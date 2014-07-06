@@ -34,6 +34,7 @@ void openNetworkSocket(void);
 void sendMavlinkPacketOverNetwork(void);
 void listParams(void);
 void parsePacket(void);
+void setMode(void);
 
 /*****************************************************************************/
 /* Global vars
@@ -68,6 +69,8 @@ uint16_t len;
 
 uint64_t timeOfLastHeartbeat;
 position_t position = {0, 0, 0, 0, 0, 0, 0};
+MAV_MODE currentMavMode;
+MAV_STATE currentMavState;
 
 /*****************************************************************************/
 /* Main
@@ -80,6 +83,8 @@ int main(int argc, char* argv[]) {
     logFile = fopen(LOG_FILE_NAME, "a");
 
     timeOfLastHeartbeat = microsSinceEpoch(); // Prevent failsafe on first loop
+    currentMavState = MAV_STATE_BOOT; // Put us on standby state
+    currentMavMode = MAV_MODE_MANUAL_DISARMED; // Put us in manual mode
 
     // Main loop
     for (;;) {
@@ -89,9 +94,9 @@ int main(int argc, char* argv[]) {
                                    &msg,                       // Message buffer
                                    MAV_VEHICLE_TYPE,           // MAV vehicle type
                                    MAV_AUTOPILOT_TYPE,         // Autopilot type
-                                   MAV_MODE_GUIDED_ARMED,      // System mode
+                                   currentMavMode,             // System mode
                                    0,                          // Custom mode (empty)
-                                   MAV_STATE_ACTIVE);          // System status
+                                   currentMavState);           // System status
 
         sendMavlinkPacketOverNetwork();
 
@@ -144,6 +149,7 @@ int main(int argc, char* argv[]) {
         fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
         // Update GPS position
+        currentMavState = MAV_STATE_ACTIVE; // GPS lock, go to active state
         position.lat++;
 
         // Update compass
@@ -270,7 +276,6 @@ void parsePacket(void) {
         timeOfLastHeartbeat = microsSinceEpoch();
         break;
     case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
-
         break;
     case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
     case MAVLINK_MSG_ID_PARAM_REQUEST_READ:
@@ -281,6 +286,11 @@ void parsePacket(void) {
     case MAVLINK_MSG_ID_MISSION_ITEM:
         printf("mission item");
         fprintf(logFile, "mission item");
+        break;
+    case MAVLINK_MSG_ID_SET_MODE:
+        printf("set mode");
+        fprintf(logFile, "set mode");
+        setMode();
         break;
     default:
         printf("other packet type");
@@ -300,4 +310,8 @@ void listParams(void) {
                                  0);                         // Current param index
 
     sendMavlinkPacketOverNetwork();
+}
+
+void setMode(void) {
+    currentMavMode = mavlink_msg_set_mode_get_base_mode(&msg);
 }
