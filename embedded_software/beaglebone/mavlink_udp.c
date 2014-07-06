@@ -1,32 +1,14 @@
-/*******************************************************************************
- Copyright (C) 2010  Bryan Godbolt godbolt ( a t ) ualberta.ca
- 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
- ****************************************************************************/
+/*****************************************************************************/
+/* Hackerboat Mavlink Control
 /*
- This program sends some data to qgroundcontrol using the mavlink protocol.  The sent packets
- cause qgroundcontrol to respond with heartbeats.  Any settings or custom commands sent from
- qgroundcontrol are printed by this program along with the heartbeats.
- 
- 
- I compiled this program sucessfully on Ubuntu 10.04 with the following command
- 
- gcc -I ../../pixhawk/mavlink/include -o udp-server udp-server-test.c
- 
- the rt library is needed for the clock_gettime on linux
- */
+/* Jeremy Ruhland jeremy ( a t ) goopypanther.org
+/* Bryan Godbolt godbolt ( a t ) ualberta.ca
+/*
+/* GNU General Public License blah blah blah
+/*
+/* This program sends some data to qgroundcontrol using the mavlink protocol.
+/*
+/*****************************************************************************/
 #include "includes.h"
 
 /*****************************************************************************/
@@ -41,20 +23,28 @@
 #define MAV_VEHICLE_TYPE   MAV_TYPE_SURFACE_BOAT
 #define MAV_AUTOPILOT_TYPE MAV_AUTOPILOT_GENERIC
 #define SENSORS (MAV_SYS_STATUS_SENSOR_3D_GYRO|MAV_SYS_STATUS_SENSOR_3D_ACCEL|MAV_SYS_STATUS_SENSOR_3D_MAG|MAV_SYS_STATUS_SENSOR_GPS|MAV_SYS_STATUS_SENSOR_MOTOR_OUTPUTS)
+#define SEC_UNTIL_PANIC 10 // Seconds without heartbeat until failsafe mode
 
 /*****************************************************************************/
 /* Function prototypes
 /*****************************************************************************/
 uint64_t microsSinceEpoch(void);
+void parseInputParams(int argc, char* argv[]);
+void openNetworkSocket(void);
+void sendMavlinkPacketOverNetwork(void);
 void listParams(void);
 void parsePacket(void);
 
 /*****************************************************************************/
 /* Global vars
 /*****************************************************************************/
-char help[] = "--help";
-char target_ip[100];
 
+// Param buffers
+char target_ip[100];
+char gps_serial_device[100];
+char slave_serial_device[100];
+
+// Network socket vars
 int sock;
 struct sockaddr_in gcAddr;
 struct sockaddr_in locAddr;
@@ -63,76 +53,36 @@ ssize_t recsize;
 socklen_t fromlen;
 int bytes_sent;
 
+// Logfile vars
 FILE *logFile;
 
+// Msc function call vars
+int i;
+int functionReturnValue;
+unsigned int temp;
+
+// Mavlink vars
 mavlink_message_t msg;
 mavlink_status_t status;
 uint16_t len;
 
-int i;
-int functionReturnValue;
-unsigned int temp = 0;
-
 uint64_t timeOfLastHeartbeat;
 position_t position = {0, 0, 0, 0, 0, 0, 0};
 
+/*****************************************************************************/
+/* Main
+/*****************************************************************************/
 int main(int argc, char* argv[]) {
-    // Check if --help flag was used
-    if (argc == 2) {
-        functionReturnValue = strcmp(argv[1], help);
-        if (functionReturnValue == 0) {
-            printf("\n");
-            printf("\tUsage:\n\n");
-            printf("\t");
-            printf("%s", argv[0]);
-            printf(" <ip address of QGroundControl>\n");
-            printf("\tDefault for localhost: udp-server 127.0.0.1\n\n");
-            exit(EXIT_FAILURE);
-        } else {}
-    } else {}
+    parseInputParams(argc, argv); // Parse input params
 
-    // Change the target ip if parameter was given
-    strcpy(target_ip, "127.0.0.1");
-    if (argc == 2) {
-        strcpy(target_ip, argv[1]);
-    } else {}
+    openNetworkSocket(); // Open network socket
 
-    // Open network socket
-    memset(&locAddr, 0, sizeof(locAddr));
-    locAddr.sin_family = AF_INET;
-    locAddr.sin_addr.s_addr = INADDR_ANY;
-    locAddr.sin_port = htons(14551);
-
-    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    // Bind the socket to port 14551 - necessary to receive packets from qgroundcontrol
-    functionReturnValue = bind(sock,                         // Socket identifier
-                               (struct sockaddr *) &locAddr, // Bind location & address
-                               sizeof(struct sockaddr));     // Etc.
-    if (functionReturnValue == -1) { // Warn us if bind fails
-        perror("error bind failed");
-        close(sock);
-        exit(EXIT_FAILURE);
-    } else {}
-
-    // Attempt to make socket non blocking
-    functionReturnValue = fcntl(sock, F_SETFL, O_NONBLOCK);
-    if (functionReturnValue < 0) {
-        fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
-        close(sock);
-        exit(EXIT_FAILURE);
-    } else {}
-
-    memset(&gcAddr, 0, sizeof(gcAddr));
-    gcAddr.sin_family = AF_INET;
-    gcAddr.sin_addr.s_addr = inet_addr(target_ip);
-    gcAddr.sin_port = htons(14550);
+    logFile = fopen(LOG_FILE_NAME, "a");
 
     timeOfLastHeartbeat = microsSinceEpoch(); // Prevent failsafe on first loop
 
     // Main loop
     for (;;) {
-        logFile = fopen(LOG_FILE_NAME, "a");
-
         // Send Heartbeat
         mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
                                    MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
@@ -143,14 +93,7 @@ int main(int argc, char* argv[]) {
                                    0,                          // Custom mode (empty)
                                    MAV_STATE_ACTIVE);          // System status
 
-        len = mavlink_msg_to_send_buffer(buf, &msg);
-
-        bytes_sent = sendto(sock,                         // Outgoing device
-                            buf,                          // Buffer
-                            len,                          // Buffer size
-                            0,                            // Flags
-                            (struct sockaddr*)&gcAddr,    // Address
-                            sizeof(struct sockaddr_in));  // Address length
+        sendMavlinkPacketOverNetwork();
 
         // Transmitted packet
         printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
@@ -174,14 +117,7 @@ int main(int argc, char* argv[]) {
                                     0,                          // Custom error 3
                                     0);                         // Custom error 4
 
-        len = mavlink_msg_to_send_buffer(buf, &msg);
-
-        bytes_sent = sendto(sock,                        // Outgoing device
-                            buf,                         // Buffer
-                            len,                         // Buffer size
-                            0,                           // Flags
-                            (struct sockaddr*) &gcAddr,  // Address
-                            sizeof(struct sockaddr_in)); // Address length
+        sendMavlinkPacketOverNetwork();
 
         // Transmitted packet
         printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
@@ -201,14 +137,7 @@ int main(int argc, char* argv[]) {
                                              position.vz,        // Z vel
                                              position.hdg);      // Heading
 
-        len = mavlink_msg_to_send_buffer(buf, &msg);
-
-        bytes_sent = sendto(sock,                        // Outgoing device
-                            buf,                         // Buffer
-                            len,                         // Buffer size
-                            0,                           // Flags
-                            (struct sockaddr*) &gcAddr,  // Address
-                            sizeof(struct sockaddr_in)); // Address length
+        sendMavlinkPacketOverNetwork();
 
         // Transmitted packet
         printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
@@ -248,13 +177,15 @@ int main(int argc, char* argv[]) {
         memset(buf, 0, BUFFER_LENGTH);
 
         // Watchdog return, if out of contact for 10 seconds, beach self
-        if ((microsSinceEpoch()-timeOfLastHeartbeat) > 10000000) {
+        if ((microsSinceEpoch()-timeOfLastHeartbeat) > (SEC_UNTIL_PANIC * 1000000)) {
             printf("\n*** FAILSAFE ***");
             fprintf(logFile, "\n*** FAILSAFE ***");
             // Head for beach
         } else {}
 
-        fclose(logFile);
+        // Flush buffers to force output
+        fflush(NULL);
+
         sleep(1); // Sleep one second
     }
 }
@@ -269,6 +200,65 @@ uint64_t microsSinceEpoch(void) {
     micros =  ((uint64_t)tv.tv_sec) * 1000000 + tv.tv_usec;
 
     return micros;
+}
+
+void parseInputParams(int argc, char* argv[]) {
+    strcpy(target_ip, "127.0.0.1"); // Set default ip
+    if (argc == 4) {
+        strcpy(target_ip, argv[1]); // Change the target ip if parameter was given
+        strcpy(gps_serial_device, argv[2]);
+        strcpy(slave_serial_device, argv[3]);
+    } else {
+        printf("\n");
+        printf("\tUsage:\n\n");
+        printf("\t");
+        printf("%s", argv[0]);
+        printf(" <host ip> <GPS serial device> <Slave serial device>\n");
+        printf("\tDefault for localhost: udp-server 127.0.0.1 /dev/tty1 /dev/tty2\n\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void openNetworkSocket(void) {
+    memset(&locAddr, 0, sizeof(locAddr));
+    locAddr.sin_family = AF_INET;
+    locAddr.sin_addr.s_addr = INADDR_ANY;
+    locAddr.sin_port = htons(14551);
+
+    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    // Bind the socket to port 14551 - necessary to receive packets from qgroundcontrol
+    functionReturnValue = bind(sock,                         // Socket identifier
+                               (struct sockaddr *) &locAddr, // Bind location & address
+                               sizeof(struct sockaddr));     // Etc.
+    if (functionReturnValue == -1) { // Warn us if bind fails
+        perror("error bind failed");
+        close(sock);
+        exit(EXIT_FAILURE);
+    } else {}
+
+    // Attempt to make socket non blocking
+    functionReturnValue = fcntl(sock, F_SETFL, O_NONBLOCK);
+    if (functionReturnValue < 0) {
+        fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
+        close(sock);
+        exit(EXIT_FAILURE);
+    } else {}
+
+    memset(&gcAddr, 0, sizeof(gcAddr));
+    gcAddr.sin_family = AF_INET;
+    gcAddr.sin_addr.s_addr = inet_addr(target_ip);
+    gcAddr.sin_port = htons(14550);
+}
+
+void sendMavlinkPacketOverNetwork(void) {
+    len = mavlink_msg_to_send_buffer(buf, &msg);
+
+    bytes_sent = sendto(sock,                         // Outgoing device
+                        buf,                          // Buffer
+                        len,                          // Buffer size
+                        0,                            // Flags
+                        (struct sockaddr*)&gcAddr,    // Address
+                        sizeof(struct sockaddr_in));  // Address length
 }
 
 void parsePacket(void) {
@@ -309,12 +299,5 @@ void listParams(void) {
                                  1,                          // Total params on system
                                  0);                         // Current param index
 
-    len = mavlink_msg_to_send_buffer(buf, &msg);
-
-    bytes_sent = sendto(sock,                         // Outgoing device
-                        buf,                          // Buffer
-                        len,                          // Buffer size
-                        0,                            // Flags
-                        (struct sockaddr*)&gcAddr,    // Address
-                        sizeof(struct sockaddr_in));  // Address length
+    sendMavlinkPacketOverNetwork();
 }
