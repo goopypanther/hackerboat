@@ -34,6 +34,8 @@
 /*****************************************************************************/
 #define BUFFER_LENGTH 2041 // minimum buffer size that can be used with qnx (I don't know why)
 
+#define LOG_FILE_NAME "./mavlink_udp.log"
+
 // Identification for our system
 #define SYSTEM_ID          2
 #define MAV_VEHICLE_TYPE   MAV_TYPE_SURFACE_BOAT
@@ -60,6 +62,8 @@ uint8_t buf[BUFFER_LENGTH];
 ssize_t recsize;
 socklen_t fromlen;
 int bytes_sent;
+
+FILE *logFile;
 
 mavlink_message_t msg;
 mavlink_status_t status;
@@ -127,6 +131,8 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     for (;;) {
+        logFile = fopen(LOG_FILE_NAME, "a");
+
         // Send Heartbeat
         mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
                                    MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
@@ -145,6 +151,10 @@ int main(int argc, char* argv[]) {
                             0,                            // Flags
                             (struct sockaddr*)&gcAddr,    // Address
                             sizeof(struct sockaddr_in));  // Address length
+
+        // Transmitted packet
+        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
         // Send Status
         mavlink_msg_sys_status_pack(SYSTEM_ID,                  // System ID
@@ -173,6 +183,10 @@ int main(int argc, char* argv[]) {
                             (struct sockaddr*) &gcAddr,  // Address
                             sizeof(struct sockaddr_in)); // Address length
 
+        // Transmitted packet
+        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+
         // Send GPS Position
         mavlink_msg_global_position_int_pack(SYSTEM_ID,          // System ID
                                              MAV_COMP_ID_GPS,    // Component ID
@@ -196,6 +210,10 @@ int main(int argc, char* argv[]) {
                             (struct sockaddr*) &gcAddr,  // Address
                             sizeof(struct sockaddr_in)); // Address length
 
+        // Transmitted packet
+        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+
         // Update GPS position
         position.lat++;
 
@@ -203,12 +221,12 @@ int main(int argc, char* argv[]) {
 
         // Receive incoming packets from network interface
         memset(buf, 0, BUFFER_LENGTH);
-        recsize = recvfrom(sock,                        // Socket device
-                           (void *) buf,                // Receive buffer
-                           BUFFER_LENGTH,               // Length of buffer
-                           0,                           // Extra settings (none)
+        recsize = recvfrom(sock,                         // Socket device
+                           (void *) buf,                 // Receive buffer
+                           BUFFER_LENGTH,                // Length of buffer
+                           0,                            // Extra settings (none)
                            (struct sockaddr *) &gcAddr, // Receive from address
-                           &fromlen);                   // Receive address length
+                           &fromlen);                    // Receive address length
         if (recsize > 0) {
             // Something received - print out all bytes and parse packet
             //printf("Bytes Received: %d\nDatagram: ", (int)recsize);
@@ -222,6 +240,7 @@ int main(int argc, char* argv[]) {
                 if (functionReturnValue) {
                     // Packet received
                     printf("\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                    fprintf(logFile, "\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
                     parsePacket();
                 } else {}
             }
@@ -231,9 +250,11 @@ int main(int argc, char* argv[]) {
         // Watchdog return, if out of contact for 10 seconds, beach self
         if ((microsSinceEpoch()-timeOfLastHeartbeat) > 10000000) {
             printf("\n*** FAILSAFE ***");
+            fprintf(logFile, "\n*** FAILSAFE ***");
             // Head for beach
         } else {}
 
+        fclose(logFile);
         sleep(1); // Sleep one second
     }
 }
@@ -255,6 +276,7 @@ void parsePacket(void) {
     switch (msg.msgid) { // Decide what to do with packet
     case MAVLINK_MSG_ID_HEARTBEAT: // Record time of last heartbeat for watchdog
         printf("heartbeat");
+        fprintf(logFile, "heartbeat");
         timeOfLastHeartbeat = microsSinceEpoch();
         break;
     case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
@@ -263,13 +285,16 @@ void parsePacket(void) {
     case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
     case MAVLINK_MSG_ID_PARAM_REQUEST_READ:
         printf("param request");
+        fprintf(logFile, "param request");
         listParams();
         break;
     case MAVLINK_MSG_ID_MISSION_ITEM:
         printf("mission item");
+        fprintf(logFile, "mission item");
         break;
     default:
         printf("other packet type");
+        fprintf(logFile, "other packet type");
         break;
     }
 }
@@ -280,7 +305,7 @@ void listParams(void) {
                                  &msg,                       // Message buffer
                                  "NOPARAMS",                 // Param name
                                  0,                          // Param value (dummy)
-                                 MAV_PARAM_TYPE_UINT8,       // Param type
+                                 MAVLINK_TYPE_FLOAT,         // Param type
                                  1,                          // Total params on system
                                  0);                         // Current param index
 
