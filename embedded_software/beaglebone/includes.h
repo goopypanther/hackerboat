@@ -26,3 +26,5 @@ typedef struct {
 	int16_t vz;
 	uint16_t hdg;
 } position_t;
+
+typedef enum {IDLE, SENDING, REQUESTING, ACKING} waypoint_state_t
