@@ -24,7 +24,7 @@
 #define MAV_AUTOPILOT_TYPE MAV_AUTOPILOT_GENERIC
 #define SENSORS (MAV_SYS_STATUS_SENSOR_3D_GYRO|MAV_SYS_STATUS_SENSOR_3D_ACCEL|MAV_SYS_STATUS_SENSOR_3D_MAG|MAV_SYS_STATUS_SENSOR_GPS|MAV_SYS_STATUS_SENSOR_MOTOR_OUTPUTS)
 #define SEC_UNTIL_PANIC 10 // Seconds without heartbeat until failsafe mode
-#define NUM_MISSION_ITEMS 5 // Number of mission items (waypoints) we can store
+#define NUM_MISSION_ITEMS 256 // Number of mission items (waypoints) we can store
 
 /*****************************************************************************/
 /* Function prototypes
@@ -40,6 +40,7 @@ void sendNumMissionItems(void);
 void sendMissionItem(void);
 void receiveMissionCount(void);
 void receiveMissionItem(void);
+void clearAllMissionItems(void);
 
 /*****************************************************************************/
 /* Global vars
@@ -76,6 +77,9 @@ uint16_t len;
 uint64_t timeOfLastHeartbeat;
 uint16_t heartbeatCount;
 position_t position = {0, 0, 0, 0, 0, 0, 0};
+position_t target;
+uint8_t targetWaypoint;
+
 MAV_MODE currentMavMode;
 MAV_STATE currentMavState;
 
@@ -103,75 +107,43 @@ int main(int argc, char* argv[]) {
     // Set mission item index to 0
     numMissionItems = 0;
     currentlyActiveMissionItem = 0;
-
-#if 1 // Dummy waypoint hardcoded into system
-    numMissionItems = 2;
-    missionItems[0].param1 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM1, see MAV_CMD enum
-    missionItems[0].param2 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM2, see MAV_CMD enum
-    missionItems[0].param3 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM3, see MAV_CMD enum
-    missionItems[0].param4 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM4, see MAV_CMD enum
-    missionItems[0].x = 100;                        ///< PARAM5 / local: x position, global: latitude
-    missionItems[0].y = 50;                         ///< PARAM6 / y position: global: longitude
-    missionItems[0].z = 0;                          ///< PARAM7 / z position: global: altitude (relative or absolute, depending on frame.
-    missionItems[0].seq = 0;                        ///< Sequence
-    missionItems[0].command = MAV_CMD_NAV_WAYPOINT; ///< The scheduled action for the MISSION. see MAV_CMD in common.xml MAVLink specs
-    missionItems[0].target_system = 1;      ///< System ID
-    missionItems[0].target_component = MAV_COMP_ID_ALL; ///< Component ID
-    missionItems[0].frame = MAV_FRAME_GLOBAL;       ///< The coordinate system of the MISSION. see MAV_FRAME in mavlink_types.h
-    missionItems[0].current = 1;                     ///< false:0, true:1
-    missionItems[0].autocontinue = 1;                ///< autocontinue to next wp
-
-    missionItems[1].param1 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM1, see MAV_CMD enum
-    missionItems[1].param2 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM2, see MAV_CMD enum
-    missionItems[1].param3 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM3, see MAV_CMD enum
-    missionItems[1].param4 = MAV_CMD_NAV_WAYPOINT;  ///< PARAM4, see MAV_CMD enum
-    missionItems[1].x = 50;                        ///< PARAM5 / local: x position, global: latitude
-    missionItems[1].y = 100;                         ///< PARAM6 / y position: global: longitude
-    missionItems[1].z = 0;                          ///< PARAM7 / z position: global: altitude (relative or absolute, depending on frame.
-    missionItems[1].seq = 1;                        ///< Sequence
-    missionItems[1].command = MAV_CMD_NAV_WAYPOINT; ///< The scheduled action for the MISSION. see MAV_CMD in common.xml MAVLink specs
-    missionItems[1].target_system = 1;      ///< System ID
-    missionItems[1].target_component = MAV_COMP_ID_ALL; ///< Component ID
-    missionItems[1].frame = MAV_FRAME_GLOBAL;       ///< The coordinate system of the MISSION. see MAV_FRAME in mavlink_types.h
-    missionItems[1].current = 0;                     ///< false:0, true:1
-    missionItems[1].autocontinue = 1;                ///< autocontinue to next wp
-#endif
+    targetWaypoint = 0;
 
     // Main loop
     for (;;) {
         if (heartbeatCount == 10000) {
-        currentTime = time(0);
-        printf("\n%s", ctime(&currentTime));
-        fprintf(logFile, "\n%s", ctime(&currentTime));
+            currentTime = time(0);
+            printf("\n%s", ctime(&currentTime));
+            fprintf(logFile, "\n%s", ctime(&currentTime));
 
-        // Send Heartbeat
-        mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
-                                   MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
-                                   &msg,                       // Message buffer
-                                   MAV_VEHICLE_TYPE,           // MAV vehicle type
-                                   MAV_AUTOPILOT_TYPE,         // Autopilot type
-                                   currentMavMode,             // System mode
-                                   0,                          // Custom mode (empty)
-                                   currentMavState);           // System status
+            // Send Heartbeat
+            mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
+                                       MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
+                                       &msg,                       // Message buffer
+                                       MAV_VEHICLE_TYPE,           // MAV vehicle type
+                                       MAV_AUTOPILOT_TYPE,         // Autopilot type
+                                       currentMavMode,             // System mode
+                                       0,                          // Custom mode (empty)
+                                       currentMavState);           // System status
 
-        sendMavlinkPacketOverNetwork();
+            sendMavlinkPacketOverNetwork();
 
-        // Transmitted packet
-        //printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-        //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+            // Transmitted packet
+            //printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+            //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
-        // Send Status
-        mavlink_msg_sys_status_pack(SYSTEM_ID,                  // System ID
-                                    MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
-                                    &msg,                       // Message buffer
-                                    SENSORS,                    // Sensors present
-                                    SENSORS,                    // Sensors enabled
-                                    SENSORS,                    // Sensor health
-                                    500,                        // System load
-                                    12000,                      // Batt voltage
-                                    -1,                         // Batt current
-                                    -1,                         // Batt remaining
-                                    0,                          // Comm drop percentage
+            // Send Status
+            mavlink_msg_sys_status_pack(SYSTEM_ID,                  // System ID
+                                        MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
+                                        &msg,                       // Message buffer
+                                        SENSORS,                    // Sensors present
+                                        SENSORS,                    // Sensors enabled
+                                        SENSORS,                    // Sensor health
+                                        500,                        // System load
+                                        12000,                      // Batt voltage
+                                        -1,                         // Batt current
+                                        -1,                         // Batt remaining
+                                        0,                          // Comm drop percentage
                                         0,                          // Comm errors
                                         0,                          // Custom error 1
                                         0,                          // Custom error 2
@@ -204,9 +176,23 @@ int main(int argc, char* argv[]) {
             //printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
             //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
+            // Send current waypoint if in auto mode
+            if (currentMavMode == MAV_MODE_AUTO_ARMED) {
+                mavlink_msg_mission_current_pack(SYSTEM_ID,
+                                                 MAV_COMP_ID_SYSTEM_CONTROL,
+                                                 &msg,
+                                                 targetWaypoint);
+
+                sendMavlinkPacketOverNetwork();
+
+                // Transmitted packet
+                //printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+            } else {}
+
             // Update GPS position
             currentMavState = MAV_STATE_ACTIVE; // GPS lock, go to active state
-            position.lat++;
+            //position.lat += 5000000;
 
             // Update compass
 
@@ -367,6 +353,20 @@ void parsePacket(void) {
         fprintf(logFile, "mission item %d", mavlink_msg_mission_item_get_seq(&msg));
         receiveMissionItem();
         break;
+    case MAVLINK_MSG_ID_MISSION_CLEAR_ALL:
+        printf("clear all mission items");
+        fprintf(logFile, "clear all mission items");
+        clearAllMissionItems();
+        break;
+    case MAVLINK_MSG_ID_MISSION_SET_CURRENT:
+        printf("set current mission to %d", mavlink_msg_mission_set_current_get_seq(&msg));
+        fprintf(logFile, "set current mission to %d", mavlink_msg_mission_set_current_get_seq(&msg));
+        targetWaypoint = mavlink_msg_mission_set_current_get_seq(&msg);
+#if 1
+        position.lat = missionItems[targetWaypoint].x;
+        position.lon = missionItems[targetWaypoint].y;
+#endif
+        break;
     case MAVLINK_MSG_ID_SET_MODE:
         printf("set mode");
         fprintf(logFile, "set mode");
@@ -466,6 +466,7 @@ void receiveMissionItem(void) {
 
     if (currentlyInterogatedMissionItem < (numMissionItems-1)) {
         mavlink_msg_mission_item_decode(&msg, &missionItems[currentlyInterogatedMissionItem]);
+        missionItems[currentlyInterogatedMissionItem].target_system = msg.sysid;
 
         mavlink_msg_mission_request_pack(SYSTEM_ID,                            // System ID
                                          MAV_COMP_ID_SYSTEM_CONTROL,           // Component ID
@@ -481,6 +482,7 @@ void receiveMissionItem(void) {
         fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d request mission item %d", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid, (currentlyInterogatedMissionItem+1));
     } else if (currentlyInterogatedMissionItem == (numMissionItems-1)) {
         mavlink_msg_mission_item_decode(&msg, &missionItems[currentlyInterogatedMissionItem]);
+        missionItems[currentlyInterogatedMissionItem].target_system = msg.sysid;
 
         mavlink_msg_mission_ack_pack(SYSTEM_ID,                  // System ID
                                      MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
@@ -507,4 +509,21 @@ void receiveMissionItem(void) {
         sendMavlinkPacketOverNetwork();
 
     }
+}
+
+void clearAllMissionItems(void) {
+    numMissionItems = 0;
+
+    mavlink_msg_mission_ack_pack(SYSTEM_ID,                  // System ID
+                                 MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
+                                 &msg,                       // Message buffer
+                                 msg.sysid,                  // SysID of requesting system
+                                 msg.compid,                 // CompID of requesting system
+                                 MAV_MISSION_ACCEPTED);      // We must be out of space
+
+    sendMavlinkPacketOverNetwork();
+
+    // Transmitted packet
+    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
