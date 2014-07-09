@@ -18,6 +18,9 @@
 
 #define LOG_FILE_NAME "./mavlink_udp.log"
 
+#define LOOPTIME 1
+#define LOOPS_PER_SECOND 10000
+
 // Identification for our system
 #define SYSTEM_ID          2
 #define MAV_VEHICLE_TYPE   MAV_TYPE_SURFACE_BOAT
@@ -41,6 +44,8 @@ void sendMissionItem(void);
 void receiveMissionCount(void);
 void receiveMissionItem(void);
 void clearAllMissionItems(void);
+void parseCommand(void);
+void reachedTargetWaypoint(void);
 
 /*****************************************************************************/
 /* Global vars
@@ -79,6 +84,7 @@ uint16_t heartbeatCount;
 position_t position = {0, 0, 0, 0, 0, 0, 0};
 position_t target;
 uint8_t targetWaypoint;
+mavlink_command_long_t currentCommand;
 
 MAV_MODE currentMavMode;
 MAV_STATE currentMavState;
@@ -111,7 +117,7 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     for (;;) {
-        if (heartbeatCount == 10000) {
+        if (heartbeatCount == LOOPS_PER_SECOND) {
             currentTime = time(0);
             printf("\n%s", ctime(&currentTime));
             fprintf(logFile, "\n%s", ctime(&currentTime));
@@ -157,18 +163,18 @@ int main(int argc, char* argv[]) {
             //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
             // Send GPS Position
-            mavlink_msg_global_position_int_pack(SYSTEM_ID,          // System ID
-                                                 MAV_COMP_ID_GPS,    // Component ID
-                                                 &msg,               // Message buffer
-                                                 microsSinceEpoch(), // Current time
-                                                 position.lat,       // Lat
-                                                 position.lon,       // Long
-                                                 position.alt,       // Alt
-                                                 position.alt,       // Relative alt (assume same)
-                                                 position.vx,        // X vel
-                                                 position.vy,        // Y vel
-                                                 position.vz,        // Z vel
-                                                 position.hdg);      // Heading
+            mavlink_msg_global_position_int_pack(SYSTEM_ID,              // System ID
+                                                 MAV_COMP_ID_GPS,        // Component ID
+                                                 &msg,                   // Message buffer
+                                                 microsSinceEpoch(),     // Current time
+                                                 position.lat,           // Lat
+                                                 position.lon,           // Long
+                                                 position.alt,           // Alt
+                                                 position.alt,           // Relative alt (assume same)
+                                                 position.vx,            // X vel
+                                                 position.vy,            // Y vel
+                                                 position.vz,            // Z vel
+                                                 position.hdg);          // Heading
 
             sendMavlinkPacketOverNetwork();
 
@@ -192,7 +198,7 @@ int main(int argc, char* argv[]) {
 
             // Update GPS position
             currentMavState = MAV_STATE_ACTIVE; // GPS lock, go to active state
-            //position.lat += 5000000;
+            //position.lon += 100000;
 
             // Update compass
 
@@ -231,16 +237,17 @@ int main(int argc, char* argv[]) {
 
         // Watchdog return, if out of contact for 10 seconds, beach self
         if ((microsSinceEpoch()-timeOfLastHeartbeat) > (SEC_UNTIL_PANIC * 1000000)) {
-            printf("\n*** FAILSAFE ***");
-            fprintf(logFile, "\n*** FAILSAFE ***");
+            if (heartbeatCount >= LOOPS_PER_SECOND) {
+                printf("\n*** FAILSAFE ***");
+                fprintf(logFile, "\n*** FAILSAFE ***");
+            } else {}
             // Head for beach
         } else {}
 
         // Flush buffers to force output
-        //fflush(NULL);
+        fflush(NULL);
 
-        //sleep(1); // Sleep one second
-        usleep(1); // Sleep 1 microsecond
+        usleep(LOOPTIME); // Sleep 1 microsecond
     }
 }
 
@@ -358,19 +365,15 @@ void parsePacket(void) {
         fprintf(logFile, "clear all mission items");
         clearAllMissionItems();
         break;
-    case MAVLINK_MSG_ID_MISSION_SET_CURRENT:
-        printf("set current mission to %d", mavlink_msg_mission_set_current_get_seq(&msg));
-        fprintf(logFile, "set current mission to %d", mavlink_msg_mission_set_current_get_seq(&msg));
-        targetWaypoint = mavlink_msg_mission_set_current_get_seq(&msg);
-#if 1
-        position.lat = missionItems[targetWaypoint].x;
-        position.lon = missionItems[targetWaypoint].y;
-#endif
-        break;
     case MAVLINK_MSG_ID_SET_MODE:
         printf("set mode");
         fprintf(logFile, "set mode");
         setMode();
+        break;
+    case MAVLINK_MSG_ID_COMMAND_LONG:
+        printf("command");
+        fprintf(logFile, "command");
+        parseCommand();
         break;
     default:
         printf("other packet type");
@@ -526,4 +529,39 @@ void clearAllMissionItems(void) {
     // Transmitted packet
     printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+}
+
+void parseCommand(void) {
+    mavlink_msg_command_long_decode(&msg, &currentCommand);
+
+    if (currentCommand.target_system == SYSTEM_ID) {
+        switch (currentCommand.command) {
+        case MAV_CMD_NAV_WAYPOINT:
+            currentMavMode = MAV_MODE_MANUAL_ARMED;
+            target.lat = currentCommand.param5;
+            target.lon = currentCommand.param6;
+            break;
+        case MAV_CMD_NAV_RETURN_TO_LAUNCH:
+            break;
+        case MAV_CMD_NAV_TAKEOFF:
+            position.lat = 10000000 * missionItems[currentlyActiveMissionItem].x;
+            position.lon = 10000000 * missionItems[currentlyActiveMissionItem].y;
+            break;
+        case MAV_CMD_MISSION_START:
+            position.lat = missionItems[currentlyActiveMissionItem].x;
+            position.lon = missionItems[currentlyActiveMissionItem].y;
+            break;
+        default:
+            break;
+        }
+    } else {}
+}
+
+void reachedTargetWaypoint(void) {
+    functionReturnValue = missionItems[currentlyActiveMissionItem].command;
+    if (functionReturnValue == MAV_CMD_DO_JUM) {
+
+    } else {
+
+    }
 }
