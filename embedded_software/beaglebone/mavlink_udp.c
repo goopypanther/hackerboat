@@ -18,8 +18,8 @@
 
 #define LOG_FILE_NAME "./mavlink_udp.log"
 
-#define LOOPTIME 1
-#define LOOPS_PER_SECOND 10000
+#define LOOPTIME 1 // microseconds
+#define LOOPS_PER_SECOND 10000 // Fudged for execution time of program
 
 // Identification for our system
 #define SYSTEM_ID          2
@@ -28,6 +28,8 @@
 #define SENSORS (MAV_SYS_STATUS_SENSOR_3D_GYRO|MAV_SYS_STATUS_SENSOR_3D_ACCEL|MAV_SYS_STATUS_SENSOR_3D_MAG|MAV_SYS_STATUS_SENSOR_GPS|MAV_SYS_STATUS_SENSOR_MOTOR_OUTPUTS)
 #define SEC_UNTIL_PANIC 10 // Seconds without heartbeat until failsafe mode
 #define NUM_MISSION_ITEMS 256 // Number of mission items (waypoints) we can store
+
+#define ACCEPTABLE_DISTANCE_FROM_WAYPOINT 10 // Meters
 
 /*****************************************************************************/
 /* Function prototypes
@@ -46,6 +48,8 @@ void receiveMissionItem(void);
 void clearAllMissionItems(void);
 void parseCommand(void);
 void reachedTargetWaypoint(void);
+float getDistanceToWaypoint(void);
+float getAngleToWaypoint(void);
 
 /*****************************************************************************/
 /* Global vars
@@ -72,6 +76,7 @@ time_t currentTime;
 // Msc function call vars
 int i;
 int functionReturnValue;
+float functionReturnValueFloat;
 unsigned int temp;
 
 // Mavlink vars
@@ -163,18 +168,18 @@ int main(int argc, char* argv[]) {
             //fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 
             // Send GPS Position
-            mavlink_msg_global_position_int_pack(SYSTEM_ID,              // System ID
-                                                 MAV_COMP_ID_GPS,        // Component ID
-                                                 &msg,                   // Message buffer
-                                                 microsSinceEpoch(),     // Current time
-                                                 position.lat,           // Lat
-                                                 position.lon,           // Long
-                                                 position.alt,           // Alt
-                                                 position.alt,           // Relative alt (assume same)
-                                                 position.vx,            // X vel
-                                                 position.vy,            // Y vel
-                                                 position.vz,            // Z vel
-                                                 position.hdg);          // Heading
+            mavlink_msg_global_position_int_pack(SYSTEM_ID,                             // System ID
+                                                 MAV_COMP_ID_GPS,                       // Component ID
+                                                 &msg,                                  // Message buffer
+                                                 microsSinceEpoch(),                    // Current time
+                                                 ((int32_t) (position.lat * 10000000)), // Lat
+                                                 ((int32_t) (position.lon * 10000000)), // Long
+                                                 position.alt,                          // Alt
+                                                 position.alt,                          // Relative alt (assume same)
+                                                 position.vx,                           // X vel
+                                                 position.vy,                           // Y vel
+                                                 position.vz,                           // Z vel
+                                                 position.hdg);                         // Heading
 
             sendMavlinkPacketOverNetwork();
 
@@ -198,7 +203,14 @@ int main(int argc, char* argv[]) {
 
             // Update GPS position
             currentMavState = MAV_STATE_ACTIVE; // GPS lock, go to active state
-            //position.lon += 100000;
+
+            functionReturnValueFloat = getDistanceToWaypoint();
+            if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+                reachedTargetWaypoint();
+            } else {}
+
+            functionReturnValueFloat = getDistanceToWaypoint();
+            functionReturnValueFloat = getAngleToWaypoint();
 
             // Update compass
 
@@ -544,12 +556,10 @@ void parseCommand(void) {
         case MAV_CMD_NAV_RETURN_TO_LAUNCH:
             break;
         case MAV_CMD_NAV_TAKEOFF:
-            position.lat = 10000000 * missionItems[currentlyActiveMissionItem].x;
-            position.lon = 10000000 * missionItems[currentlyActiveMissionItem].y;
-            break;
-        case MAV_CMD_MISSION_START:
             position.lat = missionItems[currentlyActiveMissionItem].x;
             position.lon = missionItems[currentlyActiveMissionItem].y;
+            break;
+        case MAV_CMD_MISSION_START:
             break;
         default:
             break;
@@ -558,10 +568,49 @@ void parseCommand(void) {
 }
 
 void reachedTargetWaypoint(void) {
-    functionReturnValue = missionItems[currentlyActiveMissionItem].command;
-    if (functionReturnValue == MAV_CMD_DO_JUM) {
+    if (missionItems[currentlyActiveMissionItem].command == MAV_CMD_DO_JUMP) {
+        currentlyActiveMissionItem = missionItems[currentlyActiveMissionItem].param1;
+    } else if (missionItems[currentlyActiveMissionItem].autocontinue) {
+        currentlyActiveMissionItem++;
+    } else if (missionItems[currentlyActiveMissionItem].autocontinue == 0) {
+        currentMavMode = MAV_MODE_MANUAL_DISARMED;
+    } else {}
+}
 
-    } else {
+float getDistanceToWaypoint(void) {
+    float a;
+    float c;
+    float d;
+    float targetLat;
+    float targetLon;
+    float currentLat;
+    float currentLon;
 
-    }
+    currentLat = (position.lat/(180/M_PI));
+    currentLon = (position.lon/(180/M_PI));
+    targetLat = (missionItems[currentlyActiveMissionItem].x/(180/M_PI));
+    targetLon = (missionItems[currentlyActiveMissionItem].y/(180/M_PI));
+
+    a = powf(sin((targetLat-currentLat)/2), 2)+cosf(currentLat)*cosf(targetLat)*powf(sinf((targetLon-targetLat)/2), 2);
+    c = 2*atan2f(sqrtf(a), sqrtf(1-a));
+    d = (c*6371)/1000;
+
+    return (d);
+}
+
+float getAngleToWaypoint(void) {
+    float angle;
+    float targetLat;
+    float targetLon;
+    float currentLat;
+    float currentLon;
+
+    currentLat = (position.lat/(180/M_PI));
+    currentLon = (position.lon/(180/M_PI));
+    targetLat = (missionItems[currentlyActiveMissionItem].x/(180/M_PI));
+    targetLon = (missionItems[currentlyActiveMissionItem].y/(180/M_PI));
+
+    angle = atan2f((sinf(targetLon-currentLon)*cosf(targetLat)), (cosf(currentLat)*sinf(targetLat)-sinf(currentLat)*cosf(targetLat)*cosf(targetLon-currentLon)));
+
+    return (angle);
 }

@@ -12,14 +12,15 @@
 #include <sys/time.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <math.h>
 
 /* This assumes you have the mavlink headers on your include path
  or in the same folder as this source file */
 #include <mavlink.h>
 
 typedef struct {
-	int32_t lat;
-	int32_t lon;
+	float lat;
+	float lon;
 	int32_t alt;
 	int16_t vx;
 	int16_t vy;
