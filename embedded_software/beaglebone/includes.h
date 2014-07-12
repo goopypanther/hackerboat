@@ -26,4 +26,11 @@ typedef struct {
 	int16_t vy;
 	int16_t vz;
 	uint16_t hdg;
+    uint8_t lock;
 } position_t;
+
+typedef struct {
+    uint8_t *c;
+    uint8_t len;
+    int8_t dir; 
+} position_string_t;
