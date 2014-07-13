@@ -55,6 +55,7 @@ void openUarts(void);
 void sendPacketToLowLevel(void);
 void readLowLevelVoltageLevel(void);
 float stringToFloat(position_string_t position);
+int readFromDevice(int fd, char buf[], int buflen);
 
 /*****************************************************************************/
 /* Global vars
@@ -221,22 +222,42 @@ int main(int argc, char* argv[]) {
             } else {}
 
             // Update GPS position
-#if 0
             getGpsPosition();
-            if (position.lock) {
-                currentMavState = MAV_STATE_ACTIVE; // GPS lock, go to active state
-            } else {
-                currentMavState = MAV_STATE_BOOT;
-            }
-#endif
-            functionReturnValueFloat = getDistanceToWaypoint();
-            if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
-                reachedTargetWaypoint();
+
+            if ((currentMavMode == MAV_MODE_AUTO_ARMED) || (currentMavMode == MAV_MODE_AUTO_DISARMED)) {
+                functionReturnValueFloat = getDistanceToWaypoint();
+                if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+                    reachedTargetWaypoint();
+                } else {
+                    functionReturnValueFloat = getAngleToWaypoint();
+                    mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                                      MAV_COMP_ID_PATHPLANNER,
+                                                      &msg,
+                                                      SYSTEM_ID,
+                                                      0,
+                                                      0,
+                                                      functionReturnValue,
+                                                      1,
+                                                      0,
+                                                      0,
+                                                      0,
+                                                      0);
+
+                    sendMavlinkPacketOverNetwork();
+
+                    // Transmitted packet
+                    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                }
+            } else if ((currentMavMode == MAV_MODE_MANUAL_ARMED) || (currentMavMode == MAV_MODE_MANUAL_ARMED)) {
+                functionReturnValueFloat = getDistanceToWaypoint();
+                if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+                    reachedTargetWaypoint();
+                } else {}
+
+                functionReturnValueFloat = getDistanceToWaypoint();
+                functionReturnValueFloat = getAngleToWaypoint();
             } else {}
-
-            functionReturnValueFloat = getDistanceToWaypoint();
-            functionReturnValueFloat = getAngleToWaypoint();
-
             // Update compass
 
             heartbeatCount = 0;
@@ -307,10 +328,11 @@ uint64_t microsSinceEpoch(void) {
 
 void parseInputParams(int argc, char* argv[]) {
     strcpy(target_ip, "127.0.0.1"); // Set default ip
-    if (argc == 4) {
+    if (argc == 5) {
         strcpy(target_ip, argv[1]); // Change the target ip if parameter was given
         strcpy(gps_serial_device, argv[2]);
         strcpy(low_level_serial_device, argv[3]);
+        strcpy(low_level_debug_device, argv[4]);
     } else {
         printf("\n");
         printf("\tUsage:\n\n");
@@ -647,11 +669,25 @@ float getAngleToWaypoint(void) {
 }
 
 void openUarts(void) {
+	int lowLevelControlFlags;
+	int lowLevelDebugFlags;
+	int gpsModuleFlags;
+
     lowLevelControl = fopen(low_level_serial_device, "r+");
     lowLevelControlFD = fileno(lowLevelControl);
     lowLevelDebug = fopen(low_level_debug_device, "r");
     lowLevelDebugFD = fileno(lowLevelDebug);
     gpsModule = fopen(gps_serial_device, "r");
+    gpsModuleFD = fileno(gpsModule);
+
+    //lowLevelControlFlags = fcntl(lowLevelControlFD, F_GETFL, 0);
+    //fcntl(lowLevelControlFD, lowLevelControlFlags | O_NONBLOCK);
+
+    //lowLevelDebugFlags = fcntl(lowLevelDebugFD, F_GETFL, 0);
+	//fcntl(lowLevelDebugFD, lowLevelDebugFlags | O_NONBLOCK);
+
+	//gpsModuleFlags = fcntl(gpsModuleFD, F_GETFL, 0);
+	//fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
 }
 
 void sendPacketToLowLevel(void) {
@@ -665,7 +701,7 @@ void readLowLevelVoltageLevel(void) {
     int incomingSize;
 
     memset(uartBuf, 0, BUFFER_LENGTH);
-    incomingSize = read(lowLevelControlFD, &uartBuf, BUFFER_LENGTH);
+    incomingSize = readFromDevice(lowLevelControlFD, &uartBuf, BUFFER_LENGTH);
 
     if (incomingSize) {
         for (i = 0; i < incomingSize; ++i) {
@@ -686,7 +722,7 @@ void readLowLevelVoltageLevel(void) {
 
 void getUartDebug(void) {
     memset(uartBuf, 0, BUFFER_LENGTH);
-    read(lowLevelDebugFD, &uartBuf, BUFFER_LENGTH);
+    readFromDevice(lowLevelDebugFD, &uartBuf, BUFFER_LENGTH);
     printf("\nArduino message", uartBuf);
     fprintf(logFile, "\nArduino message", uartBuf);
     memset(uartBuf, 0, BUFFER_LENGTH);
@@ -700,7 +736,7 @@ void getGpsPosition(void) {
     uint16_t gpsCount;
 
     memset(gpsBuff, '\0', 500);
-    gpsCount = read(gpsModuleFD, gpsBuff, 500);
+    gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
 
 functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
     while (functionReturnValue) {
@@ -792,4 +828,31 @@ float stringToFloat(position_string_t pos) { // char* s
 	if (isnegative)  decimal_part = - decimal_part;
 
 	return decimal_part;
+}
+
+int readFromDevice(int fd, char buf[], int buflen) {
+    int dataReady;
+    int returnValue;
+    struct timeval tv;
+    fd_set write_fds;
+
+    FD_ZERO(&write_fds);
+    FD_SET(fd, &write_fds);
+
+    tv.tv_sec = 0;
+    tv.tv_usec = 1;
+
+    dataReady = select(fd+1,
+                       &write_fds,
+                       NULL,
+                       NULL,
+                       &tv);
+
+    if (dataReady > 0) {
+        returnValue = read(fd, buf, buflen);
+    } else {
+    	returnValue = 0;
+    }
+
+    return (returnValue);
 }
