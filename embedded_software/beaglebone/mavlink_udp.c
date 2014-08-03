@@ -86,17 +86,14 @@ FILE *logFile;
 time_t currentTime;
 
 // Msc function call vars
-int functionReturnValue;
-float functionReturnValueFloat;
-unsigned int temp;
+//int functionReturnValue;
+//float functionReturnValueFloat;
 
 // Mavlink vars
 mavlink_message_t msg;
 mavlink_status_t status;
-uint16_t len;
 
 uint64_t timeOfLastHeartbeat;
-uint16_t heartbeatCount;
 position_t position = {0, 0, 0, 0, 0, 0, 0, 0};
 position_t target;
 uint8_t targetWaypoint;
@@ -116,11 +113,13 @@ uint16_t currentlyActiveMissionItem;
 /* Main
 /*****************************************************************************/
 int main(int argc, char* argv[]) {
+    uint16_t heartbeatCount;
+    
     parseInputParams(argc, argv); // Parse input params
 
     openNetworkSocket(); // Open network socket
 
-    openUarts();
+    openUarts(); // Open serial ports to GPS and low-level controller
 
     logFile = fopen(LOG_FILE_NAME, "a");
 
@@ -250,18 +249,18 @@ void oncePerSecond(void) {
     getGpsPosition();
 
     if ((currentMavMode == MAV_MODE_AUTO_ARMED) || (currentMavMode == MAV_MODE_AUTO_DISARMED)) {
-        functionReturnValueFloat = getDistanceToWaypoint();
-        if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+        float distanceToWaypoint = getDistanceToWaypoint();
+        if (distanceToWaypoint <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
             reachedTargetWaypoint();
         } else {
-            functionReturnValueFloat = getAngleToWaypoint();
+            float angleToWaypoint = getAngleToWaypoint();
             mavlink_msg_attitude_control_pack(SYSTEM_ID,
                                               MAV_COMP_ID_PATHPLANNER,
                                               &msg,
                                               SYSTEM_ID,
                                               0,
                                               0,
-                                              functionReturnValue,
+                                              angleToWaypoint,
                                               1,
                                               0,
                                               0,
@@ -275,13 +274,10 @@ void oncePerSecond(void) {
             fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
         }
     } else if ((currentMavMode == MAV_MODE_MANUAL_ARMED) || (currentMavMode == MAV_MODE_MANUAL_ARMED)) {
-        functionReturnValueFloat = getDistanceToWaypoint();
-        if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+        float distanceToWaypoint = getDistanceToWaypoint();
+        if (distanceToWaypoint <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
             reachedTargetWaypoint();
         } else {}
-
-        functionReturnValueFloat = getDistanceToWaypoint();
-        functionReturnValueFloat = getAngleToWaypoint();
     } else {}
     // Update compass
 }
@@ -303,13 +299,11 @@ void processMavlinkActivity(void) {
         // Something received - print out all bytes and parse packet
         //printf("Bytes Received: %d\nDatagram: ", (int)recsize);
         for (i = 0; i < recsize; ++i) {
-            temp = buf[i];
-            //printf("%02x ", (unsigned char)temp);
-            functionReturnValue = mavlink_parse_char(MAVLINK_COMM_0, // Channel
-                                                     buf[i],         // Char to parse
-                                                     &msg,           // Message buffer
-                                                     &status);       // Message status
-            if (functionReturnValue) {
+            uint8_t receivedMessage = mavlink_parse_char(MAVLINK_COMM_0, // Channel
+                                                         buf[i],         // Char to parse
+                                                         &msg,           // Message buffer
+                                                         &status);       // Message status
+            if (receivedMessage) {
                 // Packet received
                 printf("\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
                 fprintf(logFile, "\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
@@ -352,6 +346,7 @@ void parseInputParams(int argc, char* argv[]) {
 }
 
 void openNetworkSocket(void) {
+    int rc;
     struct sockaddr_in locAddr;
     memset(&locAddr, 0, sizeof(locAddr));
     locAddr.sin_family = AF_INET;
@@ -360,23 +355,24 @@ void openNetworkSocket(void) {
 
     sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     // Bind the socket to port 14551 - necessary to receive packets from qgroundcontrol
-    functionReturnValue = bind(sock,                         // Socket identifier
-                               (struct sockaddr *) &locAddr, // Bind location & address
-                               sizeof(struct sockaddr));     // Etc.
-    if (functionReturnValue == -1) { // Warn us if bind fails
+    rc = bind(sock,                         // Socket identifier
+              (struct sockaddr *) &locAddr, // Bind location & address
+              sizeof(struct sockaddr));     // Etc.
+    if (rc == -1) { // Warn us if bind fails
         perror("error bind failed");
         close(sock);
         exit(EXIT_FAILURE);
     } else {}
 
     // Attempt to make socket non blocking
-    functionReturnValue = fcntl(sock, F_SETFL, O_NONBLOCK);
-    if (functionReturnValue < 0) {
+    rc = fcntl(sock, F_SETFL, O_NONBLOCK);
+    if (rc < 0) {
         fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
         close(sock);
         exit(EXIT_FAILURE);
     } else {}
 
+    /* Initial mavlink peer address */
     memset(&gcAddr, 0, sizeof(gcAddr));
     gcAddr.sin_family = AF_INET;
     gcAddr.sin_addr.s_addr = inet_addr(target_ip);
@@ -386,14 +382,15 @@ void openNetworkSocket(void) {
 void sendMavlinkPacketOverNetwork(void) {
     uint8_t buf[BUFFER_LENGTH];
     int bytes_sent;
+    uint16_t buffer_used;
 
     memset(buf, 0, sizeof(buf));
 
-    len = mavlink_msg_to_send_buffer(buf, &msg);
-
+    buffer_used = mavlink_msg_to_send_buffer(buf, &msg);
+    
     bytes_sent = sendto(sock,                         // Outgoing device
                         buf,                          // Buffer
-                        len,                          // Buffer size
+                        buffer_used,                  // Buffer size
                         0,                            // Flags
                         (struct sockaddr*)&gcAddr,    // Address
                         sizeof(struct sockaddr_in));  // Address length
@@ -705,11 +702,12 @@ void openUarts(void) {
 
 void sendPacketToLowLevel(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
+    uint16_t buffer_used;
 
     memset(uartBuf, 0, sizeof(uartBuf));
-    len = mavlink_msg_to_send_buffer(uartBuf, &msg);
+    buffer_used = mavlink_msg_to_send_buffer(uartBuf, &msg);
 
-    write(lowLevelControlFD, uartBuf, len);
+    write(lowLevelControlFD, uartBuf, buffer_used);
     fflush(lowLevelControl);
 }
 
@@ -723,13 +721,12 @@ void readLowLevelVoltageLevel(void) {
 
     if (incomingSize) {
         for (i = 0; i < incomingSize; ++i) {
-            temp = uartBuf[i];
-            functionReturnValue = mavlink_parse_char(MAVLINK_COMM_0,
-                                                     uartBuf[i],
-                                                     &msg,
-                                                     &status);
+            uint8_t receivedMessage = mavlink_parse_char(MAVLINK_COMM_0,
+                                                         uartBuf[i],
+                                                         &msg,
+                                                         &status);
 
-            if (functionReturnValue && (msg.msgid == MAVLINK_MSG_ID_POWER_STATUS)) {
+            if (receivedMessage && (msg.msgid == MAVLINK_MSG_ID_POWER_STATUS)) {
                 voltageLevel = mavlink_msg_power_status_get_Vservo(&msg);
             } else {}
         }
@@ -755,7 +752,7 @@ void getGpsPosition(void) {
     memset(gpsBuff, '\0', 500);
     gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
 
-functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
+int functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
 i = 0;
     while (functionReturnValue) {
         functionReturnValue = strncmp(&gpsBuff[i], "$GPRMC", 6);
