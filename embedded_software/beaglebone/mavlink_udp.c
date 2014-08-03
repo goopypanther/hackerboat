@@ -39,6 +39,8 @@ void parseInputParams(int argc, char* argv[]);
 void openNetworkSocket(void);
 void sendMavlinkPacketOverNetwork(void);
 void listParams(void);
+void oncePerSecond(void);
+void processMavlinkActivity(void);
 void parsePacket(void);
 void setMode(void);
 void sendNumMissionItems(void);
@@ -143,156 +145,16 @@ int main(int argc, char* argv[]) {
     // Main loop
     for (;;) {
         if (heartbeatCount == LOOPS_PER_SECOND) {
-            currentTime = time(0);
-            printf("\n%s", ctime(&currentTime));
-            fprintf(logFile, "\n%s", ctime(&currentTime));
-
-            // Send Heartbeat
-            mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
-                                       MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
-                                       &msg,                       // Message buffer
-                                       MAV_VEHICLE_TYPE,           // MAV vehicle type
-                                       MAV_AUTOPILOT_TYPE,         // Autopilot type
-                                       currentMavMode,             // System mode
-                                       0,                          // Custom mode (empty)
-                                       currentMavState);           // System status
-
-            sendMavlinkPacketOverNetwork();
-
-            // Transmitted packet
-            printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-            fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-
-            // Send Status
-            mavlink_msg_sys_status_pack(SYSTEM_ID,                  // System ID
-                                        MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
-                                        &msg,                       // Message buffer
-                                        SENSORS,                    // Sensors present
-                                        SENSORS,                    // Sensors enabled
-                                        SENSORS,                    // Sensor health
-                                        500,                        // System load
-                                        voltageLevel,               // Batt voltage
-                                        -1,                         // Batt current
-                                        -1,                         // Batt remaining
-                                        0,                          // Comm drop percentage
-                                        0,                          // Comm errors
-                                        0,                          // Custom error 1
-                                        0,                          // Custom error 2
-                                        0,                          // Custom error 3
-                                        0);                         // Custom error 4
-
-            sendMavlinkPacketOverNetwork();
-
-            // Transmitted packet
-            printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-            fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-
-            // Send GPS Position
-            mavlink_msg_global_position_int_pack(SYSTEM_ID,                             // System ID
-                                                 MAV_COMP_ID_GPS,                       // Component ID
-                                                 &msg,                                  // Message buffer
-                                                 microsSinceEpoch(),                    // Current time
-                                                 ((int32_t) (position.lat * 10000000)), // Lat
-                                                 ((int32_t) (position.lon * 10000000)), // Long
-                                                 position.alt,                          // Alt
-                                                 position.alt,                          // Relative alt (assume same)
-                                                 position.vx,                           // X vel
-                                                 position.vy,                           // Y vel
-                                                 position.vz,                           // Z vel
-                                                 position.hdg);                         // Heading
-
-            sendMavlinkPacketOverNetwork();
-
-            // Transmitted packet
-            printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-            fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-
-            // Send current waypoint if in auto mode
-            if (currentMavMode == MAV_MODE_AUTO_ARMED) {
-                mavlink_msg_mission_current_pack(SYSTEM_ID,
-                                                 MAV_COMP_ID_SYSTEM_CONTROL,
-                                                 &msg,
-                                                 targetWaypoint);
-
-                sendMavlinkPacketOverNetwork();
-
-                // Transmitted packet
-                printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-            } else {}
-
-            // Update GPS position
-            getGpsPosition();
-
-            if ((currentMavMode == MAV_MODE_AUTO_ARMED) || (currentMavMode == MAV_MODE_AUTO_DISARMED)) {
-                functionReturnValueFloat = getDistanceToWaypoint();
-                if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
-                    reachedTargetWaypoint();
-                } else {
-                    functionReturnValueFloat = getAngleToWaypoint();
-                    mavlink_msg_attitude_control_pack(SYSTEM_ID,
-                                                      MAV_COMP_ID_PATHPLANNER,
-                                                      &msg,
-                                                      SYSTEM_ID,
-                                                      0,
-                                                      0,
-                                                      functionReturnValue,
-                                                      1,
-                                                      0,
-                                                      0,
-                                                      0,
-                                                      0);
-
-                    sendMavlinkPacketOverNetwork();
-
-                    // Transmitted packet
-                    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                }
-            } else if ((currentMavMode == MAV_MODE_MANUAL_ARMED) || (currentMavMode == MAV_MODE_MANUAL_ARMED)) {
-                functionReturnValueFloat = getDistanceToWaypoint();
-                if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
-                    reachedTargetWaypoint();
-                } else {}
-
-                functionReturnValueFloat = getDistanceToWaypoint();
-                functionReturnValueFloat = getAngleToWaypoint();
-            } else {}
-            // Update compass
-
+            oncePerSecond();
             heartbeatCount = 0;
         } else {
             heartbeatCount++;
         }
 
         // Receive incoming packets from network interface
-        memset(buf, 0, BUFFER_LENGTH);
-        recsize = recvfrom(sock,                         // Socket device
-                           (void *) buf,                 // Receive buffer
-                           BUFFER_LENGTH,                // Length of buffer
-                           0,                            // Extra settings (none)
-                           (struct sockaddr *) &gcAddr, // Receive from address
-                           &fromLen);                    // Receive address length
-        if (recsize > 0) {
-            // Something received - print out all bytes and parse packet
-            //printf("Bytes Received: %d\nDatagram: ", (int)recsize);
-            for (i = 0; i < recsize; ++i) {
-                temp = buf[i];
-                //printf("%02x ", (unsigned char)temp);
-                functionReturnValue = mavlink_parse_char(MAVLINK_COMM_0, // Channel
-                                                         buf[i],         // Char to parse
-                                                         &msg,           // Message buffer
-                                                         &status);       // Message status
-                if (functionReturnValue) {
-                    // Packet received
-                    printf("\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                    fprintf(logFile, "\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        processMavlinkActivity();
 
-                    sendPacketToLowLevel();
-                    parsePacket();
-                } else {}
-            }
-        } else {}
+
         memset(buf, 0, BUFFER_LENGTH);
 
         // Read voltage level from low level device
@@ -312,6 +174,155 @@ int main(int argc, char* argv[]) {
 
         usleep(LOOPTIME); // Sleep 1 microsecond
     }
+}
+
+void oncePerSecond(void) {
+    currentTime = time(0);
+    printf("\n%s", ctime(&currentTime));
+    fprintf(logFile, "\n%s", ctime(&currentTime));
+    
+    // Send Heartbeat
+    mavlink_msg_heartbeat_pack(SYSTEM_ID,                  // System ID
+                               MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
+                               &msg,                       // Message buffer
+                               MAV_VEHICLE_TYPE,           // MAV vehicle type
+                               MAV_AUTOPILOT_TYPE,         // Autopilot type
+                               currentMavMode,             // System mode
+                               0,                          // Custom mode (empty)
+                               currentMavState);           // System status
+    
+    sendMavlinkPacketOverNetwork();
+    
+    // Transmitted packet
+    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d heartbeat", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    
+    // Send Status
+    mavlink_msg_sys_status_pack(SYSTEM_ID,                  // System ID
+                                MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
+                                &msg,                       // Message buffer
+                                SENSORS,                    // Sensors present
+                                SENSORS,                    // Sensors enabled
+                                SENSORS,                    // Sensor health
+                                500,                        // System load
+                                voltageLevel,               // Batt voltage
+                                -1,                         // Batt current
+                                -1,                         // Batt remaining
+                                0,                          // Comm drop percentage
+                                0,                          // Comm errors
+                                0,                          // Custom error 1
+                                0,                          // Custom error 2
+                                0,                          // Custom error 3
+                                0);                         // Custom error 4
+
+    sendMavlinkPacketOverNetwork();
+
+    // Transmitted packet
+    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d status", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+
+    // Send GPS Position
+    mavlink_msg_global_position_int_pack(SYSTEM_ID,                             // System ID
+                                         MAV_COMP_ID_GPS,                       // Component ID
+                                         &msg,                                  // Message buffer
+                                         microsSinceEpoch(),                    // Current time
+                                         ((int32_t) (position.lat * 10000000)), // Lat
+                                         ((int32_t) (position.lon * 10000000)), // Long
+                                         position.alt,                          // Alt
+                                         position.alt,                          // Relative alt (assume same)
+                                         position.vx,                           // X vel
+                                         position.vy,                           // Y vel
+                                         position.vz,                           // Z vel
+                                         position.hdg);                         // Heading
+
+    sendMavlinkPacketOverNetwork();
+
+    // Transmitted packet
+    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d GPS", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+
+    // Send current waypoint if in auto mode
+    if (currentMavMode == MAV_MODE_AUTO_ARMED) {
+        mavlink_msg_mission_current_pack(SYSTEM_ID,
+                                         MAV_COMP_ID_SYSTEM_CONTROL,
+                                         &msg,
+                                         targetWaypoint);
+
+        sendMavlinkPacketOverNetwork();
+
+        // Transmitted packet
+        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    } else {}
+
+    // Update GPS position
+    getGpsPosition();
+
+    if ((currentMavMode == MAV_MODE_AUTO_ARMED) || (currentMavMode == MAV_MODE_AUTO_DISARMED)) {
+        functionReturnValueFloat = getDistanceToWaypoint();
+        if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+            reachedTargetWaypoint();
+        } else {
+            functionReturnValueFloat = getAngleToWaypoint();
+            mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                              MAV_COMP_ID_PATHPLANNER,
+                                              &msg,
+                                              SYSTEM_ID,
+                                              0,
+                                              0,
+                                              functionReturnValue,
+                                              1,
+                                              0,
+                                              0,
+                                              0,
+                                              0);
+
+            sendMavlinkPacketOverNetwork();
+
+            // Transmitted packet
+            printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+            fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        }
+    } else if ((currentMavMode == MAV_MODE_MANUAL_ARMED) || (currentMavMode == MAV_MODE_MANUAL_ARMED)) {
+        functionReturnValueFloat = getDistanceToWaypoint();
+        if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
+            reachedTargetWaypoint();
+        } else {}
+
+        functionReturnValueFloat = getDistanceToWaypoint();
+        functionReturnValueFloat = getAngleToWaypoint();
+    } else {}
+    // Update compass
+}
+
+void processMavlinkActivity(void) {
+    memset(buf, 0, BUFFER_LENGTH);
+    recsize = recvfrom(sock,                         // Socket device
+                       (void *) buf,                 // Receive buffer
+                       BUFFER_LENGTH,                // Length of buffer
+                       0,                            // Extra settings (none)
+                       (struct sockaddr *) &gcAddr, // Receive from address
+                       &fromLen);                    // Receive address length
+    if (recsize > 0) {
+        // Something received - print out all bytes and parse packet
+        //printf("Bytes Received: %d\nDatagram: ", (int)recsize);
+        for (i = 0; i < recsize; ++i) {
+            temp = buf[i];
+            //printf("%02x ", (unsigned char)temp);
+            functionReturnValue = mavlink_parse_char(MAVLINK_COMM_0, // Channel
+                                                     buf[i],         // Char to parse
+                                                     &msg,           // Message buffer
+                                                     &status);       // Message status
+            if (functionReturnValue) {
+                // Packet received
+                printf("\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                fprintf(logFile, "\nReceived packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d ", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+
+                sendPacketToLowLevel();
+                parsePacket();
+            } else {}
+        }
+    } else {}
 }
 
 uint64_t microsSinceEpoch(void) {
