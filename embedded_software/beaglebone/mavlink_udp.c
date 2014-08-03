@@ -30,6 +30,7 @@
 #define NUM_MISSION_ITEMS 256 // Number of mission items (waypoints) we can store
 
 #define ACCEPTABLE_DISTANCE_FROM_WAYPOINT 100 // Meters
+#define EAST 90
 
 /*****************************************************************************/
 /* Function prototypes
@@ -55,7 +56,7 @@ void openUarts(void);
 void sendPacketToLowLevel(void);
 void readLowLevelVoltageLevel(void);
 float stringToFloat(position_string_t position);
-int readFromDevice(int fd, char buf[], int buflen);
+int readFromDevice(FILE *f, char buf[], int buflen);
 
 /*****************************************************************************/
 /* Global vars
@@ -107,6 +108,7 @@ position_t target;
 uint8_t targetWaypoint;
 mavlink_command_long_t currentCommand;
 uint16_t voltageLevel;
+uint8_t goodToGo;
 
 MAV_MODE currentMavMode;
 MAV_STATE currentMavState;
@@ -138,7 +140,8 @@ int main(int argc, char* argv[]) {
     numMissionItems = 0;
     currentlyActiveMissionItem = 0;
     targetWaypoint = 0;
-    voltageLevel = 12000;
+    voltageLevel = 0;
+    goodToGo = 0;
 
     // Main loop
     for (;;) {
@@ -229,34 +232,33 @@ int main(int argc, char* argv[]) {
                 if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
                     reachedTargetWaypoint();
                 } else {
-                    functionReturnValueFloat = getAngleToWaypoint();
-                    mavlink_msg_attitude_control_pack(SYSTEM_ID,
-                                                      MAV_COMP_ID_PATHPLANNER,
-                                                      &msg,
-                                                      SYSTEM_ID,
-                                                      0,
-                                                      0,
-                                                      functionReturnValue,
-                                                      1,
-                                                      0,
-                                                      0,
-                                                      0,
-                                                      0);
+                    if (goodToGo) {
+                        functionReturnValueFloat = getAngleToWaypoint();
+                        mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                                          MAV_COMP_ID_PATHPLANNER,
+                                                          &msg,
+                                                          SYSTEM_ID,
+                                                          0,
+                                                          0,
+                                                          functionReturnValueFloat,
+                                                          1,
+                                                          0,
+                                                          0,
+                                                          0,
+                                                          0);
 
-                    sendMavlinkPacketOverNetwork();
+                        sendMavlinkPacketOverNetwork();
 
-                    // Transmitted packet
-                    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                        // Transmitted packet
+                        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                    } else {}
                 }
             } else if ((currentMavMode == MAV_MODE_MANUAL_ARMED) || (currentMavMode == MAV_MODE_MANUAL_ARMED)) {
                 functionReturnValueFloat = getDistanceToWaypoint();
                 if (functionReturnValueFloat <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
                     reachedTargetWaypoint();
                 } else {}
-
-                functionReturnValueFloat = getDistanceToWaypoint();
-                functionReturnValueFloat = getAngleToWaypoint();
             } else {}
             // Update compass
 
@@ -304,7 +306,26 @@ int main(int argc, char* argv[]) {
                 printf("\n*** FAILSAFE ***");
                 fprintf(logFile, "\n*** FAILSAFE ***");
             } else {}
-            // Head for beach
+                goodToGo = 0;
+
+                mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                                  MAV_COMP_ID_PATHPLANNER,
+                                                  &msg,
+                                                  SYSTEM_ID,
+                                                  0,
+                                                  0,
+                                                  ((float) EAST),
+                                                  1,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0);
+
+                sendMavlinkPacketOverNetwork();
+
+                // Transmitted packet
+                printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+                fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
         } else {}
 
         // Flush buffers to force output
@@ -604,12 +625,12 @@ void parseCommand(void) {
             currentMavMode = MAV_MODE_MANUAL_ARMED;
             target.lat = currentCommand.param5;
             target.lon = currentCommand.param6;
+            goodToGo = 1;
             break;
         case MAV_CMD_NAV_RETURN_TO_LAUNCH:
             break;
         case MAV_CMD_NAV_TAKEOFF:
-            position.lat = missionItems[currentlyActiveMissionItem].x;
-            position.lon = missionItems[currentlyActiveMissionItem].y;
+            goodToGo = 1;
             break;
         case MAV_CMD_MISSION_START:
             break;
@@ -626,6 +647,26 @@ void reachedTargetWaypoint(void) {
         currentlyActiveMissionItem++;
     } else if (missionItems[currentlyActiveMissionItem].autocontinue == 0) {
         currentMavMode = MAV_MODE_MANUAL_DISARMED;
+        goodToGo = 0;
+
+        mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                          MAV_COMP_ID_PATHPLANNER,
+                                          &msg,
+                                          SYSTEM_ID,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0);
+
+        sendMavlinkPacketOverNetwork();
+
+        // Transmitted packet
+        printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command stop", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d attitude command stop", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
     } else {}
 }
 
@@ -680,14 +721,14 @@ void openUarts(void) {
     gpsModule = fopen(gps_serial_device, "r");
     gpsModuleFD = fileno(gpsModule);
 
-    //lowLevelControlFlags = fcntl(lowLevelControlFD, F_GETFL, 0);
-    //fcntl(lowLevelControlFD, lowLevelControlFlags | O_NONBLOCK);
+    lowLevelControlFlags = fcntl(lowLevelControlFD, F_GETFL, 0);
+    fcntl(lowLevelControlFD, lowLevelControlFlags | O_NONBLOCK);
 
-    //lowLevelDebugFlags = fcntl(lowLevelDebugFD, F_GETFL, 0);
-	//fcntl(lowLevelDebugFD, lowLevelDebugFlags | O_NONBLOCK);
+    lowLevelDebugFlags = fcntl(lowLevelDebugFD, F_GETFL, 0);
+	fcntl(lowLevelDebugFD, lowLevelDebugFlags | O_NONBLOCK);
 
-	//gpsModuleFlags = fcntl(gpsModuleFD, F_GETFL, 0);
-	//fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
+	gpsModuleFlags = fcntl(gpsModuleFD, F_GETFL, 0);
+	fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
 }
 
 void sendPacketToLowLevel(void) {
@@ -701,7 +742,7 @@ void readLowLevelVoltageLevel(void) {
     int incomingSize;
 
     memset(uartBuf, 0, BUFFER_LENGTH);
-    incomingSize = readFromDevice(lowLevelControlFD, &uartBuf, BUFFER_LENGTH);
+    incomingSize = readFromDevice(lowLevelControl, &uartBuf, BUFFER_LENGTH);
 
     if (incomingSize) {
         for (i = 0; i < incomingSize; ++i) {
@@ -722,7 +763,7 @@ void readLowLevelVoltageLevel(void) {
 
 void getUartDebug(void) {
     memset(uartBuf, 0, BUFFER_LENGTH);
-    readFromDevice(lowLevelDebugFD, &uartBuf, BUFFER_LENGTH);
+    readFromDevice(lowLevelDebug, &uartBuf, BUFFER_LENGTH);
     printf("\nArduino message", uartBuf);
     fprintf(logFile, "\nArduino message", uartBuf);
     memset(uartBuf, 0, BUFFER_LENGTH);
@@ -736,12 +777,20 @@ void getGpsPosition(void) {
     uint16_t gpsCount;
 
     memset(gpsBuff, '\0', 500);
-    gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
+    gpsCount = readFromDevice(gpsModule, gpsBuff, 500);
 
-functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
+    if (gpsCount < 60) {
+        return;
+    } else {}
+
+    functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
     while (functionReturnValue) {
+        if (i > (500-6)) {
+        	return;
+        } else {}
+
         functionReturnValue = strncmp(&gpsBuff[i], "$GPRMC", 6);
-        i++;
+    	i++;
     }
 
     for (; gpsBuff[i] != ','; i++) {}
@@ -809,10 +858,7 @@ float stringToFloat(position_string_t pos) { // char* s
 			isdecimal = 1;
 			c++;
 			continue;
-		} else {}
-		
-		if (!isdecimal) {
-			integer_part = (10 * integer_part) + (*c - 48);
+		} else {} if (!isdecimal) { integer_part = (10 * integer_part) + (*c - 48);
 		}
 		else {
 			decimal_part += decimal_pivot * (float)(*c - 48);
@@ -830,29 +876,15 @@ float stringToFloat(position_string_t pos) { // char* s
 	return decimal_part;
 }
 
-int readFromDevice(int fd, char buf[], int buflen) {
-    int dataReady;
-    int returnValue;
-    struct timeval tv;
-    fd_set write_fds;
+int readFromDevice(FILE *f, char buf[], int buflen) {
+    int cread; 
+    cread = 0;
 
-    FD_ZERO(&write_fds);
-    FD_SET(fd, &write_fds);
+    cread = read(f, buf, buflen);
 
-    tv.tv_sec = 0;
-    tv.tv_usec = 1;
-
-    dataReady = select(fd+1,
-                       &write_fds,
-                       NULL,
-                       NULL,
-                       &tv);
-
-    if (dataReady > 0) {
-        returnValue = read(fd, buf, buflen);
+    if (cread >= 0) {
+        return cread;
     } else {
-    	returnValue = 0;
+        return 0;
     }
-
-    return (returnValue);
 }
