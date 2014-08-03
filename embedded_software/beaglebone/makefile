@@ -6,11 +6,11 @@ INCLUDES=./mavlink/hackerboat
 COMPILER=gcc
 
 all:
-	$(COMPILER) -I $(INCLUDES) -o $(APPNAME) $(SOURCES)
+	$(COMPILER) -g -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -lm
 	du -h $(APPNAME)
 
 debug:
-	$(COMPILER) -g -I $(INCLUDES) -o $(APPNAME) $(SOURCES)
+	$(COMPILER) -g -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -lm
 	du -h $(APPNAME)
 
 clean:
