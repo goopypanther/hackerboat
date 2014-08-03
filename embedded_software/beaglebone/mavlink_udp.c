@@ -58,7 +58,7 @@ void openUarts(void);
 void sendPacketToLowLevel(void);
 void readLowLevelVoltageLevel(void);
 float stringToFloat(position_string_t position);
-int readFromDevice(FILE *f, char buf[], int buflen);
+int readFromDevice(int fd, char buf[], int buflen);
 
 /*****************************************************************************/
 /* Global vars
@@ -75,9 +75,6 @@ int sock;
 struct sockaddr_in gcAddr;   // Ground Control address (our mavlink peer)
 
 // UART vars
-FILE *lowLevelControl;
-FILE *gpsModule;
-FILE *lowLevelDebug;
 int lowLevelControlFD;
 int lowLevelDebugFD;
 int gpsModuleFD;
@@ -719,25 +716,28 @@ float getAngleToWaypoint(void) {
 }
 
 void openUarts(void) {
-	int lowLevelControlFlags;
-	int lowLevelDebugFlags;
-	int gpsModuleFlags;
-
-    lowLevelControl = fopen(low_level_serial_device, "r+");
-    lowLevelControlFD = fileno(lowLevelControl);
-    lowLevelDebug = fopen(low_level_debug_device, "r");
-    lowLevelDebugFD = fileno(lowLevelDebug);
-    gpsModule = fopen(gps_serial_device, "r");
-    gpsModuleFD = fileno(gpsModule);
-
+    int lowLevelControlFlags;
+    int lowLevelDebugFlags;
+    int gpsModuleFlags;
+    
+    lowLevelControlFD = open(low_level_serial_device, O_RDWR);
+    if (lowLevelControlFD < 0)
+        err(1, "%s: open", low_level_serial_device);
+    lowLevelDebugFD = open(low_level_debug_device, O_RDONLY);
+    if (lowLevelDebugFD < 0)
+        err(1, "%s: open", low_level_debug_device);
+    gpsModuleFD = open(gps_serial_device, O_RDONLY);
+    if (gpsModuleFD < 0)
+        err(1, "%s: open", gps_serial_device);
+    
     lowLevelControlFlags = fcntl(lowLevelControlFD, F_GETFL, 0);
     fcntl(lowLevelControlFD, lowLevelControlFlags | O_NONBLOCK);
-
+    
     lowLevelDebugFlags = fcntl(lowLevelDebugFD, F_GETFL, 0);
-	fcntl(lowLevelDebugFD, lowLevelDebugFlags | O_NONBLOCK);
-
-	gpsModuleFlags = fcntl(gpsModuleFD, F_GETFL, 0);
-	fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
+    fcntl(lowLevelDebugFD, lowLevelDebugFlags | O_NONBLOCK);
+    
+    gpsModuleFlags = fcntl(gpsModuleFD, F_GETFL, 0);
+    fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
 }
 
 void sendPacketToLowLevel(void) {
@@ -748,7 +748,6 @@ void sendPacketToLowLevel(void) {
     buffer_used = mavlink_msg_to_send_buffer(uartBuf, &msg);
 
     write(lowLevelControlFD, uartBuf, buffer_used);
-    fflush(lowLevelControl);
 }
 
 void readLowLevelVoltageLevel(void) {
@@ -757,7 +756,7 @@ void readLowLevelVoltageLevel(void) {
 
     uint8_t uartBuf[BUFFER_LENGTH];
     memset(uartBuf, 0, sizeof(uartBuf));
-    incomingSize = readFromDevice(lowLevelControl, &uartBuf, BUFFER_LENGTH);
+    incomingSize = readFromDevice(lowLevelControlFD, &uartBuf, BUFFER_LENGTH);
 
     if (incomingSize) {
         for (i = 0; i < incomingSize; ++i) {
@@ -776,7 +775,7 @@ void readLowLevelVoltageLevel(void) {
 void getUartDebug(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
     memset(uartBuf, 0, sizeof(uartBuf));
-    readFromDevice(lowLevelDebug, &uartBuf, BUFFER_LENGTH);
+    readFromDevice(lowLevelDebugFD, &uartBuf, BUFFER_LENGTH);
     printf("\nArduino message", uartBuf);
     fprintf(logFile, "\nArduino message", uartBuf);
 }
@@ -791,7 +790,7 @@ void getGpsPosition(void) {
     int functionReturnValue;
 
     memset(gpsBuff, '\0', 500);
-    gpsCount = readFromDevice(gpsModule, gpsBuff, 500);
+    gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
 
 
     if (gpsCount < 60) {
@@ -892,7 +891,7 @@ float stringToFloat(position_string_t pos) { // char* s
 	return decimal_part;
 }
 
-int readFromDevice(FILE *f, char buf[], int buflen) {
+int readFromDevice(int f, char buf[], int buflen) {
     int cread; 
     cread = 0;
 
