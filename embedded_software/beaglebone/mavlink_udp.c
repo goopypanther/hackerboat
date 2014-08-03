@@ -71,12 +71,7 @@ char low_level_debug_device[100];
 
 // Network socket vars
 int sock;
-struct sockaddr_in gcAddr;
-struct sockaddr_in locAddr;
-uint8_t buf[BUFFER_LENGTH];
-ssize_t recsize;
-socklen_t fromLen;
-int bytes_sent;
+struct sockaddr_in gcAddr;   // Ground Control address (our mavlink peer)
 
 // UART vars
 FILE *lowLevelControl;
@@ -85,14 +80,12 @@ FILE *lowLevelDebug;
 int lowLevelControlFD;
 int lowLevelDebugFD;
 int gpsModuleFD;
-uint8_t uartBuf[BUFFER_LENGTH];
 
 // Logfile vars
 FILE *logFile;
 time_t currentTime;
 
 // Msc function call vars
-int i;
 int functionReturnValue;
 float functionReturnValueFloat;
 unsigned int temp;
@@ -154,8 +147,6 @@ int main(int argc, char* argv[]) {
         // Receive incoming packets from network interface
         processMavlinkActivity();
 
-
-        memset(buf, 0, BUFFER_LENGTH);
 
         // Read voltage level from low level device
         readLowLevelVoltageLevel();
@@ -296,6 +287,11 @@ void oncePerSecond(void) {
 }
 
 void processMavlinkActivity(void) {
+    uint8_t buf[BUFFER_LENGTH];
+    ssize_t recsize;
+    socklen_t fromLen;
+    int i;
+
     memset(buf, 0, BUFFER_LENGTH);
     recsize = recvfrom(sock,                         // Socket device
                        (void *) buf,                 // Receive buffer
@@ -356,6 +352,7 @@ void parseInputParams(int argc, char* argv[]) {
 }
 
 void openNetworkSocket(void) {
+    struct sockaddr_in locAddr;
     memset(&locAddr, 0, sizeof(locAddr));
     locAddr.sin_family = AF_INET;
     locAddr.sin_addr.s_addr = INADDR_ANY;
@@ -387,6 +384,11 @@ void openNetworkSocket(void) {
 }
 
 void sendMavlinkPacketOverNetwork(void) {
+    uint8_t buf[BUFFER_LENGTH];
+    int bytes_sent;
+
+    memset(buf, 0, sizeof(buf));
+
     len = mavlink_msg_to_send_buffer(buf, &msg);
 
     bytes_sent = sendto(sock,                         // Outgoing device
@@ -702,6 +704,9 @@ void openUarts(void) {
 }
 
 void sendPacketToLowLevel(void) {
+    uint8_t uartBuf[BUFFER_LENGTH];
+
+    memset(uartBuf, 0, sizeof(uartBuf));
     len = mavlink_msg_to_send_buffer(uartBuf, &msg);
 
     write(lowLevelControlFD, uartBuf, len);
@@ -710,8 +715,10 @@ void sendPacketToLowLevel(void) {
 
 void readLowLevelVoltageLevel(void) {
     int incomingSize;
+    int i;
 
-    memset(uartBuf, 0, BUFFER_LENGTH);
+    uint8_t uartBuf[BUFFER_LENGTH];
+    memset(uartBuf, 0, sizeof(uartBuf));
     incomingSize = readFromDevice(lowLevelControlFD, &uartBuf, BUFFER_LENGTH);
 
     if (incomingSize) {
@@ -727,16 +734,14 @@ void readLowLevelVoltageLevel(void) {
             } else {}
         }
     } else {}
-
-    memset(uartBuf, 0, BUFFER_LENGTH);
 }
 
 void getUartDebug(void) {
-    memset(uartBuf, 0, BUFFER_LENGTH);
+    uint8_t uartBuf[BUFFER_LENGTH];
+    memset(uartBuf, 0, sizeof(uartBuf));
     readFromDevice(lowLevelDebugFD, &uartBuf, BUFFER_LENGTH);
     printf("\nArduino message", uartBuf);
     fprintf(logFile, "\nArduino message", uartBuf);
-    memset(uartBuf, 0, BUFFER_LENGTH);
 }
 
 void getGpsPosition(void) {
@@ -745,11 +750,13 @@ void getGpsPosition(void) {
     position_string_t velocity;
     uint8_t gpsBuff[500];
     uint16_t gpsCount;
+    int i;
 
     memset(gpsBuff, '\0', 500);
     gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
 
 functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
+i = 0;
     while (functionReturnValue) {
         functionReturnValue = strncmp(&gpsBuff[i], "$GPRMC", 6);
         i++;
