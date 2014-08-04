@@ -58,7 +58,7 @@ float getDistanceToWaypoint(void);
 float getAngleToWaypoint(void);
 void readGpsMessages(void);
 void processGpsMessage(char *m, int msglen);
-void processGPRMC(const char *m);
+void processGPRMC(const char **fields, int fieldCount);
 void openUarts(void);
 void sendPacketToLowLevel(void);
 void readLowLevelVoltageLevel(void);
@@ -157,9 +157,9 @@ int main(int argc, char* argv[]) {
          */
         gettimeofday(&now_time, NULL); /* TODO: use CLOCK_MONOTONIC instead? */
         maxWait = (struct timeval){ .tv_sec = 1, .tv_usec = 0 };
-        printf("checking nextTx (%ld/%ld) against now (%ld/%ld)\n",
-               nextHeartbeatTx.tv_sec, nextHeartbeatTx.tv_usec,
-               now_time.tv_sec, now_time.tv_usec);
+        // printf("checking nextTx (%ld/%ld) against now (%ld/%ld)\n",
+        //   nextHeartbeatTx.tv_sec, nextHeartbeatTx.tv_usec,
+        //   now_time.tv_sec, now_time.tv_usec);
         if (checkDeadline(now_time, nextHeartbeatTx, &maxWait)) {
             oncePerSecond();
             nextHeartbeatTx = nextDeadline(nextHeartbeatTx, now_time, 1.0, 0.25);
@@ -190,8 +190,15 @@ int main(int argc, char* argv[]) {
 #undef SET_ONE
 
         int c = select(fdmax, &rfds, NULL, NULL, &maxWait);
-        if (c < 0 && errno != EAGAIN && errno != EINTR) {
-            err(EXIT_FAILURE, "select");
+        if (c < 0) {
+            /* The select() call failed. Why? */
+            if (errno != EAGAIN && errno != EINTR) {
+                /* An actual failure */
+                err(EXIT_FAILURE, "select");
+            } else {
+                /* A signal or something. Just recalculate our timers and go again. */
+                continue;
+            }
         }
 
         // Receive incoming packets from network interface
@@ -880,7 +887,10 @@ void readGpsMessages(void) {
 }
 
 void processGpsMessage(char *m, int msglen) {
-    char *asterisk;
+    char *asterisk, *cursor;
+#define MAX_NMEA_FIELDS 25
+    const char *fields[MAX_NMEA_FIELDS];
+    int fieldCount;
 
     /* Check whether this line looks like a valid NMEA-0183 message */
     if (msglen < 4 || m[0] != '$') {
@@ -912,58 +922,67 @@ void processGpsMessage(char *m, int msglen) {
     /* Terminate the sentence at the checksum. */
     *asterisk = 0;
 
-    if (!memcmp(m, "$GPRMC,", 7)) {
-        processGPRMC(m+7);
+    fprintf(stderr, "GPS sentence [%s]\n", m);
+
+    /* Split the NMEA message into fields */
+    fields[0] = m+1; // first field is sentence's data type, eg "GPRMC"
+    fieldCount = 1;
+    for(cursor = m+1;
+        cursor < asterisk && fieldCount < MAX_NMEA_FIELDS;
+        cursor ++) {
+        if (*cursor == ',') {
+            *cursor = 0;
+            fields[fieldCount ++] = cursor+1;
+        }
+    }
+
+    /* Dispatch to a routine based on the sentence's data type */
+    if (!strcmp(fields[0], "GPRMC")) {
+        processGPRMC(fields, fieldCount);
     } else {
         /* We could process other messages here as well if we wanted to */
     }
 }
 
-void processGPRMC(const char *gpsBuff) {
-    position_string_t latString;
-    position_string_t lonString;
-    position_string_t velocity;
-    int i;
+void processGPRMC(const char **fields, int fieldCount) {
+    double lat, lon, groundspeed;
+    
+    /* Fields of the GPRMC sentence:
+       
+       $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+       
+       Field   Use
+       ------- -----------------------------------------
+       0       "GPRMC"
+       1       HHMMSS  Fix taken at time (UTC)
+       2       Status A=active or V=Void
+       3,4     Latitude (decimal degrees, E or W)
+       5,6     Longitude (deimal degrees, N or S)
+       7       Speed over the ground in knots
+       8       Track angle in degrees True
+       9       DDMMYY  Date of fix
+       10,11   Magnetic variation (degrees, E or W)
+       
+    */
 
-    fprintf(stderr, "GPMRC sentence [%s]\n", gpsBuff);
-
-    i = 0;
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
-
-    latString.c = &gpsBuff[i];
-
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
-
-    if (gpsBuff[i] == 'N') {
-        latString.dir = 1;
-    } else {
-        latString.dir = -1;
+    if (fieldCount < 9 || !*(fields[3]) || !*(fields[5])) {
+        /* Missing or empty fields */
+        return;
     }
 
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
+    lat = atof(fields[3]);
+    if (fields[4][0] == 'S')
+        lat = -lat;
 
-    lonString.c = &gpsBuff[i];
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
-    if (gpsBuff[i] == 'E') {
-        lonString.dir = 1;
-    } else {
-        lonString.dir = -1;
-    }
+    lon = atof(fields[5]);
+    if (fields[6][0] == 'W')
+        lon = -lon;
 
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
+    groundspeed = atof(fields[7]);
 
-    velocity.c = &gpsBuff[i];
-
-    position.lat = ((stringToFloat(latString) * latString.dir)/100);
-    position.lon = ((stringToFloat(lonString) * lonString.dir)/100);
-    position.vx = ((uint16_t) stringToFloat(velocity));
+    position.lat = lat / 100;
+    position.lon = lon / 100;
+    position.vx  = groundspeed;
     fprintf(stderr, "  lat=%f  lon=%f  vx=%d\n", position.lat, position.lon, position.vx);
 }
 
