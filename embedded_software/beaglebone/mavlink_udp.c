@@ -10,6 +10,7 @@
 /*
 /*****************************************************************************/
 #include "includes.h"
+#include <err.h>
 
 /*****************************************************************************/
 /* System defines
@@ -17,9 +18,6 @@
 #define BUFFER_LENGTH 2041 // minimum buffer size that can be used with qnx (I don't know why)
 
 #define LOG_FILE_NAME "./mavlink_udp.log"
-
-#define LOOPTIME 1 // microseconds
-#define LOOPS_PER_SECOND 10000 // Fudged for execution time of program
 
 // Identification for our system
 #define SYSTEM_ID          2
@@ -31,6 +29,11 @@
 
 #define ACCEPTABLE_DISTANCE_FROM_WAYPOINT 100 // Meters
 #define EAST 90
+
+// Special values for checkDeadline
+#define TV_DEADLINE_UNSET ((struct timeval){0, -1})
+#define TV_DEADLINE_IMMEDIATE ((struct timeval){0, -2})
+
 
 /*****************************************************************************/
 /* Function prototypes
@@ -53,12 +56,19 @@ void parseCommand(void);
 void reachedTargetWaypoint(void);
 float getDistanceToWaypoint(void);
 float getAngleToWaypoint(void);
-void getGpsPosition(void);
+void readGpsMessages(void);
+void processGpsMessage(char *m, int msglen);
+void processGPRMC(const char *m);
 void openUarts(void);
 void sendPacketToLowLevel(void);
 void readLowLevelVoltageLevel(void);
+void getUartDebug(void);
 float stringToFloat(position_string_t position);
+int fromHex2(char hh, char ll);
 int readFromDevice(int fd, char buf[], int buflen);
+struct timeval timevalAddf(struct timeval tv, double increment);
+int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *timeout);
+struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan);
 
 /*****************************************************************************/
 /* Global vars
@@ -79,6 +89,12 @@ int lowLevelControlFD;
 int lowLevelDebugFD;
 int gpsModuleFD;
 
+// GPS reception buffer
+// we accumulate bytes from the GPS UART here until we have a full line
+#define GPS_BUFFER_SIZE   512
+char gpsBuffer[GPS_BUFFER_SIZE];
+int gpsBufferUsed;
+
 // Logfile vars
 FILE *logFile;
 time_t currentTime;
@@ -87,7 +103,7 @@ time_t currentTime;
 mavlink_message_t msg;
 mavlink_status_t status;
 
-uint64_t timeOfLastHeartbeat;
+struct timeval timeOfLastHeartbeat;
 position_t position = {0, 0, 0, 0, 0, 0, 0, 0};
 position_t target;
 uint8_t targetWaypoint;
@@ -108,7 +124,7 @@ uint16_t currentlyActiveMissionItem;
 /* Main
 /*****************************************************************************/
 int main(int argc, char* argv[]) {
-    uint16_t heartbeatCount;
+    struct timeval nextHeartbeatTx;
     
     parseInputParams(argc, argv); // Parse input params
 
@@ -118,8 +134,8 @@ int main(int argc, char* argv[]) {
 
     logFile = fopen(LOG_FILE_NAME, "a");
 
-    timeOfLastHeartbeat = microsSinceEpoch(); // Prevent failsafe on first loop
-    heartbeatCount = 0;
+    timeOfLastHeartbeat = TV_DEADLINE_UNSET; // Prevent failsafe on first loop
+    nextHeartbeatTx = TV_DEADLINE_IMMEDIATE;
     currentMavState = MAV_STATE_BOOT; // Put us on standby state
     currentMavMode = MAV_MODE_MANUAL_DISARMED; // Put us in manual mode
 
@@ -132,52 +148,74 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     for (;;) {
-        if (heartbeatCount == LOOPS_PER_SECOND) {
+        int fdmax;
+        fd_set rfds;
+        struct timeval now_time, maxWait;
+
+        /* Figure out how long until one of our timed events happens (either
+         * our oncePerSecond() processing or our link-dropped panic)
+         */
+        gettimeofday(&now_time, NULL); /* TODO: use CLOCK_MONOTONIC instead? */
+        maxWait = (struct timeval){ .tv_sec = 1, .tv_usec = 0 };
+        printf("checking nextTx (%ld/%ld) against now (%ld/%ld)\n",
+               nextHeartbeatTx.tv_sec, nextHeartbeatTx.tv_usec,
+               now_time.tv_sec, now_time.tv_usec);
+        if (checkDeadline(now_time, nextHeartbeatTx, &maxWait)) {
             oncePerSecond();
-            heartbeatCount = 0;
-        } else {
-            heartbeatCount++;
+            nextHeartbeatTx = nextDeadline(nextHeartbeatTx, now_time, 1.0, 0.25);
+            printf("advancing nextTx to (%ld/%ld)\n",
+                   nextHeartbeatTx.tv_sec, nextHeartbeatTx.tv_usec);
+            continue;
+        }
+#if 0
+        // TODO: We want to panic if it's been too long since we
+        // received a heartbeat packet, *but* we need to not re-panic
+        // each time through the loop once we're in a panic state. We
+        // should probably depend on currentMavMode, currentMavState,
+        // or something in this test and not panic if we're in BOOT
+        // etc. or already in return-to-base mode.
+        if (... && checkDeadline(now_time, timevalAddf(timeOfLastHeartbeat, SEC_UNTIL_PANIC), &maxWait)) {
+            // Watchdog return, if out of contact for 10 seconds
+            linkInactivityPanic();
+        }
+#endif
+
+        FD_ZERO(&rfds);
+        fdmax = 0;
+#define SET_ONE(f)   do { if (f >= 0) { FD_SET(f, &rfds); if (f >= fdmax) fdmax = f + 1; } }while(0)
+        SET_ONE(sock);
+        SET_ONE(lowLevelDebugFD);
+        SET_ONE(lowLevelControlFD);
+        SET_ONE(gpsModuleFD);
+#undef SET_ONE
+
+        int c = select(fdmax, &rfds, NULL, NULL, &maxWait);
+        if (c < 0 && errno != EAGAIN && errno != EINTR) {
+            err(EXIT_FAILURE, "select");
         }
 
         // Receive incoming packets from network interface
-        processMavlinkActivity();
-
+        if (FD_ISSET(sock, &rfds)) {
+            processMavlinkActivity();
+        } else {}
 
         // Read voltage level from low level device
-        readLowLevelVoltageLevel();
+        if (FD_ISSET(lowLevelControlFD, &rfds)) {
+            readLowLevelVoltageLevel();
+        } else {}
 
-        // Watchdog return, if out of contact for 10 seconds, beach self
-        if ((microsSinceEpoch()-timeOfLastHeartbeat) > (SEC_UNTIL_PANIC * 1000000)) {
-            if (heartbeatCount >= LOOPS_PER_SECOND) {
-                printf("\n*** FAILSAFE ***");
-                fprintf(logFile, "\n*** FAILSAFE ***");
-            } else {}
-                goodToGo = 0;
+        // Read data from the GPS
+        if (FD_ISSET(gpsModuleFD, &rfds)) {
+            readGpsMessages();
+        } else {}
 
-                mavlink_msg_attitude_control_pack(SYSTEM_ID,
-                                                  MAV_COMP_ID_PATHPLANNER,
-                                                  &msg,
-                                                  SYSTEM_ID,
-                                                  0,
-                                                  0,
-                                                  ((float) EAST),
-                                                  1,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  0);
-
-                sendMavlinkPacketOverNetwork();
-
-                // Transmitted packet
-                printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
-                fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+        // Read log debug messages from the low level controller
+        if (FD_ISSET(lowLevelDebugFD, &rfds)) {
+            getUartDebug();
         } else {}
 
         // Flush buffers to force output
         fflush(NULL);
-
-        usleep(LOOPTIME); // Sleep 1 microsecond
     }
 }
 
@@ -260,9 +298,6 @@ void oncePerSecond(void) {
         fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d current mission", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
     } else {}
 
-    // Update GPS position
-    getGpsPosition();
-
     if ((currentMavMode == MAV_MODE_AUTO_ARMED) || (currentMavMode == MAV_MODE_AUTO_DISARMED)) {
         float distanceToWaypoint = getDistanceToWaypoint();
         if (distanceToWaypoint <= ACCEPTABLE_DISTANCE_FROM_WAYPOINT) {
@@ -297,6 +332,29 @@ void oncePerSecond(void) {
         } else {}
     } else {}
     // Update compass
+}
+
+void linkInactivityPanic(void) {
+    goodToGo = 0;
+    
+    mavlink_msg_attitude_control_pack(SYSTEM_ID,
+                                      MAV_COMP_ID_PATHPLANNER,
+                                      &msg,
+                                      SYSTEM_ID,
+                                      0,
+                                      0,
+                                      ((float) EAST),
+                                      1,
+                                      0,
+                                      0,
+                                      0,
+                                      0);
+    
+    sendMavlinkPacketOverNetwork();
+    
+    // Transmitted packet
+    printf("\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
+    fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
 void processMavlinkActivity(void) {
@@ -371,6 +429,8 @@ void openNetworkSocket(void) {
     locAddr.sin_port = htons(14551);
 
     sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sock < 0)
+        err(EXIT_FAILURE, "socket");
     // Bind the socket to port 14551 - necessary to receive packets from qgroundcontrol
     rc = bind(sock,                         // Socket identifier
               (struct sockaddr *) &locAddr, // Bind location & address
@@ -419,7 +479,7 @@ void parsePacket(void) {
     case MAVLINK_MSG_ID_HEARTBEAT: // Record time of last heartbeat for watchdog
         printf("heartbeat");
         fprintf(logFile, "heartbeat");
-        timeOfLastHeartbeat = microsSinceEpoch();
+        gettimeofday(&timeOfLastHeartbeat, NULL);
         break;
     case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
     case MAVLINK_MSG_ID_PARAM_REQUEST_READ:
@@ -722,13 +782,13 @@ void openUarts(void) {
     
     lowLevelControlFD = open(low_level_serial_device, O_RDWR);
     if (lowLevelControlFD < 0)
-        err(1, "%s: open", low_level_serial_device);
+        err(EXIT_FAILURE, "%s: open", low_level_serial_device);
     lowLevelDebugFD = open(low_level_debug_device, O_RDONLY);
     if (lowLevelDebugFD < 0)
-        err(1, "%s: open", low_level_debug_device);
+        err(EXIT_FAILURE, "%s: open", low_level_debug_device);
     gpsModuleFD = open(gps_serial_device, O_RDONLY);
     if (gpsModuleFD < 0)
-        err(1, "%s: open", gps_serial_device);
+        err(EXIT_FAILURE, "%s: open", gps_serial_device);
     
     lowLevelControlFlags = fcntl(lowLevelControlFD, F_GETFL, 0);
     fcntl(lowLevelControlFD, lowLevelControlFlags | O_NONBLOCK);
@@ -780,36 +840,94 @@ void getUartDebug(void) {
     fprintf(logFile, "\nArduino message", uartBuf);
 }
 
-void getGpsPosition(void) {
-    position_string_t latString;
-    position_string_t lonString;
-    position_string_t velocity;
-    uint8_t gpsBuff[500];
-    uint16_t gpsCount;
-    int i;
-    int functionReturnValue;
+void readGpsMessages(void) {
+    int amountLeft = GPS_BUFFER_SIZE - gpsBufferUsed;
+    int ix, lastLineStart;
+    
+    if (amountLeft > 0) {
+        int amountRead = read(gpsModuleFD, gpsBuffer, amountLeft);
+        if (amountRead > 0) {
+            gpsBufferUsed += amountRead;
+        } else if (amountRead < 0) {
+            if (errno != EAGAIN && errno != EINTR && errno != EWOULDBLOCK) {
+                warn("gps: read");
+            }
+        }
+    }
 
-    memset(gpsBuff, '\0', 500);
-    gpsCount = readFromDevice(gpsModuleFD, gpsBuff, 500);
+    // Look for lines delimited by CR and/or LF and pass them to processGpsMessage()
+    ix = 0;
+    lastLineStart = 0;
+    while (ix < gpsBufferUsed) {
+        if (gpsBuffer[ix] == '\r' || gpsBuffer[ix] == '\n') {
+            if (lastLineStart + 1 < ix) {
+                processGpsMessage(gpsBuffer + lastLineStart, ix - lastLineStart);
+                lastLineStart = ix + 1;
+            }
+        }
+        ix ++;
+    }
 
+    if (lastLineStart > 0) {
+        // Move any unprocessed partial line to the front of the buffer.
+        memmove(gpsBuffer, gpsBuffer + lastLineStart, gpsBufferUsed - lastLineStart);
+        gpsBufferUsed -= lastLineStart;
+    } else if (gpsBufferUsed == GPS_BUFFER_SIZE) {
+        // RX buffer is full, and we saw no line boundaries in it. We're getting garbage
+        // of some sort so just discard it all.
+        gpsBufferUsed = 0;
+    }
+}
 
-    if (gpsCount < 60) {
+void processGpsMessage(char *m, int msglen) {
+    char *asterisk;
+
+    /* Check whether this line looks like a valid NMEA-0183 message */
+    if (msglen < 4 || m[0] != '$') {
+        /* Not a message, ignore */
         return;
     } else {}
 
-    i = 0;
-    functionReturnValue = strncmp(gpsBuff, "$GPRMC", 6);
-    while (functionReturnValue) {
-        if (i > (500-6)) {
-        	return;
+    asterisk = memchr(m, '*', msglen);
+    if (asterisk == (m + msglen - 3)) {
+        /* Validate the NMEA checksum */
+        uint8_t csum = 0;
+        uint8_t receivedCsum;
+        const char *p;
+
+        for(p = m+1; p != asterisk; p++)
+            csum ^= *(uint8_t *)p;
+        
+        receivedCsum = fromHex2(asterisk[1], asterisk[2]);
+        if (receivedCsum != csum) {
+            warnx("GPS: Bad NMEA checksum");
+            return;
         } else {}
-
-        functionReturnValue = strncmp(&gpsBuff[i], "$GPRMC", 6);
-    	i++;
+    } else {
+        /* Missing checksum. Not technically required to be sent for all sentences, but it is required for the only sentence we listen for ($GPRMC), so let's require it. */
+        warnx("GPS: no checksum in NMEA data");
+        return;
     }
+    
+    /* Terminate the sentence at the checksum. */
+    *asterisk = 0;
 
-    for (; gpsBuff[i] != ','; i++) {}
-    i++;
+    if (!memcmp(m, "$GPRMC,", 7)) {
+        processGPRMC(m+7);
+    } else {
+        /* We could process other messages here as well if we wanted to */
+    }
+}
+
+void processGPRMC(const char *gpsBuff) {
+    position_string_t latString;
+    position_string_t lonString;
+    position_string_t velocity;
+    int i;
+
+    fprintf(stderr, "GPMRC sentence [%s]\n", gpsBuff);
+
+    i = 0;
     for (; gpsBuff[i] != ','; i++) {}
     i++;
     for (; gpsBuff[i] != ','; i++) {}
@@ -846,7 +964,7 @@ void getGpsPosition(void) {
     position.lat = ((stringToFloat(latString) * latString.dir)/100);
     position.lon = ((stringToFloat(lonString) * lonString.dir)/100);
     position.vx = ((uint16_t) stringToFloat(velocity));
-
+    fprintf(stderr, "  lat=%f  lon=%f  vx=%d\n", position.lat, position.lon, position.vx);
 }
 
 float stringToFloat(position_string_t pos) { // char* s
@@ -903,3 +1021,150 @@ int readFromDevice(int f, char buf[], int buflen) {
         return 0;
     }
 }
+
+static short fromHexCh(char c)
+{
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'A' && c <= 'F') {
+        return c - 'A' + 10;
+    } else if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    } else {
+        return -1;
+    }
+}
+
+int fromHex2(char hh, char ll)
+{
+    short h = fromHexCh(hh);
+    short l = fromHexCh(ll);
+    if (h >= 0 && l >= 0) {
+        return (h * 16 + l);
+    } else {
+        return -1;
+    }
+}
+
+/*****************************************************************************/
+/* Timeval utilities                                                         */
+/*****************************************************************************/
+
+// Compares two timevals.
+// Returna 1 if a>b, -1 if a<b, and 0 if a==b.
+int timeval_cmp(struct timeval a, struct timeval b)
+{
+    if (a.tv_sec > b.tv_sec) {
+        return 1;
+    } else if (a.tv_sec < b.tv_sec) {
+        return -1;
+    } else if (a.tv_usec > b.tv_usec) {
+        return 1;
+    } else if (a.tv_usec < b.tv_usec) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+void timeval_min(struct timeval *tv, struct timeval b)
+{
+    if (timeval_cmp(*tv, b) > 0) {
+        *tv = b;
+    } else {}
+}
+
+// Compare deadline against now. If it's in the past, return 1.
+// If it's in the future, adjust *timeout to be no longer than the
+// time from now until deadline.
+//
+// The deadline value has two special cases:
+//    {0,-1}   -->   unset. This deadline is never reached.
+//    {0,-2}   -->   immediate. This deadline has always passed.
+int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *timeout) {
+    if (deadline.tv_sec == 0 && deadline.tv_usec < 0) {
+        if (deadline.tv_usec == -1) {
+            /* No deadline is set */
+            return 0;
+        } else {
+            /* "Immediate" deadline */
+            return 1;
+        }
+    } else if (deadline.tv_sec < now.tv_sec) {
+        /* Decidedly in the past */
+        return 1;
+    } else if (deadline.tv_sec == now.tv_sec) {
+        /* Possibly in the past --- check the usecs */
+        if (deadline.tv_usec <= now.tv_usec) {
+            return 1;
+        } else {
+            struct timeval waittime;
+            waittime.tv_sec = 0;
+            waittime.tv_usec = deadline.tv_usec - now.tv_usec;
+            timeval_min(timeout, waittime);
+            return 0;
+        }
+    } else /* deadline.tv_sec > now.tv_sec */ {
+        /* Definitely in the future */
+        struct timeval waittime;
+        waittime.tv_sec = deadline.tv_sec - now.tv_sec;
+        if (deadline.tv_usec < now.tv_usec) {
+            /* Borrow the 1 ... sec is guaranteed to be positive because of
+             * the conditional above, so this is safe from underflow
+             */
+            waittime.tv_sec --;
+            waittime.tv_usec = 1000000 + deadline.tv_usec - now.tv_usec;
+        } else {
+            waittime.tv_usec = deadline.tv_usec - now.tv_usec;
+        }
+        timeval_min(timeout, waittime);
+        return 0;
+    }
+}
+
+// Adds "increment" seconds to a timeval.
+// If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+struct timeval timevalAddf(struct timeval tv, double increment) {
+    double isec;
+
+    if (tv.tv_sec == 0 && tv.tv_usec < 0) {
+        return tv;
+    }
+
+    increment = modf(increment, &isec);
+    tv.tv_sec += (int)isec;
+    tv.tv_usec += lrint(1e6 * increment);
+    if (tv.tv_usec > 1000000) {
+        tv.tv_sec ++;
+        tv.tv_usec -= 1000000;
+    }
+
+    return tv;
+}
+
+// Increment deadline by increment seconds. Additionally, if the
+// resulting deadline is less than noLessThan seconds from tv, extend
+// it even further so that it is.
+//
+// If the deadline is either of the special cases that checkDeadline()
+// handles, pretend that it was equal to tv.
+struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan) {
+    struct timeval slidingDeadline;
+
+    if (deadline.tv_sec == 0 && deadline.tv_usec < 0) {
+        /* An unset deadline. Pretend that it fired just now. */
+        deadline = tv;
+    }
+
+    deadline = timevalAddf(deadline, increment);
+    slidingDeadline = timevalAddf(tv, noLessThan);
+
+    if (timeval_cmp(deadline, slidingDeadline) >= 0) {
+        /* The next deadline is sufficiently far in the future. Use it. */
+        return deadline;
+    } else {
+        /* The next deadline is too soon (or possibly in the past). Extend it to now+noLessThan. */
+        return slidingDeadline;
+    }
+}
+
