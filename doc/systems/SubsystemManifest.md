@@ -4,7 +4,7 @@ Subsystem Manifest
 This is a list of all subsystems on the boat with a thumbnail description of each and their major components.
 
 1 Control System
-----------------
+================
 The control system comprises those components involved in navigating the vessel and maintaining its state.
 
 1.1 Control Box
@@ -91,7 +91,7 @@ Boatse 0.2: Only the motor monitor is installed. This monitors the voltage and c
 Boatse 0.3: Additional monitors are mounted in the main battery and charge circuits.
 
 2 *Shore Station*
------------------
+=================
 
 2.1 *Laptop*
 ------------
@@ -103,7 +103,7 @@ Boatse 0.3: Additional monitors are mounted in the main battery and charge circu
 -------------------
 
 3 Propulsion
-------------
+============
 
 3.1 Motor
 ---------
@@ -130,7 +130,7 @@ The motor is provided with an outboard-style screw clamp arrangement that connec
 The servo is mounted to a specially designed plate epoxied to the top of the motor bulkhead. The servo arm is connected to the tiller via an adjustable length mounting link. This link uses ball ends to absorb the misalignment between the two.
 
 4 Communications
-----------------
+================
 
 4.1 Radio Box
 -------------
@@ -151,7 +151,7 @@ The 2.4 GHz radio serves as the primary Ethernet switch and allows the use of st
 The antenna mast is a xxx” diameter aluminum tube that elevates the 900 MHz antenna well above the boat in order to
 
 5 Power
--------
+=======
 
 5.1 Main Bus
 ------------
@@ -189,7 +189,7 @@ Boatse 0.3: Solar panels are mounted as described below
 ---------------------------
 
 6 Structures
-------------
+============
 
 6.1 Initial Hull
 ----------------
@@ -207,7 +207,7 @@ Boatse 0.3: Solar panels are mounted as described below
 --------
 
 7 Miscellaneous
----------------
+===============
 
 7.1 Bilge Pump
 --------------
