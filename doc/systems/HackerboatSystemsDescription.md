@@ -1,3 +1,6 @@
+Hackerboat System Description
+=============================
+
 Structures
 ==========
 The structure is built around a surplus two-hatch fiberglass kayak obtained from Craigslist. 
