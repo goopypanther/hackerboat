@@ -90,17 +90,17 @@ Strip of 4 waterproofed addressable RGB LEDs, mounted externally and aft.
 Boatse 0.2: Only the motor monitor is installed. This monitors the voltage and current on the motor, and is mounted between the relay box and the main power bus. It is a 30A/20V inline unit from Logos Electromechanical.
 Boatse 0.3: Additional monitors are mounted in the main battery and charge circuits.
 
-2 Shore Station
----------------
-
-2.1 Laptop
-----------
-
-2.2 QGroundControl
-------------------
-
-2.3 900 MHz Radio
+2 *Shore Station*
 -----------------
+
+2.1 *Laptop*
+------------
+
+2.2 *QGroundControl*
+--------------------
+
+2.3 *900 MHz Radio*
+-------------------
 
 3 Propulsion
 ------------
@@ -143,8 +143,8 @@ The 900 MHz radio provides ship to shore communications.
 -------------
 The 2.4 GHz radio serves as the primary Ethernet switch and allows the use of standard WiFi accessories such as cameras.
 
-4.1.3 Boost Regulator
----------------------
+4.1.3 *Boost Regulator*
+-----------------------
 
 4.2 Antenna Mast
 ----------------
