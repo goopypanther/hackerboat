@@ -9,7 +9,7 @@ The control system comprises those components involved in navigating the vessel 
 
 1.1 Control Box
 ---------------
-The control box contains a large interconnect PCB (described in [§ 1.1.5](#1.1.5-Interconnect)) with an Arduino Mega, a Beaglebone, a 9-DoF IMU, and a GPS shield attached to it. It implements all guidance, navigation, and control functions.
+The control box contains a large interconnect PCB (described in [§ 1.1.5](#115-Interconnect)) with an Arduino Mega, a Beaglebone, a 9-DoF IMU, and a GPS shield attached to it. It implements all guidance, navigation, and control functions.
 
 1.1.1 Beaglebone
 ----------------
