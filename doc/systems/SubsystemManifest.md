@@ -166,7 +166,7 @@ This will be relocated somewhere easier to reach.
 
 5.2 Batteries
 -------------
-The boat is powered by a pair of 12V truck batteries. ***Insert part numbers etc here*** These batteries are wired in parallel to provide a single nominal 12V bus.
+The boat is powered by a pair of 12V truck batteries, p/n 31-950 PA. These batteries are wired in parallel to provide a single nominal 12V bus. This is a 31-size battery, which allows us to use standard battery trays for securing them. One battery is in each of the forward and aft main compartments.
 
 5.3 Charger
 -----------
