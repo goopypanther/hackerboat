@@ -199,12 +199,24 @@ Boatse 0.3: Solar panels are mounted as described below
 
 6.3 Bulkheads
 -------------
+There are two internal bulkheads approximately **??**" and **??**" from the bow and stern respectively. Both are made of plywood and are **??**" thick. The bulkheads fit around the keelson and port and starboard deck runners. There are ratholes on either side of the keelson where the bulkhead makes contact with the inner hull.
+Both bulkheads are affixed to the keelson, deck runners, inner hull and inner deck by fiberglass cloth strips running along the contacting surfaces on the side of each bulkhead facing inwards towards the hatch coamings.
 
 6.4 Keelson
 -----------
+The keelson is made of a wooden plank running the length of the inner hull, approximately **??**" long, **??** wide and **??** thick. It is affixed to the inner hull with thickened epoxy and lag bolts driven from below the hull upwards as well as bolts passing through the external keel mounting brackets.
 
 6.5 Keel
 --------
+The keel is an epoxy coated board approximately **??**" by **??**" and **??**" thick with a length of PVC pipe mounted to its lower edge. This pipe is filled with **??** lbs of metal rebar. The keel is removable and is normally attached to the hull with **?? (number of bolts)** bolts passing through two aluminum L-brackets permanently mounted to the underside of the hull.
+
+6.6 Hatch Coamings
+------------------
+Original curved hatch coamings have been raised with cut foam to provide a flat mounting surfaces for hatch covers. Gaps between the foam and coamings has been plugged with smaller pieces of foam and thickened epoxy. The foam has further been affixed to the coamings by a layer of fiberglass cloth strips wrapped around the foam-coaming interface. The mating surface between the new coamings and hatch covers have been sanded smooth and coated in a smooth layer of epoxy thickened with glass microspheres.
+
+6.7 Deck Runners
+----------------
+The deck underside has been reinforced on the port and starboard side by wooden beams approximately **??**" x **??**" and **??**" long. These are affixed to the underside of the deck with thickened epoxy and bolts driven from the deck downwards. These runners provide added strength to the solar panel mounting points and hatch cover cleats.
 
 7 Miscellaneous
 ===============
