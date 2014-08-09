@@ -125,7 +125,7 @@ uint16_t currentlyActiveMissionItem;
 
 
 /*****************************************************************************/
-/* Main
+/* Main                                                                      */
 /*****************************************************************************/
 int main(int argc, char* argv[]) {
     struct timeval nextHeartbeatTx;
@@ -1411,4 +1411,3 @@ struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double i
         return slidingDeadline;
     }
 }
-
