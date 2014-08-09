@@ -3,7 +3,7 @@
 * @brief Hackerboat Mavlink Control
 * @author Jeremy Ruhland jeremy ( a t ) goopypanther.org
 * @author Bryan Godbolt godbolt ( a t ) ualberta.ca
-* @author Wim Lewis wiml ( a t ) omnigroup.com
+* @author Wim Lewis wiml ( a t ) hhhh.org
 * @date 2014
 *
 * GNU General Public License blah blah blah
