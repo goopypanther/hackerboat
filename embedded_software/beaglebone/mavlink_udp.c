@@ -3,7 +3,7 @@
 * @brief Hackerboat Mavlink Control
 * @author Jeremy Ruhland jeremy ( a t ) goopypanther.org
 * @author Bryan Godbolt godbolt ( a t ) ualberta.ca
-* @author Wim Lewis wiml ( a t ) omnigroup.com
+* @author Wim Lewis wiml ( a t ) hhhh.org
 * @date 2014
 *
 * GNU General Public License blah blah blah
@@ -16,7 +16,7 @@
 #include <err.h>
 
 /*****************************************************************************/
-/* System defines
+/* System defines                                                            */
 /*****************************************************************************/
 #define BUFFER_LENGTH 2041 // minimum buffer size that can be used with qnx (I don't know why)
 
@@ -39,7 +39,7 @@
 
 
 /*****************************************************************************/
-/* Function prototypes
+/* Function prototypes                                                       */
 /*****************************************************************************/
 uint64_t microsSinceEpoch(void);
 void parseInputParams(int argc, char* argv[]);
@@ -74,7 +74,7 @@ int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *t
 struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan);
 
 /*****************************************************************************/
-/* Global vars
+/* Global vars                                                               */
 /*****************************************************************************/
 
 // Param buffers
@@ -124,7 +124,7 @@ uint16_t currentlyActiveMissionItem;
 
 
 /*****************************************************************************/
-/* Main
+/* Main                                                                      */
 /*****************************************************************************/
 int main(int argc, char* argv[]) {
     struct timeval nextHeartbeatTx;
@@ -1208,8 +1208,11 @@ int fromHex2(char hh, char ll)
 /* Timeval utilities                                                         */
 /*****************************************************************************/
 
-// Compares two timevals.
-// Returna 1 if a>b, -1 if a<b, and 0 if a==b.
+/**
+ * Compares two timevals.
+ *
+ * @return  1 if a>b, -1 if a<b, and 0 if a==b.
+ */
 int timeval_cmp(struct timeval a, struct timeval b)
 {
     if (a.tv_sec > b.tv_sec) {
@@ -1232,13 +1235,20 @@ void timeval_min(struct timeval *tv, struct timeval b)
     } else {}
 }
 
-// Compare deadline against now. If it's in the past, return 1.
-// If it's in the future, adjust *timeout to be no longer than the
-// time from now until deadline.
-//
-// The deadline value has two special cases:
-//    {0,-1}   -->   unset. This deadline is never reached.
-//    {0,-2}   -->   immediate. This deadline has always passed.
+/**
+ * Compare deadline against now. If it's in the past, return 1.
+ * If it's in the future, adjust *timeout to be no longer than the
+ * time from now until deadline.
+ *
+ * The deadline value has two special cases:
+ *    {0,-1}   -->   unset. This deadline is never reached.
+ *    {0,-2}   -->   immediate. This deadline has always passed.
+ *
+ * @param now       The current time
+ * @param deadline  A deadline to compare against now
+ * @param timeout   (in/out) A timeval which is adjusted to no longer than the time until deadline
+ * @return   1 if the deadline has passed; 0 otherwise
+ */
 int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *timeout) {
     if (deadline.tv_sec == 0 && deadline.tv_usec < 0) {
         if (deadline.tv_usec == -1) {
@@ -1280,8 +1290,10 @@ int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *t
     }
 }
 
-// Adds "increment" seconds to a timeval.
-// If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+/**
+ * Adds "increment" seconds to a timeval.
+ * If the timeval is TV_DEADLINE_IMMEDIATE or TV_DEADLINE_UNSET, it is passed through unchanged.
+ */
 struct timeval timevalAddf(struct timeval tv, double increment) {
     double isec;
 
@@ -1300,12 +1312,20 @@ struct timeval timevalAddf(struct timeval tv, double increment) {
     return tv;
 }
 
-// Increment deadline by increment seconds. Additionally, if the
-// resulting deadline is less than noLessThan seconds from tv, extend
-// it even further so that it is.
-//
-// If the deadline is either of the special cases that checkDeadline()
-// handles, pretend that it was equal to tv.
+/**
+ * Increment deadline by increment seconds. Additionally, if the
+ * resulting deadline is less than noLessThan seconds from tv, extend
+ * it even further so that it is.
+ *
+ * If the deadline is either of the special cases that checkDeadline()
+ * handles, pretend that it was equal to tv.
+ *
+ * @param deadline   The timeval to increment
+ * @param tv         The timeval from which noLessThan is an offset
+ * @param increment  The number of seconds to add to the deadline
+ * @param noLessThan The minimum number of seconds after tv which the new deadline can be
+ * @return   The new deadline
+ */
 struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan) {
     struct timeval slidingDeadline;
 
@@ -1326,3 +1346,4 @@ struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double i
     }
 }
 
+/* EOF */
