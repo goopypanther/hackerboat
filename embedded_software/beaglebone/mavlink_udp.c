@@ -7,6 +7,7 @@
 * @date 2014
 *
 * GNU General Public License blah blah blah
+*
 * This program sends some data to qgroundcontrol using the mavlink protocol.
 *
 */
@@ -986,6 +987,12 @@ void getUartDebug(void) {
     fprintf(logFile, "\nArduino message", uartBuf);
 }
 
+/** Processes incoming data from gps uart interface
+*
+* Incoming data is placed into a buffer and complete strings are sent to
+* parser \c processGpsMessage. Excess data in buffer is saved for next time
+* through the function.
+*/
 void readGpsMessages(void) {
     int amountLeft = GPS_BUFFER_SIZE - gpsBufferUsed;
     int ix, lastLineStart;
@@ -1025,6 +1032,14 @@ void readGpsMessages(void) {
     }
 }
 
+/** Processes NMEA messages to determine type
+*
+* Checks char string starting at \c m and verifies checksum. Message is broken
+* into fields and dispatched to proper parser for message type.
+*
+* @param m char string of NMEA message to be processed
+* @param msglen length of char string
+*/
 void processGpsMessage(char *m, int msglen) {
     char *asterisk, *cursor;
 #define MAX_NMEA_FIELDS 25
@@ -1083,27 +1098,36 @@ void processGpsMessage(char *m, int msglen) {
     }
 }
 
+/** Parse GPRMC NMEA messages to extract readable data
+*
+* Lat/lon fields are converted into floats and stored in position variable.
+*
+* Fields of the GPRMC sentence:
+*
+* \code
+*
+* $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+*
+* Field | Use
+* ------|-------------------------------------
+* 0     | "GPRMC"
+* 1     | HHMMSS  Fix taken at time (UTC)
+* 2     | Status A=active or V=Void
+* 3,4   | Latitude (decimal degrees, E or W)
+* 5,6   | Longitude (deimal degrees, N or S)
+* 7     | Speed over the ground in knots
+* 8     | Track angle in degrees True
+* 9     | DDMMYY  Date of fix
+* 10,11 | Magnetic variation (degrees, E or W)
+*
+* \endcode
+*
+* @param fields Pointer to char pointer containing GPRMC message
+* @param fieldCount number of fields in message
+*/
 void processGPRMC(const char **fields, int fieldCount) {
     double lat, lon, groundspeed;
     
-    /* Fields of the GPRMC sentence:
-       
-       $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
-       
-       Field   Use
-       ------- -----------------------------------------
-       0       "GPRMC"
-       1       HHMMSS  Fix taken at time (UTC)
-       2       Status A=active or V=Void
-       3,4     Latitude (decimal degrees, E or W)
-       5,6     Longitude (deimal degrees, N or S)
-       7       Speed over the ground in knots
-       8       Track angle in degrees True
-       9       DDMMYY  Date of fix
-       10,11   Magnetic variation (degrees, E or W)
-       
-    */
-
     if (fieldCount < 9 || !*(fields[3]) || !*(fields[5])) {
         /* Missing or empty fields */
         return;
@@ -1167,6 +1191,15 @@ float stringToFloat(position_string_t pos) { // char* s
 	return decimal_part;
 }
 
+/** Reads char from file device
+*
+* Reads char from device, if no chars available, returns 0
+*
+* @param f file device to read from
+* @param buf buffer to place chars into
+* @param buflen max length of buffer
+* @return number of chars written to buf
+*/
 int readFromDevice(int f, char buf[], int buflen) {
     int cread; 
     cread = 0;
@@ -1180,6 +1213,14 @@ int readFromDevice(int f, char buf[], int buflen) {
     }
 }
 
+/** Convert ascii hex char into binary hex value
+*
+* Converts ascii value 0-9, a/A-f/F to binary equivalent.
+* If ascii char is not representative of a hex value, function returns -1.
+*
+* @param c ASCII hex char
+* @return binary value represented by ascii hex char
+*/
 static short fromHexCh(char c)
 {
     if (c >= '0' && c <= '9') {
@@ -1193,6 +1234,16 @@ static short fromHexCh(char c)
     }
 }
 
+/** Converts two ascii hex chars into binary equivalent
+*
+* Converts ascii chars 00-ff/FF to binary equivalent by passing two chars
+* individually as arguments into function.
+* If ascii chars are not representative of a hex value, function returns -1.
+*
+* @param hh High ascii nibble of hex value
+* @param ll Low ascii nibble of hex value
+* @return binary value represented by ascii hex chars
+*/
 int fromHex2(char hh, char ll)
 {
     short h = fromHexCh(hh);
@@ -1208,8 +1259,14 @@ int fromHex2(char hh, char ll)
 /* Timeval utilities                                                         */
 /*****************************************************************************/
 
-// Compares two timevals.
-// Returna 1 if a>b, -1 if a<b, and 0 if a==b.
+/** Compares two timevals.
+*
+* Returns 1 if a>b, -1 if a<b, and 0 if a==b.
+*
+* @param a first time
+* @param b second time
+* @return comparison result
+*/
 int timeval_cmp(struct timeval a, struct timeval b)
 {
     if (a.tv_sec > b.tv_sec) {
@@ -1225,6 +1282,13 @@ int timeval_cmp(struct timeval a, struct timeval b)
     }
 }
 
+/** Sets timeval tv to timeval b if tv exceeds b
+* 
+* If tv > b then set tv to b
+*
+* @param tv timeval to be overwritten if it exceeds b
+* @param b timeval to check against
+*/
 void timeval_min(struct timeval *tv, struct timeval b)
 {
     if (timeval_cmp(*tv, b) > 0) {
@@ -1232,13 +1296,21 @@ void timeval_min(struct timeval *tv, struct timeval b)
     } else {}
 }
 
-// Compare deadline against now. If it's in the past, return 1.
-// If it's in the future, adjust *timeout to be no longer than the
-// time from now until deadline.
-//
-// The deadline value has two special cases:
-//    {0,-1}   -->   unset. This deadline is never reached.
-//    {0,-2}   -->   immediate. This deadline has always passed.
+/** Compare deadline against now.
+*
+* If deadline is in the past, return 1.
+* If it's in the future, adjust *timeout to be no longer than the
+* time from now until deadline.
+*
+* The deadline value has two special cases:
+* - {0,-1}   -->   unset. This deadline is never reached.
+* - {0,-2}   -->   immediate. This deadline has always passed.
+*
+* @param now current time
+* @param deadline anticipated deadline
+* @param timeout time until deadline passes
+* @return temporal relation to deadline
+*/
 int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *timeout) {
     if (deadline.tv_sec == 0 && deadline.tv_usec < 0) {
         if (deadline.tv_usec == -1) {
@@ -1280,8 +1352,14 @@ int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *t
     }
 }
 
-// Adds "increment" seconds to a timeval.
-// If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+/** Adds "increment" seconds to a timeval.
+*
+* If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+*
+* @param tv timeval to increment
+* @param increment amount of seconds to increment tv by
+* @return new incremented timeval
+*/
 struct timeval timevalAddf(struct timeval tv, double increment) {
     double isec;
 
@@ -1300,12 +1378,20 @@ struct timeval timevalAddf(struct timeval tv, double increment) {
     return tv;
 }
 
-// Increment deadline by increment seconds. Additionally, if the
-// resulting deadline is less than noLessThan seconds from tv, extend
-// it even further so that it is.
-//
-// If the deadline is either of the special cases that checkDeadline()
-// handles, pretend that it was equal to tv.
+/** Increment deadline by increment seconds.
+*
+* Additionally, if the resulting deadline is less than noLessThan seconds
+* from tv, extend it even further so that it is.
+*
+* If the deadline is either of the special cases that checkDeadline()
+* handles, pretend that it was equal to tv.
+*
+* @param deadline anticipated deadline
+* @param tv current time
+* @param increment number of seconds to increment deadline by
+* @param noLessThan minimum accepted time until deadline passes
+* @return new incremented deadline
+*/
 struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan) {
     struct timeval slidingDeadline;
 
