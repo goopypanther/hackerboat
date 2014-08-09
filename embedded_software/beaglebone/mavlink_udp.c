@@ -1,14 +1,17 @@
 /*****************************************************************************/
-/* Hackerboat Mavlink Control
-/*
-/* Jeremy Ruhland jeremy ( a t ) goopypanther.org
-/* Bryan Godbolt godbolt ( a t ) ualberta.ca
-/*
-/* GNU General Public License blah blah blah
-/*
-/* This program sends some data to qgroundcontrol using the mavlink protocol.
-/*
+/** @file mavlink_udp.c
+* @brief Hackerboat Mavlink Control
+* @author Jeremy Ruhland jeremy ( a t ) goopypanther.org
+* @author Bryan Godbolt godbolt ( a t ) ualberta.ca
+* @author Wim Lewis wiml ( a t ) omnigroup.com
+* @date 2014
+*
+* GNU General Public License blah blah blah
+* This program sends some data to qgroundcontrol using the mavlink protocol.
+*
+*/
 /*****************************************************************************/
+
 #include "includes.h"
 #include <err.h>
 
@@ -226,6 +229,19 @@ int main(int argc, char* argv[]) {
     }
 }
 
+/** Once per second tasks
+*
+* Sends specific mavlink packets once per second:
+*
+* - Heartbeat
+* - Status
+* - GPS position
+* - Current target waypoint
+* - Attitude control
+*
+* Transmissions are sent to stdout, logged to file and sent over network
+* interface.
+*/
 void oncePerSecond(void) {
     currentTime = time(0);
     printf("\n%s", ctime(&currentTime));
@@ -341,6 +357,11 @@ void oncePerSecond(void) {
     // Update compass
 }
 
+/** Send in emergency to head back to shore
+*
+* When triggered, linkInactivityPanic will set goodToGo false and command low
+* level control to head east.
+*/
 void linkInactivityPanic(void) {
     goodToGo = 0;
     
@@ -364,6 +385,11 @@ void linkInactivityPanic(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Parses incoming mavlink packets from UDP interface
+*
+* When packet is receive successfully function calls parsePacket. Each received
+* packet is also retransmitted on the UART interface to low level control.
+*/
 void processMavlinkActivity(void) {
     uint8_t buf[BUFFER_LENGTH];
     ssize_t recsize;
@@ -397,6 +423,10 @@ void processMavlinkActivity(void) {
     } else {}
 }
 
+/** Returns number of microseconds since epoch
+*
+* @return Number of microseconds since epoch.
+*/
 uint64_t microsSinceEpoch(void) {
 
     struct timeval tv;
@@ -409,6 +439,22 @@ uint64_t microsSinceEpoch(void) {
     return micros;
 }
 
+/** Parses program input parameters
+*
+* An argument count of five is expected:
+*
+* - 0. Always program name
+* - 1. Target ipv4 of ground control station
+* - 2. tty of gps device
+* - 3. tty of low level control device
+* - 4. tty of debug interface
+*
+* If incorrect number of params are passed, program will display help msg and
+* exit.
+*
+* @param argc Argument count
+* @param argv Char array of arguments entered
+*/
 void parseInputParams(int argc, char* argv[]) {
     strcpy(target_ip, "127.0.0.1"); // Set default ip
     if (argc == 5) {
@@ -427,6 +473,9 @@ void parseInputParams(int argc, char* argv[]) {
     }
 }
 
+/** Opens UDP network socket
+*
+*/
 void openNetworkSocket(void) {
     int rc;
     struct sockaddr_in locAddr;
@@ -463,6 +512,11 @@ void openNetworkSocket(void) {
     gcAddr.sin_port = htons(14550);
 }
 
+/** Sends a mavlink packet over the network interface
+*
+* Function assumes global buffer \c msg has been packed with message content.
+* \c msg is not modified by this function.
+*/
 void sendMavlinkPacketOverNetwork(void) {
     uint8_t buf[BUFFER_LENGTH];
     int bytes_sent;
@@ -480,6 +534,12 @@ void sendMavlinkPacketOverNetwork(void) {
                         sizeof(struct sockaddr_in));  // Address length
 }
 
+/** Parses received mavlink packet calls appropriate function
+*
+* Add new packet types we need to respond to in this switch statement.
+* Received functions are logged to stdout and file.
+* Heartbeat packets cause time of day to be updated to prevent watchdog panic.
+*/
 void parsePacket(void) {
     //printf("\nWe got a packet!\n");
     switch (msg.msgid) { // Decide what to do with packet
@@ -540,6 +600,10 @@ void parsePacket(void) {
     }
 }
 
+/** Tells qgroundcontrol that we have no internal parameters
+*
+* Packet is transmitted and logged to stdout and file.
+*/
 void listParams(void) {
     mavlink_msg_param_value_pack(SYSTEM_ID,                  // System ID
                                  MAV_COMP_ID_SYSTEM_CONTROL, // Component
@@ -557,10 +621,17 @@ void listParams(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d params list", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Sets currentMavMode to mode commanded by received mavlink packet
+*
+*/
 void setMode(void) {
     currentMavMode = mavlink_msg_set_mode_get_base_mode(&msg);
 }
 
+/** Responds to request for number of mission items
+*
+* Packet is transmitted and logged to stdout and file.
+*/
 void sendNumMissionItems(void) {
     mavlink_msg_mission_count_pack(SYSTEM_ID,                  // System ID
                                    MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
@@ -576,6 +647,12 @@ void sendNumMissionItems(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item count %d", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid, numMissionItems);
 }
 
+/** Responds to request for specific mission item
+*
+* Packet is transmitted and logged to stdout and file.
+* If requested mission item exceeds range of stored mission items, function
+* responds with out of memory error.
+*/
 void sendMissionItem(void) {
     currentlyInterogatedMissionItem = mavlink_msg_mission_request_get_seq(&msg);
 
@@ -604,6 +681,11 @@ void sendMissionItem(void) {
     }
 }
 
+/** Prepares to receive mission items from qgroundcontrol
+*
+* We learn how many mission items to expect from qgroundcontrol and request
+* the first one. Packet is transmitted and logged to stdout and file.
+*/
 void receiveMissionCount(void) {
     currentlyInterogatedMissionItem = 0;
     numMissionItems = mavlink_msg_mission_count_get_count(&msg);
@@ -622,6 +704,13 @@ void receiveMissionCount(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d request mission item %d", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid, currentlyInterogatedMissionItem);
 }
 
+/** qgroundcontrol sends us a mission item to store
+*
+* If we receive a mission we requested we store it. If this is the final
+* mission item we need we send an ack packet. If received packet exceeds number
+* of packets we were requesting, we send a \c MAV_MISSION_NO_SPACE error.
+* All packet transmissions are logged to stdout and file.
+*/
 void receiveMissionItem(void) {
     currentlyInterogatedMissionItem = mavlink_msg_mission_item_get_seq(&msg);
 
@@ -672,6 +761,11 @@ void receiveMissionItem(void) {
     }
 }
 
+/** Erases all stored mission items
+*
+* Sets currently stored number of mission items to 0 and sends ack packet.
+* Packet transmission is logged to stdout and file.
+*/
 void clearAllMissionItems(void) {
     numMissionItems = 0;
 
@@ -689,6 +783,12 @@ void clearAllMissionItems(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Parses system commands send by qgroundcontrol
+*
+* Pressing the start/stop buttons in qgroundcontrol will send command packets.
+* These allow mission start/stop, return, etc. to be controlled.
+* Add new commands we must respond to into this switch statement.
+*/
 void parseCommand(void) {
     mavlink_msg_command_long_decode(&msg, &currentCommand);
 
@@ -713,6 +813,14 @@ void parseCommand(void) {
     } else {}
 }
 
+/** Behavior upon reaching target waypoint vicinity
+*
+* Waypoints include commands to control the boat's next course of action.
+* If/else statements control if next target waypoint is the next in the
+* sequential waypoint list, or a waypoint id included with the achieved
+* waypoint. It is also possible for no waypoint to be designated, and the boat
+* will stop.
+*/
 void reachedTargetWaypoint(void) {
     if (missionItems[currentlyActiveMissionItem].command == MAV_CMD_DO_JUMP) {
         currentlyActiveMissionItem = missionItems[currentlyActiveMissionItem].param1;
@@ -743,6 +851,15 @@ void reachedTargetWaypoint(void) {
     } else {}
 }
 
+/** Finds current distance to target waypoint
+*
+* Calculates distance between current lat/lon and lat/lon of target waypoint
+* using haversine method.
+*
+* Based off http://www.movable-type.co.uk/scripts/latlong.html
+*
+* @return great circle distance in meters to next waypoint
+*/
 float getDistanceToWaypoint(void) {
     float a;
     float c;
@@ -764,6 +881,14 @@ float getDistanceToWaypoint(void) {
     return (d);
 }
 
+/** Finds bearing to current target waypoint
+*
+* Calculates bearing to target waypoint from current lat/lon
+*
+* Based off http://www.movable-type.co.uk/scripts/latlong.html
+*
+* @return bearing in degrees towards current target waypoint
+*/
 float getAngleToWaypoint(void) {
     float angle;
     float targetLat;
@@ -782,6 +907,9 @@ float getAngleToWaypoint(void) {
     return (angle);
 }
 
+/** Opens uart FDs
+*
+*/
 void openUarts(void) {
     int lowLevelControlFlags;
     int lowLevelDebugFlags;
@@ -807,6 +935,9 @@ void openUarts(void) {
     fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
 }
 
+/** Relays mavlink packet to low level control system
+*
+*/
 void sendPacketToLowLevel(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
     uint16_t buffer_used;
@@ -817,6 +948,11 @@ void sendPacketToLowLevel(void) {
     write(lowLevelControlFD, uartBuf, buffer_used);
 }
 
+/** Receives mavlink packets from low level control system
+*
+* Parses incoming packets from UART interface to low level control system.
+* If power system status packet is received, grab the current battery voltage.
+*/
 void readLowLevelVoltageLevel(void) {
     int incomingSize;
     int i;
@@ -839,6 +975,9 @@ void readLowLevelVoltageLevel(void) {
     } else {}
 }
 
+/** Grab messages from low level control system's uart debug interface and log
+*   to stdout and file.
+*/
 void getUartDebug(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
     memset(uartBuf, 0, sizeof(uartBuf));

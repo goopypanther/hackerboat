@@ -18,19 +18,22 @@
  or in the same folder as this source file */
 #include <mavlink.h>
 
+/** Position/velocity type
+*
+*/
 typedef struct {
-	float lat;
-	float lon;
-	int32_t alt;
-	int16_t vx;
-	int16_t vy;
-	int16_t vz;
-	uint16_t hdg;
-    uint8_t lock;
+	float lat; /**< Float value of latitude */
+	float lon; /**< Float value of longitude */
+	int32_t alt; /**< Altitude */
+	int16_t vx; /**< X velocity */
+	int16_t vy; /**< Y velocity */
+	int16_t vz; /**< Z velocity */
+	uint16_t hdg; /**< Compass heading */
+    uint8_t lock; /**< Gps lock achieved */
 } position_t;
 
 typedef struct {
     uint8_t *c;
     uint8_t len;
-    int8_t dir; 
+    int8_t dir;
 } position_string_t;
