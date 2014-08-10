@@ -193,22 +193,25 @@ Boatse 0.3: Solar panels are mounted as described below
 
 6.1 Initial Hull
 ----------------
+The initial craigslist kayak was approximately 16.5' long and 30" wide at its widest point with a depth of 9".
 
 6.2 Motor Mount
 ---------------
+The motor mount is formed from a 13.5" by 4" by 3/4" plywood board mounted upright with a V-cut along its longest dimension to match the curvature of the deck. This is fixed securely to the aft deck with thickened epoxy and fiberglass strips. A 13.5" x 3.5" x 1.5" wooden block is affixed to back of this board with thickened epoxy to form a leveled mounting surface. A small standoff board is attached to the port side to support the servo drive mechanism. The starboard side is used as a clamping surface for the drive motor.
+The center of the motor mount has four holes drilled into it along the direction of the keel for mounting the antenna mast.
 
 6.3 Bulkheads
 -------------
-There are two internal bulkheads approximately **??**" and **??**" from the bow and stern respectively. Both are made of plywood and are **??**" thick. The bulkheads fit around the keelson and port and starboard deck runners. There are ratholes on either side of the keelson where the bulkhead makes contact with the inner hull.
-Both bulkheads are affixed to the keelson, deck runners, inner hull and inner deck by fiberglass cloth strips running along the contacting surfaces on the side of each bulkhead facing inwards towards the hatch coamings.
+There are three internal bulkheads approximately **??**" and **??**" from the bow and stern respectively with a central bulkhead in the middle of the boat. All are made of plywood and are **??**" thick. The bulkheads fit around the keelson and port and starboard deck runners. There are ratholes on either side of the keelson where the central bulkhead makes contact with the inner hull.
+All bulkheads are affixed to the keelson, deck runners, inner hull and inner deck by fiberglass cloth strips running along the contacting surfaces on the side of each bulkhead facing inwards towards the hatch coamings and on both sides for the central bulkhead.
 
 6.4 Keelson
 -----------
-The keelson is made of a wooden plank running the length of the inner hull, approximately **??**" long, **??** wide and **??** thick. It is affixed to the inner hull with thickened epoxy and lag bolts driven from below the hull upwards as well as bolts passing through the external keel mounting brackets.
+The keelson is made of a wooden plank running the length of the inner hull, approximately **??**" long, 6"  wide and 1" thick. It is affixed to the inner hull with thickened epoxy and lag bolts driven from below the hull upwards as well as bolts passing through the external keel mounting brackets.
 
 6.5 Keel
 --------
-The keel is an epoxy coated board approximately **??**" by **??**" and **??**" thick with a length of PVC pipe mounted to its lower edge. This pipe is filled with **??** lbs of metal rebar. The keel is removable and is normally attached to the hull with **?? (number of bolts)** bolts passing through two aluminum L-brackets permanently mounted to the underside of the hull.
+The keel is an epoxy coated board approximately 22" long, 29" deep  and 3/4" thick with a length of PVC pipe mounted to its lower edge. This pipe is filled with **??** lbs of metal rebar. The keel is removable and is normally attached to the hull with 5 bolts passing through two aluminum L-brackets permanently mounted to the underside of the hull.
 
 6.6 Hatch Coamings
 ------------------
@@ -216,7 +219,7 @@ Original curved hatch coamings have been raised with cut foam to provide a flat 
 
 6.7 Deck Runners
 ----------------
-The deck underside has been reinforced on the port and starboard side by wooden beams approximately **??**" x **??**" and **??**" long. These are affixed to the underside of the deck with thickened epoxy and bolts driven from the deck downwards. These runners provide added strength to the solar panel mounting points and hatch cover cleats.
+The deck underside has been reinforced on the port and starboard side by wooden beams approximately 1.5" x 1.5" and **??**" long. These are affixed to the underside of the deck with thickened epoxy and bolts driven from the deck downwards. These runners provide added strength to the solar panel mounting points and hatch cover cleats.
 
 7 Miscellaneous
 ===============
