@@ -15,3 +15,6 @@ debug:
 
 clean:
 	rm $(APPNAME)
+
+doxy:
+	doxygen doxyfile

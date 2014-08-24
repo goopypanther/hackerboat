@@ -1,14 +1,18 @@
 /*****************************************************************************/
-/* Hackerboat Mavlink Control
-/*
-/* Jeremy Ruhland jeremy ( a t ) goopypanther.org
-/* Bryan Godbolt godbolt ( a t ) ualberta.ca
-/*
-/* GNU General Public License blah blah blah
-/*
-/* This program sends some data to qgroundcontrol using the mavlink protocol.
-/*
+/** @file mavlink_udp.c
+* @brief Hackerboat Mavlink Control
+* @author Jeremy Ruhland jeremy ( a t ) goopypanther.org
+* @author Bryan Godbolt godbolt ( a t ) ualberta.ca
+* @author Wim Lewis wiml ( a t ) hhhh.org
+* @date 2014
+*
+* GNU General Public License blah blah blah
+*
+* This program sends some data to qgroundcontrol using the mavlink protocol.
+*
+*/
 /*****************************************************************************/
+
 #include "includes.h"
 #include <err.h>
 
@@ -121,7 +125,7 @@ uint16_t currentlyActiveMissionItem;
 
 
 /*****************************************************************************/
-/* Main
+/* Main                                                                      */
 /*****************************************************************************/
 int main(int argc, char* argv[]) {
     struct timeval nextHeartbeatTx;
@@ -226,6 +230,19 @@ int main(int argc, char* argv[]) {
     }
 }
 
+/** Once per second tasks
+*
+* Sends specific mavlink packets once per second:
+*
+* - Heartbeat
+* - Status
+* - GPS position
+* - Current target waypoint
+* - Attitude control
+*
+* Transmissions are sent to stdout, logged to file and sent over network
+* interface.
+*/
 void oncePerSecond(void) {
     currentTime = time(0);
     printf("\n%s", ctime(&currentTime));
@@ -341,6 +358,11 @@ void oncePerSecond(void) {
     // Update compass
 }
 
+/** Send in emergency to head back to shore
+*
+* When triggered, linkInactivityPanic will set goodToGo false and command low
+* level control to head east.
+*/
 void linkInactivityPanic(void) {
     goodToGo = 0;
     
@@ -364,6 +386,11 @@ void linkInactivityPanic(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d failsafe to shore", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Parses incoming mavlink packets from UDP interface
+*
+* When packet is receive successfully function calls parsePacket. Each received
+* packet is also retransmitted on the UART interface to low level control.
+*/
 void processMavlinkActivity(void) {
     uint8_t buf[BUFFER_LENGTH];
     ssize_t recsize;
@@ -397,6 +424,10 @@ void processMavlinkActivity(void) {
     } else {}
 }
 
+/** Returns number of microseconds since epoch
+*
+* @return Number of microseconds since epoch.
+*/
 uint64_t microsSinceEpoch(void) {
 
     struct timeval tv;
@@ -409,6 +440,22 @@ uint64_t microsSinceEpoch(void) {
     return micros;
 }
 
+/** Parses program input parameters
+*
+* An argument count of five is expected:
+*
+* - 0. Always program name
+* - 1. Target ipv4 of ground control station
+* - 2. tty of gps device
+* - 3. tty of low level control device
+* - 4. tty of debug interface
+*
+* If incorrect number of params are passed, program will display help msg and
+* exit.
+*
+* @param argc Argument count
+* @param argv Char array of arguments entered
+*/
 void parseInputParams(int argc, char* argv[]) {
     strcpy(target_ip, "127.0.0.1"); // Set default ip
     if (argc == 5) {
@@ -427,6 +474,9 @@ void parseInputParams(int argc, char* argv[]) {
     }
 }
 
+/** Opens UDP network socket
+*
+*/
 void openNetworkSocket(void) {
     int rc;
     struct sockaddr_in locAddr;
@@ -463,6 +513,11 @@ void openNetworkSocket(void) {
     gcAddr.sin_port = htons(14550);
 }
 
+/** Sends a mavlink packet over the network interface
+*
+* Function assumes global buffer \c msg has been packed with message content.
+* \c msg is not modified by this function.
+*/
 void sendMavlinkPacketOverNetwork(void) {
     uint8_t buf[BUFFER_LENGTH];
     int bytes_sent;
@@ -480,6 +535,12 @@ void sendMavlinkPacketOverNetwork(void) {
                         sizeof(struct sockaddr_in));  // Address length
 }
 
+/** Parses received mavlink packet calls appropriate function
+*
+* Add new packet types we need to respond to in this switch statement.
+* Received functions are logged to stdout and file.
+* Heartbeat packets cause time of day to be updated to prevent watchdog panic.
+*/
 void parsePacket(void) {
     //printf("\nWe got a packet!\n");
     switch (msg.msgid) { // Decide what to do with packet
@@ -540,6 +601,10 @@ void parsePacket(void) {
     }
 }
 
+/** Tells qgroundcontrol that we have no internal parameters
+*
+* Packet is transmitted and logged to stdout and file.
+*/
 void listParams(void) {
     mavlink_msg_param_value_pack(SYSTEM_ID,                  // System ID
                                  MAV_COMP_ID_SYSTEM_CONTROL, // Component
@@ -557,10 +622,17 @@ void listParams(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d params list", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Sets currentMavMode to mode commanded by received mavlink packet
+*
+*/
 void setMode(void) {
     currentMavMode = mavlink_msg_set_mode_get_base_mode(&msg);
 }
 
+/** Responds to request for number of mission items
+*
+* Packet is transmitted and logged to stdout and file.
+*/
 void sendNumMissionItems(void) {
     mavlink_msg_mission_count_pack(SYSTEM_ID,                  // System ID
                                    MAV_COMP_ID_SYSTEM_CONTROL, // Component ID
@@ -576,6 +648,12 @@ void sendNumMissionItems(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item count %d", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid, numMissionItems);
 }
 
+/** Responds to request for specific mission item
+*
+* Packet is transmitted and logged to stdout and file.
+* If requested mission item exceeds range of stored mission items, function
+* responds with out of memory error.
+*/
 void sendMissionItem(void) {
     currentlyInterogatedMissionItem = mavlink_msg_mission_request_get_seq(&msg);
 
@@ -604,6 +682,11 @@ void sendMissionItem(void) {
     }
 }
 
+/** Prepares to receive mission items from qgroundcontrol
+*
+* We learn how many mission items to expect from qgroundcontrol and request
+* the first one. Packet is transmitted and logged to stdout and file.
+*/
 void receiveMissionCount(void) {
     currentlyInterogatedMissionItem = 0;
     numMissionItems = mavlink_msg_mission_count_get_count(&msg);
@@ -622,6 +705,13 @@ void receiveMissionCount(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d request mission item %d", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid, currentlyInterogatedMissionItem);
 }
 
+/** qgroundcontrol sends us a mission item to store
+*
+* If we receive a mission we requested we store it. If this is the final
+* mission item we need we send an ack packet. If received packet exceeds number
+* of packets we were requesting, we send a \c MAV_MISSION_NO_SPACE error.
+* All packet transmissions are logged to stdout and file.
+*/
 void receiveMissionItem(void) {
     currentlyInterogatedMissionItem = mavlink_msg_mission_item_get_seq(&msg);
 
@@ -672,6 +762,11 @@ void receiveMissionItem(void) {
     }
 }
 
+/** Erases all stored mission items
+*
+* Sets currently stored number of mission items to 0 and sends ack packet.
+* Packet transmission is logged to stdout and file.
+*/
 void clearAllMissionItems(void) {
     numMissionItems = 0;
 
@@ -689,6 +784,12 @@ void clearAllMissionItems(void) {
     fprintf(logFile, "\nTransmitted packet: SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d mission item list ack", msg.seq, msg.sysid, msg.compid, msg.len, msg.msgid);
 }
 
+/** Parses system commands send by qgroundcontrol
+*
+* Pressing the start/stop buttons in qgroundcontrol will send command packets.
+* These allow mission start/stop, return, etc. to be controlled.
+* Add new commands we must respond to into this switch statement.
+*/
 void parseCommand(void) {
     mavlink_msg_command_long_decode(&msg, &currentCommand);
 
@@ -713,6 +814,14 @@ void parseCommand(void) {
     } else {}
 }
 
+/** Behavior upon reaching target waypoint vicinity
+*
+* Waypoints include commands to control the boat's next course of action.
+* If/else statements control if next target waypoint is the next in the
+* sequential waypoint list, or a waypoint id included with the achieved
+* waypoint. It is also possible for no waypoint to be designated, and the boat
+* will stop.
+*/
 void reachedTargetWaypoint(void) {
     if (missionItems[currentlyActiveMissionItem].command == MAV_CMD_DO_JUMP) {
         currentlyActiveMissionItem = missionItems[currentlyActiveMissionItem].param1;
@@ -743,6 +852,15 @@ void reachedTargetWaypoint(void) {
     } else {}
 }
 
+/** Finds current distance to target waypoint
+*
+* Calculates distance between current lat/lon and lat/lon of target waypoint
+* using haversine method.
+*
+* Based off http://www.movable-type.co.uk/scripts/latlong.html
+*
+* @return great circle distance in meters to next waypoint
+*/
 float getDistanceToWaypoint(void) {
     float a;
     float c;
@@ -764,6 +882,14 @@ float getDistanceToWaypoint(void) {
     return (d);
 }
 
+/** Finds bearing to current target waypoint
+*
+* Calculates bearing to target waypoint from current lat/lon
+*
+* Based off http://www.movable-type.co.uk/scripts/latlong.html
+*
+* @return bearing in degrees towards current target waypoint
+*/
 float getAngleToWaypoint(void) {
     float angle;
     float targetLat;
@@ -782,6 +908,9 @@ float getAngleToWaypoint(void) {
     return (angle);
 }
 
+/** Opens uart FDs
+*
+*/
 void openUarts(void) {
     int lowLevelControlFlags;
     int lowLevelDebugFlags;
@@ -807,6 +936,9 @@ void openUarts(void) {
     fcntl(gpsModuleFD, gpsModuleFlags | O_NONBLOCK);
 }
 
+/** Relays mavlink packet to low level control system
+*
+*/
 void sendPacketToLowLevel(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
     uint16_t buffer_used;
@@ -817,6 +949,11 @@ void sendPacketToLowLevel(void) {
     write(lowLevelControlFD, uartBuf, buffer_used);
 }
 
+/** Receives mavlink packets from low level control system
+*
+* Parses incoming packets from UART interface to low level control system.
+* If power system status packet is received, grab the current battery voltage.
+*/
 void readLowLevelVoltageLevel(void) {
     int incomingSize;
     int i;
@@ -839,6 +976,9 @@ void readLowLevelVoltageLevel(void) {
     } else {}
 }
 
+/** Grab messages from low level control system's uart debug interface and log
+*   to stdout and file.
+*/
 void getUartDebug(void) {
     uint8_t uartBuf[BUFFER_LENGTH];
     memset(uartBuf, 0, sizeof(uartBuf));
@@ -847,6 +987,12 @@ void getUartDebug(void) {
     fprintf(logFile, "\nArduino message", uartBuf);
 }
 
+/** Processes incoming data from gps uart interface
+*
+* Incoming data is placed into a buffer and complete strings are sent to
+* parser \c processGpsMessage. Excess data in buffer is saved for next time
+* through the function.
+*/
 void readGpsMessages(void) {
     int amountLeft = GPS_BUFFER_SIZE - gpsBufferUsed;
     int ix, lastLineStart;
@@ -886,6 +1032,14 @@ void readGpsMessages(void) {
     }
 }
 
+/** Processes NMEA messages to determine type
+*
+* Checks char string starting at \c m and verifies checksum. Message is broken
+* into fields and dispatched to proper parser for message type.
+*
+* @param m char string of NMEA message to be processed
+* @param msglen length of char string
+*/
 void processGpsMessage(char *m, int msglen) {
     char *asterisk, *cursor;
 #define MAX_NMEA_FIELDS 25
@@ -944,27 +1098,36 @@ void processGpsMessage(char *m, int msglen) {
     }
 }
 
+/** Parse GPRMC NMEA messages to extract readable data
+*
+* Lat/lon fields are converted into floats and stored in position variable.
+*
+* Fields of the GPRMC sentence:
+*
+* \code
+*
+* $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+*
+* Field | Use
+* ------|-------------------------------------
+* 0     | "GPRMC"
+* 1     | HHMMSS  Fix taken at time (UTC)
+* 2     | Status A=active or V=Void
+* 3,4   | Latitude (decimal degrees, E or W)
+* 5,6   | Longitude (deimal degrees, N or S)
+* 7     | Speed over the ground in knots
+* 8     | Track angle in degrees True
+* 9     | DDMMYY  Date of fix
+* 10,11 | Magnetic variation (degrees, E or W)
+*
+* \endcode
+*
+* @param fields Pointer to char pointer containing GPRMC message
+* @param fieldCount number of fields in message
+*/
 void processGPRMC(const char **fields, int fieldCount) {
     double lat, lon, groundspeed;
     
-    /* Fields of the GPRMC sentence:
-       
-       $GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
-       
-       Field   Use
-       ------- -----------------------------------------
-       0       "GPRMC"
-       1       HHMMSS  Fix taken at time (UTC)
-       2       Status A=active or V=Void
-       3,4     Latitude (decimal degrees, E or W)
-       5,6     Longitude (deimal degrees, N or S)
-       7       Speed over the ground in knots
-       8       Track angle in degrees True
-       9       DDMMYY  Date of fix
-       10,11   Magnetic variation (degrees, E or W)
-       
-    */
-
     if (fieldCount < 9 || !*(fields[3]) || !*(fields[5])) {
         /* Missing or empty fields */
         return;
@@ -1028,6 +1191,15 @@ float stringToFloat(position_string_t pos) { // char* s
 	return decimal_part;
 }
 
+/** Reads char from file device
+*
+* Reads char from device, if no chars available, returns 0
+*
+* @param f file device to read from
+* @param buf buffer to place chars into
+* @param buflen max length of buffer
+* @return number of chars written to buf
+*/
 int readFromDevice(int f, char buf[], int buflen) {
     int cread; 
     cread = 0;
@@ -1041,6 +1213,14 @@ int readFromDevice(int f, char buf[], int buflen) {
     }
 }
 
+/** Convert ascii hex char into binary hex value
+*
+* Converts ascii value 0-9, a/A-f/F to binary equivalent.
+* If ascii char is not representative of a hex value, function returns -1.
+*
+* @param c ASCII hex char
+* @return binary value represented by ascii hex char
+*/
 static short fromHexCh(char c)
 {
     if (c >= '0' && c <= '9') {
@@ -1054,6 +1234,16 @@ static short fromHexCh(char c)
     }
 }
 
+/** Converts two ascii hex chars into binary equivalent
+*
+* Converts ascii chars 00-ff/FF to binary equivalent by passing two chars
+* individually as arguments into function.
+* If ascii chars are not representative of a hex value, function returns -1.
+*
+* @param hh High ascii nibble of hex value
+* @param ll Low ascii nibble of hex value
+* @return binary value represented by ascii hex chars
+*/
 int fromHex2(char hh, char ll)
 {
     short h = fromHexCh(hh);
@@ -1069,8 +1259,14 @@ int fromHex2(char hh, char ll)
 /* Timeval utilities                                                         */
 /*****************************************************************************/
 
-// Compares two timevals.
-// Returna 1 if a>b, -1 if a<b, and 0 if a==b.
+/** Compares two timevals.
+*
+* Returns 1 if a>b, -1 if a<b, and 0 if a==b.
+*
+* @param a first time
+* @param b second time
+* @return comparison result
+*/
 int timeval_cmp(struct timeval a, struct timeval b)
 {
     if (a.tv_sec > b.tv_sec) {
@@ -1086,6 +1282,13 @@ int timeval_cmp(struct timeval a, struct timeval b)
     }
 }
 
+/** Sets timeval tv to timeval b if tv exceeds b
+* 
+* If tv > b then set tv to b
+*
+* @param tv timeval to be overwritten if it exceeds b
+* @param b timeval to check against
+*/
 void timeval_min(struct timeval *tv, struct timeval b)
 {
     if (timeval_cmp(*tv, b) > 0) {
@@ -1093,13 +1296,21 @@ void timeval_min(struct timeval *tv, struct timeval b)
     } else {}
 }
 
-// Compare deadline against now. If it's in the past, return 1.
-// If it's in the future, adjust *timeout to be no longer than the
-// time from now until deadline.
-//
-// The deadline value has two special cases:
-//    {0,-1}   -->   unset. This deadline is never reached.
-//    {0,-2}   -->   immediate. This deadline has always passed.
+/** Compare deadline against now.
+*
+* If deadline is in the past, return 1.
+* If it's in the future, adjust *timeout to be no longer than the
+* time from now until deadline.
+*
+* The deadline value has two special cases:
+* - {0,-1}   -->   unset. This deadline is never reached.
+* - {0,-2}   -->   immediate. This deadline has always passed.
+*
+* @param now current time
+* @param deadline anticipated deadline
+* @param timeout time until deadline passes
+* @return temporal relation to deadline
+*/
 int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *timeout) {
     if (deadline.tv_sec == 0 && deadline.tv_usec < 0) {
         if (deadline.tv_usec == -1) {
@@ -1141,8 +1352,14 @@ int checkDeadline(struct timeval now, struct timeval deadline, struct timeval *t
     }
 }
 
-// Adds "increment" seconds to a timeval.
-// If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+/** Adds "increment" seconds to a timeval.
+*
+* If the timeval is TV_DEADLINE_{IMMEDIATE,UNSET} it is passed through unchanged.
+*
+* @param tv timeval to increment
+* @param increment amount of seconds to increment tv by
+* @return new incremented timeval
+*/
 struct timeval timevalAddf(struct timeval tv, double increment) {
     double isec;
 
@@ -1161,12 +1378,20 @@ struct timeval timevalAddf(struct timeval tv, double increment) {
     return tv;
 }
 
-// Increment deadline by increment seconds. Additionally, if the
-// resulting deadline is less than noLessThan seconds from tv, extend
-// it even further so that it is.
-//
-// If the deadline is either of the special cases that checkDeadline()
-// handles, pretend that it was equal to tv.
+/** Increment deadline by increment seconds.
+*
+* Additionally, if the resulting deadline is less than noLessThan seconds
+* from tv, extend it even further so that it is.
+*
+* If the deadline is either of the special cases that checkDeadline()
+* handles, pretend that it was equal to tv.
+*
+* @param deadline anticipated deadline
+* @param tv current time
+* @param increment number of seconds to increment deadline by
+* @param noLessThan minimum accepted time until deadline passes
+* @return new incremented deadline
+*/
 struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double increment, double noLessThan) {
     struct timeval slidingDeadline;
 
@@ -1186,4 +1411,3 @@ struct timeval nextDeadline(struct timeval deadline, struct timeval tv, double i
         return slidingDeadline;
     }
 }
-
