@@ -7,103 +7,122 @@
 #include <Adafruit_9DOF.h>
 #include "mavlink.h"
 
-#define FAULT_LOW_BAT          0x0001
-#define FAULT_SENSOR           0x0002
-#define FAULT_NO_SIGNAL        0x0004
-#define FAULT_BB_FAULT         0x0008
-#define FAULT_NVM              0x0010
+/** @file */
 
-const int32_t sensorTestPeriod =     5000;
-const int32_t signalTestPeriod =     60000;
-const int32_t startupTestPeriod =    65000;
-const double compassDeviationLimit = 10.0;
-const double tiltDeviationLimit =    15.0;
-const double rateDeviationLimit =    15.0;
-const double testVoltageLimit =      12.0;
-const double serviceVoltageLimit =   10.0;
+#define FAULT_LOW_BAT          0x0001			/**< Low battery fault bit 	*/
+#define FAULT_SENSOR           0x0002			/**< Sensor fault bit 		*/
+#define FAULT_NO_SIGNAL        0x0004			/**< No signal fault bit 	*/
+#define FAULT_BB_FAULT         0x0008			/**< Beaglebone fault bit 	*/
+#define FAULT_NVM              0x0010			/**< NVM fault bit 			*/
 
-const uint32_t enbButtonTime =       10000;
-const uint32_t stopButtonTime =      1000;
-const uint32_t disarmedPacketTimeout = 60000;
-const uint32_t armedPacketTimeout =  60000;
-const uint32_t activePacketTimeout = 300000;
+const int32_t sensorTestPeriod =     5000;		/**< Period to check for sensor deviations, in ms 				*/
+const int32_t signalTestPeriod =     60000;		/**< Period to wait for Beaglebone signal 						*/
+const int32_t startupTestPeriod =    65000;		/**< Period to stay in the self-test state 						*/
+const double compassDeviationLimit = 10.0;		/**< Limit of compass swing, in degrees, during test period 	*/
+const double tiltDeviationLimit =    15.0;		/**< Limit of tilt in degrees from horizontal during test		*/
+const double rateDeviationLimit =    15.0;		/**< Gyro rate limit, in degrees. Currently unused. 			*/
+const double testVoltageLimit =      12.0;		/**< Voltage limit during powerup test							*/
+const double serviceVoltageLimit =   10.0;		/**< Voltage limit is service									*/
 
-const uint8_t servoEnable =          2;
-const uint8_t steeringPin =          3;
-const uint8_t internalBatVolt =      A0;
-const double internalBatVoltMult =   1.0;
-const uint8_t relayDir =             52;
-const uint8_t relayDirFB =           53;
-const uint8_t relaySpeed1 =          51;
-const uint8_t relaySpeed1FB =        50;
-const uint8_t relaySpeed3 =          48;  
-const uint8_t relaySpeed3FB =        49;
-const uint8_t relaySpeed5 =          47;  
-const uint8_t relaySpeed5FB =        46;
-const uint16_t sendDelay =           1000;
-const uint32_t lightTimeout =        1490000;
-const uint32_t ctrlTimeout =         1500000;
-const uint16_t lowVoltCutoff =       750;
+const uint32_t enbButtonTime =       10000;		/**< Time the enable button needs to be pressed, in ms, to arm the boat		*/
+const uint32_t stopButtonTime =      1000;		/**< Time the stop button needs to be pressed, in ms, to disarm the boat	*/
+const uint32_t disarmedPacketTimeout = 60000;	/**< Connection timeout, in ms, in the disarmed state						*/
+const uint32_t armedPacketTimeout =  60000;		/**< Connection timeout, in ms, in the armed state							*/
+const uint32_t activePacketTimeout = 300000;	/**< Connection timeout, in ms, in the active state							*/
+
+const uint8_t servoEnable =          2;			/**< Enable pin for the steering servo power supply 	*/
+const uint8_t steeringPin =          3;			/**< Steering servo control pin							*/
+const uint8_t internalBatVolt =      A0;		/**< Internal battery voltage pin						*/
+const double internalBatVoltMult =   1.0;		/**< Internal battery voltage multiplier				*/
+const uint8_t relayDir =             52;		/**< Pin to control motor direction. LOW = forward, HIGH = reverse 		*/
+const uint8_t relayDirFB =           53;		/**< Motor direction relay wraparound pin			*/
+const uint8_t relaySpeedWht =        51;		/**< Motor relay white								*/
+const uint8_t relaySpeedWhtFB =      50;		/**< Motor relay white wraparound					*/
+const uint8_t relaySpeedYlw =        48;  		/**< Motor relay yellow								*/
+const uint8_t relaySpeedYlwFB =      49;		/**< Motor relay yellow wraparound					*/
+const uint8_t relaySpeedRed =        47;  		/**< Motor relay red								*/
+const uint8_t relaySpeedRedFB =      46;		/**< Motor relay red wraparound						*/
+const uint8_t relaySpeedRedWht = 	 44;		/**< Red-White motor crossover relay				*/
+const uint8_t relaySpeedRedWhtFB = 	 45;		/**< Red-White motor crossover relay wraparound		*/
+const uint8_t relaySpeedRedYlw = 	 43;		/**< Red-Yellow motor crossover relay				*/
+const uint8_t relaySpeedRedYlwFB = 	 42;		/**< Red-Yellow motor crossover relay wraparound	*/
+
+
+const uint16_t sendDelay =           250;		/**< Time in ms between packet transmissions 		*/
+//const uint32_t lightTimeout =        1490000;
+//const uint32_t ctrlTimeout =         1500000;
+//const uint16_t lowVoltCutoff =       750;
 //const uint8_t relayAux1 =      47;
 
-/*! \var typedef enum boatState
- *  \brief An enum to store the current state of the boat.
+/**
+ * @brief An enum to store the current state of the boat.
  */
 typedef enum boatState {
-  BOAT_POWERUP,
-  BOAT_ARMED,
-  BOAT_SELFTEST,
-  BOAT_DISARMED,
-  BOAT_ACTIVE,
-  BOAT_LOWBATTERY,
-  BOAT_FAULT,
-  BOAT_SELFRECOVERY
-} boatState;
+  BOAT_POWERUP, 		/**< The boat enters this state at the end of initialization */
+  BOAT_ARMED,			/**< In this state, the boat is ready to receive go commands over RF */
+  BOAT_SELFTEST,		/**< After powerup, the boat enters this state to determine whether it's fit to run */
+  BOAT_DISARMED,		/**< This is the default safe state. No external command can start the motor */
+  BOAT_ACTIVE,			/**< This is the normal steering state */
+  BOAT_LOWBATTERY,		/**< The battery voltage has fallen below that required to operate the motor */
+  BOAT_FAULT,			/**< The boat is faulted in some fashion */
+  BOAT_SELFRECOVERY		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
+} boatState;				
 
+/**
+ * @brief An enum to store the current throttle state.
+ */
 typedef enum throttleState {
-  FWD5,
-  FWD4,
-  FWD3,
-  FWD2,
-  FWD1,
-  STOP,
-  REV1,
-  REV2,
-  REV3
+  FWD5,		/**< Full forward speed. Red, white, and yellow all tied to V+, black tied to V- */
+  FWD4,		/**< Motor forward 4 */
+  FWD3,		/**< Motor forward 3 */
+  FWD2,		/**< Motor forward 2 */
+  FWD1,		/**< Motor forward 1 */
+  STOP,		/**< Motor off */
+  REV1,		/**< Motor reverse 1 */
+  REV2,		/**< Motor forward 2 */
+  REV3		/**< Full reverse speed */
 } throttleState;
 
+/**
+ * @brief External commands for state transitions, received from the Beaglebone
+ */
 typedef enum stateCmd {
-  CMD_NONE,
-  CMD_ARM,   
-  CMD_DISARM,
-  CMD_ACTIVE,
-  CMD_TEST,
-  CMD_FAULT        // If the Beaglebone declares a fault state, the 
+  CMD_NONE,		/**< No command 											*/
+  CMD_DISARM,	/**< Stop moving and return to disarmed state 				*/
+  CMD_ACTIVE,	/**< Go from armed to moving 								*/
+  CMD_TEST,		/**< Initiate self test (used to clear faults in service) 	*/
+  CMD_FAULT		/**< Beaglebone faulted 									*/        
 } stateCmd;
 
+/**
+ * @brief Structure to hold the boat's state data 
+ */
 typedef struct boatVector {
-  boatState state;
-  throttleState throttle;
-  sensors_vec_t orientation;
-  double headingTarget;
-  double internalVoltage;
-  double batteryVoltage;
-  uint8_t enbButton;
-  uint8_t stopButton;
-  long timeSinceLastPacket;
+  boatState state;				/**< The current state of the boat 										*/
+  throttleState throttle;		/**< The current throttle position 										*/
+  sensors_vec_t orientation;	/**< The current accelerometer tilt and magnetic heading of the boat 	*/
+  double headingTarget;			/**< The desired magnetic heading 										*/	
+  double internalVoltage;		/**< The battery voltage measured on the control PCB 					*/
+  double batteryVoltage;		/**< The battery voltage measured at the battery 						*/
+  uint8_t enbButton;			/**< State of the enable button. off = 0; on = 0xff 					*/
+  uint8_t stopButton;			/**< State of the emergency stop button. off = 0; on = 0xff 			*/
+  long timeSinceLastPacket;		/**< Number of milliseconds since the last command packet received 		*/
 } boatVector;
 
-Servo steeringServo;
-double currentError;
-double targetError = 0;
-double steeringCmd;
-PID steeringPID(&currentError, &steeringCmd, &targetError, 1, 0.01, 0, REVERSE); // changed in response to test results 2014Jul12-1750
-Adafruit_9DOF                dof   = Adafruit_9DOF();
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
-boatVector boat;
-const double emergencyHeading = 90;
-uint16_t faultString = 0;
+Servo steeringServo;		/**< Servo object corresponding to the steering servo 					*/
+double currentError;		/**< Current heading error. This is a global so the PID can be as well 	*/
+double targetError = 0;		/**< Desired heading error. This is a global so the PID can be as well 	*/
+double steeringCmd;			/**< Steering command to be written out to the servo. 					*/
+/**
+ * @brief PID loop object for driving the steering servo
+ */
+PID steeringPID(&currentError, &steeringCmd, &targetError, 1, 0.01, 0, REVERSE); 
+Adafruit_9DOF dof = 					Adafruit_9DOF(); 						/**< IMU object 							*/
+Adafruit_LSM303_Accel_Unified accel = 	Adafruit_LSM303_Accel_Unified(30301);	/**< Accelerometer object 					*/
+Adafruit_LSM303_Mag_Unified   mag   = 	Adafruit_LSM303_Mag_Unified(30302);		/**< Magnetometer object 					*/
+boatVector boat;																/**< Boat state vector 						*/
+const double emergencyHeading = 90;												/**< Emergency heading for self-recovery	*/
+uint16_t faultString = 0;														/**< Fault string -- binary string 			*/
 
 // function declarations
 double getHeadingError (double heading, double headingSet);
@@ -317,14 +336,15 @@ void loop (void) {
   
 }*/
 
-/*! \fn double getHeadingError (double heading, double headingSet)
- *  \brief generate heading error from current heading and desired heading
+/** 
+ *  @brief generate heading error from current heading and desired heading
  *
- *  \param heading
- *  \param headingSet
- *  \return
+ *  @param heading current magnetic heading
+ *  @param headingSet desired magnetic heading
+ *
+ *  @return heading error, adjusted for the fact that it's circular.
+ *
  */
- 
 double getHeadingError (double heading, double headingSet) {
   double result = headingSet - heading;
   
@@ -334,7 +354,17 @@ double getHeadingError (double heading, double headingSet) {
   return result;
 }
 
-
+/**
+ *  @brief Get all of the input sensor values
+ *
+ *	@param *thisBoat A pointer to the state of the boat, of type structure boatVector. Members of this struct are modified here
+ *	@param *batCurrent A pointer to a double allocated for the current flowing out of the battery
+ *	@param *motVoltage A pointer to a double allocated for the voltage at the motor speed control relay box
+ *  @param *motCurrent A pointer to a double allocated for the current flowing into the motor speed control relay box
+ *
+ *  @return An integer indicating success or failure. A zero is success; any other value is failure
+ *
+ */
 int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage, double * motCurrent) {
   sensors_event_t accel_event;
   sensors_event_t mag_event;
@@ -357,6 +387,15 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   return failCnt;
 }
 
+/**
+ * @brief Get all of the input sensor values
+ *
+ *	@param *thisBoat A pointer to the state of the boat, of type structure boatVector. Members of this struct are modified here
+ *  @param *cmd A pointer to an enum of type stateCmd, allocated for any incoming command. Should be initialized to CMD_NONE
+ *
+ *  @return the value of millis() at the receipt of the last valid packet
+ *
+ */
 long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   static mavlink_message_t msg;
   static mavlink_status_t stat;
@@ -366,14 +405,30 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   return 0;
 }
 
+/**
+ *  @brief Retrieve boat state, throttle command, and heading from NVM
+ *
+ *  @param state A pointer to an allocated instance of the boatState enum. This stores the last state written to NVM
+ *  @param throttle A pointer to an allocated instance of the throttleState enum. This stores the last throttle position written to NVM
+ *  @param heading A pointer to a double allocated for the last heading written to NVM
+ *
+ *  @return 0 if all is working, -1 if the NVM read fails for any reason
+ *
+ */
 int getNVM (boatState * state, throttleState * throttle, double * heading) {
   return 0;
 }
 
-/*! \fn int executeSelfTest (void)
- *  \brief Run internal self tests to confirm that the boat's systems are working correctly.
+/** 
+ *  @brief Run internal self tests to confirm that the boat's systems are working correctly.
+ *
+ *	@param *thisBoat A pointer to the state of the boat, of type structure boatVector. Members of this struct are modified here
+ *  @param lastState The state of the control system on the last tick
+ *  @param cmd Incoming command from the BeagleBone. No effect in this state.
+ *
+ *  @return the control system state on the next tick
+ *
  */
-
 boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd cmd) {
   static uint8_t faultCnt = 0;
   static double headingRef;
@@ -386,13 +441,13 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   throttleState myThrottle = STOP;
   stateCmd myCmd = CMD_NONE;
   double myHeading = 0.0;
-  double intVoltage;
-  double batVoltage;
+  //double intVoltage;
+  //double batVoltage;
   double batCurrent;
   double motVoltage;
   double motCurrent;
-  uint8_t enbButton;
-  uint8_t estopButton;
+  //uint8_t enbButton;
+  //uint8_t estopButton;
   
   // if we've just entered this state, reset all the counters
   if (lastState != BOAT_SELFTEST) {
