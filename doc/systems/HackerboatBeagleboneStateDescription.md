@@ -12,7 +12,7 @@ Power Up
 **System**          | **State**
 --------------------|----------
 Group				| Initialize
-Indicator Lights    | Solid Amber
+Indicator Lights    | Flashing Green
 
 This is the state the Beaglebone enters on power up. It transitions to Self-Test after peripheral initialization.
 
@@ -37,7 +37,7 @@ Disarmed
 **System**          | **State**
 --------------------|----------
 Group				| Safe
-Indicator Lights    | Flashing Blue
+Indicator Lights    | Solid Amber
 
 This is the wait state with the physical enable switch in the ‘off’ position. The enable switch state is sensed by the Arduino. 
 
@@ -73,7 +73,7 @@ Loss of Signal
 **System**          | **State**
 --------------------|----------
 Group				| Unsafe
-Indicator Lights    | Flashing Red
+Indicator Lights    | Flashing Red and White
 
 This is the state the Beaglebone enters if it loses network. If it was in Waypoint or Steering mode, it navigates to a pre-determined waypoint.
 
@@ -82,6 +82,6 @@ Fault
 **System**          | **State**
 --------------------|----------
 Group				| Safe
-Indicator Lights    | Solid Red
+Indicator Lights    | Flashing Red
 
 This is the state the Beaglebone enters if it fails self-test or loses either GPS or contact with the Arduino. 
