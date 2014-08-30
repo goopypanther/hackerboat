@@ -134,6 +134,13 @@ typedef enum MAV_CMD
 #include "./mavlink_msg_point_of_interest_connection.h"
 #include "./mavlink_msg_brief_feature.h"
 #include "./mavlink_msg_attitude_control.h"
+#include "./mavlink_msg_set_mode.h"
+#include "./mavlink_msg_command_ack.h"
+#include "./mavlink_msg_command_int.h"
+#include "./mavlink_msg_command_long.h"
+#include "./mavlink_msg_named_value_int.h"
+#include "./mavlink_msg_named_value_float.h"
+
 
 #ifdef __cplusplus
 }

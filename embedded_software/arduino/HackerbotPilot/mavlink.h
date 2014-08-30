@@ -23,5 +23,6 @@
 
 #include "version.h"
 #include "hackerboat.h"
+#include "mavlink_types.h"
 
 #endif // MAVLINK_H
