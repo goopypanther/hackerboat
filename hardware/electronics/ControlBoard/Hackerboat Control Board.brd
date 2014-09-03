@@ -4883,7 +4883,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="54.61" y1="82.55" x2="54.61" y2="60.325" width="0.254" layer="1"/>
 <wire x1="54.61" y1="60.325" x2="56.515" y2="58.42" width="0.254" layer="1"/>
 </signal>
-<signal name="N$1">
+<signal name="GNSS_RX">
 <contactref element="GPS" pad="RX"/>
 <contactref element="U$1" pad="59"/>
 <contactref element="U$5" pad="19"/>
@@ -4893,7 +4893,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="35.56" y1="49.53" x2="57.785" y2="49.53" width="0.254" layer="16"/>
 <wire x1="57.785" y1="49.53" x2="59.055" y2="48.26" width="0.254" layer="16"/>
 </signal>
-<signal name="N$2">
+<signal name="GNSS_TX">
 <contactref element="GPS" pad="TX"/>
 <contactref element="U$1" pad="57"/>
 <contactref element="U$5" pad="20"/>
@@ -7767,7 +7767,7 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="U$5" pad="21"/>
 <wire x1="59.055" y1="43.18" x2="63.373" y2="43.18" width="0.4064" layer="16"/>
 </signal>
-<signal name="N$67">
+<signal name="SYS_5V">
 <contactref element="GPS" pad="VIN"/>
 <contactref element="U$1" pad="53"/>
 <contactref element="U$5" pad="22"/>

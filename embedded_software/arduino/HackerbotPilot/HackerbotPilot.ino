@@ -64,7 +64,6 @@ const uint8_t boneLightsPin =			38;		/**< Beaglebone state indicator lights pin	
 const uint8_t enableButton =			37;		/**< Enable button input								*/	
 const uint8_t stopButton = 				36;		/**< Stop button input									*/
 
-
 // pin-associated constants
 const uint8_t boneLightCount =			8;		/**< The number of pixels in the BeagleBone light strip	*/	
 const uint8_t ardLightCount =			8;		/**< The number of pixels in the Arduino light strip	*/
@@ -334,7 +333,7 @@ double getHeadingError (double heading, double headingSet) {
 int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage, double * motCurrent) {
   sensors_event_t accel_event;
   sensors_event_t mag_event;
-  uint8_t failCnt = 0;\
+  uint8_t failCnt = 0;
   
   // get & process the IMU data
   accel.getEvent(&accel_event);

@@ -16623,7 +16623,7 @@ Source: http://eshop.phoenixcontact.com .. .pdf</description>
 <pinref part="U$5" gate="G$1" pin="15"/>
 </segment>
 </net>
-<net name="N$1" class="0">
+<net name="GNSS_RX" class="0">
 <segment>
 <pinref part="GPS" gate="G$1" pin="2"/>
 <pinref part="U$1" gate="G$1" pin="UART4_TXD"/>
@@ -16631,9 +16631,10 @@ Source: http://eshop.phoenixcontact.com .. .pdf</description>
 <pinref part="U$5" gate="G$1" pin="19"/>
 <wire x1="63.5" y1="106.68" x2="86.36" y2="106.68" width="0.1524" layer="91"/>
 <junction x="63.5" y="106.68"/>
+<label x="38.1" y="106.68" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$2" class="0">
+<net name="GNSS_TX" class="0">
 <segment>
 <pinref part="GPS" gate="G$1" pin="3"/>
 <pinref part="U$1" gate="G$1" pin="UART4_RXD"/>
@@ -16641,6 +16642,7 @@ Source: http://eshop.phoenixcontact.com .. .pdf</description>
 <pinref part="U$5" gate="G$1" pin="20"/>
 <wire x1="63.5" y1="109.22" x2="86.36" y2="109.22" width="0.1524" layer="91"/>
 <junction x="63.5" y="109.22"/>
+<label x="38.1" y="109.22" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="+5V/1" class="0">
@@ -17176,7 +17178,7 @@ Source: http://eshop.phoenixcontact.com .. .pdf</description>
 <pinref part="U$5" gate="G$1" pin="21"/>
 </segment>
 </net>
-<net name="N$67" class="0">
+<net name="SYS_5V" class="0">
 <segment>
 <pinref part="GPS" gate="G$1" pin="5"/>
 <pinref part="U$1" gate="G$1" pin="SYS_5V@1"/>
@@ -17184,6 +17186,7 @@ Source: http://eshop.phoenixcontact.com .. .pdf</description>
 <pinref part="U$5" gate="G$1" pin="22"/>
 <wire x1="30.48" y1="114.3" x2="63.5" y2="114.3" width="0.1524" layer="91"/>
 <junction x="63.5" y="114.3"/>
+<label x="38.1" y="114.3" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$71" class="0">
