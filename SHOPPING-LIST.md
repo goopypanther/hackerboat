@@ -5,3 +5,4 @@
 | 4 | Anderson Power Poles | | | | We probably have this |
 | 2 | Battery holders      | | | | No |
 | 40 kg | Rebar | Home Depot | | | No |
+| 1 | M8x0.5 jam nut, SS | Tacoma Screw | | | No | 
