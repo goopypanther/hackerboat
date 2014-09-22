@@ -18,18 +18,18 @@
 
 *  **Fabricate & install solid battery mounts** -- PN has identified commercial products that meet the requirement, but has not yet acquired them.
 * **Do weight and balance calculations** -- PN noted that since we verified that the boat floated flat and level without the batteries and keel, we can probably just get away with doing the keel plus batteries for now. 
-* **Finish keel and add ballast bulbs**
+* ~~**Finish keel and add ballast bulbs**~~ -- Alex assembled these. They just need to be filled with rebar. 
 * **Add keying to hatches** -- Partially complete thanks to Matt; epoxy is back
 
 ## Electrical
 
-* **Replace external wiring for motor with stranded wire** -- Old wiring has been removed. New wiring is on hand but needs to be installed.
+* **Replace external wiring for motor with stranded wire** -- Old wiring has been removed. New wiring is on hand and needs Andersons to finish. 
 * **Re-work antenna** -- Replacement cables on hand.
-* **Replace servo wiring** -- Old wiring has been removed. PN ordered a cable set with the wrong gender connector, so it needs to be replaced. 
+* **Replace servo wiring** -- Old wiring has been removed. Correct cable is on hand but needs to be installed. 
 * **Add cutoff & enable switches** -- 3ric has identified appropriate switches. Not acquired yet. 
 * **Add mode lights aft** -- Need to acquire lights & cable
 * ~~**Finalize assembly of control & relay boxes**~~ 
-* **Functional test of control & relay boxes** -- PN has written & checked in code; still need to run it.
+* **Functional test of control & relay boxes** -- PN has written & checked in test code; still need to run it.
 * **Improved control box mounting, esp wrt compass heading**
 
 ## Comms
