@@ -1,11 +1,11 @@
 Mark items with a 'Yes' in the purchased column when ordered and cross them out when they are in hand. 
 
-| Quantity | Item | Vendor | Link | Price | Purchased? |
-|----------|------|--------|------|-------|------------|
-| 1m | Waterproof RGB LED strip | Adafruit | http://www.adafruit.com/products/306 | $30 | Yes |
+| Quantity | Item | Vendor | Link | Price | Purchased? | Est Delivery? |
+|----------|------|--------|------|-------|------------|---------------|
+| 1m | Waterproof RGB LED strip | Adafruit | http://www.adafruit.com/products/306 | $30 | Yes | Tuesday 9/30 |
 | ~~2~~ | ~~IP68 On-(On) SPDT pushbutton~~ | ~~Mouser~~ | | ~~$5.50 ea~~ | ~~Yes~~ |
 | 4 | Anderson Power Poles | | | | We probably have this |
-| 2 | Battery holders      | eBay | | | Yes |
+| 2 | Battery holders      | eBay | | | Yes | Tuesday 9/30 |
 | 40 kg | Rebar | Home Depot | | | No |
 | 1 | M8x0.5 jam nut, SS | Tacoma Screw | | | No | 
 | 1 | Right angle USB cable | CDW | | | Yes |
