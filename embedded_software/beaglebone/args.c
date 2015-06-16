@@ -1,18 +1,22 @@
 /**
  * @file args.c
  * @brief Input argument parser
+ *
  * @author Jeremy Ruhland jeremy ( a t ) goopypanther.org
  * @author Bryan Godbolt godbolt ( a t ) ualberta.ca
  * @author Wim Lewis wiml ( a t ) hhhh.org
+ *
  * @license GPL 3.0 
  * @version 1.0
- * @since 6/14/2015
+ * @since Jun 15, 2015
  *
  * Parses and returns input arguments to the application.
  * Call parseInputParams() and then argsReturn functions will return pointers
  * to strings.
  */
- 
+
+#include "includes.h"
+
 #define STRING_BUFFER 100
 #define DEFAULT_LOG_FILE "./mavlink_udp.log"
 
@@ -23,6 +27,8 @@ static char low_level_serial_device[STRING_BUFFER];
 static char log_file[STRING_BUFFER];
 
 /**
+ * argsReturnTargetIp
+ *
  * @return string pointer of IP address of host
  */
 char *argsReturnTargetIp(void) {
@@ -30,6 +36,8 @@ char *argsReturnTargetIp(void) {
 }
 
 /**
+ * argsReturnGpsSerialDevice
+ *
  * @return string pointer of gps tty device
  */
 char *argsReturnGpsSerialDevice(void) {
@@ -37,6 +45,8 @@ char *argsReturnGpsSerialDevice(void) {
 }
 
 /**
+ * argsReturnLowLevelDebug
+ *
  * @return string pointer of debug tty device
  */
 char *argsReturnLowLevelDebug(void) {
@@ -44,6 +54,8 @@ char *argsReturnLowLevelDebug(void) {
 }
 
 /**
+ * argsReturnLowLevelSerial
+ *
  * @return string pointer of low level serial device
  */
 char *argsReturnLowLevelSerial(void) {
@@ -51,6 +63,8 @@ char *argsReturnLowLevelSerial(void) {
 }
 
 /**
+ * argsReturnLogFile
+ *
  * @return string pointer of log file
  */
 char *argsReturnLogFile(void) {
@@ -58,6 +72,8 @@ char *argsReturnLogFile(void) {
 }
 
 /**
+ * parseInputParams
+ *
  * Parses program input parameters
  *
  * An argument count of six is expected:
