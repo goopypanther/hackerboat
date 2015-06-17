@@ -14,12 +14,16 @@
  * Call logOpen() to open log file and log() to send data to stdout and logfile.
  */
 
-#include "includes.h"
+#include "log.h"
+#include <stdarg.h>
+#include <stdio.h>
+
+// Static variables
 
 static FILE *logFile;
 
 /**
- * logOpen
+ * Open log file
  *
  * @param logPath string pointer to log file
  */
@@ -28,8 +32,6 @@ void logOpen(const char *logPath) {
 }
 
 /**
- * logStdOut
- *
  * Prints data to standard out.
  *
  * @param data printf-compatible string & variables
@@ -43,8 +45,6 @@ void logStdOut(const char *data, ...) {
 }
 
 /**
- * log
- *
  * Prints data to standard out and log file.
  *
  * @param data printf-compatible string & variables
@@ -56,7 +56,7 @@ void log(const char *data, ...) {
     vprintf(data, dataList);
     va_end(dataList);
 
-    va_start(dataList);
+    va_start(dataList, data);
     vfprintf(logFile, data, dataList);
     va_end(dataList);
 }
