@@ -15,11 +15,16 @@
  * to strings.
  */
 
-#include "includes.h"
+#include "args.h"
+#include <string.h>
+#include <stdlib.h>
+
+// Defines
 
 #define STRING_BUFFER 100
 #define DEFAULT_LOG_FILE "./mavlink_udp.log"
 
+// Static variables
 static char target_ip[STRING_BUFFER];
 static char gps_serial_device[STRING_BUFFER];
 static char low_level_debug_device[STRING_BUFFER];
@@ -27,8 +32,6 @@ static char low_level_serial_device[STRING_BUFFER];
 static char log_file[STRING_BUFFER];
 
 /**
- * argsReturnTargetIp
- *
  * @return string pointer of IP address of host
  */
 char *argsReturnTargetIp(void) {
@@ -36,8 +39,6 @@ char *argsReturnTargetIp(void) {
 }
 
 /**
- * argsReturnGpsSerialDevice
- *
  * @return string pointer of gps tty device
  */
 char *argsReturnGpsSerialDevice(void) {
@@ -45,8 +46,6 @@ char *argsReturnGpsSerialDevice(void) {
 }
 
 /**
- * argsReturnLowLevelDebug
- *
  * @return string pointer of debug tty device
  */
 char *argsReturnLowLevelDebug(void) {
@@ -54,8 +53,6 @@ char *argsReturnLowLevelDebug(void) {
 }
 
 /**
- * argsReturnLowLevelSerial
- *
  * @return string pointer of low level serial device
  */
 char *argsReturnLowLevelSerial(void) {
@@ -63,8 +60,6 @@ char *argsReturnLowLevelSerial(void) {
 }
 
 /**
- * argsReturnLogFile
- *
  * @return string pointer of log file
  */
 char *argsReturnLogFile(void) {
@@ -72,8 +67,6 @@ char *argsReturnLogFile(void) {
 }
 
 /**
- * parseInputParams
- *
  * Parses program input parameters
  *
  * An argument count of six is expected:
@@ -102,10 +95,10 @@ void parseInputParams(int argc, char* argv[]) {
         
         // Make sure strings are still null terminated
         // (if buffer overrun occured)
-        target_ip[STRING_BUFFER - 1] = 0x00;
-        gps_serial_device[STRING_BUFFER - 1] = 0x00;
-        low_level_debug_device[STRING_BUFFER - 1] = 0x00;
-        low_level_serial_device[STRING_BUFFER - 1] = 0x00;
+        target_ip[STRING_BUFFER] = 0x00;
+        gps_serial_device[STRING_BUFFER] = 0x00;
+        low_level_debug_device[STRING_BUFFER] = 0x00;
+        low_level_serial_device[STRING_BUFFER] = 0x00;
 
         // If log file was supplied
         if (argc == 6) {
@@ -116,7 +109,7 @@ void parseInputParams(int argc, char* argv[]) {
             strncpy(log_file, DEFAULT_LOG_FILE, STRING_BUFFER);
         }
         
-        log_file[STRING_BUFFER - 1] = 0x00;
+        log_file[STRING_BUFFER] = 0x00;
         
     } else {
     // Print help message if improper number of arguments passed
@@ -124,7 +117,7 @@ void parseInputParams(int argc, char* argv[]) {
         printf("\tUsage:\n\n");
         printf("\t");
         printf("%s", argv[0]);
-        printf(" <host ip> <GPS serial device> <low level serial device>\n");
+        printf(" <host ip> <GPS serial device> <low level serial device> <optional path to log file>\n");
         exit(EXIT_FAILURE);
     }
 }
