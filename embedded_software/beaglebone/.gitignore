@@ -2,3 +2,4 @@
 .project
 .settings
 mavlink_udp
+doc/
