@@ -22,7 +22,6 @@
 // Defines
 #define LOCAL_PORT 14551
 #define HOST_PORT  14550
-#define RECEIVE_BUFFER_LENGTH 500
 
 // Function prototypes
 
@@ -31,7 +30,6 @@
 
 static int socket;
 static struct sockaddr_in hostAddress;
-static uint8_t receiveBuffer[RECEIVE_BUFFER_LENGTH];
 
 /**
  * Open UDP socket
@@ -102,6 +100,7 @@ void udpCloseSocket(void) {
  * @param dataLength Size of data byte array
  */
 void udpSend(const uint8_t *data, uint32_t dataLength) {
+	// Send buffer over UDP socket
 	sendto(socket,                       	   // UDP socket
 		   data,                               // Data buffer
 		   dataLength,                         // Data length
@@ -114,17 +113,19 @@ void udpSend(const uint8_t *data, uint32_t dataLength) {
  * Receive data from UDP socket
  *
  * @param buf Char pointer to received data buffer
+ * @param bufLen Size of buffer
  * @return Number of bytes received
  */
-uint32_t udpReceive(char *buf) {
+uint32_t udpReceive(char *buf, uint32_t bufLen) {
 	uint32_t returnLength;
 
-	returnLength = recvfrom(socket,                 // Socket device
-					   	    (void *) receiveBuffer, // Receive buffer
-					   	    RECEIVE_BUFFER_LENGTH,  // Length of buffer
-					   	    0,                      // Extra settings (none)
-					   	    0,						// Ignore receive from address
-					   	    0);                     // Ignore receive address length
+	// Receive data from UDP socket into buffer
+	returnLength = recvfrom(socket,       // Socket device
+					   	    (void *) buf, // Receive buffer
+					   	    bufLen,       // Length of buffer
+					   	    0,            // Extra settings (none)
+					   	    0,			  // Ignore receive from address
+					   	    0);           // Ignore receive address length
 
 	return (returnLength);
 }

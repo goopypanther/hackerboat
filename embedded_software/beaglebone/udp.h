@@ -14,6 +14,9 @@
 #ifndef UDP_H_
 #define UDP_H_
 
-
+extern void udpOpenSocket(const char *host);
+extern void udpCloseSocket(void);
+extern void udpSend(const uint8_t *data, uint32_t dataLength);
+extern uint32_t udpReceive(char *buf, uint32_t bufLen);
 
 #endif /* UDP_H_ */
