@@ -1,6 +1,6 @@
 /**
  * @file udp.h
- * @brief
+ * @brief UDP connection functions
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  * @author Bryan Godbolt godbolt ( a t ) ualberta.ca

@@ -1,6 +1,6 @@
 /**
  * @file udp.c
- * @brief UDP connection
+ * @brief UDP connection functions
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  * @author Bryan Godbolt godbolt ( a t ) ualberta.ca
@@ -10,14 +10,11 @@
  * @version 1.0
  * @since Jun 16, 2015
  *
+ * Call \c udpOpenSocket() first, then \c udpSend() and \c udpReceive() as
+ * needed.
  */
 
-#include "udp.h"
-#include <string.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include "includes2.h"
 
 // Defines
 #define LOCAL_PORT 14551
@@ -120,12 +117,12 @@ uint32_t udpReceive(char *buf, uint32_t bufLen) {
 	uint32_t returnLength;
 
 	// Receive data from UDP socket into buffer
-	returnLength = recvfrom(socket,       // Socket device
-					   	    (void *) buf, // Receive buffer
-					   	    bufLen,       // Length of buffer
-					   	    0,            // Extra settings (none)
-					   	    0,			  // Ignore receive from address
-					   	    0);           // Ignore receive address length
+	returnLength = (uint32_t) recvfrom(socket,       // Socket device
+					   	               (void *) buf, // Receive buffer
+					   	               bufLen,       // Length of buffer
+					   	               0,            // Extra settings (none)
+					   	               0,            // Ignore receive from address
+					   	               0);           // Ignore receive address length
 
 	return (returnLength);
 }
