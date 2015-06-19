@@ -11,13 +11,11 @@
  * @since Jun 15, 2015
  *
  * Parses and returns input arguments to the application.
- * Call parseInputParams() and then argsReturn functions will return pointers
- * to strings.
+ * Call \c parseInputParams() and then \c argsReturn functions will return
+ * pointers to strings.
  */
 
-#include "args.h"
-#include <string.h>
-#include <stdlib.h>
+#include "includes2.h"
 
 // Defines
 
