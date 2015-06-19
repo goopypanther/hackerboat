@@ -15,6 +15,7 @@
 #define LOG_H_
 
 extern void logOpen(const char *logPath);
+extern void logClose(void);
 extern void logStdOut(const char *data, ...);
 extern void log(const char *data, ...);
 

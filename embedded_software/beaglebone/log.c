@@ -11,16 +11,20 @@
  * @since Jun 15, 2015
  *
  * Handles data output to logfile and stdout.
- * Call logOpen() to open log file and log() to send data to stdout and logfile.
+ * Call \c logOpen() to open log file and \c log() to send data to stdout
+ * and logfile.
  */
 
-#include "log.h"
-#include <stdarg.h>
-#include <stdio.h>
+#include "includes2.h"
 
 // Static variables
 
 static FILE *logFile;
+
+static const char transmitedToHostString[] =     "Tx to host:       ";
+static const char transmitedToLowLevelString[] = "Tx to low level:  ";
+static const char receivedHostString[] =         "Rx from host:     ";
+static const char receivedLowLevelString[] =     "Rx from low level:";
 
 /**
  * Open log file
@@ -29,6 +33,13 @@ static FILE *logFile;
  */
 void logOpen(const char *logPath) {
     logFile = fopen(logPath, "a"); // Open file, append mode
+}
+
+/**
+ * Close log file
+ */
+void logClose(void) {
+	(void) fclose(logFile);
 }
 
 /**
@@ -59,4 +70,19 @@ void log(const char *data, ...) {
     va_start(dataList, data);
     vfprintf(logFile, data, dataList);
     va_end(dataList);
+}
+
+/**
+ * Logs mavlink packet
+ *
+ * @param packet Mavlink packet to log
+ */
+void logPacket(mavlink_message_t *packet) {
+	char *routing;
+	char *packetType;
+
+	// TODO Determine if packet is being transmitted or received
+	if ()
+
+	log("%s SEQ: %d, SYS: %d, COMP: %d, LEN: %d, MSG ID: %d %s", routing, packet->seq, packet->sysid, packet->compid, packet->len, packet->msgid, packetType);
 }
