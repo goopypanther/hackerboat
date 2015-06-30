@@ -1,12 +1,12 @@
 # My makefile
-APPNAME=mavlink_udp
-SOURCES=mavlink_udp.c
+APPNAME=hackerboatNavigator
+SOURCES=main.c args.c log.c udp.c mavlinkWrapper.c Neo6m.c
 INCLUDES=./mavlink/hackerboat
 
 COMPILER=gcc
 
 all:
-	$(COMPILER) -g -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -lm
+	$(COMPILER) -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -lm
 	du -h $(APPNAME)
 
 debug:
