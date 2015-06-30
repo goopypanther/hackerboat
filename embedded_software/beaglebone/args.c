@@ -15,7 +15,7 @@
  * pointers to strings.
  */
 
-#include "includes2.h"
+#include "includes.h"
 
 // Defines
 
@@ -25,7 +25,6 @@
 // Static variables
 static char target_ip[STRING_BUFFER];
 static char gps_serial_device[STRING_BUFFER];
-static char low_level_debug_device[STRING_BUFFER];
 static char low_level_serial_device[STRING_BUFFER];
 static char log_file[STRING_BUFFER];
 
@@ -41,13 +40,6 @@ char *argsReturnTargetIp(void) {
  */
 char *argsReturnGpsSerialDevice(void) {
     return (&gps_serial_device);
-}
-
-/**
- * @return string pointer of debug tty device
- */
-char *argsReturnLowLevelDebug(void) {
-    return (&low_level_debug_device);
 }
 
 /**
@@ -73,8 +65,7 @@ char *argsReturnLogFile(void) {
  * - 1. Target ipv4 of ground control station
  * - 2. tty of gps device
  * - 3. tty of low level control device
- * - 4. tty of debug interface
- * - 5. path to log file (optional)
+ * - 4. path to log file (optional)
  *
  * If incorrect number of params are passed, program will display help msg and
  * exit.
@@ -82,25 +73,23 @@ char *argsReturnLogFile(void) {
  * @param argc Argument count
  * @param argv Char array of arguments entered
  */
-void parseInputParams(int argc, char* argv[]) {
+void argsParseInputParams(int argc, char* argv[]) {
     // Check for proper number of arguments
-    if (argc >= 5) {
+    if (argc >= 4) {
         // Copy substrings to variables
         strncpy(target_ip, argv[1], STRING_BUFFER);
         strncpy(gps_serial_device, argv[2], STRING_BUFFER);
         strncpy(low_level_serial_device, argv[3], STRING_BUFFER);
-        strncpy(low_level_debug_device, argv[4], STRING_BUFFER);
         
         // Make sure strings are still null terminated
         // (if buffer overrun occured)
         target_ip[STRING_BUFFER] = 0x00;
         gps_serial_device[STRING_BUFFER] = 0x00;
-        low_level_debug_device[STRING_BUFFER] = 0x00;
         low_level_serial_device[STRING_BUFFER] = 0x00;
 
         // If log file was supplied
-        if (argc == 6) {
-            strncpy(log_file, argv[5], STRING_BUFFER);
+        if (argc == 5) {
+            strncpy(log_file, argv[4], STRING_BUFFER);
             
         } else {
         // If no log file supplied

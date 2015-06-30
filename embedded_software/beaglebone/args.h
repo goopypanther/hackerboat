@@ -16,9 +16,8 @@
 
 extern char *argsReturnTargetIp(void);
 extern char *argsReturnGpsSerialDevice(void);
-extern char *argsReturnLowLevelDebug(void);
 extern char *argsReturnLowLevelSerial(void);
 extern char *argsReturnLogFile(void);
-extern void parseInputParams(int argc, char* argv[]);
+extern void argsParseInputParams(int argc, char* argv[]);
 
 #endif /* ARGS_H_ */
