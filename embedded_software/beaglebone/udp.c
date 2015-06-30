@@ -14,7 +14,7 @@
  * needed.
  */
 
-#include "includes2.h"
+#include "includes.h"
 
 // Defines
 #define LOCAL_PORT 14551
@@ -25,7 +25,7 @@
 
 // Static variables
 
-static int socket;
+static int socketDevice;
 static struct sockaddr_in hostAddress;
 
 /**
@@ -39,9 +39,9 @@ void udpOpenSocket(const char *host) {
 
     memset(&hostAddress, 0, sizeof(hostAddress)); // Zero out struct
 
-    gcAddr.sin_addr.s_addr = inet_addr(host);
-    gcAddr.sin_family = AF_INET;
-    gcAddr.sin_port = htons(HOST_PORT);
+    hostAddress.sin_addr.s_addr = inet_addr(host);
+    hostAddress.sin_family = AF_INET;
+    hostAddress.sin_port = htons(HOST_PORT);
 
 	memset(&localAddress, 0x00, sizeof(localAddress)); // Zero out struct
 
@@ -50,32 +50,32 @@ void udpOpenSocket(const char *host) {
 	localAddress.sin_family = AF_INET;
 	localAddress.sin_port = htons(LOCAL_PORT);
 
-	socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP); // Create socket
+	socketDevice = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP); // Create socket
 
 	// Catch socket creation failure
-	if (socket < 0) {
+	if (socketDevice < 0) {
 		err(EXIT_FAILURE, "Failed to open socket.");
 
 	} else {}
 
 	// Bind socket to port
-	returnValue = bind(socket,                           // Socket identifier
+	returnValue = bind(socketDevice,                     // Socket identifier
 					   (struct sockaddr*) &localAddress, // Settings struct
 					   sizeof(localAddress));            // Size of settings struct
 
 	// Catch bind failure
 	if (returnValue < 0) {
-		close(socket);
+		close(socketDevice);
 
 		err(EXIT_FAILURE, "Failed to bind socket.");
 
 	} else {}
 
-    returnValue = fcntl(socket,	F_SETFL, O_NONBLOCK); // Make socket non-blocking
+    returnValue = fcntl(socketDevice, F_SETFL, O_NONBLOCK); // Make socket non-blocking
 
     // Catch non-blocking failure
     if (returnValue < 0) {
-        close(socket);
+        close(socketDevice);
 
         err(EXIT_FAILURE, "Failed setting non-blocking.");
 
@@ -87,7 +87,7 @@ void udpOpenSocket(const char *host) {
  * Close UDP socket
  */
 void udpCloseSocket(void) {
-	close(socket);
+	close(socketDevice);
 }
 
 /**
@@ -98,7 +98,7 @@ void udpCloseSocket(void) {
  */
 void udpSend(const uint8_t *data, uint32_t dataLength) {
 	// Send buffer over UDP socket
-	sendto(socket,                       	   // UDP socket
+	sendto(socketDevice,                   	   // UDP socket
 		   data,                               // Data buffer
 		   dataLength,                         // Data length
 		   0,                                  // Flags
@@ -114,15 +114,20 @@ void udpSend(const uint8_t *data, uint32_t dataLength) {
  * @return Number of bytes received
  */
 uint32_t udpReceive(char *buf, uint32_t bufLen) {
-	uint32_t returnLength;
+	int32_t returnLength;
 
 	// Receive data from UDP socket into buffer
-	returnLength = (uint32_t) recvfrom(socket,       // Socket device
+	returnLength = (int32_t) recvfrom(socketDevice, // Socket device
 					   	               (void *) buf, // Receive buffer
 					   	               bufLen,       // Length of buffer
 					   	               0,            // Extra settings (none)
 					   	               0,            // Ignore receive from address
 					   	               0);           // Ignore receive address length
 
-	return (returnLength);
+	// Check for errors
+	if (returnLength < 0) {
+		returnLength = 0;
+	} else {}
+
+	return ((uint32_t) returnLength);
 }
