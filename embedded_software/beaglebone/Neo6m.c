@@ -10,18 +10,18 @@
 
 #include "includes.h"
 
-#ifndef _STDLIB_H_
+#ifndef _STDLIB_H
 #warning "stdlib.h required, including now. You should probably manually add stdlib.h to your includes."
-//#include <stdlib.h>
+#include <stdlib.h>
 #endif
 
-#ifndef _MATH_H_
+#ifndef _MATH_H
 #warning "math.h required, including now. You should probably manually add math.h to your includes."
 #include <math.h>
 #endif
 
 // Defines
-#define NEO6M_UART_PUTS(x) putchar(x)
+#define NEO6M_UART_PUTS(x) putchar((int) x)
 #define NEO6_UART_GETC() getchar()
 
 #define NMEABUFFER_LENGTH 82
