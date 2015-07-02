@@ -21,7 +21,10 @@
 #define HOST_PORT  14550
 
 // Function prototypes
-
+void udpOpenSocket(const char *host);
+void udpCloseSocket(void);
+void udpSend(const uint8_t *data, uint32_t dataLength);
+uint32_t udpReceive(char *buf, uint32_t bufLen);
 
 // Static variables
 
@@ -102,8 +105,8 @@ void udpSend(const uint8_t *data, uint32_t dataLength) {
 		   data,                               // Data buffer
 		   dataLength,                         // Data length
 		   0,                                  // Flags
-		   (struct sockaddr_in*) &hostAddress, // Address
-		   sizeof(struct sockaddr_in));        // Address length
+		   (struct sockaddr*) &hostAddress, // Address
+		   (socklen_t) sizeof(struct sockaddr_in));        // Address length
 }
 
 /**

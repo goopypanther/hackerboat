@@ -32,28 +32,28 @@ static char log_file[STRING_BUFFER];
  * @return string pointer of IP address of host
  */
 char *argsReturnTargetIp(void) {
-    return (&target_ip);
+    return ((char *) &target_ip);
 }
 
 /**
  * @return string pointer of gps tty device
  */
 char *argsReturnGpsSerialDevice(void) {
-    return (&gps_serial_device);
+    return ((char *) &gps_serial_device);
 }
 
 /**
  * @return string pointer of low level serial device
  */
 char *argsReturnLowLevelSerial(void) {
-    return (&low_level_serial_device);
+    return ((char *) &low_level_serial_device);
 }
 
 /**
  * @return string pointer of log file
  */
 char *argsReturnLogFile(void) {
-    return (&log_file);
+    return ((char *) &log_file);
 }
 
 /**

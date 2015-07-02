@@ -114,9 +114,9 @@ void logLine(const char *data, ...) {
  * @param packet Mavlink packet to log
  */
 void logPacket(mavlink_message_t *packet) {
-	char *packetType;
+	const char *packetType;
 	char unknownPacketTypeBuffer[12];
-	char *packetSource;
+	const char *packetSource;
 	nmea_rmc_t nmea;
 
 	nmea = Neo6mGetData(); // Get current time from GPS
