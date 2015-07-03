@@ -24,11 +24,14 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "udp.h"
 #include "log.h"
 #include "args.h"
 #include "mavlinkWrapper.h"
 #include "Neo6m.h"
+#include "uart.h"
+#include "currentTime.h"
 
 #endif /* INCLUDES_H_ */
