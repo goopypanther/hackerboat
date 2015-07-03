@@ -20,11 +20,14 @@
 #define LOCAL_PORT 14551
 #define HOST_PORT  14550
 
+#define BUFFER_LENGTH 2048
+
 // Function prototypes
 void udpOpenSocket(const char *host);
 void udpCloseSocket(void);
 void udpSend(const uint8_t *data, uint32_t dataLength);
 uint32_t udpReceive(char *buf, uint32_t bufLen);
+uint32_t udpGetMessage(mavlink_message_t *message, mavlink_status_t *messageStatus);
 
 // Static variables
 
@@ -121,11 +124,11 @@ uint32_t udpReceive(char *buf, uint32_t bufLen) {
 
 	// Receive data from UDP socket into buffer
 	returnLength = (int32_t) recvfrom(socketDevice, // Socket device
-					   	               (void *) buf, // Receive buffer
-					   	               bufLen,       // Length of buffer
-					   	               0,            // Extra settings (none)
-					   	               0,            // Ignore receive from address
-					   	               0);           // Ignore receive address length
+					   	              (void *) buf, // Receive buffer
+					   	              bufLen,       // Length of buffer
+					   	              0,            // Extra settings (none)
+					   	              0,            // Ignore receive from address
+					   	              0);           // Ignore receive address length
 
 	// Check for errors
 	if (returnLength < 0) {
@@ -133,4 +136,45 @@ uint32_t udpReceive(char *buf, uint32_t bufLen) {
 	} else {}
 
 	return ((uint32_t) returnLength);
+}
+
+/**
+ * Receives mavlink packet from UDP and decodes
+ *
+ * @param message pointer to mavlink message received packet will be stored
+ * into
+ *
+ * @param messageStatus pointer to message status struct received message will
+ * be stored into
+ *
+ * @return 0 if no new packet received (\c message and \c messageStatus will
+ * not be altered), 1 if new packet received, \c message and \c messageStatus
+ * will be updated)
+ */
+uint32_t udpGetMessage(mavlink_message_t *message, mavlink_status_t *messageStatus) {
+	char buffer[BUFFER_LENGTH];
+	uint32_t bufferLengthReceived;
+	uint32_t i;
+	uint32_t messageFound;
+
+	messageFound = FALSE; // Set initial state
+
+	bufferLengthReceived = udpReceive(buffer, sizeof(buffer)); // Receive packet from UDP socket
+
+	// Check if something was received
+	if (bufferLengthReceived > 0) {
+
+		// Loop through buffer attempting to decode packet until buffer is
+		// exhausted or successful decode takes place. messageFound will become
+		// TRUE if a packet has been decoded.
+		for (i = 0; ((i < bufferLengthReceived) && (messageFound == FALSE)); i++) {
+			messageFound = mavlink_parse_char(MAVLINK_COMM_0, // Channel
+											  buffer[i],      // Char to parse
+											  message,        // Message
+											  messageStatus); // Message status
+		}
+
+	}
+
+	return (messageFound);
 }

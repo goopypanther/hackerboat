@@ -17,6 +17,6 @@
 extern void udpOpenSocket(const char *host);
 extern void udpCloseSocket(void);
 extern void udpSend(const uint8_t *data, uint32_t dataLength);
-extern uint32_t udpReceive(char *buf, uint32_t bufLen);
+extern uint32_t udpGetMessage(mavlink_message_t *message, mavlink_status_t *messageStatus);
 
 #endif /* UDP_H_ */
