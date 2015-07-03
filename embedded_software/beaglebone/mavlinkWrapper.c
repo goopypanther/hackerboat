@@ -18,53 +18,63 @@
 #define BUFFER_LENGTH 2048
 
 // Function prototypes
-
+void mavlinkWrapperSend(mavlink_message_t *packet);
+uint32_t mavlinkWrapperReceive(void);
+const mavlink_message_t *mavlinkWrapperReturnMessage(void);
 
 // Static variables
-static mavlink_message_t incomingMessageHost;
-static mavlink_status_t incomingMessageStatusHost;
-
-static mavlink_message_t incomingMessageLowLevel;
-static mavlink_status_t incomingMessageStatusLowLevel;
+static mavlink_message_t incomingMessage;
+static mavlink_status_t incomingMessageStatus;
 
 /**
- * Sends mavlink packet over UDP to host computer
+ * Sends mavlink packet over UDP and UART
  *
  * @param packet Mavlink packet to send
  */
-void mavlinkWrapperHostSend(mavlink_message_t *packet) {
+void mavlinkWrapperSend(mavlink_message_t *packet) {
 	char packetBuffer[sizeof(mavlink_message_t)];
 	uint32_t packetBufferFilled;
 
 	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, packet); // Copy packet to buffer
 
 	udpSend(packetBuffer, packetBufferFilled); // Send contents of buffer over UDP
+	uartLowLevelSend(packetBuffer, packetBufferFilled); // Send contents of buffer over UART
 
 	logPacket(packet); // Log transmission of packet
 }
 
 /**
- * Receive and decode mavlink packets from host computer over UDP
+ * Receive and decode mavlink packets from UDP and UART
+ *
+ * @return 1 if new packet received, 0 if no new packet received
  */
-void mavlinkWrapperHostReceive() {
-	char buffer[BUFFER_LENGTH];
-	uint32_t bufferLengthReceived;
-	uint32_t i;
-	uint8_t messageFound = 0;
+uint32_t mavlinkWrapperReceive(void) {
+	uint32_t messageFound;
 
-	bufferLengthReceived = udpReceive(buffer, sizeof(buffer)); // Receive packet from UDP socket
+	messageFound = FALSE; // Set initial state
 
-	// Check if something was received
-	if (bufferLengthReceived > 0) {
-		// Loop through buffer attempting to decode packet until buffer is
-		// exhausted or successful decode takes place
-		for (i = 0; ((i < bufferLengthReceived) && (messageFound != 1)); i++) {
-			messageFound = mavlink_parse_char(MAVLINK_COMM_0,              // Channel
-											  buffer[i],                   // Char to parse
-											  &incomingMessageHost,        // Message
-											  &incomingMessageStatusHost); // Message status
+	// First, try to receive packet from UDP, these may be important
+	// commands from ground control.
+	messageFound = udpGetMessage(&incomingMessage, &incomingMessageStatus); // Receive packet from UDP socket
 
-			logPacket(incomingMessageHost); // Log reception of packet
-		}
+	// Second, try to receive packet from UART
+	if (messageFound == FALSE) {
+		messageFound = uartGetMessage(&incomingMessage, &incomingMessageStatus); // Receive packet from UART
 	} else {}
+
+	// Log reception of packet if complete packet received
+	if (messageFound) {
+		logPacket(&incomingMessage);
+	} else {}
+
+	return (messageFound);
+}
+
+/**
+ * Returns pointer for accessing most recently received mavlink packet
+ *
+ * @return pointer to most recently received packet
+ */
+const mavlink_message_t *mavlinkWrapperReturnMessage(void) {
+	return ((const mavlink_message_t*) &incomingMessage);
 }
