@@ -21,7 +21,7 @@
 #endif
 
 // Defines
-#define NEO6M_UART_PUTS(x) putchar((int) x)
+#define NEO6M_UART_PUTS(x) uartGpsSend(x)
 #define NEO6_UART_GETC() getchar()
 
 #define NMEABUFFER_LENGTH 82
