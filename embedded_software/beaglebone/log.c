@@ -11,15 +11,21 @@
  * @since Jun 15, 2015
  *
  * Handles data output to logfile and stdout.
- * Call \c logOpen() to open log file and \c log() to send data to stdout
+ * Call \c logOpen() to open log file and \c logLine() to send data to stdout
  * and logfile.
  */
 
 #include "includes.h"
 
 // Defines
+#define SHORE_SYSTEM_ID 0
 
 // Function prototypes
+void logOpen(const char *logPath);
+void logClose(void);
+void logStdOut(const char *data, ...);
+void logLine(const char *data, ...);
+void logPacket(mavlink_message_t *packet);
 
 // Static variables
 
@@ -117,12 +123,12 @@ void logPacket(mavlink_message_t *packet) {
 	const char *packetType;
 	char unknownPacketTypeBuffer[12];
 	const char *packetSource;
-	nmea_rmc_t nmea;
+	nmea_time_t time;
 
-	nmea = Neo6mGetData(); // Get current time from GPS
+	currentTimeGet(&time); // Get current time
 
 	// Determine if packet came from shore
-	if (packet->sysid == 0) {
+	if (packet->sysid == SHORE_SYSTEM_ID) {
 		packetSource = packetSourceShoreString;
 
 	// Did packet come from beaglebone
@@ -130,7 +136,8 @@ void logPacket(mavlink_message_t *packet) {
 		packetSource = packetSourceBeagleboneString;
 
 	// Did packet come from arduino
-	} else if (packet->compid == MAV_COMP_ID_SERVO1) {
+	} else if (packet->compid == MAV_COMP_ID_SERVO1 ||
+			   packet->compid == MAV_COMP_ID_IMU) {
 		packetSource = packetSourceLowLevelString;
 
 	// Did packet come from somewhere else
@@ -247,5 +254,5 @@ void logPacket(mavlink_message_t *packet) {
 	    break;
 	}
 
-	logLine("%u-%u-%u %u:%u:%u %s packet from %s", nmea.time.year, nmea.time.month, nmea.time.day, nmea.time.hour, nmea.time.minute, nmea.time.second, packetType, packetSource);
+	logLine("%04u-%02u-%02u %02u:%02u:%02u %s packet from %s", time.year, time.month, time.day, time.hour, time.minute, time.second, packetType, packetSource);
 }

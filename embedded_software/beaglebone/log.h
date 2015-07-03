@@ -1,6 +1,6 @@
 /**
  * @file log.h
- * @brief
+ * @brief Output lines to log
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  * @author Bryan Godbolt godbolt ( a t ) ualberta.ca
@@ -18,5 +18,6 @@ extern void logOpen(const char *logPath);
 extern void logClose(void);
 extern void logStdOut(const char *data, ...);
 extern void logLine(const char *data, ...);
+extern void logPacket(mavlink_message_t *packet);
 
 #endif /* LOG_H_ */
