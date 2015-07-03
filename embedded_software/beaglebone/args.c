@@ -20,7 +20,7 @@
 // Defines
 
 #define STRING_BUFFER 100
-#define DEFAULT_LOG_FILE "./mavlink_udp.log"
+#define DEFAULT_LOG_FILE "./hackerboatNavigator.log"
 
 // Static variables
 static char target_ip[STRING_BUFFER];
@@ -82,7 +82,7 @@ void argsParseInputParams(int argc, char* argv[]) {
         strncpy(low_level_serial_device, argv[3], STRING_BUFFER);
         
         // Make sure strings are still null terminated
-        // (if buffer overrun occured)
+        // (if buffer overrun occurred)
         target_ip[STRING_BUFFER] = 0x00;
         gps_serial_device[STRING_BUFFER] = 0x00;
         low_level_serial_device[STRING_BUFFER] = 0x00;
@@ -100,10 +100,7 @@ void argsParseInputParams(int argc, char* argv[]) {
         
     } else {
     // Print help message if improper number of arguments passed
-        printf("\n");
-        printf("\tUsage:\n\n");
-        printf("\t");
-        printf("%s", argv[0]);
+        printf("\n Usage:\n\n %s", argv[0]);
         printf(" <host ip> <GPS serial device> <low level serial device> <optional path to log file>\n");
         exit(EXIT_FAILURE);
     }
