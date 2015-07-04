@@ -21,36 +21,15 @@
 
 int main (int argc, char* argv[]) {
 	int returnState;
-	char beginMsg[] = "Beginning test...";
-	mavlink_message_t packet;
+	nmea_rmc_t gpsCoords;
 
-	argsParseInputParams(argc, argv);
+	uartInit("gps", "lowlevel");
 
-	logOpen(argsReturnLogFile());
-	udpOpenSocket(argsReturnTargetIp());
+	while (Neo6mGetStatus() == FALSE) {}
 
-	logLine(beginMsg);
+	gpsCoords = Neo6mGetData();
 
-	mavlink_msg_scaled_imu_pack(1,
-								MAV_COMP_ID_SYSTEM_CONTROL,
-								&packet,
-								0,
-								1,
-								1,
-								1,
-								1,
-								1,
-								1,
-								1,
-								1,
-								1);
-
-	logPacket(&packet);
-
-	udpCloseSocket();
-	logClose();
-
-	returnState = 0;
+	printf("Lat: %u Lon: %u\nVel: %u\n", gpsCoords.space.lat, gpsCoords.space.lon, gpsCoords.velocity.speed);
 
 	return (returnState);
 }
