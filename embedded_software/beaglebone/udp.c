@@ -168,7 +168,7 @@ uint32_t udpGetMessage(mavlink_message_t *message, mavlink_status_t *messageStat
 		// exhausted or successful decode takes place. messageFound will become
 		// TRUE if a packet has been decoded.
 		for (i = 0; ((i < bufferLengthReceived) && (messageFound == FALSE)); i++) {
-			messageFound = mavlink_parse_char(MAVLINK_COMM_0, // Channel
+			messageFound = mavlink_parse_char(MAVLINK_COMM_0, // Channel (different than UART chan)
 											  buffer[i],      // Char to parse
 											  message,        // Message
 											  messageStatus); // Message status
