@@ -21,6 +21,9 @@ void uartGpsSend(const char *data);
 uint32_t uartGetMessage(mavlink_message_t *message, mavlink_status_t *messageStatus);
 void *uartGpsReceiveThread(void);
 void *uartLowLevelReceiveThread(void);
+uint8_t uartReturnIncomingNmeaChar(void);
+void uartGpsLockMutex(void);
+void uartGpsUnlockMutex(void);
 
 // Static variables
 static int gpsFd;
@@ -33,6 +36,9 @@ static mavlink_status_t incomingMessageStatus;
 static pthread_mutex_t messageAccess;
 static pthread_t gpsReceiveThread;
 static pthread_t lowLevelReceiveThread;
+
+static pthread_mutex_t nmeaAccess;
+static uint8_t incomingNmeaChar;
 
 /**
  * Initializes UART and opens devices
@@ -56,8 +62,13 @@ void uartInit(const char *gpsDevice, const char *lowLevelDevice) {
 		err(EXIT_FAILURE, "Failed to open low level TTY %d\n", lowLevelFd);
 	} else {}
 
-	// Set up threads & mutexes
-	pthread_mutex_init(&messageAccess, NULL); // Initialize message mutex
+	Neo6mInit(); // Configure GPS and parsing functions
+
+	// Set up mutexes
+	pthread_mutex_init(&messageAccess, NULL);
+	pthread_mutex_init(&nmeaAccess, NULL);
+
+	// Set up threads
 	pthread_create(&gpsReceiveThread, NULL, (void *) uartGpsReceiveThread, NULL); // Start GPS thread
 	pthread_create(&lowLevelReceiveThread, NULL, (void *) uartLowLevelReceiveThread, NULL); // Start low level thread
 }
@@ -115,7 +126,7 @@ uint32_t uartGetMessage(mavlink_message_t *message, mavlink_status_t *messageSta
 		packetReceived = FALSE;
 	}
 
-	pthread_mutex_unlock(&messageAccess);// Release access to mavlink messages
+	pthread_mutex_unlock(&messageAccess);// Release access to mavlink message
 
 	return (packetReceived);
 }
@@ -126,19 +137,79 @@ uint32_t uartGetMessage(mavlink_message_t *message, mavlink_status_t *messageSta
  */
 void *uartGpsReceiveThread(void) {
 	for (;;) {
+		read(gpsFd, &incomingNmeaChar, sizeof(incomingNmeaChar)); // Get char from UART
 
+		uartGpsLockMutex(); // Acquire lock on mutex
+
+		Neo6mMeldDataISR(); // Add char to buffer
+		Neo6mParseBuffer(); // Parse buffer
+
+		uartGpsUnlockMutex(); // Release mutex
 	}
 
 	return (NULL);
 }
 
 /**
+ * Locks mutex to allow NMEA module to update data
+ */
+void uartGpsLockMutex(void) {
+	pthread_mutex_lock(&nmeaAccess);
+}
+
+/**
+ * Unlocks mutex for NMEA module
+ */
+void uartGpsUnlockMutex(void) {
+	pthread_mutex_unlock(&nmeaAccess);
+}
+
+/**
+ * Passthrough function for NMEA module
+ *
+ * @return most recent NMEA char received
+ */
+uint8_t uartReturnIncomingNmeaChar(void) {
+	return (incomingNmeaChar);
+}
+
+/**
  * Receives mavlink packets over UART
- * Each char is passed to mavlink module for decode.
+ *
+ * Loop waits to receive char and passes it to mavlink for decode. When decode
+ * succeeds thread acquires mutex and copies received message to static
+ * variables.
  */
 void *uartLowLevelReceiveThread(void) {
-	for (;;) {
+	uint32_t messageFound;
+	uint32_t readBytes;
+	uint8_t incomingChar;
+	mavlink_message_t message;
+	mavlink_status_t messageStatus;
 
+	// Main loop, runs forever
+	for (;;) {
+		readBytes = read(lowLevelFd, incomingChar, sizeof(incomingChar)); // Get char from UART
+
+		messageFound = mavlink_parse_char(MAVLINK_COMM_1,  // Channel (different than UDP chan)
+										  incomingChar,    // Char to parse
+										  &message,        // Message
+										  &messageStatus); // Message status
+
+		// If message was decoded
+		if (messageFound) {
+			pthread_mutex_lock(&messageAccess); // Acquire access to mavlink messages
+
+			newMessage = TRUE; // Tell uartGetMessage a new message has arrived
+
+			// Copy received messages to static variables
+			incomingMessage = message;
+			incomingMessageStatus = messageStatus;
+
+			pthread_mutex_unlock(&messageAccess);// Release access to mavlink messages
+
+		} else {}
 	}
+
 	return (NULL);
 }
