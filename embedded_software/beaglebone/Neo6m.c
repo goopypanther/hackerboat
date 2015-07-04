@@ -22,7 +22,7 @@
 
 // Defines
 #define NEO6M_UART_PUTS(x) uartGpsSend(x)
-#define NEO6_UART_GETC() getchar()
+#define NEO6_UART_GETC() uartReturnIncomingNmeaChar();
 
 #define NMEABUFFER_LENGTH 82
 #define NMEAM_MINIMUM_SENTENCE_LENGTH 20
@@ -404,7 +404,13 @@ nmea_velocity_t nmeaVelocityParser(const uint8_t *speed, const uint8_t *course) 
  * Velocity structure, unsigned 32 bit speed in m/s, heading in degrees 0-359
  */
 nmea_rmc_t Neo6mGetData(void) {
-	return (nmeaData);
+	nmea_rmc_t localNmeaData;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localNmeaData = nmeaData;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localNmeaData);
 }
 
 /**
@@ -413,7 +419,13 @@ nmea_rmc_t Neo6mGetData(void) {
  * @return fixed point 6 decimal (11cm) precision signed 32 bit lat
  */
 int32_t Neo6mGetLat(void) {
-	return (nmeaData.space.lat);
+	int32_t localLat;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localLat = nmeaData.space.lat;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localLat);
 }
 
 /**
@@ -422,7 +434,13 @@ int32_t Neo6mGetLat(void) {
  * @return fixed point 6 decimal (11cm) precision signed 32 bit lon
  */
 int32_t Neo6mGetLon(void) {
-	return (nmeaData.space.lon);
+	int32_t localLon;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localLon = nmeaData.space.lon;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localLon);
 }
 
 /**
@@ -431,7 +449,13 @@ int32_t Neo6mGetLon(void) {
  * @return unsigned 32 bit speed in m/s
  */
 uint32_t Neo6mGetSpeed(void) {
-	return (nmeaData.velocity.speed);
+	uint32_t localSpeed;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localSpeed = nmeaData.velocity.speed;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localSpeed);
 }
 
 /**
@@ -440,7 +464,13 @@ uint32_t Neo6mGetSpeed(void) {
  * @return unsigned 32 bit heading in degrees 0-359
  */
 uint32_t Neo6mGetHeadingMadeGood(void) {
-	return (nmeaData.velocity.headingMadeGood);
+	uint32_t localHeadingMadeGood;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localHeadingMadeGood = nmeaData.velocity.headingMadeGood;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localHeadingMadeGood);
 }
 
 /**
@@ -449,5 +479,11 @@ uint32_t Neo6mGetHeadingMadeGood(void) {
  * @return True if GPS has a fix
  */
 uint32_t Neo6mGetStatus(void) {
-	return (nmeaData.status);
+	uint32_t localStatus;
+
+	uartGpsLockMutex(); // Acquire lock on mutex to prevent thread interference
+	localStatus = nmeaData.status;
+	uartGpsUnlockMutex(); // Release mutex
+
+	return (localStatus);
 }
