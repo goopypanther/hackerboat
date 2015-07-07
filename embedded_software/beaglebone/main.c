@@ -15,21 +15,48 @@
 
 
 // Function prototypes
-
+void mainWaitSliceTask(void);
 
 // Static variables
 
 int main (int argc, char* argv[]) {
 	int returnState;
-	nmea_rmc_t gpsCoords;
+	nmea_time_t curTime;
 
-	uartInit("gps", "lowlevel");
+	//argsParseInputParams(argc, argv);
+	//logOpen(argsReturnLogFile());
+	//udpOpenSocket(argsReturnTargetIp());
+	//uartInit(argsReturnGpsSerialDevice(), argsReturnLowLevelSerial());
 
-	while (Neo6mGetStatus() == FALSE) {}
+	//while (Neo6mGetStatus() == FALSE) {}
 
-	gpsCoords = Neo6mGetData();
+	printf("%llu\n", currentTimeMsSinceEpoch());
+	mainWaitSliceTask();
+	printf("%llu\n", currentTimeMsSinceEpoch());
+	mainWaitSliceTask();
+	printf("%llu\n", currentTimeMsSinceEpoch());
 
-	printf("Lat: %u Lon: %u\nVel: %u\n", gpsCoords.space.lat, gpsCoords.space.lon, gpsCoords.velocity.speed);
+	//logClose();
 
+	returnState = 0;
 	return (returnState);
+}
+
+/**
+ * Waits for next slice, every 10ms
+ */
+void mainWaitSliceTask(void) {
+	static uint64_t lastTime;
+	static uint32_t isInit = TRUE;
+
+	if (isInit == TRUE) {
+		isInit = FALSE;
+
+		lastTime = currentTimeMsSinceEpoch();
+
+	} else {
+		while ((currentTimeMsSinceEpoch() - lastTime) < 10) {}
+
+		lastTime = currentTimeMsSinceEpoch();
+	}
 }
