@@ -33,5 +33,6 @@
 #include "Neo6m.h"
 #include "uart.h"
 #include "currentTime.h"
+#include "Map.h"
 
 #endif /* INCLUDES_H_ */
