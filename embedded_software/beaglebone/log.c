@@ -30,6 +30,7 @@ void logPacket(mavlink_message_t *packet);
 // Static variables
 
 static FILE *logFile;
+static uint32_t logCurrentlyOpen = FALSE;
 
 static const char packetSourceShoreString[] = "Shore";
 static const char packetSourceBeagleboneString[] = "Beaglebone";
@@ -73,13 +74,19 @@ static const char packetTypeParamRequestReadString[] = "Param request read";
  */
 void logOpen(const char *logPath) {
     logFile = fopen(logPath, "a"); // Open file, append mode
+    logCurrentlyOpen = TRUE;
 }
 
 /**
  * Close log file
  */
 void logClose(void) {
-	(void) fclose(logFile);
+	if (logCurrentlyOpen == TRUE) {
+
+		(void) fclose(logFile);
+		logCurrentlyOpen = FALSE;
+
+	} else {}
 }
 
 /**
