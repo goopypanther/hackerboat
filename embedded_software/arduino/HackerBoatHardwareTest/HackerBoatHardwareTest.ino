@@ -70,10 +70,12 @@ void servoDrive (void);
 
 void setup() {
   // put your setup code here, to run once:
-    Serial.begin(115200);
+  Serial.begin(115200);
   Serial1.begin(115200);
   pinMode(servoEnable, OUTPUT);
   pinMode(steeringPin, OUTPUT);
+  pinMode(relayDir, OUTPUT);
+  pinMode(relayDirFB, INPUT);
   pinMode(relaySpeedWht, OUTPUT);
   pinMode(relaySpeedWhtFB, INPUT);
   pinMode(relaySpeedYlw, OUTPUT);
@@ -131,30 +133,37 @@ void loop() {
 	  break;
 	case '1':	// activate reverse relay
 	  stopAllOutputs();
+          Serial.println("Turning on reverse relay");
 	  digitalWrite(relayDir, HIGH);
 	  break;
 	case '2':	// activate red relay
 	  stopAllOutputs();
+          Serial.println("Turning on red relay");
 	  digitalWrite(relaySpeedRed, HIGH);
 	  break;
 	case '3':	// activate yellow relay
 	  stopAllOutputs();
+          Serial.println("Turning on yellow relay");
 	  digitalWrite(relaySpeedYlw, HIGH);
 	  break;
 	case '4':	// activate white relay
 	  stopAllOutputs();
+          Serial.println("Turning on white relay");
 	  digitalWrite(relaySpeedWht, HIGH);
 	  break;
 	case '5':	// activate red-white relay
 	  stopAllOutputs();
+          Serial.println("Turning on red-white relay");
 	  digitalWrite(relaySpeedRedWht, HIGH);
 	  break;
 	case '6':	// activate red-yellow relay
 	  stopAllOutputs();
+          Serial.println("Turning on red-yellow relay");
 	  digitalWrite(relaySpeedRedYlw, HIGH);
 	  break;
 	case 'h':	// turn the horn on
 	  stopAllOutputs();
+          Serial.println("Turning on horn relay");
 	  digitalWrite(horn, HIGH);
 	  break;
 	case 's':	// stop all outputs
@@ -176,9 +185,10 @@ void loop() {
 	  servoDrive();
 	  break;
 	default:
-	  stopAllOutputs();
+	  //stopAllOutputs();
 	  break;
   }
+  c = 0;
 
 }
 
@@ -195,20 +205,20 @@ void printInputs (void) {
   dof.magGetOrientation(SENSOR_AXIS_Z, &mag_event, &orientation);
   
   Serial.print("Heading:\t\t"); Serial.println(orientation.heading);
-  Serial.print("Roll:\t\t"); Serial.println(orientation.roll);
-  Serial.print("Pitch:\t\t"); Serial.println(orientation.pitch);
+  Serial.print("Roll:\t\t\t"); Serial.println(orientation.roll);
+  Serial.print("Pitch:\t\t\t"); Serial.println(orientation.pitch);
   Serial.print("Internal Voltage:\t"); Serial.println(analogRead(internalBatVolt));
   Serial.print("Motor Voltage:\t\t"); Serial.println(analogRead(motorVolt));
   Serial.print("Motor Current:\t\t"); Serial.println(analogRead(motorCurrent));
   Serial.print("Direction Relay:\t"); Serial.println(digitalRead(relayDirFB));
-  Serial.print("White Relay:\t"); Serial.println(digitalRead(relaySpeedWhtFB));
+  Serial.print("White Relay:\t\t"); Serial.println(digitalRead(relaySpeedWhtFB));
   Serial.print("Red Relay:\t\t"); Serial.println(digitalRead(relaySpeedRedFB));
-  Serial.print("Yellow Relay:\t"); Serial.println(digitalRead(relaySpeedYlwFB));
+  Serial.print("Yellow Relay:\t\t"); Serial.println(digitalRead(relaySpeedYlwFB));
   Serial.print("Red/Wht Relay:\t\t"); Serial.println(digitalRead(relaySpeedRedWhtFB));
-  Serial.print("Red/Ylw Relay:\t"); Serial.println(digitalRead(relaySpeedRedYlwFB));
-  Serial.print("Horn:\t\t"); Serial.println(digitalRead(hornFB));
-  Serial.print("Enable Button:\t"); Serial.println(digitalRead(enableButton));
-  Serial.print("Stop Button:\t"); Serial.println(digitalRead(stopButton));
+  Serial.print("Red/Ylw Relay:\t\t"); Serial.println(digitalRead(relaySpeedRedYlwFB));
+  Serial.print("Horn:\t\t\t"); Serial.println(digitalRead(hornFB));
+  Serial.print("Enable Button:\t\t"); Serial.println(digitalRead(enableButton));
+  Serial.print("Stop Button:\t\t"); Serial.println(digitalRead(stopButton));
 }
 
 void stopAllOutputs (void) {
