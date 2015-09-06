@@ -387,12 +387,12 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
         Serial.println(msg.sysid);
       }
       switch (msg.msgid) {
-        case MAVLINK_MSG_ID_ATTITUDE_CONTROL:
+        case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
           Serial.println("Received attitude control packet");
           if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
-            thisBoat->headingTarget = mavlink_msg_attitude_control_get_yaw(&msg) + 180;
-            throttleIn = mavlink_msg_attitude_control_get_thrust(&msg);
-			throttleFlag = 0xff;
+            thisBoat->headingTarget = mavlink_msg_nav_controller_output_get_nav_bearing(&msg);
+            throttleIn = mavlink_msg_nav_controller_output_get_wp_dist(&msg);
+			      throttleFlag = 0xff;
           } else {
             Serial.print("Target is: ");
             Serial.println(mavlink_msg_attitude_control_get_target(&msg));
@@ -401,7 +401,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
         case MAVLINK_MSG_ID_HEARTBEAT:
           Serial.println("Received heartbeat packet");
           break;
-		case MAVLINK_MSG_ID_SET_MODE:
+		    case MAVLINK_MSG_ID_SET_MODE:
           Serial.println("Received mode set packet");
           if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
           } else {
@@ -409,7 +409,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
             Serial.println(mavlink_msg_attitude_control_get_target(&msg));
           }
           break;
-		case MAVLINK_MSG_ID_COMMAND_INT:
+		    case MAVLINK_MSG_ID_COMMAND_INT:
           Serial.println("Received command int packet");
           if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
           } else {
@@ -417,7 +417,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
             Serial.println(mavlink_msg_attitude_control_get_target(&msg));
           }
           break;
-		case MAVLINK_MSG_ID_COMMAND_LONG:
+		    case MAVLINK_MSG_ID_COMMAND_LONG:
           Serial.println("Received command long packet");
           if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
           } else {
@@ -834,8 +834,8 @@ void lightControl(boatState state, boneState bone) {
   
   // if this is our first run through, initialize the light strips
   if (0 == iteration) {
-	ardLights.begin();
-	boneLights.begin();
+  	ardLights.begin();
+  	boneLights.begin();
   }
   iteration++;
   
