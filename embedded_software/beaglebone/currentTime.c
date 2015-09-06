@@ -17,7 +17,7 @@
 
 // Function prototypes
 void currentTimeGet(nmea_time_t *currentTime);
-uint64_t currentTimeMsSinceEpoch(void);
+uint64_t currentTimeUsSinceEpoch(void);
 
 // Static variables
 
@@ -53,17 +53,17 @@ void currentTimeGet(nmea_time_t *currentTime) {
 }
 
 /**
- * Return ms since unix epoch
+ * Return us since unix epoch
  *
- * @return ms since epoch
+ * @return us since epoch
  */
-uint64_t currentTimeMsSinceEpoch(void) {
-	uint64_t msSinceEpoch;
+uint64_t currentTimeUsSinceEpoch(void) {
+	uint64_t usSinceEpoch;
 	struct timeval time;
 
 	gettimeofday(&time, NULL);
 
-	msSinceEpoch = (((uint64_t) time.tv_sec) * 1000) + (((uint64_t) time.tv_usec) / 1000);
+	usSinceEpoch = (((uint64_t) time.tv_sec) * 1000000) + ((uint64_t) time.tv_usec);
 
-	return (msSinceEpoch);
+	return (usSinceEpoch);
 }

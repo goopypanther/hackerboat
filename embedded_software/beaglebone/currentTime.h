@@ -13,6 +13,6 @@
 #define CURRENTTIME_H_
 
 extern void currentTimeGet(nmea_time_t *currentTime);
-extern uint64_t currentTimeMsSinceEpoch(void);
+extern uint64_t currentTimeUsSinceEpoch(void);
 
 #endif /* CURRENTTIME_H_ */
