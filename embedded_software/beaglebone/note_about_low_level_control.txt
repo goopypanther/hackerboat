@@ -1,8 +1,11 @@
-Arduino's device ID: 2
-Arduino's system id: COMP_ID_SERVO1
+Arduino's sysid: 2
+Arduino's compid: COMP_ID_SERVO1
 
-Beaglebone's device ID: 1
-Beaglebone's system id: MAV_COMP_ID_SYSTEM_CONTROL
+Beaglebone's sysid: 1
+Beaglebone's compid: MAV_COMP_ID_SYSTEM_CONTROL
+
+Groundcontrol's sysid: 255
+Groundcontrol's compid: ???
 
 Sending
 -------
@@ -32,6 +35,14 @@ Receiving
     
  * MAVLINK_MSG_ID_MANUAL_CONTROL from groundcontroll
   * Only act on these if you're currently in armed manual mode and active state
+  * 'r' will be 0 if D-pad is not pressed, 1000 if left, -1000 if right
+  * 'buttons' will be 0 if none pressed, 1 if forward, 4 if backward
 
  * MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT from beaglebone
   * Only act on these if you're currently in armed automatic mode and active state
+
+
+Modes & States
+--------------
+
+Beaglebone state starts in MAV_STATE_BOOT and transisions 
