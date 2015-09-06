@@ -34,7 +34,7 @@ const int32_t disarmedPacketTimeout = 	60000;	/**< Connection timeout, in ms, in
 const int32_t armedPacketTimeout =  	60000;	/**< Connection timeout, in ms, in the armed state							*/
 const int32_t activePacketTimeout = 	300000;	/**< Connection timeout, in ms, in the active state							*/
 const int32_t hornTimeout = 			10000;	/**< Time in ms to sound the horn for before entering an unsafe state		*/	
-const int16_t sendDelay =           	250;	/**< Time in ms between packet transmissions 								*/
+const int16_t sendDelay =           	1000;	/**< Time in ms between packet transmissions 								*/
 const int16_t flashDelay = 				500;	/**< Time in ms between light transitions while flashing					*/
 
 // pin mapping
@@ -370,17 +370,19 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   static mavlink_message_t msg;
   static mavlink_status_t stat;
   static long lastCtrlTime = millis();
-  float throttleIn = 0;
+  uint16_t throttleIn = 0;
+  uint16_t steeringIn = 0;
+  uint16_t bearingIn = 0;
   uint8_t throttleFlag = 0;
   int16_t i = 0;
   
   while (Serial1.available() && (i < 256)) {
     i++;
     if (mavlink_parse_char(0, Serial.read(), &msg, &stat)) {
-      if (msg.sysid == 1) {
+      if (msg.sysid == 255) {
         Serial.println("Received packet from GCS");
         lastCtrlTime = millis();
-      } else if (msg.sysid == 2) {
+      } else if (msg.sysid == 1) {
         Serial.println("Received packet from Beaglebone");
         lastCtrlTime = millis();
       } else {
@@ -388,43 +390,67 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
         Serial.println(msg.sysid);
       }
       switch (msg.msgid) {
-        case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
-          Serial.println("Received attitude control packet");
-          if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
-            thisBoat->headingTarget = mavlink_msg_nav_controller_output_get_nav_bearing(&msg);
-            throttleIn = mavlink_msg_nav_controller_output_get_wp_dist(&msg);
-			      throttleFlag = 0xff;
-          } else {
-            Serial.print("Target is: ");
-            Serial.println(mavlink_msg_attitude_control_get_target(&msg));
-          }
-          break;
-        case MAVLINK_MSG_ID_HEARTBEAT:
+		case MAVLINK_MSG_ID_HEARTBEAT:
           Serial.println("Received heartbeat packet");
+		  if (msg.sysid == 1) {
+			  uint8_t boneMode = mavlink_msg_heartbeat_get_base_mode(&msg);
+			  uint8_t boneStatus = mavlink_msg_heartbeat_get_system_status(&msg);
+			  if (MAV_STATE_EMERGENCY == boneStatus) {
+				  thisBoat->bone = BONE_FAULT;
+			  } else if (MAV_MODE_PREFLIGHT == boneMode) {
+				  if (MAV_STATE_BOOT == boneStatus) {
+					  thisBoat->bone = BONE_SELFTEST;
+				  } else if (MAV_STATE_STANDBY == boneStatus) {
+					  thisBoat->bone = BONE_DISARMED;
+				  }
+			  } else if (MAV_MODE_MANUAL_DISARMED == boneMode) {
+				  thisBoat->bone = BONE_DISARMED;
+			  } else if (MAV_MODE_AUTO_DISARMED == boneMode) {
+				  thisBoat->bone = BONE_DISARMED;
+			  } else if (MAV_MODE_MANUAL_ARMED == boneMode) {
+				  if (MAV_STATE_STANDBY == boneStatus) {
+					  thisBoat->bone = BONE_ARMED;
+				  } else if (MAV_STATE_ACTIVE == boneStatus) {
+					  thisBoat->bone = BONE_STEERING;
+				  } else if (MAV_STATE_CRITICAL == boneStatus) {
+					  thisBoat->bone = BONE_NOSIGNAL;
+				  }
+			  } else if (MAV_MODE_AUTO_ARMED == boneMode) {
+				  if (MAV_STATE_STANDBY == boneStatus) {
+					  thisBoat->bone = BONE_ARMED;
+				  } else if (MAV_STATE_ACTIVE == boneStatus) {
+					  thisBoat->bone = BONE_WAYPOINT;
+				  } else if (MAV_STATE_CRITICAL == boneStatus) {
+					  thisBoat->bone = BONE_NOSIGNAL;
+				  }
+			  }
+		  }
           break;
-		    case MAVLINK_MSG_ID_SET_MODE:
-          Serial.println("Received mode set packet");
-          if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
-          } else {
-            Serial.print("Target is: ");
-            Serial.println(mavlink_msg_attitude_control_get_target(&msg));
-          }
-          break;
-		    case MAVLINK_MSG_ID_COMMAND_INT:
-          Serial.println("Received command int packet");
-          if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
-          } else {
-            Serial.print("Target is: ");
-            Serial.println(mavlink_msg_attitude_control_get_target(&msg));
-          }
-          break;
-		    case MAVLINK_MSG_ID_COMMAND_LONG:
-          Serial.println("Received command long packet");
-          if (2 == mavlink_msg_attitude_control_get_target(&msg)) {
-          } else {
-            Serial.print("Target is: ");
-            Serial.println(mavlink_msg_attitude_control_get_target(&msg));
-          }
+        case MAVLINK_MSG_ID_MANUAL_CONTROL:
+		  if ((msg.sysid == 255) && 
+			  (BOAT_ACTIVE == thisBoat->state) && 
+			  (BONE_STEERING == thisBoat->bone)) {
+			  throttleFlag = -1;
+			  uint8_t buttonsIn = mavlink_msg_manual_control_get_buttons(&msg);
+			  if (1 == buttonsIn) {
+				  throttleIn = 100;
+			  } else if (4 == buttonsIn) {
+				  throttleIn = -100;
+			  } else {
+				  throttleIn = 0;
+			  }
+			  steeringIn = mavlink_msg_manual_control_get_r(&msg);
+		  }
+		  break;
+		case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
+		  if ((msg.sysid == 1) && 
+			  (BOAT_ACTIVE == thisBoat->state) && 
+			  (BONE_WAYPOINT == thisBoat->bone)) {
+			  throttleFlag = -1;
+			  throttleIn = mavlink_msg_nav_controller_output_get_wp_dist(&msg);
+			  bearingIn = mavlink_msg_nav_controller_output_get_target_bearing(&msg);
+		  }
+		  break;
         default:
           Serial.println("Received some other sort of packet");
       }
@@ -432,28 +458,42 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   }
   
   if (throttleFlag) {
-	if (throttleIn < 0) {
-	  if (throttleIn > 0.1) {
+	if (throttleIn <= 0) {
+	  if (throttleIn > -1) {
 	    thisBoat->throttle = STOP;
-	  } else if (throttleIn > 1.0) {
+	  } else if (throttleIn > -20) {
 	    thisBoat->throttle = REV1;
-	  } else if (throttleIn > 2.0) {
+	  } else if (throttleIn > -40) {
 	    thisBoat->throttle = REV2;
-	  } else if (throttleIn > 3.0) {
+	  } else if (throttleIn > -60) {
 	    thisBoat->throttle = REV3;
 	  }
-	} else if (throttleIn < 0.1) {
-	  thisBoat->throttle = STOP;
 	} else if (throttleIn < 1) {
+	  thisBoat->throttle = STOP;
+	} else if (throttleIn < 20) {
 	  thisBoat->throttle = FWD1;
-	} else if (throttleIn < 2) {
+	} else if (throttleIn < 40) {
 	  thisBoat->throttle = FWD2;
-	} else if (throttleIn < 3) {
+	} else if (throttleIn < 60) {
 	  thisBoat->throttle = FWD3;
-	} else if (throttleIn < 4) {
+	} else if (throttleIn < 80) {
 	  thisBoat->throttle = FWD4;
-	} else if (throttleIn < 5) {
+	} else if (throttleIn < 100) {
 	  thisBoat->throttle = FWD5;
+	}
+	if (MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT == msg.msgid) {
+		thisBoat->headingTarget = (double)bearingIn;
+	} else if (MAVLINK_MSG_ID_MANUAL_CONTROL == msg.msgid) {
+		if (bearingIn > 10) {
+			thisBoat->headingTarget = (thisBoat->headingTarget - 2.5);
+		} else if (bearingIn < 10) {
+			thisBoat->headingTarget = (thisBoat->headingTarget + 2.5);
+		}
+		if (thisBoat->headingTarget < 0.0) {
+			thisBoat->headingTarget += 360.0;
+		} else if (thisBoat->headingTarget > 360.0) {
+			thisBoat->headingTarget -= 360.0;
+		}
 	}
   }
   return lastCtrlTime;
@@ -1128,9 +1168,10 @@ int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVol
   uint16_t len;
   
   if ((millis() - *lastPacketOut) > sendDelay) {
-    len = mavlink_msg_power_status_pack(2, MAV_COMP_ID_SERVO1, &outMsg, 
-	                                    (thisBoat->internalVoltage * 1000), 
-										(thisBoat->batteryVoltage * 1000), 0);
+    len = mavlink_msg_battery_status_pack(2, MAV_COMP_ID_SERVO1, &outMsg, 0,
+	                                    (uint16_t)(thisBoat->internalVoltage * 1000), 
+										(uint16_t)(thisBoat->batteryVoltage * 1000), 
+										0, 0, 0, 0, 0, 0, 0, 0);
 	outBuf = (byte *)(&outMsg);
     Serial1.write(outBuf, len);
 	len = mavlink_msg_attitude_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
@@ -1138,7 +1179,7 @@ int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVol
                                     (thisBoat->orientation.heading * (3.1415/180)), 0, 0, 0);
     outBuf = (byte *)(&outMsg);
     Serial1.write(outBuf, len);
-	len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
+	/*len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                         "batI", batCurrent);
 	outBuf = (byte *)(&outMsg);
     Serial1.write(outBuf, len);
@@ -1149,7 +1190,7 @@ int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVol
 	len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                         "motorI", motCurrent);
 	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+    Serial1.write(outBuf, len);*/
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "enable", thisBoat->enbButton);
 	outBuf = (byte *)(&outMsg);
