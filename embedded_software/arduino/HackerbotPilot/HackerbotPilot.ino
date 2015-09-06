@@ -292,6 +292,7 @@ void loop (void) {
       boat.state = executeSelfRecovery(&boat, lastState, cmd);
       break;
     default:
+	  boat.state = executeFault(&boat, lastState, cmd);
       break;
   }
   
