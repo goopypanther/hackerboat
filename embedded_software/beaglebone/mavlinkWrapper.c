@@ -20,7 +20,7 @@
 // Function prototypes
 void mavlinkWrapperSend(mavlink_message_t *packet);
 uint32_t mavlinkWrapperReceive(void);
-const mavlink_message_t *mavlinkWrapperReturnMessage(void);
+mavlink_message_t mavlinkWrapperReturnMessage(void);
 
 // Static variables
 static mavlink_message_t incomingMessage;
@@ -71,10 +71,10 @@ uint32_t mavlinkWrapperReceive(void) {
 }
 
 /**
- * Returns pointer for accessing most recently received mavlink packet
+ * Returns most recently received mavlink packet
  *
- * @return pointer to most recently received packet
+ * @return most recently received packet
  */
-const mavlink_message_t *mavlinkWrapperReturnMessage(void) {
-	return ((const mavlink_message_t*) &incomingMessage);
+mavlink_message_t mavlinkWrapperReturnMessage(void) {
+	return (incomingMessage);
 }
