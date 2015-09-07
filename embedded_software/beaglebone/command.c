@@ -50,6 +50,13 @@ void commandReceive(const mavlink_message_t *msg) {
 
 					boatStateSetState(MAV_STATE_STANDBY);
 
+					// Check which armed mode we are in
+					if (boatStateReturnMode() == MAV_MODE_AUTO_ARMED) {
+						boatStateSetMode(MAV_MODE_AUTO_DISARMED);
+					} else if (boatStateReturnMode() == MAV_MODE_MANUAL_ARMED) {
+						boatStateSetMode(MAV_MODE_MANUAL_DISARMED);
+					} else {}
+
 				} else {}
 
 			} else {}
