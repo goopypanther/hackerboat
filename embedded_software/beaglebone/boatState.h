@@ -12,6 +12,7 @@
 #ifndef BOATSTATE_H_
 #define BOATSTATE_H_
 
+extern void boatStateReceive(const mavlink_message_t *msg);
 extern void boatStateSetMode(MAV_MODE mode);
 extern void boatStateSetState(MAV_STATE state);
 extern MAV_MODE boatStateReturnMode(void);
@@ -20,6 +21,8 @@ extern MAV_STATE boatStateReturnState(void);
 extern MAV_TYPE boatStateReturnVehicleType(void);
 extern MAV_AUTOPILOT boatStateReturnAutopilotType(void);
 extern uint8_t boatStateReturnSystemId(void);
+extern uint8_t boatStateReturnShoreSystemId(void);
+extern uint8_t boatStateReturnLowLevelSystemId(void);
 extern MAV_SYS_STATUS_SENSOR boatStateReturnSensors(void);
 
 #endif /* BOATSTATE_H_ */
