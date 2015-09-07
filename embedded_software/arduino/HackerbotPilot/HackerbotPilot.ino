@@ -16,6 +16,22 @@
 #define FAULT_BB_FAULT         0x0008			/**< Beaglebone fault bit 	*/
 #define FAULT_NVM              0x0010			/**< NVM fault bit 			*/
 
+// calibration constants
+// these constants are used to calibrate the accelerometer and magnetometer
+#define X_ACCEL_OFFSET          (-0.275)
+#define X_ACCEL_GAIN            (0.092378753)
+#define Y_ACCEL_OFFSET          (2.825)
+#define Y_ACCEL_GAIN            (0.07160759)
+#define Z_ACCEL_OFFSET          (-3.925)
+#define Z_ACCEL_GAIN            (0.06655574)
+#define X_MAG_OFFSET            (-24.725)
+#define X_MAG_GAIN              (0.018003421)
+#define Y_MAG_OFFSET            (0)
+#define Y_MAG_GAIN              (0.017571604)
+#define Z_MAG_OFFSET            (-5.92)
+#define Z_MAG_GAIN              (0.017253278)
+
+
 // test limits
 const double compassDeviationLimit = 	10.0;	/**< Limit of compass swing, in degrees, during test period 	*/
 const double tiltDeviationLimit =    	15.0;	/**< Limit of tilt in degrees from horizontal during test		*/
@@ -81,7 +97,6 @@ const uint32_t red = Adafruit_NeoPixel::Color(0xff, 0, 0);			/**< pixel colors f
 const uint32_t blu = Adafruit_NeoPixel::Color(0, 0, 0xff);			/**< pixel colors for blue		*/
 const uint32_t amb = Adafruit_NeoPixel::Color(0xff, 0xbf, 0);		/**< pixel colors for amber		*/
 const uint32_t wht = Adafruit_NeoPixel::Color(0xff, 0xff, 0xff);	/**< pixel colors for white		*/
-
 
 //const uint32_t lightTimeout =        1490000;
 //const uint32_t ctrlTimeout =         1500000;
@@ -190,6 +205,8 @@ void lightControl(boatState state, boneState bone);
 int output (throttleState * throttle, double error);
 int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVoltage, double motCurrent, long * lastPacketOut);
 int writeNVM (boatState state, throttleState throttle, double heading);
+void calibrateMag (sensors_event_t *magEvent);
+void calibrateAccel (sensors_event_t *accelEvent);
 
 void setup (void) {
   Serial.begin(115200);
@@ -339,6 +356,8 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   // get & process the IMU data
   accel.getEvent(&accel_event);
   mag.getEvent(&mag_event);
+  calibrateMag(&mag_event);
+  calibrateAccel(&accel_event);
   dof.accelGetOrientation(&accel_event, &(thisBoat->orientation));
   dof.magTiltCompensation(SENSOR_AXIS_Z, &mag_event, &accel_event);
   dof.magGetOrientation(SENSOR_AXIS_Z, &mag_event, &(thisBoat->orientation));
@@ -1221,4 +1240,28 @@ int writeNVM (boatState state, throttleState throttle, double heading) {
   return 0;
 }
 
+void calibrateMag (sensors_event_t *magEvent) {
+  float *mag_X, *mag_Y, *mag_Z;
+  mag_X = &(magEvent->magnetic.y);
+  mag_Y = &(magEvent->magnetic.z);
+  mag_Z = &(magEvent->magnetic.x);
+  *mag_X += X_MAG_OFFSET;
+  *mag_X *= X_MAG_GAIN;
+  *mag_Y += Y_MAG_OFFSET;
+  *mag_Y *= Y_MAG_GAIN;
+  *mag_Z += Z_MAG_OFFSET;
+  *mag_Z *= Z_MAG_GAIN;
+}
 
+void calibrateAccel (sensors_event_t *accelEvent) {
+  float *accel_X, *accel_Y, *accel_Z;
+  accel_X = &(accelEvent->acceleration.y);
+  accel_Y = &(accelEvent->acceleration.z);
+  accel_Z = &(accelEvent->acceleration.x);
+  *accel_X += X_ACCEL_OFFSET;
+  *accel_X *= X_ACCEL_GAIN;
+  *accel_Y += Y_ACCEL_OFFSET;
+  *accel_Y *= Y_ACCEL_GAIN;
+  *accel_Z += Z_ACCEL_OFFSET;
+  *accel_Z *= Z_ACCEL_GAIN;
+}
