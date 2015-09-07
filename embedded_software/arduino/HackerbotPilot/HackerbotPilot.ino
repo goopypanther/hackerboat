@@ -397,7 +397,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   
   while (Serial1.available() && (i < 256)) {
     i++;
-    if (mavlink_parse_char(0, Serial.read(), &msg, &stat)) {
+    if (mavlink_parse_char(0, Serial1.read(), &msg, &stat)) {
       if (msg.sysid == 255) {
         Serial.println("Received packet from GCS");
         lastCtrlTime = millis();
