@@ -107,29 +107,29 @@ const uint32_t wht = Adafruit_NeoPixel::Color(0xff, 0xff, 0xff);	/**< pixel colo
  * @brief An enum to store the current state of the boat.
  */
 typedef enum boatState {
-  BOAT_POWERUP, 		/**< The boat enters this state at the end of initialization */
-  BOAT_ARMED,			/**< In this state, the boat is ready to receive go commands over RF */
-  BOAT_SELFTEST,		/**< After powerup, the boat enters this state to determine whether it's fit to run */
-  BOAT_DISARMED,		/**< This is the default safe state. No external command can start the motor */
-  BOAT_ACTIVE,			/**< This is the normal steering state */
-  BOAT_LOWBATTERY,		/**< The battery voltage has fallen below that required to operate the motor */
-  BOAT_FAULT,			/**< The boat is faulted in some fashion */
-  BOAT_SELFRECOVERY		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
+  BOAT_POWERUP 		= 0, 	/**< The boat enters this state at the end of initialization */
+  BOAT_ARMED 		= 1,	/**< In this state, the boat is ready to receive go commands over RF */
+  BOAT_SELFTEST 	= 2,	/**< After powerup, the boat enters this state to determine whether it's fit to run */
+  BOAT_DISARMED 	= 3,	/**< This is the default safe state. No external command can start the motor */
+  BOAT_ACTIVE 		= 4,	/**< This is the normal steering state */
+  BOAT_LOWBATTERY 	= 5,	/**< The battery voltage has fallen below that required to operate the motor */
+  BOAT_FAULT 		= 6,	/**< The boat is faulted in some fashion */
+  BOAT_SELFRECOVERY = 7		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
 } boatState;				
 
 /**
  * @brief An enum to store the current throttle state.
  */
 typedef enum throttleState {
-  FWD5,		/**< Full forward speed. Red, white, and yellow all tied to V+, black tied to V- */
-  FWD4,		/**< Motor forward 4 */
-  FWD3,		/**< Motor forward 3 */
-  FWD2,		/**< Motor forward 2 */
-  FWD1,		/**< Motor forward 1 */
-  STOP,		/**< Motor off */
-  REV1,		/**< Motor reverse 1 */
-  REV2,		/**< Motor forward 2 */
-  REV3		/**< Full reverse speed */
+  FWD5 		= 5,	/**< Full forward speed. Red, white, and yellow all tied to V+, black tied to V- */
+  FWD4		= 4,	/**< Motor forward 4 */
+  FWD3		= 3,	/**< Motor forward 3 */
+  FWD2		= 2,	/**< Motor forward 2 */
+  FWD1		= 1,	/**< Motor forward 1 */
+  STOP		= 0,	/**< Motor off */
+  REV1		= 255,	/**< Motor reverse 1 */
+  REV2		= 254,	/**< Motor forward 2 */
+  REV3		= 253	/**< Full reverse speed */
 } throttleState;
 
 /**
@@ -147,14 +147,14 @@ typedef enum stateCmd {
  * @brief Beaglebone state
  */
 typedef enum boneState {
-  BONE_POWERUP,		/**< Initial starting state 				*/
-  BONE_SELFTEST,	/**< Initial self-test						*/
-  BONE_DISARMED,	/**< Disarmed wait state					*/
-  BONE_ARMED,		/**< Beaglebone armed & ready to navigate	*/  
-  BONE_WAYPOINT,	/**< Beaglebone navigating by waypoints		*/
-  BONE_STEERING,	/**< Beaglebone manual steering				*/
-  BONE_NOSIGNAL,	/**< Beaglbone has lost shore signal		*/	
-  BONE_FAULT		/**< Beaglebone faulted 					*/ 
+  BONE_POWERUP		= 0,	/**< Initial starting state 				*/
+  BONE_SELFTEST		= 1,	/**< Initial self-test						*/
+  BONE_DISARMED		= 2,	/**< Disarmed wait state					*/
+  BONE_ARMED		= 3,	/**< Beaglebone armed & ready to navigate	*/  
+  BONE_WAYPOINT		= 4,	/**< Beaglebone navigating by waypoints		*/
+  BONE_STEERING		= 5,	/**< Beaglebone manual steering				*/
+  BONE_NOSIGNAL		= 6,	/**< Beaglbone has lost shore signal		*/	
+  BONE_FAULT		= 7		/**< Beaglebone faulted 					*/ 
 } boneState;
 
 /**
@@ -711,8 +711,11 @@ boatState executeArmed(boatVector * thisBoat, boatState lastState, stateCmd cmd)
 	return BOAT_ARMED;
   } else {
     digitalWrite(horn, LOW);
-	if (CMD_ACTIVE == cmd) return BOAT_ACTIVE;
-	if (CMD_DISARM == cmd) return BOAT_DISARMED;
+	if (BONE_WAYPOINT == thisBoat->bone) return BOAT_ACTIVE;
+	if (BONE_STEERING == thisBoat->bone) return BOAT_ACTIVE;
+	if (BONE_DISARMED == thisBoat->bone) return BOAT_DISARMED;
+	if (BONE_NOSIGNAL == thisBoat->bone) return BOAT_DISARMED;
+	if (BONE_FAULT == thisBoat->bone) return BOAT_DISARMED;
   }
   return BOAT_ARMED;
 }
@@ -752,8 +755,8 @@ boatState executeActive(boatVector * thisBoat, boatState lastState, stateCmd cmd
   }
   
   // check for command
-  if (CMD_HALT == cmd) return BOAT_ARMED;
-  if (CMD_DISARM == cmd) return BOAT_DISARMED;
+  if (BONE_ARMED == thisBoat->bone) return BOAT_ARMED;
+  if (BONE_DISARMED == thisBoat->bone) return BOAT_DISARMED;
   
   // check for low voltage
   if (thisBoat->internalVoltage < serviceVoltageLimit) {
