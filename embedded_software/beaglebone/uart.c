@@ -182,14 +182,13 @@ uint8_t uartReturnIncomingNmeaChar(void) {
  */
 void *uartLowLevelReceiveThread(void) {
 	uint32_t messageFound;
-	uint32_t readBytes;
 	uint8_t incomingChar;
 	mavlink_message_t message;
 	mavlink_status_t messageStatus;
 
 	// Main loop, runs forever
 	for (;;) {
-		readBytes = read(lowLevelFd, incomingChar, sizeof(incomingChar)); // Get char from UART
+		read(lowLevelFd, &incomingChar, sizeof(incomingChar)); // Get char from UART
 
 		messageFound = mavlink_parse_char(MAVLINK_COMM_1,  // Channel (different than UDP chan)
 										  incomingChar,    // Char to parse
