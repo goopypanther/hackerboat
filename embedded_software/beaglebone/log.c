@@ -44,8 +44,8 @@ static const char packetTypeNavControllerOutputString[] = "Nav controller output
 
 static const char packetTypeBatteryStatusString[] = "Battery status";
 static const char packetTypeSystemStatusString[] = "System status";
-static const char packetTypeGpsStatusString[] = "GPS status";
 
+static const char packetTypeManualControllString[] = "Manual control";
 static const char packetTypeManualSetpointString[] = "Manual setpoint";
 static const char packetTypeSetModeString[] = "Set mode";
 static const char packetTypeMissionRequestString[] = "Mission request";
@@ -135,16 +135,15 @@ void logPacket(mavlink_message_t *packet) {
 	currentTimeGet(&time); // Get current time
 
 	// Determine if packet came from shore
-	if (packet->sysid == SHORE_SYSTEM_ID) {
+	if (packet->sysid == boatStateReturnShoreSystemId()) {
 		packetSource = packetSourceShoreString;
 
 	// Did packet come from beaglebone
-	} else if (packet->compid == MAV_COMP_ID_SYSTEM_CONTROL) {
+	} else if (packet->sysid == boatStateReturnSystemId()) {
 		packetSource = packetSourceBeagleboneString;
 
 	// Did packet come from arduino
-	} else if (packet->compid == MAV_COMP_ID_SERVO1 ||
-			   packet->compid == MAV_COMP_ID_IMU) {
+	} else if (packet->sysid == boatStateReturnLowLevelSystemId()) {
 		packetSource = packetSourceLowLevelString;
 
 	// Did packet come from somewhere else
@@ -194,6 +193,10 @@ void logPacket(mavlink_message_t *packet) {
 		packetType = packetTypeSystemStatusString;
 		break;
 
+	case MAVLINK_MSG_ID_MANUAL_CONTROL:
+		packetType = packetTypeManualControllString;
+		break;
+
 	case MAVLINK_MSG_ID_MANUAL_SETPOINT:
 		packetType = packetTypeManualSetpointString;
 		break;
@@ -220,10 +223,6 @@ void logPacket(mavlink_message_t *packet) {
 
 	case MAVLINK_MSG_ID_MISSION_SET_CURRENT:
 		packetType = packetTypeMissionSetCurrentString;
-		break;
-
-	case MAVLINK_MSG_ID_GPS_STATUS:
-		packetType = packetTypeGpsStatusString;
 		break;
 
 	case MAVLINK_MSG_ID_MISSION_COUNT:
