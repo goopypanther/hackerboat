@@ -16,6 +16,6 @@
 
 extern void mavlinkWrapperSend(mavlink_message_t *packet);
 extern uint32_t mavlinkWrapperReceive(void);
-extern const mavlink_message_t *mavlinkWrapperReturnMessage(void);
+extern mavlink_message_t mavlinkWrapperReturnMessage(void);
 
 #endif /* MAVLINKWRAPPER_H_ */
