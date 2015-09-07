@@ -1,10 +1,11 @@
 /**
  * @file includes.h
- * @brief
+ * @brief main includes file
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  *
- * @version
+ * @version 1.0
+ * @license GPL 3.0
  * @since Jun 18, 2015
  */
 
@@ -34,5 +35,10 @@
 #include "uart.h"
 #include "currentTime.h"
 #include "Map.h"
+#include "boatState.h"
+#include "voltage.h"
+#include "heartbeat.h"
+#include "param.h"
+#include "command.h"
 
 #endif /* INCLUDES_H_ */
