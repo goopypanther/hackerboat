@@ -1,10 +1,11 @@
 /**
  * @file command.c
- * @brief
+ * @brief Changes boat state according to received commands
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  *
- * @version
+ * @license GPL 3.0
+ * @version 1.0
  * @since Sep 5, 2015
  */
 
@@ -19,6 +20,11 @@ void commandReceive(const mavlink_message_t *msg);
 
 // Static variables
 
+/**
+ * Receives and parses command packets from groundcontrol
+ *
+ * @param msg pointer to received mavlink packet
+ */
 void commandReceive(const mavlink_message_t *msg) {
 	mavlink_command_long_t decodedCommandMessage;
 

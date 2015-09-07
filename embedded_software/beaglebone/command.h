@@ -1,6 +1,6 @@
 /**
  * @file command.h
- * @brief
+ * @brief Changes boat state according to received commands
  *
  * @author Jeremy Ruhland <jeremy ( a t ) goopypanther.org>
  *
