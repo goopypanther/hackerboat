@@ -148,6 +148,7 @@ void mainStateSelectTask(void) {
 	case MAV_STATE_BOOT:
 		if (Neo6mGetStatus() == TRUE) {
 			boatStateSetState(MAV_STATE_STANDBY);
+			logLine("*** Acquired GPS Lock ***");
 		} else {}
 		break;
 
@@ -156,8 +157,14 @@ void mainStateSelectTask(void) {
 		break;
 
 	case MAV_STATE_ACTIVE:
-		if (heartbeatCheckPanicHost() || heartbeatCheckPanicLowLevel()) {
+		if (heartbeatCheckPanicHost()) {
 			boatStateSetState(MAV_STATE_EMERGENCY);
+			logLine("*** Emergency, lost comms with groundcontrol ***");
+		} else {}
+
+		if (heartbeatCheckPanicLowLevel()) {
+			boatStateSetState(MAV_STATE_EMERGENCY);
+			logLine("*** Emergency, lost comms with lowlevel ***");
 		} else {}
 		break;
 

@@ -62,6 +62,11 @@ void boatStateReceive(const mavlink_message_t *msg) {
 			break;
 		}
 
+		// Notify if system has been armed
+		if ((mode == MAV_MODE_MANUAL_ARMED) || (mode == MAV_MODE_AUTO_ARMED)) {
+			logLine("*** System Armed ***");
+		} else {}
+
 		boatStateSetMode(mode);
 
 	} else {}

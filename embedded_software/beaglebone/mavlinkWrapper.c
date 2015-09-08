@@ -40,6 +40,7 @@ void mavlinkWrapperSend(mavlink_message_t *packet) {
 	udpSend(packetBuffer, packetBufferFilled); // Send contents of buffer over UDP
 	uartLowLevelSend(packetBuffer, packetBufferFilled); // Send contents of buffer over UART
 
+	logLine("Transmitted:");
 	logPacket(packet); // Log transmission of packet
 }
 
@@ -60,7 +61,15 @@ uint32_t mavlinkWrapperReceive(void) {
 	// Second, try to receive packet from UART
 	if (messageFound == FALSE) {
 		messageFound = uartGetMessage(&incomingMessage, &incomingMessageStatus); // Receive packet from UART
-	} else {}
+
+		// If received message from uart
+		if (messageFound) {
+			logLine("Received UART:");
+		} else {}
+	} else {
+		// If received message from UDP
+		logLine("Received UDP:");
+	}
 
 	// Log reception of packet if complete packet received
 	if (messageFound) {

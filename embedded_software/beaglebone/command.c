@@ -48,6 +48,8 @@ void commandReceive(const mavlink_message_t *msg) {
 				} else if (decodedCommandMessage.command == MAV_CMD_NAV_LAND) {
 				// Check if landing button pressed
 
+					logLine("*** System Disarmed ***");
+
 					boatStateSetState(MAV_STATE_STANDBY);
 
 					// Check which armed mode we are in
