@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
+#include <termios.h>
 
 #include "udp.h"
 #include "log.h"

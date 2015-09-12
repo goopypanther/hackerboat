@@ -47,20 +47,27 @@ static uint8_t incomingNmeaChar;
  * @param lowLevelDevice path to tty
  */
 void uartInit(const char *gpsDevice, const char *lowLevelDevice) {
+	struct termios lowLevelFdSettings;
+
 	// Open UARTS
-	gpsFd = open(gpsDevice, O_RDWR);
+	gpsFd = open(gpsDevice, O_RDWR | O_NONBLOCK | O_NDELAY);
 
 	// Check for error opening GPS
 	if (gpsFd < 0) {
 		err(EXIT_FAILURE, "Failed to open GPS TTY %d\n", gpsFd);
 	} else {}
 
-	lowLevelFd = open(lowLevelDevice, O_RDWR);
+	lowLevelFd = open(lowLevelDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	// Check for error opening low level device
 	if (lowLevelFd < 0) {
 		err(EXIT_FAILURE, "Failed to open low level TTY %d\n", lowLevelFd);
 	} else {}
+
+	// Set lowLevelFd into raw mode
+	tcgetattr(lowLevelDevice, &lowLevelFdSettings);
+	cfmakeraw(&lowLevelFdSettings);
+	tcsetattr(lowLevelDevice, TCSAFLUSH, &lowLevelFdSettings);
 
 	Neo6mInit(); // Configure GPS and parsing functions
 
