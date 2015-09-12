@@ -4,6 +4,7 @@ SOURCES=args.c boatState.c command.c currentTime.c heartbeat.c log.c main.c Map.
 INCLUDES=./mavlink/hackerboat
 
 COMPILER=gcc
+BEAGLEBONECOMPILER=/usr/local/angstrom/arm/bin/arm-angstrom-linux-gnueabi-gcc
 
 all:
 	$(COMPILER) -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -lm -lpthread
@@ -18,3 +19,7 @@ clean:
 
 doxy:
 	doxygen doxyfile
+
+remotedebug:
+	$(BEAGLEBONECOMPILER) -g -I $(INCLUDES) -o $(APPNAME) $(SOURCES) -L /usr/local/angstrom/arm/arm-angstrom-linux-gnueabi/usr/include -lm -lpthread
+	du -h $(APPNAME)
