@@ -19,7 +19,7 @@
 
 // Defines
 
-#define STRING_BUFFER 100
+#define STRING_BUFFER 1024
 #define DEFAULT_LOG_FILE "./hackerboatNavigator.log"
 
 // Static variables
@@ -77,9 +77,9 @@ void argsParseInputParams(int argc, char* argv[]) {
     // Check for proper number of arguments
     if (argc >= 4) {
         // Copy substrings to variables
-        strncpy(target_ip, argv[1], STRING_BUFFER);
-        strncpy(gps_serial_device, argv[2], STRING_BUFFER);
-        strncpy(low_level_serial_device, argv[3], STRING_BUFFER);
+        strcpy(target_ip, argv[1]);
+        strcpy(gps_serial_device, argv[2]);
+        strcpy(low_level_serial_device, argv[3]);
         
         // Make sure strings are still null terminated
         // (if buffer overrun occurred)
@@ -89,11 +89,11 @@ void argsParseInputParams(int argc, char* argv[]) {
 
         // If log file was supplied
         if (argc == 5) {
-            strncpy(log_file, argv[4], STRING_BUFFER);
+            strcpy(log_file, argv[4]);
             
         } else {
         // If no log file supplied
-            strncpy(log_file, DEFAULT_LOG_FILE, STRING_BUFFER);
+            strcpy(log_file, DEFAULT_LOG_FILE);
         }
         
         log_file[STRING_BUFFER] = 0x00;
