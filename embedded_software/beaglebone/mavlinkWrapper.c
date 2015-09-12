@@ -58,17 +58,17 @@ uint32_t mavlinkWrapperReceive(void) {
 	// commands from ground control.
 	messageFound = udpGetMessage(&incomingMessage, &incomingMessageStatus); // Receive packet from UDP socket
 
+	// Check if packet found
+	if (messageFound == TRUE) {
+		logLine("Received UDP:");
+	} else {
 	// Second, try to receive packet from UART
-	if (messageFound == FALSE) {
 		messageFound = uartGetMessage(&incomingMessage, &incomingMessageStatus); // Receive packet from UART
 
-		// If received message from uart
-		if (messageFound) {
+		// Check if packet found
+		if (messageFound == TRUE) {
 			logLine("Received UART:");
 		} else {}
-	} else {
-		// If received message from UDP
-		logLine("Received UDP:");
 	}
 
 	// Log reception of packet if complete packet received
