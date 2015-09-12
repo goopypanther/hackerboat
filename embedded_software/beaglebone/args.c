@@ -32,28 +32,28 @@ static char log_file[STRING_BUFFER];
  * @return string pointer of IP address of host
  */
 char *argsReturnTargetIp(void) {
-    return ((char *) &target_ip);
+    return (target_ip);
 }
 
 /**
  * @return string pointer of gps tty device
  */
 char *argsReturnGpsSerialDevice(void) {
-    return ((char *) &gps_serial_device);
+    return (gps_serial_device);
 }
 
 /**
  * @return string pointer of low level serial device
  */
 char *argsReturnLowLevelSerial(void) {
-    return ((char *) &low_level_serial_device);
+    return (low_level_serial_device);
 }
 
 /**
  * @return string pointer of log file
  */
 char *argsReturnLogFile(void) {
-    return ((char *) &log_file);
+    return (log_file);
 }
 
 /**
@@ -75,7 +75,7 @@ char *argsReturnLogFile(void) {
  */
 void argsParseInputParams(int argc, char* argv[]) {
     // Check for proper number of arguments
-    if (argc >= 4) {
+    if ((argc >= 4) && (argc <= 5)) {
         // Copy substrings to variables
         strcpy(target_ip, argv[1]);
         strcpy(gps_serial_device, argv[2]);
@@ -83,9 +83,9 @@ void argsParseInputParams(int argc, char* argv[]) {
         
         // Make sure strings are still null terminated
         // (if buffer overrun occurred)
-        target_ip[STRING_BUFFER] = 0x00;
-        gps_serial_device[STRING_BUFFER] = 0x00;
-        low_level_serial_device[STRING_BUFFER] = 0x00;
+        target_ip[STRING_BUFFER - 1] = 0x00;
+        gps_serial_device[STRING_BUFFER - 1] = 0x00;
+        low_level_serial_device[STRING_BUFFER - 1] = 0x00;
 
         // If log file was supplied
         if (argc == 5) {
@@ -96,7 +96,7 @@ void argsParseInputParams(int argc, char* argv[]) {
             strcpy(log_file, DEFAULT_LOG_FILE);
         }
         
-        log_file[STRING_BUFFER] = 0x00;
+        log_file[STRING_BUFFER - 1] = 0x00;
         
     } else {
     // Print help message if improper number of arguments passed
