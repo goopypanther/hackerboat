@@ -65,9 +65,9 @@ void uartInit(const char *gpsDevice, const char *lowLevelDevice) {
 	} else {}
 
 	// Set lowLevelFd into raw mode
-	tcgetattr(lowLevelDevice, &lowLevelFdSettings);
+	tcgetattr(lowLevelFd, &lowLevelFdSettings);
 	cfmakeraw(&lowLevelFdSettings);
-	tcsetattr(lowLevelDevice, TCSAFLUSH, &lowLevelFdSettings);
+	tcsetattr(lowLevelFd, TCSAFLUSH, &lowLevelFdSettings);
 
 	Neo6mInit(); // Configure GPS and parsing functions
 
