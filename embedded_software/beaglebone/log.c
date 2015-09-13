@@ -67,6 +67,8 @@ static const char packetTypeParamRequestString[] = "Param Request";
 static const char packetTypeParamValueString[] = "Param value";
 static const char packetTypeParamRequestReadString[] = "Param request read";
 
+static const char packetTypeNamedValueInt[] = "Named value int";
+
 /**
  * Open log file
  *
@@ -252,6 +254,10 @@ void logPacket(mavlink_message_t *packet) {
 	case MAVLINK_MSG_ID_MISSION_ACK:
 		packetType = packetTypeMissionAckString;
 		break;
+
+	case MAVLINK_MSG_ID_NAMED_VALUE_INT:
+	    packetType = packetTypeNamedValueInt;
+	    break;
 
 	default:
 		// If unknown packet arrived log type number
