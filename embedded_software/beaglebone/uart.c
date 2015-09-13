@@ -57,7 +57,7 @@ void uartInit(const char *gpsDevice, const char *lowLevelDevice) {
 		err(EXIT_FAILURE, "Failed to open GPS TTY %d\n", gpsFd);
 	} else {}
 
-	lowLevelFd = open(lowLevelDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	lowLevelFd = open(lowLevelDevice, O_RDWR | O_NOCTTY);
 
 	// Check for error opening low level device
 	if (lowLevelFd < 0) {
