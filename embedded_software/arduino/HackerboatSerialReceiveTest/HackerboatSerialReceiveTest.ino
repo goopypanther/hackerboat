@@ -2,12 +2,11 @@ void setup(void) {
   Serial.begin(115200);
   Serial1.begin(115200);
   
-  while(!Serial) {}
-  while(!Serial1){}
+  while((!Serial) || (!Serial1)) {}
+  Serial.println("test");
 }
 
 void loop(void) {
-    Serial1.println("test");
     
     if (Serial1.available() > 0) {
         Serial.write(Serial1.read());
