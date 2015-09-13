@@ -1188,51 +1188,53 @@ int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVol
   mavlink_message_t outMsg;
   byte * outBuf;
   uint16_t len;
+  uint8_t packetBuffer[sizeof(mavlink_message_t)];
+  uint32_t packetBufferFilled;
   
   if ((millis() - *lastPacketOut) > sendDelay) {
     len = mavlink_msg_battery_status_pack(2, MAV_COMP_ID_SERVO1, &outMsg, 0,
 	                                    (uint16_t)(thisBoat->internalVoltage * 1000), 
 										(uint16_t)(thisBoat->batteryVoltage * 1000), 
 										0, 0, 0, 0, 0, 0, 0, 0);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_attitude_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                (thisBoat->headingTarget * (3.1415/180)), 0,  
                                     (thisBoat->orientation.heading * (3.1415/180)), 0, 0, 0);
-    outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+    packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	/*len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                         "batI", batCurrent);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                         "motorV", motVoltage);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_float_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                         "motorI", motCurrent);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);*/
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);*/
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "enable", thisBoat->enbButton);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "stop", thisBoat->stopButton);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "state", thisBoat->state);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "throttle", thisBoat->throttle);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), 
 	                                       "bone", thisBoat->bone);
-	outBuf = (byte *)(&outMsg);
-    Serial1.write(outBuf, len);
+	packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
+    Serial1.write(packetBuffer, packetBufferFilled);
 	
 	*lastPacketOut = millis();
   }
