@@ -50,6 +50,8 @@ void mavlinkWrapperSend(mavlink_message_t *packet) {
  * @return 1 if new packet received, 0 if no new packet received
  */
 uint32_t mavlinkWrapperReceive(void) {
+    char packetBuffer[sizeof(mavlink_message_t)];
+    uint32_t packetBufferFilled;
 	uint32_t messageFound;
 
 	messageFound = FALSE; // Set initial state
@@ -67,7 +69,11 @@ uint32_t mavlinkWrapperReceive(void) {
 
 		// Check if packet found
 		if (messageFound == TRUE) {
-			logLine("Received UART:");
+			logLine("Received UART, echo to UDP:");
+
+			// Echo received UART packet over UDP
+			packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &incomingMessage);
+			udpSend(packetBuffer, packetBufferFilled); // Send contents of buffer over UDP
 		} else {}
 	}
 
