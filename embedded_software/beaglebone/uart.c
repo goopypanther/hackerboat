@@ -66,16 +66,6 @@ void uartInit(const char *gpsDevice, const char *lowLevelDevice) {
 
 	// Set lowLevelFd into raw mode
 	tcgetattr(lowLevelFd, &lowLevelFdSettings);
-#if 0
-	lowLevelFdSettings.c_cflag &= ~(PARENB | CSTOPB | CSIZE);      // no parity, one stop bit
-	lowLevelFdSettings.c_cflag |= (CLOCAL | CREAD | CS8);          // ignore modem status lines, enable receiver, 8 bits per byte
-	lowLevelFdSettings.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make sure we are in raw mode
-	lowLevelFdSettings.c_iflag &= ~(IXON | IXOFF | IXANY);         // turn off all flow control
-	lowLevelFdSettings.c_iflag &= ~(ICRNL);                        // turn off line ending translation
-	lowLevelFdSettings.c_oflag &= ~(OPOST);                        // turn off post processing of output
-	lowLevelFdSettings.c_cc[VMIN] = 0;                             // this sets the timeouts for the read() operation to minimum
-	lowLevelFdSettings.c_cc[VTIME] = 0;
-#endif
 	cfmakeraw(&lowLevelFdSettings);
 	tcsetattr(lowLevelFd, TCSANOW, &lowLevelFdSettings);
 
