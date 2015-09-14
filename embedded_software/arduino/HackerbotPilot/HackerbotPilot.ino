@@ -562,6 +562,8 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   //uint8_t enbButton;
   //uint8_t estopButton;
   
+  Serial.println("**** Self-testing... ****");
+  
   // if we've just entered this state, reset all the counters
   if (lastState != BOAT_SELFTEST) {
     faultCnt = 0; 
@@ -635,6 +637,8 @@ boatState executeDisarmed(boatVector * thisBoat, boatState lastState, stateCmd c
   static uint8_t lastEnbButton = 0;
   static long startEnbTime = millis();
   
+  Serial.println("**** Disarmed ****");
+  
   thisBoat->headingTarget = thisBoat->orientation.heading;
   thisBoat->throttle = STOP;
   if (thisBoat->enbButton && !(lastEnbButton)) {
@@ -670,6 +674,8 @@ boatState executeArmed(boatVector * thisBoat, boatState lastState, stateCmd cmd)
   static long startStopTime = millis();
   static long startStateTime = millis();
   static boatState originState = BOAT_DISARMED;
+  
+  Serial.println("**** Armed ****");
   
   thisBoat->throttle = STOP;
   // Keep the steering servo powered through here to enable manual inspection
@@ -734,6 +740,8 @@ boatState executeActive(boatVector * thisBoat, boatState lastState, stateCmd cmd
   static uint8_t lastStopButton = 0;
   static long startStopTime = millis();
   
+  Serial.println("**** Active ****");
+  
   // obviously, the steering servo needs to be active
   digitalWrite(servoEnable, HIGH);
   // no reason to sound the horn
@@ -782,6 +790,8 @@ boatState executeLowBattery(boatVector * thisBoat, boatState lastState, stateCmd
   static uint8_t lastStopButton = 0;
   static long startStopTime = millis();
 
+  Serial.println("**** Low Battery ****");
+  
   // obviously, the steering servo needs to be inactive and the motor off
   digitalWrite(servoEnable, LOW);
   thisBoat->throttle = STOP;
@@ -828,6 +838,8 @@ boatState executeLowBattery(boatVector * thisBoat, boatState lastState, stateCmd
  */
 boatState executeFault(boatVector * thisBoat, boatState lastState, stateCmd cmd) {
 
+  Serial.println("**** Fault ****");
+  
   thisBoat->throttle = STOP;
   thisBoat->headingTarget = thisBoat->orientation.heading;
   digitalWrite(servoEnable, LOW);
@@ -853,6 +865,8 @@ boatState executeSelfRecovery(boatVector * thisBoat, boatState lastState, stateC
   static uint8_t lastStopButton = 0;
   static long startStopTime = millis();
 
+  Serial.println("**** Self Recovery ****");
+  
   // obviously, the steering servo needs active and the heading set to the emergency value
   digitalWrite(servoEnable, HIGH);
   thisBoat->throttle = FWD5;
