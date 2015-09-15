@@ -27,6 +27,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <termios.h>
+#include <sys/utsname.h>
 
 #include "udp.h"
 #include "log.h"
@@ -41,5 +42,6 @@
 #include "heartbeat.h"
 #include "param.h"
 #include "command.h"
+#include "ioConfig.h"
 
 #endif /* INCLUDES_H_ */

@@ -1,6 +1,6 @@
 # Hackerboat Navigator Makefile
 APPNAME=hackerboatNavigator
-SOURCES=args.c boatState.c command.c currentTime.c heartbeat.c log.c main.c Map.c mavlinkWrapper.c Neo6m.c param.c uart.c udp.c voltage.c
+SOURCES=args.c boatState.c command.c currentTime.c heartbeat.c ioConfig.c log.c main.c Map.c mavlinkWrapper.c Neo6m.c param.c uart.c udp.c voltage.c
 INCLUDES=./mavlink/hackerboat
 
 COMPILER=gcc

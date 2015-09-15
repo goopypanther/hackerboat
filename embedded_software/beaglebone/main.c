@@ -31,6 +31,8 @@ int main (int argc, char* argv[]) {
 
 	logOpen(argsReturnLogFile());
 
+	ioConfigInit();
+
 	udpOpenSocket(argsReturnTargetIp());
 	uartInit(argsReturnGpsSerialDevice(), argsReturnLowLevelSerial());
 
