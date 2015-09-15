@@ -27,7 +27,6 @@ void ioConfigInit(void);
 void ioConfigInit(void) {
     struct utsname unameData;
     int32_t isBeagleBone;
-    FILE *slotFile;
 
     uname(&unameData); // Get kernel data
 
@@ -35,12 +34,8 @@ void ioConfigInit(void) {
 
     // Check if kernel release is matched
     if (isBeagleBone == 0) {
-        slotFile = fopen(SLOT_PATH, "a");
-
-        fprintf(slotFile, "BB-UART2");
-        fprintf(slotFile, "BB-UART4");
-
-        fclose(slotFile);
+        system("echo BB-UART2 >" SLOT_PATH);
+        system("echo BB-UART4 >" SLOT_PATH);
     } else {}
 
 }
