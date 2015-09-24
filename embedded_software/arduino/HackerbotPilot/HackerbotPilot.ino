@@ -400,6 +400,8 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   Serial.print("Roll:\t\t\t"); Serial.println(thisBoat->orientation.roll);
   Serial.print("Pitch:\t\t\t"); Serial.println(thisBoat->orientation.pitch);
   Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
+  Serial.print("Enable:\t\t"); Serial.println(thisBoat->enbButton);
+  Serial.print("Stop:\t\t\t"); Serial.println(thisBoat->stopButton);
   
   return failCnt;
 }
