@@ -584,9 +584,19 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   if ((millis() - startTime) < sensorTestPeriod) {
     if ((thisBoat->orientation.roll > tiltDeviationLimit) || (thisBoat->orientation.pitch > tiltDeviationLimit)) {
       faultCnt++;
+      Serial.print("Sensor outside of roll/pitch limits. Measure values roll: ");
+      Serial.print(thisBoat->orientation.roll);
+      Serial.print(" pitch: ");
+      Serial.println(thisBoat->orientation.pitch);
       faultString |= FAULT_SENSOR;
     }
     if (abs(getHeadingError(thisBoat->orientation.heading, headingRef)) > compassDeviationLimit) {
+      Serial.print("Compass outside of deviation limits. Compass heading: ");
+      Serial.print(thisBoat->orientation.heading);
+      Serial.print(" Reference: ");
+      Serial.print(headingRef);
+      Serial.print(" Error: ");
+      Serial.println(getHeadingError(thisBoat->orientation.heading, headingRef));
       faultCnt++;
       faultString |= FAULT_SENSOR;
     }
@@ -596,6 +606,8 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   if (getPackets(thisBoat, &myCmd) > signalTestPeriod) {
     faultCnt++;
     faultString |= FAULT_NO_SIGNAL;
+  } else {
+    faultString &= !FAULT_NO_SIGNAL;
   }
   if (BONE_FAULT == thisBoat->bone) {
     faultCnt++;
