@@ -609,6 +609,8 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   if ((millis() - startTime) > startupTestPeriod) {
     if (getNVM(&myState, &myThrottle, &myHeading)) {
       faultString |= FAULT_NVM;
+      Serial.print("Got faults on startup, NVM edition. Fault string: ");
+      Serial.println(faultString, HEX);
       return BOAT_FAULT;
     } else if (faultCnt) {
       Serial.print("Got faults on startup. Fault string: ");
@@ -845,7 +847,8 @@ boatState executeFault(boatVector * thisBoat, boatState lastState, stateCmd cmd)
   thisBoat->throttle = STOP;
   thisBoat->headingTarget = thisBoat->orientation.heading;
   digitalWrite(servoEnable, LOW);
-  
+  Serial.print("Fault string: ");
+  Serial.println(faultString, HEX);
   if (0 == faultString) return BOAT_DISARMED;
   if (CMD_TEST == cmd) return BOAT_SELFTEST;
   
