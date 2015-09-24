@@ -632,7 +632,7 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   }
   
   // check for a signal from the beaglebone
-  if (getPackets(thisBoat, &myCmd) > signalTestPeriod) {
+  if ((millis() - getPackets(thisBoat, &myCmd)) > signalTestPeriod) {
     faultCnt++;
     faultString |= FAULT_NO_SIGNAL;
     Serial.print("Signal timeout. Current time: ");
