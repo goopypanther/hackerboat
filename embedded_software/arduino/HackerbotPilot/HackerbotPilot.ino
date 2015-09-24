@@ -596,11 +596,16 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   }
   
   // check that the sensors are within bounds
-  getSensors (thisBoat, &batCurrent, &motVoltage, &motCurrent);
+  // getSensors (thisBoat, &batCurrent, &motVoltage, &motCurrent);
   if (thisBoat->internalVoltage < testVoltageLimit) {
     faultCnt++;
     faultString |= FAULT_LOW_BAT;
   }
+  Serial.println("Incoming sensor readings");
+  Serial.print("Battery voltage:\t"); Serial.println(thisBoat->internalVoltage);
+  Serial.print("Roll:\t\t"); Serial.println(thisBoat->orientation.roll);
+  Serial.print("Pitch:\t\t"); Serial.println(thisBoat->orientation.pitch);
+  Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
   if ((millis() - startTime) < sensorTestPeriod) {
     if ((thisBoat->orientation.roll > tiltDeviationLimit) || (thisBoat->orientation.pitch > tiltDeviationLimit)) {
       faultCnt++;
