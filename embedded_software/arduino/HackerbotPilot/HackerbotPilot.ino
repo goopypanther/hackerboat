@@ -273,11 +273,13 @@ void loop (void) {
   double batCurrent;
   double motVoltage;
   double motCurrent;
-  static boatState lastState = boat.state;
+  static boatState lastState = BOAT_POWERUP;
+  boatState thisState = BOAT_POWERUP;
   
-  lastState = boat.state;
+  
   boat.timeSinceLastPacket = millis() - getPackets(&boat, &cmd);
   if (getSensors (&boat, &batCurrent, &motVoltage, &motCurrent)) {
+    lastState = boat.state;
     boat.state = BOAT_FAULT;
     Serial.println("Sensor fault!");
     faultString |= FAULT_SENSOR;
@@ -285,31 +287,49 @@ void loop (void) {
   
   switch (boat.state) {
     case BOAT_POWERUP:
+      Serial.println("*** Powering Up ***");
+      lastState = boat.state;
       boat.state = BOAT_SELFTEST;
       break;
     case BOAT_SELFTEST:
+      thisState = boat.state;
       boat.state = executeSelfTest(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_DISARMED:
+      thisState = boat.state;
       boat.state = executeDisarmed(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_ARMED:
+      thisState = boat.state;
       boat.state = executeArmed(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_ACTIVE:
+      thisState = boat.state;
       boat.state = executeActive(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_LOWBATTERY:
+      thisState = boat.state;
       boat.state = executeLowBattery(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_FAULT:
+      thisState = boat.state;
       boat.state = executeFault(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     case BOAT_SELFRECOVERY:
+      thisState = boat.state;
       boat.state = executeSelfRecovery(&boat, lastState, cmd);
+      lastState = thisState;
       break;
     default:
-	  boat.state = executeFault(&boat, lastState, cmd);
+      thisState = boat.state;
+	    boat.state = executeFault(&boat, lastState, cmd);
+      lastState = thisState;
       break;
   }
   
