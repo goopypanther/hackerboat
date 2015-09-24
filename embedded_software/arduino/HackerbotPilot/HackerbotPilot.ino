@@ -611,6 +611,8 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
       faultString |= FAULT_NVM;
       return BOAT_FAULT;
     } else if (faultCnt) {
+      Serial.print("Got faults on startup. Fault string: ");
+      Serial.println(faultString, HEX);
       if ((FAULT_BB_FAULT == faultString) || (FAULT_NO_SIGNAL == faultString) || ((FAULT_NO_SIGNAL|FAULT_BB_FAULT) == faultString)) {
         if ((BOAT_ARMED == myState) || (BOAT_ACTIVE == myState) || (BOAT_SELFRECOVERY == myState)) return BOAT_SELFRECOVERY;
         else return BOAT_FAULT;
