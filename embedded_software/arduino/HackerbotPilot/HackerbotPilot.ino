@@ -393,6 +393,14 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   thisBoat->enbButton = digitalRead(enableButton);
   thisBoat->stopButton = digitalRead(stopButton);
   
+  Serial.println("Incoming sensor readings");
+  Serial.print("Internal voltage:\t"); Serial.println(thisBoat->internalVoltage);
+  Serial.print("Motor voltage:\t"); Serial.println(*motVoltage);
+  Serial.print("Motor current:\t"); Serial.println(*motCurrent);
+  Serial.print("Roll:\t\t\t"); Serial.println(thisBoat->orientation.roll);
+  Serial.print("Pitch:\t\t\t"); Serial.println(thisBoat->orientation.pitch);
+  Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
+  
   return failCnt;
 }
 
@@ -601,11 +609,6 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
     faultCnt++;
     faultString |= FAULT_LOW_BAT;
   }
-  Serial.println("Incoming sensor readings");
-  Serial.print("Battery voltage:\t"); Serial.println(thisBoat->internalVoltage);
-  Serial.print("Roll:\t\t"); Serial.println(thisBoat->orientation.roll);
-  Serial.print("Pitch:\t\t"); Serial.println(thisBoat->orientation.pitch);
-  Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
   if ((millis() - startTime) < sensorTestPeriod) {
     if ((thisBoat->orientation.roll > tiltDeviationLimit) || (thisBoat->orientation.pitch > tiltDeviationLimit)) {
       faultCnt++;
