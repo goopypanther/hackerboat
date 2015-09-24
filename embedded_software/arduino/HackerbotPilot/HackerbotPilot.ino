@@ -44,14 +44,14 @@ const double recoverVoltageLimit = 		11.0;	/**< Battery voltage required to reco
 const int32_t sensorTestPeriod = 	    5000;	/**< Period to check for sensor deviations, in ms 							*/
 const int32_t signalTestPeriod =     	60000;	/**< Period to wait for Beaglebone signal 									*/
 const int32_t startupTestPeriod =    	65000;	/**< Period to stay in the self-test state 									*/
-const int32_t enbButtonTime =       	10000;	/**< Time the enable button needs to be pressed, in ms, to arm the boat		*/
-const int32_t stopButtonTime =      	1000;	/**< Time the stop button needs to be pressed, in ms, to disarm the boat	*/
-const int32_t disarmedPacketTimeout = 	60000;	/**< Connection timeout, in ms, in the disarmed state						*/
+const int32_t enbButtonTime =       	5000;	/**< Time the enable button needs to be pressed, in ms, to arm the boat		*/
+const int32_t stopButtonTime =      	250;	/**< Time the stop button needs to be pressed, in ms, to disarm the boat	*/
+const int32_t disarmedPacketTimeout = 60000;	/**< Connection timeout, in ms, in the disarmed state						*/
 const int32_t armedPacketTimeout =  	60000;	/**< Connection timeout, in ms, in the armed state							*/
 const int32_t activePacketTimeout = 	300000;	/**< Connection timeout, in ms, in the active state							*/
-const int32_t hornTimeout = 			2000;	/**< Time in ms to sound the horn for before entering an unsafe state		*/	
+const int32_t hornTimeout = 			    2000;	/**< Time in ms to sound the horn for before entering an unsafe state		*/	
 const int16_t sendDelay =           	1000;	/**< Time in ms between packet transmissions 								*/
-const int16_t flashDelay = 				500;	/**< Time in ms between light transitions while flashing					*/
+const int16_t flashDelay = 				    500;	/**< Time in ms between light transitions while flashing					*/
 
 // pin mapping
 const uint8_t servoEnable =          	2;		/**< Enable pin for the steering servo power supply 	*/
@@ -961,8 +961,8 @@ void lightControl(boatState state, boneState bone) {
   static long iteration = 0;
   static long lastChangeTime = millis();
   static uint8_t flashState = 0;
-  Adafruit_NeoPixel ardLights = Adafruit_NeoPixel(ardLightCount, arduinoLightsPin,  NEO_GRB + NEO_KHZ800);
-  Adafruit_NeoPixel boneLights = Adafruit_NeoPixel(boneLightCount, boneLightsPin,  NEO_GRB + NEO_KHZ800);
+  static Adafruit_NeoPixel ardLights = Adafruit_NeoPixel(ardLightCount, arduinoLightsPin,  NEO_GRB + NEO_KHZ800);
+  static Adafruit_NeoPixel boneLights = Adafruit_NeoPixel(boneLightCount, boneLightsPin,  NEO_GRB + NEO_KHZ800);
   uint8_t pixelCounter;
   uint8_t color0;
   //uint8_t color1;
@@ -976,38 +976,38 @@ void lightControl(boatState state, boneState bone) {
   
   switch (state) {
     case BOAT_POWERUP:
-	  if ((millis() - lastChangeTime) > flashDelay) {
+  	  if ((millis() - lastChangeTime) > flashDelay) {
         if (flashState) {
-		  flashState = 0;
-		  color0 = 0;
-	    } else {
-		  flashState = 0xff;
-		  color0 = grn;
-	    }
-	  }
-	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
-	    ardLights.setPixelColor(pixelCounter, color0);
-	  }
-	  break;
-	case BOAT_ARMED:
-	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
-	    ardLights.setPixelColor(pixelCounter, blu);
-	  }
-	  break;
-	case BOAT_SELFTEST:
-	  if ((millis() - lastChangeTime) > flashDelay) {
+    		  flashState = 0;
+    		  color0 = 0;
+  	    } else {
+    		  flashState = 0xff;
+    		  color0 = grn;
+  	    }
+  	  }
+  	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
+  	    ardLights.setPixelColor(pixelCounter, color0);
+  	  }
+  	  break;
+	  case BOAT_ARMED:
+  	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
+  	    ardLights.setPixelColor(pixelCounter, blu);
+  	  }
+  	  break;
+	  case BOAT_SELFTEST:
+  	  if ((millis() - lastChangeTime) > flashDelay) {
         if (flashState) {
-		  flashState = 0;
-		  color0 = 0;
-	    } else {
-		  flashState = 0xff;
-		  color0 = amb;
-	    }
-	  }
-	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
-	    ardLights.setPixelColor(pixelCounter, color0);
-	  }
-	  break;
+  	      flashState = 0;
+  	      color0 = 0;
+        } else {
+  	      flashState = 0xff;
+  	      color0 = amb;
+        }
+  	  }
+  	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
+  	    ardLights.setPixelColor(pixelCounter, color0);
+  	  }
+  	  break;
 	case BOAT_DISARMED:
 	  for (pixelCounter = 0; pixelCounter < ardLightCount; pixelCounter++) {
 	    ardLights.setPixelColor(pixelCounter, amb);
