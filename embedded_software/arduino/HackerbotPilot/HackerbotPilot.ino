@@ -499,7 +499,8 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 		  }
 		  break;
         default:
-          Serial.println("Received some other sort of packet");
+          Serial.print("Received some other sort of packet: ");
+          Serial.println(msg.msgid);
       }
     } 
   }
@@ -634,8 +635,18 @@ boatState executeSelfTest(boatVector * thisBoat, boatState lastState, stateCmd c
   if (getPackets(thisBoat, &myCmd) > signalTestPeriod) {
     faultCnt++;
     faultString |= FAULT_NO_SIGNAL;
+    Serial.print("Signal timeout. Current time: ");
+    Serial.print(millis());
+    Serial.print(" Last time: ");
+    Serial.println(getPackets(thisBoat, &myCmd));
   } else {
     faultString &= !FAULT_NO_SIGNAL;
+    Serial.print("Removing signal timeout. Current time: ");
+    Serial.print(millis());
+    Serial.print(" Last time: ");
+    Serial.print(getPackets(thisBoat, &myCmd));
+    Serial.print(" Fault string: ");
+    Serial.println(faultString);
   }
   if (BONE_FAULT == thisBoat->bone) {
     faultCnt++;
