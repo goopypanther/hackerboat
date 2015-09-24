@@ -49,7 +49,7 @@ const int32_t stopButtonTime =      	1000;	/**< Time the stop button needs to be
 const int32_t disarmedPacketTimeout = 	60000;	/**< Connection timeout, in ms, in the disarmed state						*/
 const int32_t armedPacketTimeout =  	60000;	/**< Connection timeout, in ms, in the armed state							*/
 const int32_t activePacketTimeout = 	300000;	/**< Connection timeout, in ms, in the active state							*/
-const int32_t hornTimeout = 			10000;	/**< Time in ms to sound the horn for before entering an unsafe state		*/	
+const int32_t hornTimeout = 			2000;	/**< Time in ms to sound the horn for before entering an unsafe state		*/	
 const int16_t sendDelay =           	1000;	/**< Time in ms between packet transmissions 								*/
 const int16_t flashDelay = 				500;	/**< Time in ms between light transitions while flashing					*/
 
