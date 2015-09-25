@@ -268,7 +268,7 @@ void setup (void) {
 void loop (void) {
   //static long iteration = 0;
   static long lastPacketOut = 0;
-  static double headingCmd = emergencyHeading;
+  //static double headingCmd = emergencyHeading;
   stateCmd cmd = CMD_NONE;
   double batCurrent;
   double motVoltage;
@@ -334,7 +334,8 @@ void loop (void) {
   }
   
   lightControl(boat.state, boat.bone);
-  output(&(boat.throttle), getHeadingError(boat.orientation.heading, headingCmd));
+  Serial.print("Heading Error:\t"); Serial.println(getHeadingError(boat.orientation.heading, boat.headingTarget));
+  output(&(boat.throttle), getHeadingError(boat.orientation.heading, boat.headingTarget));
   writeMavlinkPackets(&boat, batCurrent, motVoltage, motCurrent, &lastPacketOut);
  
 }
@@ -402,6 +403,7 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
   Serial.print("Enable:\t\t"); Serial.println(thisBoat->enbButton);
   Serial.print("Stop:\t\t\t"); Serial.println(thisBoat->stopButton);
+  Serial.print("Target Heading:\t"); Serial.println(thisBoat->headingTarget);
   
   return failCnt;
 }
@@ -1163,84 +1165,88 @@ void lightControl(boatState state, boneState bone) {
  */
 int output (throttleState * throttle, double error) {
 
+  Serial.println("Output values: ");
+  Serial.print("Throttle:\t"); Serial.println(*throttle);
+  Serial.print("Error:\t"); Serial.println(error);
   switch (*throttle) {
     case (FWD5):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, HIGH);
-	  digitalWrite(relaySpeedYlw, HIGH);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, HIGH);
+  	  digitalWrite(relaySpeedYlw, HIGH);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (FWD4):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, LOW);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, HIGH);
-	  digitalWrite(relaySpeedRedWht, HIGH);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, LOW);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, HIGH);
+  	  digitalWrite(relaySpeedRedWht, HIGH);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (FWD3):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, HIGH);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, HIGH);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (FWD2):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, LOW);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, HIGH);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, LOW);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, HIGH);
+  	  break;
     case (FWD1):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, LOW);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, LOW);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (STOP):
-	  digitalWrite(relayDir, LOW);
-	  digitalWrite(relaySpeedWht, LOW);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, LOW);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, LOW);
+  	  digitalWrite(relaySpeedWht, LOW);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, LOW);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (REV1):
-	  digitalWrite(relayDir, HIGH);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, LOW);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, HIGH);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, LOW);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (REV2):
-	  digitalWrite(relayDir, HIGH);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, LOW);
-	  digitalWrite(relaySpeedYlw, HIGH);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
+  	  digitalWrite(relayDir, HIGH);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, LOW);
+  	  digitalWrite(relaySpeedYlw, HIGH);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
     case (REV3):
-	  digitalWrite(relayDir, HIGH);
-	  digitalWrite(relaySpeedWht, HIGH);
-	  digitalWrite(relaySpeedRed, HIGH);
-	  digitalWrite(relaySpeedYlw, HIGH);
-	  digitalWrite(relaySpeedRedWht, LOW);
-	  digitalWrite(relaySpeedRedYlw, LOW);
-	  break;
-	default:
-	  break;
+  	  digitalWrite(relayDir, HIGH);
+  	  digitalWrite(relaySpeedWht, HIGH);
+  	  digitalWrite(relaySpeedRed, HIGH);
+  	  digitalWrite(relaySpeedYlw, HIGH);
+  	  digitalWrite(relaySpeedRedWht, LOW);
+  	  digitalWrite(relaySpeedRedYlw, LOW);
+  	  break;
+	  default:
+	    break;
   }
   
   steeringPID.Compute();
+  Serial.print("Steering:\t"); Serial.println(steeringCmd + 90);
   steeringServo.write(steeringCmd + 90);	// The magic number is so that we come out with a correct servo command
   
   return 0;
