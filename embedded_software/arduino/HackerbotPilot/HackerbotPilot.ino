@@ -478,9 +478,8 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 		  }
           break;
         case MAVLINK_MSG_ID_MANUAL_CONTROL:
-		  if ((msg.sysid == 255) && 
-			  (BOAT_ACTIVE == thisBoat->state) && 
-			  (BONE_STEERING == thisBoat->bone)) {
+		  if ((msg.sysid == MAVLINK_MSG_ID_MANUAL_CONTROL) && (BOAT_ACTIVE == thisBoat->state) && (BONE_STEERING == thisBoat->bone)) {
+        Serial.println("Received manual control packet");
 			  throttleFlag = -1;
 			  uint8_t buttonsIn = mavlink_msg_manual_control_get_buttons(&msg);
 			  if (1 == buttonsIn) {
@@ -510,6 +509,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   }
   
   if (throttleFlag) {
+    Serial.print("Setting the throttle: ");
 	if (throttleIn <= 0) {
 	  if (throttleIn > -1) {
 	    thisBoat->throttle = STOP;
@@ -533,6 +533,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 	} else if (throttleIn < 100) {
 	  thisBoat->throttle = FWD5;
 	}
+ Serial.println(thisBoat->throttle);
 	if (MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT == msg.msgid) {
 		thisBoat->headingTarget = (double)bearingIn;
 	} else if (MAVLINK_MSG_ID_MANUAL_CONTROL == msg.msgid) {
@@ -547,7 +548,10 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 			thisBoat->headingTarget -= 360.0;
 		}
 	}
+ Serial.print("Setting target heading to: ");
+ Serial.println(thisBoat->headingTarget);
   }
+
   return lastCtrlTime;
 }
 
