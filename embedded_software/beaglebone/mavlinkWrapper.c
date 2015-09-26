@@ -63,6 +63,7 @@ uint32_t mavlinkWrapperReceive(void) {
 	// Check if packet found
 	if (messageFound == TRUE) {
 		logLine("Received UDP, forward to UART:");
+		packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &incomingMessage);
 		uartLowLevelSend(packetBuffer, packetBufferFilled); // Sent contents of buffer over UART
 
 	} else {
