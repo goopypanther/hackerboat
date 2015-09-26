@@ -478,8 +478,9 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 		    }
         break;
       case MAVLINK_MSG_ID_MANUAL_CONTROL:
-		    if ((BOAT_ACTIVE == thisBoat->state) && (BONE_STEERING == thisBoat->bone)) {
         Serial.println("Received manual control packet");
+		    if ((BOAT_ACTIVE == thisBoat->state)) {
+        Serial.println("Usable manual control packet...");
 			  throttleFlag = -1;
 			  uint8_t buttonsIn = mavlink_msg_manual_control_get_buttons(&msg);
 			  if (1 == buttonsIn) {
