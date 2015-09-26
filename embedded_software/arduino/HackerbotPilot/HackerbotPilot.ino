@@ -441,44 +441,44 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
         Serial.println(msg.sysid);
       }
       switch (msg.msgid) {
-		case MAVLINK_MSG_ID_HEARTBEAT:
+		    case MAVLINK_MSG_ID_HEARTBEAT:
           Serial.println("Received heartbeat packet");
-		  if (msg.sysid == 1) {
-			  uint8_t boneMode = mavlink_msg_heartbeat_get_base_mode(&msg);
-			  uint8_t boneStatus = mavlink_msg_heartbeat_get_system_status(&msg);
-			  if (MAV_STATE_EMERGENCY == boneStatus) {
-				  thisBoat->bone = BONE_FAULT;
-			  } else if (MAV_MODE_PREFLIGHT == boneMode) {
-				  if (MAV_STATE_BOOT == boneStatus) {
-					  thisBoat->bone = BONE_SELFTEST;
-				  } else if (MAV_STATE_STANDBY == boneStatus) {
-					  thisBoat->bone = BONE_DISARMED;
-				  }
-			  } else if (MAV_MODE_MANUAL_DISARMED == boneMode) {
-				  thisBoat->bone = BONE_DISARMED;
-			  } else if (MAV_MODE_AUTO_DISARMED == boneMode) {
-				  thisBoat->bone = BONE_DISARMED;
-			  } else if (MAV_MODE_MANUAL_ARMED == boneMode) {
-				  if (MAV_STATE_STANDBY == boneStatus) {
-					  thisBoat->bone = BONE_ARMED;
-				  } else if (MAV_STATE_ACTIVE == boneStatus) {
-					  thisBoat->bone = BONE_STEERING;
-				  } else if (MAV_STATE_CRITICAL == boneStatus) {
-					  thisBoat->bone = BONE_NOSIGNAL;
-				  }
-			  } else if (MAV_MODE_AUTO_ARMED == boneMode) {
-				  if (MAV_STATE_STANDBY == boneStatus) {
-					  thisBoat->bone = BONE_ARMED;
-				  } else if (MAV_STATE_ACTIVE == boneStatus) {
-					  thisBoat->bone = BONE_WAYPOINT;
-				  } else if (MAV_STATE_CRITICAL == boneStatus) {
-					  thisBoat->bone = BONE_NOSIGNAL;
-				  }
-			  }
-		  }
-          break;
-        case MAVLINK_MSG_ID_MANUAL_CONTROL:
-		  if ((msg.sysid == MAVLINK_MSG_ID_MANUAL_CONTROL) && (BOAT_ACTIVE == thisBoat->state) && (BONE_STEERING == thisBoat->bone)) {
+		      if (msg.sysid == 1) {
+			    uint8_t boneMode = mavlink_msg_heartbeat_get_base_mode(&msg);
+			    uint8_t boneStatus = mavlink_msg_heartbeat_get_system_status(&msg);
+			    if (MAV_STATE_EMERGENCY == boneStatus) {
+				    thisBoat->bone = BONE_FAULT;
+			    } else if (MAV_MODE_PREFLIGHT == boneMode) {
+				    if (MAV_STATE_BOOT == boneStatus) {
+					    thisBoat->bone = BONE_SELFTEST;
+				    } else if (MAV_STATE_STANDBY == boneStatus) {
+					    thisBoat->bone = BONE_DISARMED;
+				    }
+			    } else if (MAV_MODE_MANUAL_DISARMED == boneMode) {
+				    thisBoat->bone = BONE_DISARMED;
+			    } else if (MAV_MODE_AUTO_DISARMED == boneMode) {
+				    thisBoat->bone = BONE_DISARMED;
+			    } else if (MAV_MODE_MANUAL_ARMED == boneMode) {
+				    if (MAV_STATE_STANDBY == boneStatus) {
+					    thisBoat->bone = BONE_ARMED;
+				    } else if (MAV_STATE_ACTIVE == boneStatus) {
+					    thisBoat->bone = BONE_STEERING;
+				    } else if (MAV_STATE_CRITICAL == boneStatus) {
+					    thisBoat->bone = BONE_NOSIGNAL;
+				    }
+			    } else if (MAV_MODE_AUTO_ARMED == boneMode) {
+				    if (MAV_STATE_STANDBY == boneStatus) {
+					    thisBoat->bone = BONE_ARMED;
+				    } else if (MAV_STATE_ACTIVE == boneStatus) {
+					    thisBoat->bone = BONE_WAYPOINT;
+				    } else if (MAV_STATE_CRITICAL == boneStatus) {
+					    thisBoat->bone = BONE_NOSIGNAL;
+				    }
+			    }
+		    }
+        break;
+      case MAVLINK_MSG_ID_MANUAL_CONTROL:
+		    if ((BOAT_ACTIVE == thisBoat->state) && (BONE_STEERING == thisBoat->bone)) {
         Serial.println("Received manual control packet");
 			  throttleFlag = -1;
 			  uint8_t buttonsIn = mavlink_msg_manual_control_get_buttons(&msg);
