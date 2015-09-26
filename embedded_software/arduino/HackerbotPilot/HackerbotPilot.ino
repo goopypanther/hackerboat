@@ -483,6 +483,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
         Serial.println("Usable manual control packet...");
 			  throttleFlag = -1;
 			  uint8_t buttonsIn = mavlink_msg_manual_control_get_buttons(&msg);
+        Serial.print("Button values: "); Serial.println(buttonsIn);
 			  if (1 == buttonsIn) {
 				  throttleIn = 100;
 			  } else if (4 == buttonsIn) {
