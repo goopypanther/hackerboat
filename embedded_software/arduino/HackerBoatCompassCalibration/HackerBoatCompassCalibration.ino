@@ -18,7 +18,7 @@ long lastDisplayTime;
 
 void setup(void) 
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("LSM303 Calibration"); Serial.println("");
   
   /* Initialise the accelerometer */
@@ -46,6 +46,18 @@ void loop(void)
   
   accel.getEvent(&accelEvent);
   mag.getEvent(&magEvent);
+
+  Serial.print(accelEvent.acceleration.x);
+  Serial.print(",\t");
+  Serial.print(accelEvent.acceleration.y);
+  Serial.print(",\t");
+  Serial.print(accelEvent.acceleration.z);
+  Serial.print(",\t\t");
+  Serial.print(accelEvent.magnetic.x);
+  Serial.print(",\t");
+  Serial.print(accelEvent.magnetic.y);
+  Serial.print(",\t");
+  Serial.println(accelEvent.magnetic.z);
   
   if (accelEvent.acceleration.x < AccelMinX) AccelMinX = accelEvent.acceleration.x;
   if (accelEvent.acceleration.x > AccelMaxX) AccelMaxX = accelEvent.acceleration.x;
@@ -67,10 +79,12 @@ void loop(void)
 
   if ((millis() - lastDisplayTime) > 1000)  // display once/second
   {
-    Serial.print("Accel Minimums: "); Serial.print(AccelMinX); Serial.print("  ");Serial.print(AccelMinY); Serial.print("  "); Serial.print(AccelMinZ); Serial.println();
-    Serial.print("Accel Maximums: "); Serial.print(AccelMaxX); Serial.print("  ");Serial.print(AccelMaxY); Serial.print("  "); Serial.print(AccelMaxZ); Serial.println();
-    Serial.print("Mag Minimums: "); Serial.print(MagMinX); Serial.print("  ");Serial.print(MagMinY); Serial.print("  "); Serial.print(MagMinZ); Serial.println();
-    Serial.print("Mag Maximums: "); Serial.print(MagMaxX); Serial.print("  ");Serial.print(MagMaxY); Serial.print("  "); Serial.print(MagMaxZ); Serial.println(); Serial.println();
+    Serial.print(",,,,,,Accel Minimums: "); Serial.print(AccelMinX); Serial.print("  ");Serial.print(AccelMinY); Serial.print("  "); Serial.print(AccelMinZ); Serial.println();
+    Serial.print(",,,,,,Accel Maximums: "); Serial.print(AccelMaxX); Serial.print("  ");Serial.print(AccelMaxY); Serial.print("  "); Serial.print(AccelMaxZ); Serial.println();
+    Serial.print(",,,,,,Mag Minimums: "); Serial.print(MagMinX); Serial.print("  ");Serial.print(MagMinY); Serial.print("  "); Serial.print(MagMinZ); Serial.println();
+    Serial.print(",,,,,,Mag Maximums: "); Serial.print(MagMaxX); Serial.print("  ");Serial.print(MagMaxY); Serial.print("  "); Serial.print(MagMaxZ); Serial.println(); Serial.println();
+    Serial.println("Ax,\tAy,\tAz,\t\tMx,\tMy,\tMz");
     lastDisplayTime = millis();
   }
+  delay(5);
 }
