@@ -512,29 +512,29 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   
   if (throttleFlag) {
     Serial.print("Setting the throttle: ");
-	if (throttleIn <= 0) {
-	  if (throttleIn > -1) {
+	  if (throttleIn <= 0) {
+	    if (throttleIn < -1) {
+	      thisBoat->throttle = STOP;
+	    } else if (throttleIn < -20) {
+	      thisBoat->throttle = REV1;
+	    } else if (throttleIn < -40) {
+	      thisBoat->throttle = REV2;
+	    } else if (throttleIn < -60) {
+	      thisBoat->throttle = REV3;
+	    }
+	  } else if (throttleIn < 1) {
 	    thisBoat->throttle = STOP;
-	  } else if (throttleIn > -20) {
-	    thisBoat->throttle = REV1;
-	  } else if (throttleIn > -40) {
-	    thisBoat->throttle = REV2;
-	  } else if (throttleIn > -60) {
-	    thisBoat->throttle = REV3;
+	  } else if (throttleIn > 20) {
+	    thisBoat->throttle = FWD1;
+	  } else if (throttleIn > 40) {
+	    thisBoat->throttle = FWD2;
+	  } else if (throttleIn > 60) {
+	    thisBoat->throttle = FWD3;
+	  } else if (throttleIn > 80) {
+	    thisBoat->throttle = FWD4;
+	  } else if (throttleIn > 100) {
+	    thisBoat->throttle = FWD5;
 	  }
-	} else if (throttleIn < 1) {
-	  thisBoat->throttle = STOP;
-	} else if (throttleIn < 20) {
-	  thisBoat->throttle = FWD1;
-	} else if (throttleIn < 40) {
-	  thisBoat->throttle = FWD2;
-	} else if (throttleIn < 60) {
-	  thisBoat->throttle = FWD3;
-	} else if (throttleIn < 80) {
-	  thisBoat->throttle = FWD4;
-	} else if (throttleIn < 100) {
-	  thisBoat->throttle = FWD5;
-	}
  Serial.println(thisBoat->throttle);
 	if (MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT == msg.msgid) {
 		thisBoat->headingTarget = (double)bearingIn;
