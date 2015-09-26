@@ -1250,7 +1250,7 @@ int output (throttleState * throttle, double error) {
 	  default:
 	    break;
   }
-  
+  currentError = error;
   steeringPID.Compute();
   Serial.print("Steering:\t"); Serial.println(steeringCmd + 90);
   steeringServo.write(steeringCmd + 90);	// The magic number is so that we come out with a correct servo command
