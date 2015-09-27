@@ -18,19 +18,18 @@
 
 // calibration constants
 // these constants are used to calibrate the accelerometer and magnetometer
-#define X_ACCEL_OFFSET          (-0.275)
-#define X_ACCEL_GAIN            (0.092378753)
-#define Y_ACCEL_OFFSET          (2.825)
-#define Y_ACCEL_GAIN            (0.07160759)
-#define Z_ACCEL_OFFSET          (-3.925)
-#define Z_ACCEL_GAIN            (0.06655574)
-#define X_MAG_OFFSET            (-24.725)
-#define X_MAG_GAIN              (0.018003421)
-#define Y_MAG_OFFSET            (0)
-#define Y_MAG_GAIN              (0.017571604)
-#define Z_MAG_OFFSET            (-5.92)
-#define Z_MAG_GAIN              (0.017253278)
-
+#define X_ACCEL_OFFSET          (0)
+#define X_ACCEL_GAIN            (0.1)
+#define Y_ACCEL_OFFSET          (0)
+#define Y_ACCEL_GAIN            (0.1)
+#define Z_ACCEL_OFFSET          (0)
+#define Z_ACCEL_GAIN            (0.1)
+#define X_MAG_OFFSET            (-39.59)
+#define X_MAG_GAIN              (0.933)
+#define Y_MAG_OFFSET            (10.82)
+#define Y_MAG_GAIN              (0.943)
+#define Z_MAG_OFFSET            (-23.16)
+#define Z_MAG_GAIN              (1.054)
 
 // test limits
 const double compassDeviationLimit = 	10.0;	/**< Limit of compass swing, in degrees, during test period 	*/
@@ -1321,9 +1320,9 @@ int writeNVM (boatState state, throttleState throttle, double heading) {
 
 void calibrateMag (sensors_event_t *magEvent) {
   float *mag_X, *mag_Y, *mag_Z;
-  mag_X = &(magEvent->magnetic.y);
-  mag_Y = &(magEvent->magnetic.z);
-  mag_Z = &(magEvent->magnetic.x);
+  mag_X = &(magEvent->magnetic.x);
+  mag_Y = &(magEvent->magnetic.y);
+  mag_Z = &(magEvent->magnetic.z);
   *mag_X += X_MAG_OFFSET;
   *mag_X *= X_MAG_GAIN;
   *mag_Y += Y_MAG_OFFSET;
@@ -1334,9 +1333,9 @@ void calibrateMag (sensors_event_t *magEvent) {
 
 void calibrateAccel (sensors_event_t *accelEvent) {
   float *accel_X, *accel_Y, *accel_Z;
-  accel_X = &(accelEvent->acceleration.y);
-  accel_Y = &(accelEvent->acceleration.z);
-  accel_Z = &(accelEvent->acceleration.x);
+  accel_X = &(accelEvent->acceleration.x);
+  accel_Y = &(accelEvent->acceleration.y);
+  accel_Z = &(accelEvent->acceleration.z);
   *accel_X += X_ACCEL_OFFSET;
   *accel_X *= X_ACCEL_GAIN;
   *accel_Y += Y_ACCEL_OFFSET;
