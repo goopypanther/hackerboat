@@ -1306,7 +1306,21 @@ int writeMavlinkPackets (boatVector * thisBoat, double batCurrent, double motVol
 	  len = mavlink_msg_named_value_int_pack(2, MAV_COMP_ID_SERVO1, &outMsg, millis(), "bone", thisBoat->bone);
 	  packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
     Serial1.write(packetBuffer, packetBufferFilled);
-	  len = mavlink_msg_heartbeat_pack(2, MAV_COMP_ID_SERVO1, &outMsg, MAV_TYPE_SURFACE_BOAT, MAV_AUTOPILOT_GENERIC, 0, 0, MAV_STATE_ACTIVE);
+    switch (thisBoat->state) {
+      case BOAT_POWERUP:
+      case BOAT_SELFTEST:
+	      len = mavlink_msg_heartbeat_pack(2, MAV_COMP_ID_SERVO1, &outMsg, MAV_TYPE_SURFACE_BOAT, MAV_AUTOPILOT_GENERIC, 0, 0, MAV_STATE_CALIBRATING);
+        break;
+      case BOAT_DISARMED:
+        len = mavlink_msg_heartbeat_pack(2, MAV_COMP_ID_SERVO1, &outMsg, MAV_TYPE_SURFACE_BOAT, MAV_AUTOPILOT_GENERIC, 0, 0, MAV_STATE_STANDBY);
+        break;
+      case BOAT_ACTIVE:
+        len = mavlink_msg_heartbeat_pack(2, MAV_COMP_ID_SERVO1, &outMsg, MAV_TYPE_SURFACE_BOAT, MAV_AUTOPILOT_GENERIC, 0, 0, MAV_STATE_ACTIVE);
+        break;
+      default:
+        len = mavlink_msg_heartbeat_pack(2, MAV_COMP_ID_SERVO1, &outMsg, MAV_TYPE_SURFACE_BOAT, MAV_AUTOPILOT_GENERIC, 0, 0, MAV_STATE_EMERGENCY);
+        break;
+    }
     packetBufferFilled = mavlink_msg_to_send_buffer(packetBuffer, &outMsg);
     Serial1.write(packetBuffer, packetBufferFilled);
 	  *lastPacketOut = millis();
