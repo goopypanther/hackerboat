@@ -41,8 +41,8 @@ const double recoverVoltageLimit = 		11.0;	/**< Battery voltage required to reco
 
 // time delays
 const int32_t sensorTestPeriod = 	    5000;	/**< Period to check for sensor deviations, in ms 							*/
-const int32_t signalTestPeriod =     	60000;	/**< Period to wait for Beaglebone signal 									*/
-const int32_t startupTestPeriod =    	65000;	/**< Period to stay in the self-test state 									*/
+const int32_t signalTestPeriod =     	6000;	/**< Period to wait for Beaglebone signal 									*/
+const int32_t startupTestPeriod =    	6500;	/**< Period to stay in the self-test state 									*/
 const int32_t enbButtonTime =       	5000;	/**< Time the enable button needs to be pressed, in ms, to arm the boat		*/
 const int32_t stopButtonTime =      	250;	/**< Time the stop button needs to be pressed, in ms, to disarm the boat	*/
 const int32_t disarmedPacketTimeout = 60000;	/**< Connection timeout, in ms, in the disarmed state						*/
@@ -179,7 +179,7 @@ double steeringCmd;			/**< Steering command to be written out to the servo. 				
 /**
  * @brief PID loop object for driving the steering servo
  */
-PID steeringPID(&currentError, &steeringCmd, &targetError, 1, 0.01, 0, REVERSE); 
+PID steeringPID(&currentError, &steeringCmd, &targetError, 5, 0.01, 0, REVERSE); 
 Adafruit_9DOF dof = 					Adafruit_9DOF(); 						/**< IMU object 							*/
 Adafruit_LSM303_Accel_Unified accel = 	Adafruit_LSM303_Accel_Unified(30301);	/**< Accelerometer object 					*/
 Adafruit_LSM303_Mag_Unified   mag   = 	Adafruit_LSM303_Mag_Unified(30302);		/**< Magnetometer object 					*/
@@ -333,7 +333,12 @@ void loop (void) {
   }
   
   lightControl(boat.state, boat.bone);
-  Serial.print("Heading Error:\t"); Serial.println(getHeadingError(boat.orientation.heading, boat.headingTarget));
+  Serial.print("Heading: "); 
+  Serial.print(boat.orientation.heading);
+  Serial.print("\tTarget: ");
+  Serial.print(boat.headingTarget);
+  Serial.print("\tError: ");
+  Serial.print(getHeadingError(boat.orientation.heading, boat.headingTarget));
   output(&(boat.throttle), getHeadingError(boat.orientation.heading, boat.headingTarget));
   writeMavlinkPackets(&boat, batCurrent, motVoltage, motCurrent, &lastPacketOut);
  
@@ -393,7 +398,7 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   thisBoat->enbButton = digitalRead(enableButton);
   thisBoat->stopButton = digitalRead(stopButton);
   
-  Serial.println("Incoming sensor readings");
+  /*Serial.println("Incoming sensor readings");
   Serial.print("Internal voltage:\t"); Serial.println(thisBoat->internalVoltage);
   Serial.print("Motor voltage:\t"); Serial.println(*motVoltage);
   Serial.print("Motor current:\t"); Serial.println(*motCurrent);
@@ -402,7 +407,7 @@ int getSensors (boatVector * thisBoat, double * batCurrent, double * motVoltage,
   Serial.print("Heading:\t\t"); Serial.println(thisBoat->orientation.heading);
   Serial.print("Enable:\t\t"); Serial.println(thisBoat->enbButton);
   Serial.print("Stop:\t\t\t"); Serial.println(thisBoat->stopButton);
-  Serial.print("Target Heading:\t"); Serial.println(thisBoat->headingTarget);
+  Serial.print("Target Heading:\t"); Serial.println(thisBoat->headingTarget);*/
   
   return failCnt;
 }
@@ -420,9 +425,9 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   static mavlink_message_t msg;
   static mavlink_status_t stat;
   static long lastCtrlTime = millis();
-  uint16_t throttleIn = 0;
-  uint16_t steeringIn = 0;
-  uint16_t bearingIn = 0;
+  int16_t throttleIn = 0;
+  int16_t steeringIn = 0;
+  int16_t bearingIn = 0;
   uint8_t throttleFlag = 0;
   int16_t i = 0;
   
@@ -491,6 +496,7 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
 				  throttleIn = 0;
 			  }
 			  steeringIn = mavlink_msg_manual_control_get_r(&msg);
+        Serial.print("Steering input: "); Serial.println(steeringIn);
 		  }
 		  break;
 		case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
@@ -510,47 +516,48 @@ long int getPackets (boatVector * thisBoat, stateCmd * cmd) {
   }
   
   if (throttleFlag) {
+    Serial.print("Throttle Input: "); Serial.println(throttleIn);
     Serial.print("Setting the throttle: ");
 	  if (throttleIn <= 0) {
-	    if (throttleIn < -1) {
+	    if (throttleIn >= -1) {
 	      thisBoat->throttle = STOP;
-	    } else if (throttleIn < -20) {
+	    } else if (throttleIn > -20) {
 	      thisBoat->throttle = REV1;
-	    } else if (throttleIn < -40) {
+	    } else if (throttleIn > -40) {
 	      thisBoat->throttle = REV2;
-	    } else if (throttleIn < -60) {
+	    } else {
 	      thisBoat->throttle = REV3;
 	    }
-	  } else if (throttleIn < 1) {
+	  } else if (throttleIn <= 1) {
 	    thisBoat->throttle = STOP;
-	  } else if (throttleIn > 20) {
+	  } else if (throttleIn < 20) {
 	    thisBoat->throttle = FWD1;
-	  } else if (throttleIn > 40) {
+	  } else if (throttleIn < 40) {
 	    thisBoat->throttle = FWD2;
-	  } else if (throttleIn > 60) {
+	  } else if (throttleIn < 60) {
 	    thisBoat->throttle = FWD3;
-	  } else if (throttleIn > 80) {
+	  } else if (throttleIn < 80) {
 	    thisBoat->throttle = FWD4;
-	  } else if (throttleIn > 100) {
+	  } else {
 	    thisBoat->throttle = FWD5;
 	  }
- Serial.println(thisBoat->throttle);
-	if (MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT == msg.msgid) {
-		thisBoat->headingTarget = (double)bearingIn;
-	} else if (MAVLINK_MSG_ID_MANUAL_CONTROL == msg.msgid) {
-		if (bearingIn > 10) {
-			thisBoat->headingTarget = (thisBoat->headingTarget - 2.5);
-		} else if (bearingIn < 10) {
-			thisBoat->headingTarget = (thisBoat->headingTarget + 2.5);
-		}
-		if (thisBoat->headingTarget < 0.0) {
-			thisBoat->headingTarget += 360.0;
-		} else if (thisBoat->headingTarget > 360.0) {
-			thisBoat->headingTarget -= 360.0;
-		}
-	}
- Serial.print("Setting target heading to: ");
- Serial.println(thisBoat->headingTarget);
+    Serial.println(thisBoat->throttle);
+  	if (MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT == msg.msgid) {
+  		thisBoat->headingTarget = (double)bearingIn;
+  	} else if (MAVLINK_MSG_ID_MANUAL_CONTROL == msg.msgid) {
+  		if (steeringIn > 10) {
+  			thisBoat->headingTarget = (thisBoat->headingTarget - 5);
+  		} else if (steeringIn < -10) {
+  			thisBoat->headingTarget = (thisBoat->headingTarget + 5);
+  		}
+  		if (thisBoat->headingTarget < 0.0) {
+  			thisBoat->headingTarget += 360.0;
+  		} else if (thisBoat->headingTarget > 360.0) {
+  			thisBoat->headingTarget -= 360.0;
+  		}
+  	}
+    Serial.print("Setting target heading to: ");
+    Serial.println(thisBoat->headingTarget);
   }
 
   return lastCtrlTime;
@@ -804,7 +811,7 @@ boatState executeActive(boatVector * thisBoat, boatState lastState, stateCmd cmd
   static uint8_t lastStopButton = 0;
   static long startStopTime = millis();
   
-  Serial.println("**** Active ****");
+  //Serial.println("**** Active ****");
   
   // obviously, the steering servo needs to be active
   digitalWrite(servoEnable, HIGH);
@@ -1170,9 +1177,9 @@ void lightControl(boatState state, boneState bone) {
  */
 int output (throttleState * throttle, double error) {
 
-  Serial.println("Output values: ");
+  /*Serial.println("Output values: ");
   Serial.print("Throttle:\t"); Serial.println(*throttle);
-  Serial.print("Error:\t"); Serial.println(error);
+  Serial.print("Error:\t"); Serial.println(error);*/
   switch (*throttle) {
     case (FWD5):
   	  digitalWrite(relayDir, LOW);
@@ -1251,7 +1258,7 @@ int output (throttleState * throttle, double error) {
   }
   currentError = error;
   steeringPID.Compute();
-  Serial.print("Steering:\t"); Serial.println(steeringCmd + 90);
+  Serial.print("\tSteering: "); Serial.println(steeringCmd + 90);
   steeringServo.write(steeringCmd + 90);	// The magic number is so that we come out with a correct servo command
   
   return 0;
