@@ -31,6 +31,15 @@
 #define Z_MAG_OFFSET            (-23.16)
 #define Z_MAG_GAIN              (1.054)
 
+// steering and servo constants
+const double Kp =               10.0;
+const double Ki =               1.0;
+const double Kd =               0.0;
+const double pidMax =           100.0;
+const double pidMin =           -100.0;
+const uint16_t servoMin =       1000;
+const uint16_t servoMax =       2000;
+
 // test limits
 const double compassDeviationLimit = 	10.0;	/**< Limit of compass swing, in degrees, during test period 	*/
 const double tiltDeviationLimit =    	15.0;	/**< Limit of tilt in degrees from horizontal during test		*/
@@ -179,7 +188,7 @@ double steeringCmd;			/**< Steering command to be written out to the servo. 				
 /**
  * @brief PID loop object for driving the steering servo
  */
-PID steeringPID(&currentError, &steeringCmd, &targetError, 5, 0.01, 0, REVERSE); 
+PID steeringPID(&currentError, &steeringCmd, &targetError, Kp, Ki, Kd, REVERSE); 
 Adafruit_9DOF dof = 					Adafruit_9DOF(); 						/**< IMU object 							*/
 Adafruit_LSM303_Accel_Unified accel = 	Adafruit_LSM303_Accel_Unified(30301);	/**< Accelerometer object 					*/
 Adafruit_LSM303_Mag_Unified   mag   = 	Adafruit_LSM303_Mag_Unified(30302);		/**< Magnetometer object 					*/
@@ -254,7 +263,7 @@ void setup (void) {
   }
   
   steeringPID.SetSampleTime(100);
-  steeringPID.SetOutputLimits(-90.0, 90.0);
+  steeringPID.SetOutputLimits(pidMin, pidMax);
   steeringServo.attach(steeringPin);
   steeringPID.SetMode(AUTOMATIC);
   Serial.println("Everything up!");
@@ -1258,8 +1267,10 @@ int output (throttleState * throttle, double error) {
   }
   currentError = error;
   steeringPID.Compute();
-  Serial.print("\tSteering: "); Serial.println(steeringCmd + 90);
-  steeringServo.write(steeringCmd + 90);	// The magic number is so that we come out with a correct servo command
+  long rawSteering = map((long)steeringCmd, (long)pidMin, (long)pidMax, servoMin, servoMax);
+  Serial.print("\tSteering: "); Serial.print(steeringCmd);
+  Serial.print("\tRaw Steering: "); Serial.println(rawSteering);
+  steeringServo.writeMicroseconds(rawSteering);	
   
   return 0;
 }
