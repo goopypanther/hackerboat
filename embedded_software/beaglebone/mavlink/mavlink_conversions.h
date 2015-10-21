@@ -48,7 +48,7 @@ MAVLINK_HELPER void mavlink_quaternion_to_dcm(const float quaternion[4], float d
     dcm[2][2] = aSq - bSq - cSq + dSq;
 }
 
-MAVLINK_HELPER void mavlink_dcm_to_euler(const float dcm[3][3], float* roll, float* pitch, float* yaw)
+MAVLINK_HELPER void mavlink_dcm_to_euler(float dcm[3][3], float* roll, float* pitch, float* yaw)
 {
     float phi, theta, psi;
     theta = asin(-dcm[2][0]);

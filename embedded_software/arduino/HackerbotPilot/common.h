@@ -506,6 +506,7 @@ typedef enum MAV_DISTANCE_SENSOR
 
 // MESSAGE DEFINITIONS
 #include "mavlink_msg_heartbeat.h"
+#include "mavlink_msg_battery_status.h"
 /*#include "mavlink_msg_sys_status.h"
 #include "mavlink_msg_system_time.h"
 #include "mavlink_msg_ping.h"

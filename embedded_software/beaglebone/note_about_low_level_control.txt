@@ -1,0 +1,48 @@
+Arduino's sysid: 2
+Arduino's compid: COMP_ID_SERVO1
+
+Beaglebone's sysid: 1
+Beaglebone's compid: MAV_COMP_ID_SYSTEM_CONTROL
+
+Groundcontrol's sysid: 255
+Groundcontrol's compid: ???
+
+Sending
+-------
+
+ * MAVLINK_MSG_ID_HEARTBEAT
+  * 1 per second
+  * tells the beaglebone & groundcontroll you're still alive
+
+ * MAVLINK_MSG_ID_BATTERY_STATUS
+  * Every few seconds?
+  * Cell 1 voltage is our main battery voltage in mV
+
+ * MAVLNK_MSG_ID_ATTITUDE
+  * 1 per second
+  * Roll/pitch/yaw are the important bits
+
+
+Receiving
+---------
+
+ * MAVLINK_MSG_ID_HEARTBEAT from beaglebone
+  * Figure out system state & mode
+  * If mode is manual listen to manual control packets
+  * If mode is automatic listen to nav controller output packets
+  * If you see mode move from a disarmed to an armed state sound the horn or do the warning thing.
+  * If state is critical/emergency take appropriate action
+    
+ * MAVLINK_MSG_ID_MANUAL_CONTROL from groundcontroll
+  * Only act on these if you're currently in armed manual mode and active state
+  * 'r' will be 0 if D-pad is not pressed, 1000 if left, -1000 if right
+  * 'buttons' will be 0 if none pressed, 1 if forward, 4 if backward
+
+ * MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT from beaglebone
+  * Only act on these if you're currently in armed automatic mode and active state
+
+
+Modes & States
+--------------
+
+Beaglebone state starts in MAV_STATE_BOOT and transisions 

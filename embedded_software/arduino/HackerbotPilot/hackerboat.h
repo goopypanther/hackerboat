@@ -140,6 +140,9 @@ typedef enum MAV_CMD
 #include "./mavlink_msg_command_long.h"
 #include "./mavlink_msg_named_value_int.h"
 #include "./mavlink_msg_named_value_float.h"
+#include "./mavlink_msg_nav_controller_output.h"
+#include "./mavlink_msg_manual_setpoint.h"
+#include "./mavlink_msg_manual_control.h"
 
 
 #ifdef __cplusplus
