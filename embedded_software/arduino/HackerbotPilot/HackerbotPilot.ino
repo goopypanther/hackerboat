@@ -32,13 +32,13 @@
 #define Z_MAG_GAIN              (1.054)
 
 // steering and servo constants
-const double Kp =               10.0;
-const double Ki =               1.0;
+const double Kp =               5.0;
+const double Ki =               0.25;
 const double Kd =               0.0;
 const double pidMax =           100.0;
 const double pidMin =           -100.0;
-const uint16_t servoMin =       1000;
-const uint16_t servoMax =       2000;
+const uint16_t servoMin =       860;
+const uint16_t servoMax =       2240;
 
 // test limits
 const double compassDeviationLimit = 	10.0;	/**< Limit of compass swing, in degrees, during test period 	*/
