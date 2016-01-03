@@ -24,7 +24,7 @@
  */
 
 typedef struct gpsVector {
-	long			seriesNum;
+	long			sequenceNum;
 	unsigned long 	uTime;			/**< Time the record was made, in microseconds past the epoch */
 	double			latitude;
 	double			longitude;
@@ -85,7 +85,7 @@ int 	countWaypoints (void);
  */
  
 typedef struct boneVector {
-	long						seriesNum;
+	long						sequenceNum;
 	unsigned long 				uTime;			/**< Time the record was made, in microseconds past the epoch */
 	boneState					state;			/**< current state of the beaglebone */	
 	char[STATE_STRING_LEN]		stateString;	/**< current state of the beaglebone, human readable string */
@@ -99,7 +99,6 @@ typedef struct boneVector {
 	double						waypointStrength;
 	double						waypointAccuracy;
 	double						waypointStrengthMax;
-	int							waypointCount;
 	bool						offshore;		/**< When set true, the boat will operate autonomously */
 } boneVector;
  
@@ -113,7 +112,7 @@ int 	countBoneVector (void);
  */ 
  
 typedef struct navStruct {
-	long			seriesNum;
+	long			sequenceNum;
 	locationStruct	current;
 	locationStruct	target;
 	double			magCorrection;	/**< Correction between sensed magnetic heading and true direction */
@@ -132,7 +131,7 @@ int  	countNavStruct (void);
  */
  
 typedef struct arduinoVector {
-	long			seriesNum;
+	long			sequenceNum;
 	unsigned long	uTime;					/**< Time the record was made, in microseconds past the epoch */
 	arduinoState 	state;					/**< The current state of the boat                    */
 	arduinoState	command;

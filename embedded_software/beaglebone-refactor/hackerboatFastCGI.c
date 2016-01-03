@@ -47,6 +47,27 @@ int navDispatch			(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray,
 int arduinoStateDispatch(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
 							int tokenCount, char *query, char *body, uint32_t method, 
 							char *response, int bodyLen, int responseLen);
+int getWaypointInput	(waypointStruct *waypoint, char *body, int bodyLen);
+json_t *insertWaypoint 		(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+							char *body, int bodyLen);
+json_t *appendWaypoint 		(char *body, int bodyLen);
+json_t *getAllGPSVectors	(void);
+json_t *getAllWaypoints		(void);
+json_t *getAllBoneVectors	(void);
+json_t *getAllNavVectors	(void);
+json_t *getAllArduinoStates	(void);
+json_t *writeBoneCommand			(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
+json_t *writeBoneWaypointNext		(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
+json_t *writeBoneWaypointStrength	(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
+json_t *writeBoneWaypointAccuracy	(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
+json_t *writeBoneWaypointStrengthMax(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
+json_t *writeBoneOffshore			(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen);
 
 // Main function
 int main (void) {
@@ -159,23 +180,15 @@ int boneStateDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArra
 	bool 			write = false;
 	int 			result = 0;
 	long 			select;
-	boneState		vec;
-	boneState		*logs;
-	json_t			*resp, *inp;	
-	json_error_t	*err;
+	boneVector		vec;
+	json_t			*resp;
 	char			*buf;
-	int				records, count, input;
-	double			inputFloat;
+	int				count;
 	long			start;
 	timespec		thisTime;
 	
 	// get the current time
 	clock_gettime(CLOCK_REALTIME, &thisTime);
-	
-	// check whether we're going to write or not.
-	if (method == murmur3_32("POST", 4, HASHSEED)) {
-		write = true;
-	}
 	
 	// grab the current state vector & modify timestamp to current time (if we're writing)
 	if (!getBoneVector(&vec, -1, 1)) result = -1;
@@ -187,150 +200,66 @@ int boneStateDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArra
 	} else if (sscanf(tokenArray[1], "%dl", select)) {
 		if (!getBoneVector(&vec, select, 1)) result = -1;
 		if (!result) resp = packBoneVector(vec);
-	} else if (tokenHashArray[1] == murmur3_32("all", 3, HASHSEED)) {
-		records = countBoneVector();
-		logs = malloc(records*sizeof(boneState));
-		if (getBoneVector(logs, start, records) {
-			resp = json_array();
-			for (int i; i < records; i++) {
-				json_array_append(resp, packBoneVector(logs[i]));
-			}
-		} else result = -1;
-	} else if (tokenHashArray[1] == murmur3_32("count", 5, HASHSEED)) {
-		resp = json_pack("{s:i}", "boneStateCount", countBoneVector);
-	} else if (tokenHashArray[1] == murmur3_32("command", 7, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:i}", "command", &input);
-			if ((!result) && (input >= 0) && (input < boneStateCount)) {
-				vec.state = input;
-				snprintf(vec.stateString, STATE_STRING_LEN, "%s", boneStates[input]);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
+	} else if (method == murmur3_32("POST", 4, HASHSEED)) {
+		switch (tokenHashArray[1]) {
+			case (murmur3_32("command", 7, HASHSEED)):
+				resp = writeBoneCommand(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			case (murmur3_32("waypointNext", 12, HASHSEED)):
+				resp = writeBoneWaypointNext(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			case (murmur3_32("waypointStrength", 16, HASHSEED)):
+				resp = writeBoneWaypointStrength(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			case (murmur3_32("waypointAccuracy", 16, HASHSEED)):
+				resp = writeBoneWaypointAccuracy(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			case (murmur3_32("waypointStrengthMax", 19, HASHSEED)):
+				resp = writeBoneWaypointStrengthMax(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			case (murmur3_32("offshore", 8, HASHSEED)):
+				resp = writeBoneOffshore(tokenArray, tokenCount, &vec, body, bodyLen);
+				break;
+			default:
 				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:i,s:i}", "success", 1, "command", 
-								vec.command, "commandString", vec.commandString);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:i,s:i}", "command", vec.command,
-								"commandString", vec.commandString);
 		}
-	} else if (tokenHashArray[1] == murmur3_32("waypointNext", 12, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:i}", "waypointNext", &input);
-			if ((!result) && (input >= 0) && (input < countWaypoints())) {
-				vec.waypointNext = input;
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
+	} else {
+		switch (tokenHashArray[1]) {
+			case (murmur3_32("all", 3, HASHSEED)):
+				resp = getAllBoneVectors();
+				break;
+			case (murmur3_32("count", 5, HASHSEED)):
+				resp = json_pack("{s:i}", "boneStateCount", countBoneVector);
+				break;
+			case (murmur3_32("command", 7, HASHSEED)):
+				resp = json_pack("{s:i,s:i}", "command", vec.command,
+									"commandString", vec.commandString);
+				break;
+			case (murmur3_32("waypointNext", 12, HASHSEED)):
+				resp = json_pack("{s:i}", "waypointNext", vec.waypointNext);
+				break;
+			case (murmur3_32("waypointStrength", 16, HASHSEED)):
+				resp = json_pack("{s:f}", "waypointStrength", vec.waypointStrength);
+				break;
+			case (murmur3_32("waypointAccuracy", 16, HASHSEED)):
+				resp = json_pack("{s:f}", "waypointAccuracy", vec.waypointAccuracy);
+				break;
+			case (murmur3_32("waypointStrengthMax", 19, HASHSEED)):
+				resp = json_pack("{s:f}", "waypointStrengthMax", vec.waypointStrengthMax);
+				break;
+			case (murmur3_32("offshore", 8, HASHSEED)):
+				resp = json_pack("{s:b}", "offshore", vec.offshore);
+				break;
+			default:
 				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:i}", "success", 1, 
-								"waypointNext", vec.waypointNext);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:i}", "waypointNext", vec.waypointNext);
 		}
-	} else if (tokenHashArray[1] == murmur3_32("waypointStrength", 16, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:f}", "waypointStrength", &inputFloat);
-			if ((!result) && (inputFloat >= 0) && (inputFloat < 200.0)) {
-				vec.waypointStrength = inputFloat;
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:f}", "success", 1,
-								"waypointStrength", vec.waypointStrength);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:f}", "waypointStrength", vec.waypointStrength);
-		}
-	} else if (tokenHashArray[1] == murmur3_32("waypointAccuracy", 16, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:f}", "waypointAccuracy", &inputFloat);
-			if ((!result) && (inputFloat >= 0) && (inputFloat < 100.0)) {
-				vec.waypointAccuracy = inputFloat;
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:f}", "success", 1,
-								"waypointAccuracy", vec.waypointAccuracy);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:f}", "waypointAccuracy", vec.waypointAccuracy);
-		}
-	} else if (tokenHashArray[1] == murmur3_32("waypointStrengthMax", 19, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:f}", "waypointStrenghtMax", &inputFloat);
-			if ((!result) && (inputFloat >= 0) && (inputFloat < 200.0)) {
-				vec.waypointStrenghtMax = inputFloat;
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:f}", "success", 1,
-				"waypointStrengthMax", vec.waypointStrengthMax);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:f}", "waypointStrengthMax", vec.waypointStrengthMax);
-		}
-	} else if (tokenHashArray[1] == murmur3_32("offshore", 8, HASHSEED)) {
-		if (write && !result) {
-			inp = json_loads(body, 0, err);
-			result = json_unpack(inp, "{s:b}", "offshore", &input);
-			if (!result) {
-				if (input) {
-					vec.offshore = true;
-				} else {
-					vec.offshore = false;
-				}
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-			if ((!result) && (writeBoneVector(&vec))) {
-				resp = json_pack("{s:b,s:b}", "success", 1,
-								"offshore", vec.offshore);
-			} else {
-				resp = json_pack("{s:b}", "success", 0);
-				result = -1;
-			}
-		} else {
-			resp = json_pack("{s:b}", "offshore", vec.offshore);
-		}
-	} else result = -1;
-	
+	}
+		
 	// pack up the response and send it along
 	if (resp) {
 		buf = json_dumps(resp, JSON_COMPACT);
-		snprintf(response, buflen, "%s", buf);
-	}
+		snprintf(response, responseLen, "%s", buf);
+	} else result = -1;
 	
 	free(inp);
 	free(err);
@@ -343,13 +272,11 @@ int boneStateDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArra
 int gpsDispatch	(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
 					int tokenCount, char *query, char *body, uint32_t method, 
 					char *response, int bodyLen, int responseLen) {
-	char 			*token;
-	bool 			write = false;
-	int 			result = 0;
-	gpsVector		vec;
-	gpsVector		*logs;
-	json_t			*resp;
-	char			*buf;
+	int 		result = 0;
+	long		select;
+	gpsVector	vec;
+	json_t		*resp;
+	char		*buf;
 	
 	if (!getGPSvector(&vec, -1, 1)) result = -1;
 	
@@ -360,49 +287,69 @@ int gpsDispatch	(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray,
 		if (!getGPSVector(&vec, select, 1)) result = -1;
 		if (!result) resp = packGPSVector(vec);
 	} else if (tokenHashArray[1] == murmur3_32("all", 3, HASHSEED)) {
-		records = countGPSVector();
-		logs = malloc(records*sizeof(gpsVector));
-		if (getGPSVector(logs, start, records) {
-			resp = json_array();
-			for (int i; i < records; i++) {
-				json_array_append(resp, packGPSVector(logs[i]));
-			}
-		} else result = -1;
+		resp = getAllGPSVectors();
+	} else if (tokenHashArray[1] == murmur3_32("count", 5, HASHSEED)) {
+		resp = json_pack("{s:i}", "GpsFixCount", countGPSVector());
 	} else result = -1;
 	
 	// pack up the response and send it along
 	if (resp) {
 		buf = json_dumps(resp, JSON_COMPACT);
 		snprintf(response, buflen, "%s", buf);
-	}
+	} else result = -1;
 	
 	free(resp);
 	free(buf);
-	free(logs);
 	return result;
 }
 
 int waypointDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
 					int tokenCount, char *query, char *body, uint32_t method, 
 					char *response, int bodyLen, int responseLen) {
-	char 			*token;
 	bool 			write = false;
 	int 			result = 0;
-	json_t			*resp, *inp;	
-	json_error_t	*err;
+	json_t			*resp = NULL;
 	char			*buf;
-	boneState		vec;
+	boneVector		vec;
 	waypointStruct	waypoint;
 	waypointStruct	*logs;
 	int 			index
 	
-	
+	// figure out what to do with this...
+	if (tokenCount == 1) {
+		if (!getBoneVector(&vec, -1, 1)) result = -1;
+		if (!result && !getWaypointStruct(&waypoint, vec.waypointNext, 1)) {
+			result = -1;
+		}
+		if (!result) resp = packWaypointStruct(waypoint);
+	} else if (sscanf(tokenArray[1], "%dl", select)) {
+		if (!getWaypointStruct(&waypoint, select, 1)) {
+			result = -1;
+		} else resp = packWaypointStruct(waypoint);
+	} else {
+		switch(tokenHashArray[1]) {
+			case (murmur3_32("all", 3, HASHSEED)):
+				resp = getAllWaypoints();
+			case (murmur3_32("count", 5, HASHSEED)):
+				resp = json_pack("{s:i}", "waypointCount", countWaypoints());
+				break;
+			case (murmur3_32("insert", 6, HASHSEED)):
+				resp = insertWaypoint(tokenArray, tokenCount, body, response, 
+										bodyLen, responseLen);
+				break;
+			case (murmur3_32("append", 6, HASHSEED)):
+				resp = appendWaypoint(body, response, bodyLen, responseLen);
+				break;
+			default:
+				result = -1;
+		}
+	}
 	
 	// pack up the response and send it along
 	if (resp) {
 		buf = json_dumps(resp, JSON_COMPACT);
 		snprintf(response, buflen, "%s", buf);
-	}
+	} else result = -1;
 	
 	free(inp);
 	free(err);
@@ -412,18 +359,358 @@ int waypointDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray
 	return result;
 }
 
+json_t *insertWaypoint (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+					char *body int bodyLen) {
+	
+}
+
+json_t *appendWaypoint (char *body, int bodyLen) {
+	waypointStruct 	waypoint;
+	boneVector		bone;
+	
+	if (!getWaypointInput(&waypoint, body, bodyLen)) {
+		waypoint.waypointNumber = countWaypoints();
+		if (writeWaypointStruct(&waypoint)) {
+			return json_pack("{s:b,s:o}", "success", 1, "waypoint", 
+							packWaypointStruct(waypoint.waypointNumber));
+		} else return json_pack("{s:b}", "success", 0);
+	} else return json_pack("{s:b}", "success", 0);
+
+}
+
+int getWaypointInput (waypointStruct *waypoint, char *body, int bodyLen) {
+	json_t 		*inp;
+	json_err_t	*err;
+	int			result = 0, stopInput;
+	double		latIn, longIn;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:{s:f,s:f},s:b}", "location", 
+							"latitude", &latIn,	"longitude", &longIn;
+							"stop", &stopInput);
+	if (!result) {
+		if (!((latIn >= -90.0) && (latIn <= 90.0))) result = -1;
+		if (!((longIn >= -180.0) && (longIn <= 180.0))) result = -1;
+		if (!result) {
+			waypoint->stop = stopInput;
+			waypoint->location.latitude = latIn;
+			waypoint->location.longitude = longIn;
+		}
+	}
+	
+	free(inp);
+	free(error);
+	return result;
+}
+
 int navDispatch	(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
 					int tokenCount, char *query, char *body, uint32_t method, 
 					char *response, int bodyLen, int responseLen) {
-
+	navStruct	nav;
+	int 		result = 0;
+	long		select;
+	json_t		*resp;
+	char		*buf;
+	
+	if (!getNavStruct(&nav, -1, 1)) result = -1;
+	
+	// figure out what to do with this...
+	if (tokenCount == 1) {
+		if (!result) resp = packNavStruct(nav);
+	} else if (sscanf(tokenArray[1], "%dl", select)) {
+		if (!getNavStruct(&nav, select, 1)) result = -1;
+		if (!result) resp = packNavStruct(vec);
+	} else if (tokenHashArray[1] == murmur3_32("all", 3, HASHSEED)) {
+		resp = getAllNavVectors();
+	} else if (tokenHashArray[1] == murmur3_32("count", 5, HASHSEED)) {
+		resp = json_pack("{s:i}", "navStructCount", countNavStruct());
+	} else result = -1;
+	
+	// pack up the response and send it along
+	if (resp) {
+		buf = json_dumps(resp, JSON_COMPACT);
+		snprintf(response, buflen, "%s", buf);
+	} else result = -1;
+	
+	free(resp);
+	free(buf);
+	return result;
 }
 
 int arduinoStateDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
 							int tokenCount, char *query, char *body, uint32_t method, 
 							char *response, int bodyLen, int responseLen) {
+	arduinoVector	ard;
+	int 			result = 0;
+	long			select;
+	json_t			*resp;
+	char			*buf;
+	
+	if (!getArduinoVector(&ard, -1, 1)) result = -1;
+	
+	// figure out what to do with this...
+	if (tokenCount == 1) {
+		if (!result) resp = packArduinoVector(ard);
+	} else if (sscanf(tokenArray[1], "%dl", select)) {
+		if (!getArduinoVector(&ard, select, 1)) result = -1;
+		if (!result) resp = packArduinoVector(ard);
+	} else if (tokenHashArray[1] == murmur3_32("all", 3, HASHSEED)) {
+		resp = getAllArduinoStates();
+	} else if (tokenHashArray[1] == murmur3_32("count", 5, HASHSEED)) {
+		resp = json_pack("{s:i}", "navStructCount", countArduinoVector());
+	} else result = -1;
+	
+	// pack up the response and send it along
+	if (resp) {
+		buf = json_dumps(resp, JSON_COMPACT);
+		snprintf(response, buflen, "%s", buf);
+	} else result = -1;
+	
+	free(resp);
+	free(buf);
+	return result;
 					
 }
 
 int	getArduinoREST (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
 							char *query, char *response, int buflen) {
 }
+
+json_t *getAllGPSVectors	(void) {
+	int 		records;
+	json_t 		*resp = NULL;
+	gpsVector	*logs;
+	
+	records = countGPSVector();
+	logs = malloc(records*sizeof(gpsVector));
+	if (getGPSVector(logs, 0, records) {
+		resp = json_array();
+		for (int i; i < records; i++) {
+			json_array_append(resp, packGPSVector(logs[i]));
+		}
+	} 
+	
+	free(logs);
+	return resp;
+}
+
+json_t *getAllWaypoints		(void) {
+	int 			records;
+	json_t 			*resp = NULL;
+	waypointStruct	*logs;
+	
+	records = countWaypoints();
+	logs = malloc(records*sizeof(waypointStruct));
+	if (getWaypointStruct(logs, 0, records) {
+		resp = json_array();
+		for (int i; i < records; i++) {
+			json_array_append(resp, packWaypointStruct(logs[i]));
+		}
+	} 
+	
+	free(logs);
+	return resp;
+}
+
+json_t *getAllBoneVectors	(void) {
+	int 		records;
+	json_t 		*resp = NULL;
+	boneVector	*logs;
+	
+	records = countBoneVector();
+	logs = malloc(records*sizeof(boneVector));
+	if (getBoneVector(logs, 0, records) {
+		resp = json_array();
+		for (int i; i < records; i++) {
+			json_array_append(resp, packBoneVector(logs[i]));
+		}
+	} 
+	
+	free(logs);
+	return resp;
+}
+
+json_t *getAllNavVectors	(void) {
+	int 		records;
+	json_t 		*resp = NULL;
+	navStruct	*logs;
+	
+	records = countNavStruct();
+	logs = malloc(records*sizeof(navStruct));
+	if (getNavStruct(logs, 0, records) {
+		resp = json_array();
+		for (int i; i < records; i++) {
+			json_array_append(resp, packNavStruct(logs[i]));
+		}
+	} 
+	
+	free(logs);
+	return resp;
+}
+
+json_t *getAllArduinoStates	(void) {
+	int 			records;
+	json_t 			*resp = NULL;
+	arduinoVector	*logs;
+	
+	records = countArduinoVector();
+	logs = malloc(records*sizeof(arduinoVector));
+	if (getArduinoVector(logs, 0, records) {
+		resp = json_array();
+		for (int i; i < records; i++) {
+			json_array_append(resp, packArduinoVector(logs[i]));
+		}
+	} 
+	
+	free(logs);
+	return resp;
+}
+
+json_t *writeBoneCommand (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+							boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result, input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:i}", "command", &input);
+	
+	if ((!result) && (input >= 0) && (input < boneStateCount)) {
+		vec->state = input;
+		snprintf(vec->stateString, STATE_STRING_LEN, "%s", boneStates[input]);
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:i,s:i}", "success", 1, "command", 
+								vec.command, "commandString", vec->commandString);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result) resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
+json_t *writeBoneWaypointNext (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+								 boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result, input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:i}", "waypointNext", &input);
+	
+	if ((!result) && (input >= 0) && (input < countWaypoints())) {
+		vec->waypointNext = input;
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:i}", "success", 1, 
+							"waypointNext", vec->waypointNext);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result) resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
+json_t *writeBoneWaypointStrength (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+									boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result;
+	double		input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:f}", "waypointStrength", &input);
+	
+	if ((!result) && (input > 0.0) && (input < 100.0)) {
+		vec->waypointStrength = input;
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:i}", "success", 1, 
+							"waypointStrength", vec->waypointStrength);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result)	resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
+json_t *writeBoneWaypointAccuracy (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+									boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result;
+	double		input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:f}", "waypointAccuracy", &input);
+	
+	if ((!result) && (input > 0.0) && (input < 200.0)) {
+		vec->waypointAccuracy = input;
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:i}", "success", 1, 
+							"waypointAccuracy", vec->waypointAccuracy);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result)	resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
+json_t *writeBoneWaypointStrengthMax (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+										boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result;
+	double		input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:f}", "waypointStrengthMax", &input);
+	
+	if ((!result) && (input > 0.0) && (input < 100.0)) {
+		vec->waypointStrengthMax = input;
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:i}", "success", 1, 
+							"waypointStrengthMax", vec->waypointStrengthMax);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result)	resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
+json_t *writeBoneOffshore (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
+							boneVector *vec, char *body, int bodyLen) {
+	json_t 		*inp, *resp = NULL;
+	json_err_t	*err;
+	int			result, input;
+	
+	inp = json_loads(body, 0, err);
+	result = json_unpack(inp, "{s:b}", "offshore", &input);
+	
+	if (!result) {
+		vec->offshore = input;
+		if (writeBoneVector(vec)) {
+			resp = json_pack("{s:b,s:b}", "success", 1, 
+							"offshore", vec->offshore);
+		} else result = -1;
+	} else result = -1;
+	
+	if (result) resp = json_pack("{s:b}", "success", 0);
+	
+	free(inp);
+	free(err);
+	return resp;
+}
+
