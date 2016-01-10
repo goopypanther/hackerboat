@@ -7,6 +7,13 @@
 #define MAX_TOKENS			5
 #define MAX_TOKEN_LEN		64
 #define HASHSEED			0xdeadbeef
+#define GNSS_TTY			"/dev/ttyO4"
+#define GNSS_BPS			57600
+#define ARDUINO_REST_TTY	"/dev/ttyO2"		
+#define ARDUINO_LOG_TTY		"/dev/ttyO1"
+#define ARDUINO_BPS			115200	
+	/**< State machine execution frame length, in nanoseconds */
+#define FRAME_LEN_NS		(100000000)		
 
 /**
  * @brief Beaglebone state
@@ -22,7 +29,7 @@ typedef enum boneState {
 	BONE_NOSIGNAL		= 7,		/**< Beaglebone has lost shore signal    */
 	BONE_RETURN			= 8,		/**< Beaglebone is attempting to return to start point */
 	BONE_ARMEDTEST		= 9,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
-	BONE_UNKNOWN		= 10		/**< State of the Beaglebone is currently unknown	*/
+	BONE_NONE			= 10		/**< State of the Beaglebone is currently unknown	*/
 } boneState;
 
 const uint8_t boneStateCount = 11;
@@ -37,7 +44,7 @@ const char boneStates[][30] = {
 	"LossOfSignal", 
 	"ReturnToLaunch", 
 	"ArmedTest",
-	"Unknown"
+	"None"
 };
 
 /**

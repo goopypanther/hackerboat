@@ -16,15 +16,9 @@
 #include <string.h>
 #include <jansson.h>
 #include <time.h>
-#include <dlcfcn.h>
 #include "logs.h"
 #include "dbReadWrite.h"
 #include "config.h"
-
-typedef struct funcDispatch {
-	char[30]	name;
-	int(*func)(char *, char *, char *, char *, int, int)
-} funcDispatch;
 
 // Function declarations
 int	restDispatch		(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray, 
@@ -48,6 +42,7 @@ int arduinoStateDispatch(char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashAr
 							int tokenCount, char *query, char *body, uint32_t method, 
 							char *response, int bodyLen, int responseLen);
 int getWaypointInput	(waypointStruct *waypoint, char *body, int bodyLen);
+int arduinoReset (void);
 json_t *insertWaypoint 		(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
 							char *body, int bodyLen);
 json_t *appendWaypoint 		(char *body, int bodyLen);
@@ -78,12 +73,6 @@ int main (void) {
 	char		tokensArray[MAX_TOKENS][MAX_TOKEN_LEN];
 	uint32_t	tokensHashArray[MAX_TOKENS], methodHash;
 	int 		tokenCount = 0;
-	
-	// Function dispatch handle
-	void *funcHandle = NULL;
-	
-	// initialize a handler to call functions by name
-	funcHandle = dlopen(NULL, RTLD_LAZY);
 	
 	while (FCGI_Accept() >= 0) {
 		FCGI_printf("Content-type: application/json\r\n\r\n");
@@ -169,6 +158,8 @@ int	restDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashArray,
 			return arduinoStateDispatch(tokenArray, tokenHashArray, tokenCount, 
 									query, body, method, response, bodyLen,
 									responseLen);
+		case (murmur3_32("arduinoReset", 12, HASHSEED)):
+			return arduinoReset(void);
 		default:
 			return -1;
 	}
@@ -474,6 +465,9 @@ int arduinoStateDispatch (char[][MAX_TOKEN_LEN] tokenArray, uint32_t *tokenHashA
 
 int	getArduinoREST (char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, 
 							char *query, char *response, int buflen) {
+}
+
+int arduinoReset (void) {
 }
 
 json_t *getAllGPSVectors	(void) {

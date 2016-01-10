@@ -14,3 +14,4 @@
  
 int logArduinoREST(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, char *query, char *response);
 int logREST(char[][MAX_TOKEN_LEN] tokenArray, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
+int logError(const char *source, char *message);
