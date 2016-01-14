@@ -18,7 +18,7 @@
 /**
  * @brief Beaglebone state
  */
-typedef enum boneState {
+typedef enum boneStateEnum {
 	BONE_START			= 0,  		/**< Initial starting state         */
 	BONE_SELFTEST		= 1,  		/**< Initial self-test            */
 	BONE_DISARMED		= 2,  		/**< Disarmed wait state          */  
@@ -50,7 +50,7 @@ const char boneStates[][30] = {
 /**
  * @brief An enum to store the current state of the Arduino.
  */
-typedef enum arduinoState {
+typedef enum arduinoStateEnum {
 	BOAT_POWERUP     	= 0,  		/**< The boat enters this state at the end of initialization */
 	BOAT_ARMED			= 1,  		/**< In this state, the boat is ready to receive go commands over RF */
 	BOAT_SELFTEST   	= 2,  		/**< After powerup, the boat enters this state to determine whether it's fit to run */
