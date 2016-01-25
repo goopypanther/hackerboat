@@ -74,13 +74,16 @@ int main (void) {
 		}
 		
 		// dispatch on the URI
-		responseJSON = root->dispatch(tokens, tokenHashes, tokenLengths, tokenCnt, 0, method, body, bodyLen);
+		responseJSON = root->dispatch(tokens, tokenHashes, tokenLengths, tokenCnt, 0, query, method, body, bodyLen);
 		
 		// print the result back to the client
 		snprintf(response, LOCAL_BUF_LEN, "%s", json_dumps(responseJSON, JSON_COMPACT));
 		FCGI_printf("{\"response\":%s,\"id\":%d,\"name\":%s,\"connected\":true}\r\n", 
 					response, REST_ID, REST_NAME);
-					
+
+		// log everything
+		logREST(tokens, tokenCnt, query, body, bodyLen, method, response);
+		
 		// clean up
 		delete body;
 		delete responseJSON;

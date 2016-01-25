@@ -12,5 +12,5 @@
 
 #include "config.h" 
  
-int logREST(char** tokenArray, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
+int logREST(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
 int logError(const char *source, char *message);
