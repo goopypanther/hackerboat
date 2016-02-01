@@ -1,0 +1,3 @@
+[submodule "embedded_software/arduino/HackerBoatLib"]
+	path = embedded_software/arduino/HackerBoatLib
+	url = https://github.com/logos-electromechanical/HackerBoatLib.git
