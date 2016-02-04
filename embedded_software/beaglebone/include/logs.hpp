@@ -11,6 +11,30 @@
  ******************************************************************************/
 
 #include "config.h" 
+
+class logREST {
+	public:
+		static logRest* instance(void);
+		bool open(std::string logfile);
+		bool write(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
+		bool close(void);
+	private:
+		logREST(void){};
+		logREST(logREST const&){};
+		logREST& operator=(logREST const&){};
+		static logREST* _instance;
+};
+
+class logError {
+	public:
+		static logError* instance(void);
+		bool open(std::string logfile);
+		bool write(const char *source, char *message);
+		bool close(void);
+	private:
+		logError(void){};
+		logError(logError const&){};
+		logError& operator=(logError const&){};
+		static logError* _instance;
+};
  
-int logREST(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
-int logError(const char *source, char *message);

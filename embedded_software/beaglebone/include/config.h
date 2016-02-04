@@ -22,6 +22,7 @@
 #define	BONE_LOG_DB_FILE
 #define ARD_LOG_DB_FILE
 #define WP_DB_FILE	
+#define REST_LOGFILE
 
 /**
  * @brief Beaglebone state

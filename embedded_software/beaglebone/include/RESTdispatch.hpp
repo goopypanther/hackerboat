@@ -21,7 +21,7 @@
 
 class RESTdispatchClass {
 	public:
-		virtual RESTdispatchClass(void);
+		virtual RESTdispatchClass(void){};
 		virtual RESTdispatchClass(const char *_name);	/**< Create a dispatch object with _name */
 		virtual RESTdispatchClass(const char *_name, RESTdispatchClass** _table, size_t _tableSize); /**< Create a dispatch object with _name and the given dispatch table */
 		
@@ -29,25 +29,40 @@ class RESTdispatchClass {
 		virtual bool addEntry (RESTdispatchClass *entry);	/**< Add an entry to the dispatch table */
 		virtual bool addNumber (RESTdispatchClass *entry);	/**< Add an entry to call when the next token is a number */
 		uint32_t setName (char *name);				/**< Set the name of the object */
-		bool match (uint32_t hash);					/**< Check if this object matches the given hash */
-		virtual json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);			/**< Function to execute if this is the last token */
-		virtual json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen); 	/**< Function to execute if the next token doesn't match anything in the dispatch table */
+		bool match (uint32_t hash) {return (hash == _hash);};					/**< Check if this object matches the given hash */
+		virtual json_t* root (char** tokens, 
+								uint32_t* tokenHashes, 
+								size_t* tokenLengths, 
+								int tokenCnt, 
+								int currentToken, 
+								char* query, 
+								char* method, 
+								char* body, 
+								int bodyLen) {return NULL;};			/**< Function to execute if this is the last token */
+		virtual json_t*	defaultFunc (char** tokens, 
+									uint32_t* tokenHashes, 
+									size_t* tokenLengths, 
+									int tokenCnt, 
+									int currentToken, 
+									char* query, 
+									char* method, 
+									char* body, 
+									int bodyLen) {return NULL;}; 	/**< Function to execute if the next token doesn't match anything in the dispatch table */
 		
-	private:	
-		RESTdispatchClass* _defaultDispatch;
-		RESTdispatchClass* _numberDispatch;
-		RESTdispatchClass** _dispatchTable;
-		size_t tableSize
-		uint32_t _hash;
-		char name[MAX_TOKEN_LEN];
+	protected:	
+		RESTdispatchClass* _numberDispatch	= NULL;
+		RESTdispatchClass** _dispatchTable	= NULL;
+		size_t tableSize 					= 0;
+		uint32_t _hash 						= 0;
+		char name[MAX_TOKEN_LEN] 			= "";
 };
 
 class allDispatchClass : public RESTdispatchClass {
 	public:
 		allDispatchClass(const char *_name, hackerboatStateClassStorable* target);	/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
 		bool setTarget (hackerboatStateClassStorable* target);						/**< Set the target hackerboatStateClassStorable */
-		bool addEntry (RESTdispatchClass *entry) {return false};
-		bool addNumber (RESTdispatchClass *entry) {return false};
+		bool addEntry (RESTdispatchClass *entry) {return false;};
+		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		
 	private:

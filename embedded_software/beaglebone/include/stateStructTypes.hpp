@@ -33,15 +33,17 @@ class hackerboatStateClass {
 
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
-		virtual hackerboatStateClass(const char *file, size_t len);	/**< Create a state object attached to the given file */
+		virtual hackerboatStateClassStorable(const char *file, size_t len);	/**< Create a state object attached to the given file */
 		int32_t getSequenceNum (void) {return sequenceNum};			/**< Get the sequenceNum of this object (-1 until populated from a file) */
-		virtual bool openFile(const char *name, size_t len) {return false};	/**< Open the given database file & store the name */
-		virtual bool openFile(void) {return false};					/**< Open the stored database file */
-		virtual bool closeFile(void) {return true};					/**< Close the open file */
-		virtual int32_t count (void) {return -1};					/**< Return the number of records of the object's type in the open database file */
-		virtual bool writeRecord (void) {return false};				/**< Write the current record to the target database file */
-		virtual bool getRecord(int32_t select) {return false};		/**< Populate the object from the open database file */
-
+		virtual bool openFile(const char *name, size_t len);	/**< Open the given database file & store the name */
+		virtual bool openFile(void);					/**< Open the stored database file */
+		virtual bool closeFile(void);					/**< Close the open file */
+		virtual int32_t count (void);					/**< Return the number of records of the object's type in the open database file */
+		virtual bool writeRecord (void);				/**< Write the current record to the target database file */
+		virtual bool getRecord(int32_t select);		/**< Populate the object from the open database file */
+		virtual bool insert(int32_t num) {return false};		/**< Insert the contents of the object into the database table at the given point */
+		virtual bool append(void) {return false};	/** < Append the contents of the object to the end of the database table */
+		
 	private:
 		int32_t 	sequenceNum;
 		char 		*fileName;

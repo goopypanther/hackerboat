@@ -38,6 +38,8 @@ int main (void) {
 	int32_t		result, tokenCnt = 0;
 	rsize_t		tokenRemain;
 	RESTdispatchClass*	root;
+	logREST*	log = logREST::instance();
+	logError*	err = logError::instance();
 	
 	// initialize the dispatch hierarchy
 	root = initRESTDispatch();
@@ -82,11 +84,13 @@ int main (void) {
 					response, REST_ID, REST_NAME);
 
 		// log everything
-		logREST(tokens, tokenCnt, query, body, bodyLen, method, response);
+		log->open(REST_LOGFILE);
+		log->write(tokens, tokenCnt, query, body, bodyLen, method, response);
+		log->close();
 		
 		// clean up
-		delete body;
-		delete responseJSON;
+		free(body);
+		free(responseJSON);
 		for (uint8_t i = 0; i < MAX_URI_TOKENS; i++) {
 			tokens[i] = NULL;
 		}
