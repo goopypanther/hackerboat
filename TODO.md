@@ -4,38 +4,38 @@
 
 * ~~**Create system description document**~~
 * ~~**Create controls specification**~~ -- Done to v0.2 requirements
-* **Create overall wiring schematic**
+* ~~**Create overall wiring schematic**~~ Done
 * ~~**Move all documentation/code/designs to single GitHub repository**~~
 
 ## Operations
 
-* **Create launching cradle/sling**
+* ~~**Create launching cradle/sling**~~ -- superseded by events
 * ~~**Designate a safety officer**~~ -- 3ric volunteered to take this on
 * **Prepare launch & recovery plan** 
 * **Provide shade for shore station operator**
 
 ## Structure
 
-*  **Fabricate & install solid battery mounts** -- PN has identified commercial products that meet the requirement, but has not yet acquired them.
+*  ~~**Fabricate & install solid battery mounts**~~ 
 * **Do weight and balance calculations** -- PN noted that since we verified that the boat floated flat and level without the batteries and keel, we can probably just get away with doing the keel plus batteries for now. 
 * ~~**Finish keel and add ballast bulbs**~~ -- Alex assembled these. They just need to be filled with rebar. 
-* **Add keying to hatches** -- Partially complete thanks to Matt; epoxy is back
+* ~~**Add keying to hatches**~~
 
 ## Electrical
 
-* **Replace external wiring for motor with stranded wire** -- Old wiring has been removed. New wiring is on hand and needs Andersons to finish. 
-* **Re-work antenna** -- Replacement cables on hand.
-* **Replace servo wiring** -- Old wiring has been removed. Correct cable is on hand but needs to be installed. 
-* **Add cutoff & enable switches** -- 3ric has identified appropriate switches. Not acquired yet. 
-* **Add mode lights aft** -- Need to acquire lights & cable
+* ~~**Replace external wiring for motor with stranded wire**~~
+* ~~**Re-work antenna**~~
+* ~~**Replace servo wiring**~~
+* ~~**Add cutoff & enable switches**~~
+* ~~**Add mode lights aft**~~
 * ~~**Finalize assembly of control & relay boxes**~~ 
-* **Functional test of control & relay boxes** -- PN has written & checked in test code; still need to run it.
-* **Improved control box mounting, esp wrt compass heading**
+* ~~**Functional test of control & relay boxes**~~
+* ~~**Improved control box mounting, esp wrt compass heading**~~
 
 ## Comms
 
-* **Finalize radio box installation**
-* **End to end comms test**
+* ~~**Finalize radio box installation**~~
+* ~~**End to end comms test**~~
  
 ## Controls
 
