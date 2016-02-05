@@ -108,23 +108,23 @@ RESTdispatchClass *initRESTDispatch (void) {
 	// leaf nodes
 	static resetArduinoRest			reset("resetArduino");
 	static arduinoRESTClass			arduino("a");
-	static allDispatchClass			boneAll("all", &boneStruct);
-	static allDispatchClass			gpsAll("all", &gpsStruct);
-	static allDispatchClass			waypointAll("all", &waypointStruct);
-	static allDispatchClass			navAll("all", &navStruct);
-	static allDispatchClass			arduinoAll("all", &ardStruct);
+	static allDispatchClass			boneAll(&boneStruct);
+	static allDispatchClass			gpsAll(&gpsStruct);
+	static allDispatchClass			waypointAll(&waypointStruct);
+	static allDispatchClass			navAll(&navStruct);
+	static allDispatchClass			arduinoAll(&ardStruct);
 	static numberDispatchClass		boneNum(&boneStruct);
 	static numberDispatchClass		gpsNum(&gpsStruct);
 	static numberDispatchClass		waypointNum(&waypointStruct);
 	static numberDispatchClass		navNum(&navStruct); 
 	static numberDispatchClass		arduinoNum(&ardStruct);
-	static countDispatchClass		boneCount("count", &boneStruct);
-	static countDispatchClass		gpsCount("count", &gpsStruct); 
-	static countDispatchClass		waypointCount("count", &waypointStruct);
-	static countDispatchClass		navCount("count", &navStruct); 
-	static countDispatchClass		arduinoCount("count", &ardStruct);
-	static appendDispatchClass		waypointAppend("append", &waypointStruct);
-	static insertDispatchClass		waypointInsert("insert", &waypointStruct);
+	static countDispatchClass		boneCount(&boneStruct);
+	static countDispatchClass		gpsCount(&gpsStruct); 
+	static countDispatchClass		waypointCount(&waypointStruct);
+	static countDispatchClass		navCount(&navStruct); 
+	static countDispatchClass		arduinoCount(&ardStruct);
+	static appendDispatchClass		waypointAppend(&waypointStruct);
+	static insertDispatchClass		waypointInsert(&waypointStruct);
 	
 	// root & branch nodes
 	static boneStateRESTClass 		bone("boneState", {&boneAll, &boneCount}, 2);

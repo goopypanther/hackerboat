@@ -19,48 +19,93 @@
 #include "stateStructTypes.h"
 #include "config.h"
 
+/**
+ * @class RESTDispatchClass
+ *
+ * @brief This is the base class for nodes on the REST call tree
+ * 
+ * When a REST request arrives, the URI is split into tokens on the slashes and each token is hashed.
+ * A top level object of this type is passed an array of tokens, an array of hashes, the index of the 
+ * current token, and the contents of the REST request (query string, method, and POST body, if any) 
+ * through its dispatch() method. If there are more tokens beyond the current one, it sorts through 
+ * the dispatch list and calls the dispatch() method of the matching object.  
+ *
+ */
+
 class RESTdispatchClass {
 	public:
 		virtual RESTdispatchClass(void){};
-		virtual RESTdispatchClass(const char *_name);	/**< Create a dispatch object with _name */
-		virtual RESTdispatchClass(const char *_name, RESTdispatchClass** _table, size_t _tableSize); /**< Create a dispatch object with _name and the given dispatch table */
+		virtual RESTdispatchClass(const char *name);			/**< Create a dispatch object with name */
+		/**
+		 * @brief Constructor for a dispatch object with name and given dispatch table
+		 */
+		virtual RESTdispatchClass	(const char *name, 			/**< Name of the object */
+									RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
+									size_t tableSize); 			/**< Number of items in the dispatch table */
 		
-		virtual json_t* dispatch (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen); /**< Dispatch on the tokenized (and hashed) URI */
-		virtual bool addEntry (RESTdispatchClass *entry);	/**< Add an entry to the dispatch table */
-		virtual bool addNumber (RESTdispatchClass *entry);	/**< Add an entry to call when the next token is a number */
-		uint32_t setName (char *name);				/**< Set the name of the object */
-		bool match (uint32_t hash) {return (hash == _hash);};					/**< Check if this object matches the given hash */
-		virtual json_t* root (char** tokens, 
-								uint32_t* tokenHashes, 
-								size_t* tokenLengths, 
-								int tokenCnt, 
-								int currentToken, 
-								char* query, 
-								char* method, 
-								char* body, 
-								int bodyLen) {return NULL;};			/**< Function to execute if this is the last token */
-		virtual json_t*	defaultFunc (char** tokens, 
-									uint32_t* tokenHashes, 
-									size_t* tokenLengths, 
-									int tokenCnt, 
-									int currentToken, 
-									char* query, 
-									char* method, 
-									char* body, 
-									int bodyLen) {return NULL;}; 	/**< Function to execute if the next token doesn't match anything in the dispatch table */
+		virtual bool addEntry (RESTdispatchClass *entry);		/**< Add an entry to the dispatch table */
+		virtual bool addNumber (RESTdispatchClass *entry);		/**< Add an entry to call when the next token is a decimal number */
+		virtual uint32_t setName (char *name);					/**< Set the name of the object */
+		bool match (uint32_t hash) {return (hash == _hash);};	/**< Check if this object matches the given hash */
+		/**
+		 * @brief Dispatch on the token designated by currentToken
+		 */
+		virtual json_t* dispatch 	(char** tokens, 			/**< Array of tokens from the URI request */
+									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
+									size_t* tokenLengths, 		/**< The length of each token */
+									int tokenCnt, 				/**< Number of tokens */
+									int currentToken, 			/**< Token to dispatch on */
+									char* query, 				/**< Query string, if any, from the request */
+									char* method, 				/**< Request method, generally either GET or POST */
+									char* body, 				/**< POST request body, if any */
+									int bodyLen); 				/**< Length of the body */
+		/**
+		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
+		 */							
+		virtual json_t* root 		(char** tokens, 			/**< Array of tokens from the URI request */
+									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
+									size_t* tokenLengths, 		/**< The length of each token */
+									int tokenCnt, 				/**< Number of tokens */
+									int currentToken, 			/**< Token to dispatch on */
+									char* query, 				/**< Query string, if any, from the request */
+									char* method, 				/**< Request method, generally either GET or POST */
+									char* body, 				/**< POST request body, if any */
+									int bodyLen); 				/**< Length of the body */
+									{return NULL;};		
+		/**
+		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
+		 */														
+		virtual json_t*	defaultFunc (char** tokens, 			/**< Array of tokens from the URI request */
+									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
+									size_t* tokenLengths, 		/**< The length of each token */
+									int tokenCnt, 				/**< Number of tokens */
+									int currentToken, 			/**< Token to dispatch on */
+									char* query, 				/**< Query string, if any, from the request */
+									char* method, 				/**< Request method, generally either GET or POST */
+									char* body, 				/**< POST request body, if any */
+									int bodyLen); 				/**< Length of the body */
+									{return NULL;}; 
 		
 	protected:	
-		RESTdispatchClass* _numberDispatch	= NULL;
-		RESTdispatchClass** _dispatchTable	= NULL;
-		size_t tableSize 					= 0;
-		uint32_t _hash 						= 0;
-		char name[MAX_TOKEN_LEN] 			= "";
+		RESTdispatchClass* _numberDispatch	= NULL;				/**< Object to dispatch to if the next token is a number */
+		RESTdispatchClass** _dispatchTable	= NULL;				/**< Dispatch table */
+		size_t _tableSize 					= 0;				/**< Size of the dispatch table */
+		char _name[MAX_TOKEN_LEN] 			= "";				/**< Name of this object */
+		uint32_t _hash 						= 0;				/**< MurmurHash3 of the object name */
 };
 
+/** 
+ * @class allDispatchClass
+ *
+ * @brief This class is for nodes where the last token is 'all'. It is strictly a leaf node.
+ *
+ */
+ 
 class allDispatchClass : public RESTdispatchClass {
 	public:
-		allDispatchClass(const char *_name, hackerboatStateClassStorable* target);	/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
-		bool setTarget (hackerboatStateClassStorable* target);						/**< Set the target hackerboatStateClassStorable */
+		allDispatchClass(hackerboatStateClassStorable* target);		/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
+		bool setTarget (hackerboatStateClassStorable* target);		/**< Set the target hackerboatStateClassStorable */
+		uint32_t setName (char *name) {return 0;};
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
@@ -69,20 +114,28 @@ class allDispatchClass : public RESTdispatchClass {
 		hackerboatStateClassStorable* _target;
 };
 
+/** 
+ * @class numberDispatchClass
+ *
+ * @brief This class is for nodes where the token is a decimal number. It may have branch nodes. 
+ *
+ */
+ 
 class numberDispatchClass : public RESTdispatchClass {
 	public:
 		numberDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		bool addEntry (RESTdispatchClass *entry) {return false};
-		bool addNumber (RESTdispatchClass *entry) {return false};
+		uint32_t setName (char *name) {return 0;};
+		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		
 	private:
 		hackerboatStateClassStorable* _target;
 };
 
 class countDispatchClass : public RESTdispatchClass {
 	public:
-		countDispatchClass(const char *_name, hackerboatStateClassStorable* target);
+		countDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false};
 		bool addNumber (RESTdispatchClass *entry) {return false};
@@ -93,7 +146,7 @@ class countDispatchClass : public RESTdispatchClass {
 
 class insertDispatchClass : public RESTdispatchClass {
 	public:
-		insertDispatchClass(const char *_name, hackerboatStateClassStorable* target);
+		insertDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false};
 		bool addNumber (RESTdispatchClass *entry) {return false};
@@ -104,7 +157,7 @@ class insertDispatchClass : public RESTdispatchClass {
 
 class appendDispatchClass : public RESTdispatchClass {
 	public:
-		insertDispatchClass(const char *_name, hackerboatStateClassStorable* target);
+		insertDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false};
 		bool addNumber (RESTdispatchClass *entry) {return false};

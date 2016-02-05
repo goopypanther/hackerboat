@@ -21,71 +21,119 @@
 #define NAV_SOURCE_NAME_LEN		30
 #define NAV_VEC_LIST_LEN		30
 
+/**
+ * @class hackerboatStateClass 
+ * 
+ * @brief Base class for holding various types of object used by the core functions of the Hackerboat
+ *
+ */
+
 class hackerboatStateClass {
 	public:
 		virtual hackerboatStateClass(void);							
 		virtual bool parse (json_t *input);			/**< Populate the object from the given json object */
-		virtual json_t *pack (void);				/**< Pack the contents of the object into an outgoing json object */
+		virtual json_t *pack (void);				/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		virtual bool isValid (void) {return true};	/**< Tests whether the current object is in a valid state */
-	private:	
-		static const char *jsonFormatString;		/**< Format string for the object */
+		
+	protected:	
+		virtual char *getFormatString(void);		/**< Get format string for the object */
 };
+
+/**
+ * @class hackerboatStateClassStorable 
+ * 
+ * @brief Base class for holding various types of object used by the core functions of the Hackerboat
+ *
+ * This base class connects to a database of records containing instances of the object type.  
+ *
+ */
 
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
-		virtual hackerboatStateClassStorable(const char *file, size_t len);	/**< Create a state object attached to the given file */
-		int32_t getSequenceNum (void) {return sequenceNum};			/**< Get the sequenceNum of this object (-1 until populated from a file) */
-		virtual bool openFile(const char *name, size_t len);	/**< Open the given database file & store the name */
-		virtual bool openFile(void);					/**< Open the stored database file */
-		virtual bool closeFile(void);					/**< Close the open file */
-		virtual int32_t count (void);					/**< Return the number of records of the object's type in the open database file */
-		virtual bool writeRecord (void);				/**< Write the current record to the target database file */
-		virtual bool getRecord(int32_t select);		/**< Populate the object from the open database file */
-		virtual bool insert(int32_t num) {return false};		/**< Insert the contents of the object into the database table at the given point */
-		virtual bool append(void) {return false};	/** < Append the contents of the object to the end of the database table */
+		virtual hackerboatStateClassStorable(const char *file, size_t len);		/**< Create a state object attached to the given file */
+		int32_t getSequenceNum (void) {return _sequenceNum};					/**< Get the sequenceNum of this object (-1 until populated from a file) */
+		virtual bool openFile(const char *name, size_t len);					/**< Open the given database file & store the name */
+		virtual bool openFile(void);											/**< Open the stored database file */
+		virtual bool closeFile(void);											/**< Close the open file */
+		virtual int32_t count (void);											/**< Return the number of records of the object's type in the open database file */
+		virtual bool writeRecord (void);										/**< Write the current record to the target database file */
+		virtual bool getRecord(int32_t select);									/**< Populate the object from the open database file */
+		virtual bool insert(int32_t num) {return false};						/**< Insert the contents of the object into the database table at the given point */
+		virtual bool append(void) {return false};								/**< Append the contents of the object to the end of the database table */
 		
-	private:
-		int32_t 	sequenceNum;
-		char 		*fileName;
-		sqlite3 	*db;
+	protected:
+		int32_t 	_sequenceNum = -1;	/**< sequence number */
+		char 		*_fileName;			/**< database filename (with path) */
+		sqlite3 	*_db;				/**< database handle */
 }
 
+/**
+ * @class gpsFixClass 
+ * 
+ * @brief A GPS fix of some type
+ *
+ * The actual text of each incoming sentence is stored for logging purposes as well. 
+ *
+ */
+ 
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
 		gpsFixClass (void);
-		gpsFixClass (char *sentence, size_t len);			/**< Create a GPS fix from an incoming sentence */
+		gpsFixClass (char *sentence, size_t len);			/**< Create a GPS fix from an incoming sentence string */
 		
-		bool readSentence (char *sentence, size_t len);		/**< Populate class from incoming sentence */
+		bool readSentence (char *sentence, size_t len);		/**< Populate class from incoming sentence string */
+		bool isValid (void);								/**< Check for validity */
 		
-		unsigned long 	uTime;				/**< Time of fix arrival */
-		double			latitude;			/**< Latitude of last fix */
-		double			longitude;			/**< Longitude of last fix */
-		double			gpsHeading;			/**< True heading, according to GPS */
-		double			gpsSpeed;			/**< Speed over the ground */
-		char[GPS_SENTENCE_LEN]		GGA;	/**< GGA sentence from GPS */
-		char[GPS_SENTENCE_LEN]		GSA;	/**< GSA sentence from GPS */
-		char[GPS_SENTENCE_LEN]		GSV;	/**< GSV sentence from GPS */
-		char[GPS_SENTENCE_LEN]		VTG;	/**< VTG sentence from GPS */
-		char[GPS_SENTENCE_LEN]		RMC;	/**< RMC sentence from GPS */
+		unsigned long long			uTime;					/**< Time of fix arrival in microseconds since the epoch */
+		double						latitude;				/**< Latitude of last fix */
+		double						longitude;				/**< Longitude of last fix */
+		double						gpsHeading;				/**< True heading, according to GPS */
+		double						gpsSpeed;				/**< Speed over the ground */
+		char[GPS_SENTENCE_LEN]		GGA;					/**< GGA sentence from GPS */
+		char[GPS_SENTENCE_LEN]		GSA;					/**< GSA sentence from GPS */
+		char[GPS_SENTENCE_LEN]		GSV;					/**< GSV sentence from GPS */
+		char[GPS_SENTENCE_LEN]		VTG;					/**< VTG sentence from GPS */
+		char[GPS_SENTENCE_LEN]		RMC;					/**< RMC sentence from GPS */
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		static const char *_format = "";
 };
+
+/**
+ * @class locationClass
+ *
+ * @brief Class for storing a location 
+ *
+ */
 
 class locationClass : public hackerboatStateClass {
 	public:
 		locationClass (void);
-		locationClass (double lat, double lon);	/**< Create a location object at the given latitude & longitude */
+		locationClass (double lat, double lon);		/**< Create a location object at the given latitude & longitude */
+		bool isValid (void);						/**< Check for validity */
 		
-		double _lat;		/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
-		double _lon;		/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */			
+		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
+		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		static const char *_format = "";	
 };
 
 class navVectorClass : public hackerboatStateClass {
 	public:	
 		navVectorClass (void);
 		navVectorClass (char *src, size_t srcLen, double bearing, double strength);
+		bool isValid (void);					/**< Check for validity */
 		
 		char[NAV_SOURCE_NAME_LEN]	source;		/**< Name of the source of this vector. */
 		double 						bearing;	/**< Bearing of this vector in degrees, clockwise from true north. */
-		double				 		strength;	/**< Relative strength of this vector */
+		double				 		strength;	/**< Relative strength of this vector */	
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		static const char *_format = "";	
 };
 
 class waypointClass : public hackerboatStateClassStorable {
@@ -94,7 +142,11 @@ class waypointClass : public hackerboatStateClassStorable {
 		waypointClass (locationClass loc, bool stop);
 		
 		locationClass	location;	/**< Location of the waypoint */
-		bool			stop;		/**< Stop bit -- if true and this is the last waypoint, stop here and hold position. Otherwise, go back to the first waypoint. */
+		bool			stop;		/**< Stop bit -- if true and this is the last waypoint, stop here and hold position. Otherwise, go back to the first waypoint. */	
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		static const char *_format = "";	
 };
 
 class boneStateClass : public hackerboatStateClassStorable {
@@ -117,7 +169,12 @@ class boneStateClass : public hackerboatStateClassStorable {
 		double						waypointStrength;		/**< Strength of the waypoint */
 		double						waypointAccuracy;		/**< How close the boat gets to each waypoint before going to the next one */
 		double						waypointStrengthMax;	/**< Maximum waypoint strength */
-		bool						offshore;		/**< When set true, the boat will operate autonomously */
+		bool						offshore;		/**< When set true, the boat will operate autonomously */	
+		
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		static const char *_format = "";	
 };
 
 class navClass : public hackerboatStateClassStorable {
@@ -133,8 +190,12 @@ class navClass : public hackerboatStateClassStorable {
 		double			magCorrection;	/**< Correction between sensed magnetic heading and true direction */
 		navVector		targetVec;		/**< Vector to the target */
 		navVector		total;			/**< Sum of target vector and all influences */
-	
+		
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		
 	private:
+		static const char *_format = "";	
 		navVector[NAV_VEC_LIST_LEN]	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 		uint16_t					influenceCount; /**< Number of influence vectors */
 };
@@ -195,4 +256,10 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 	long 				startStopTime;
 	long				startStateTime;
 	arduinoStateEnum	originState;
+	
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		
+	private:
+		static const char *_format = "";	
 };
