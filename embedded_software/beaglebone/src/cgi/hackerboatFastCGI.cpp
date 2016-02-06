@@ -29,11 +29,11 @@ int main (void) {
 	char 		method[LOCAL_BUF_LEN]			= {0};
 	char		query[LOCAL_BUF_LEN]			= {0};
 	char		contentLength[LOCAL_BUF_LEN]	= {0}; 
-	char		response[LOCAL_BUF_LEN]			= {0}; 
+	char		response[LOCAL_BUF_LEN]			= {0};
 	char*		tokens[MAX_URI_TOKENS], body, tokenState;
 	uint32_t	tokenHashes[MAX_URI_TOKENS];
 	size_t		tokenLengths[MAX_URI_TOKENS];
-	json_t*		responseJSON;
+	json_t*		responseJSON, jsonFinal;
 	int32_t		uriLen, methodLen, queryLen, bodyLen, contentLenLen;
 	int32_t		result, tokenCnt = 0;
 	rsize_t		tokenRemain;
@@ -78,10 +78,15 @@ int main (void) {
 		// dispatch on the URI
 		responseJSON = root->dispatch(tokens, tokenHashes, tokenLengths, tokenCnt, 0, query, method, body, bodyLen);
 		
+		// add some things to the JSON response...
+		jsonFinal = json_pack("{sosissss}", "response", responseJSON, 
+								"id", REST_ID, 
+								"name", REST_NAME,
+								"connected", "true");
+		
 		// print the result back to the client
-		snprintf(response, LOCAL_BUF_LEN, "%s", json_dumps(responseJSON, JSON_COMPACT));
-		FCGI_printf("{\"response\":%s,\"id\":%d,\"name\":%s,\"connected\":true}\r\n", 
-					response, REST_ID, REST_NAME);
+		snprintf(response, LOCAL_BUF_LEN, "%s", json_dumps(jsonFinal, JSON_COMPACT));
+		FCGI_printf("%s\r\n", response);
 
 		// log everything
 		log->open(REST_LOGFILE);
@@ -91,6 +96,7 @@ int main (void) {
 		// clean up
 		free(body);
 		free(responseJSON);
+		free(jsonFinal);
 		for (uint8_t i = 0; i < MAX_URI_TOKENS; i++) {
 			tokens[i] = NULL;
 		}
