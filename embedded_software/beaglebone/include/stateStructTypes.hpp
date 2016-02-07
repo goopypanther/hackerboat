@@ -15,11 +15,14 @@
 #include <sqlite3.h>
 #include "config.h"
 
+// buffer & string sizes
 #define STATE_STRING_LEN		30
 #define GPS_SENTENCE_LEN		120
 #define	FAULT_STRING_LEN		1024
 #define NAV_SOURCE_NAME_LEN		30
 #define NAV_VEC_LIST_LEN		30
+
+// value limits 
 
 /**
  * @class hackerboatStateClass 
@@ -220,18 +223,14 @@ class boneStateClass : public hackerboatStateClassStorable {
 		char[STATE_STRING_LEN]		ardStateString;	/**< current state of the Arduino, human readable string */
 		char[FAULT_STRING_LEN]		faultString;	/**< comma separated list of faults */
 		gpsFixClass					gps;			/**< current GPS position */
-		int 						waypointNext;	/**< ID of the current target waypoint */
+		int32_t						waypointNext;	/**< ID of the current target waypoint */
 		double						waypointStrength;		/**< Strength of the waypoint */
 		double						waypointAccuracy;		/**< How close the boat gets to each waypoint before going to the next one */
 		double						waypointStrengthMax;	/**< Maximum waypoint strength */
 		bool						autonomous;		/**< When set true, the boat will operate autonomously */	
-		
-	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-	private:
-		static const char *_format = "";
 		static const uint8_t boneStateCount = 11;
-		static const char boneStates[][30] = {
+		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
+		static const char boneStates[][STATE_STRING_LEN] = {
 			"Start", 
 			"SelfTest", 
 			"Disarmed", 
@@ -244,6 +243,12 @@ class boneStateClass : public hackerboatStateClassStorable {
 			"ArmedTest",
 			"None"
 		};		
+	protected:
+		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		void initHashes (void);								/**< Initialize state name hashes */
+		static const char *_format = "";
+		
 };
 
 /**
@@ -323,9 +328,9 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		long 				timeOfLastPacket;		/**< Time the last packet arrived */
 		long 				timeOfLastBoneHB;	
 		long 				timeOfLastShoreHB;
-		char				stateString[30];
-		char 				boneStateString[30];
-		char				commandString[30];
+		char				stateString[STATE_STRING_LEN];
+		char 				boneStateString[STATE_STRING_LEN];
+		char				commandString[STATE_STRING_LEN];
 		uint16_t			faultString;			/**< Fault string -- binary string to indicate source of faults */
 		float 				rudder;
 		int16_t				rudderRaw;
@@ -363,7 +368,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 	private:
 		static const char *_format = "";	
 		static const uint8_t arduinoStateCount = 11;
-		static const char arduinoStates[][30] = {
+		static const char arduinoStates[][STATE_STRING_LEN] = {
 			"PowerUp", 
 			"Armed", 
 			"SelfTest", 

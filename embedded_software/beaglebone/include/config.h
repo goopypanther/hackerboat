@@ -9,12 +9,16 @@
 #define MAX_TOKEN_LEN		64
 #define HASHSEED			0xdeadbeef
 #define GNSS_TTY			"/dev/ttyO4"
-#define GNSS_BPS			57600
+#define GNSS_UART			UART4
+#define GNSS_BPS			B57600
 #define ARDUINO_REST_TTY	"/dev/ttyO2"		
 #define ARDUINO_LOG_TTY		"/dev/ttyO1"
-#define ARDUINO_BPS			115200	
-	/**< State machine execution frame length, in nanoseconds */
-#define FRAME_LEN_NS		(100000000)		
+#define ARDUINO_REST_UART	UART2		
+#define ARDUINO_LOG_UART	UART1
+#define ARDUINO_BPS			B115200	
+#define ARDUINO_RESET_PIN
+#define FRAME_LEN_NS		(100000000)		/// State machine execution frame length, in nanoseconds
+#define UART_TIMEOUT		(100000)		/// UART contention timeout, in microseconds
 
 // File names
 #define	GPS_DB_FILE

@@ -174,52 +174,68 @@ class rootRESTClass : public RESTdispatchClass {
 
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
+		virtual boneStateRESTClass(void){setHashes()};
+		virtual boneStateRESTClass(const char *name);			/**< Create a dispatch object with name */
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		bool setTarget (hackerboatStateClassStorable* target);
+		bool setTarget (boneStateClass* target);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-
+											
 	private:
+		void setHashes (void);
 		json_t*	command (char* body, int bodyLen);
 		json_t*	waypointNext (char* body, int bodyLen);
 		json_t*	waypointStrength (char* body, int bodyLen);
 		json_t*	waypointStrengthMax (char* body, int bodyLen);
 		json_t*	waypointAccuracy (char* body, int bodyLen);
-		json_t*	offshore (char* body, int bodyLen);
-		hackerboatStateClassStorable* _target;
+		json_t*	autonomous (char* body, int bodyLen);
+		boneStateClass* _target = NULL;
+		static uint32_t commandHash = -1;
+		static uint32_t waypointNextHash = -1;
+		static uint32_t waypointStrengthHash = -1;
+		static uint32_t waypointStrengthMaxHash = -1;
+		static uint32_t waypointAccuracyHash = -1;
+		static uint32_t autonomousHash = -1;
 };
 
 class gpsRESTClass : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		bool setTarget (gpsFixClass* target);
+	private:
+		gpsFixClass* _target;
 };
 
 class waypointRESTClass : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		bool setTarget (waypointClass* target);
+	private:
+		waypointClass* _target;
 };
 
 class navRESTClass : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		bool setTarget (navClass* target);
+	private:
+		navClass* _target;
 };
 
 class arduinoStateRESTClass : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		bool setTarget (arduinoStateClass* target);
+	private:
+		arduinoStateClass* _target;
 };
 
 class resetArduinoRest : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
 
 class arduinoRESTClass : public RESTdispatchClass {
 	public:
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };

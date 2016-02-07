@@ -11,6 +11,10 @@
  
 #include "RESTdispatch.hpp"
 #include "MurmurHash3.h"
+#include <BlackGPIO.h>
+#include <unistd.h>
+
+using namespace BlackLib;
 
 RESTdispatchClass::RESTdispatchClass(const char *name) {
 	// set the name and calculate the hash...
@@ -206,15 +210,489 @@ bool insertDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 }
 
 json_t* insertDispatchClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
-	json_t *out = json_object();
+	json_err_t *errJSON;
 	int32_t insert;
 	// check that we have a target and we can open the file...
 	if (_target && _target->openFile()) {
-		// check and see if we have a trailing number...
-		if (sscanf(tokens[currentToken + 1], "%d", insert)) {
-			
+		// populate from the body...
+		if (_target->parse(json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON))) {
+			if (!_target->isValid()) {
+				return NULL;
+			}
+			// check and see if we have a trailing number...
+			if (sscanf(tokens[currentToken + 1], "%d", insert)) {
+				if (insert < _target->count()) {
+					if (!_target->insert(count)) {
+						_target->closeFile();
+						return NULL;
+					}
+				} else if (!_target->append()) {
+					_target->closeFile();
+					return NULL;
+				}
+			} else if (!_target->append()) {
+				_target->closeFile();
+				return NULL;
+			}
 		} else {
+			_target->closeFile();
+			return errJSON;
+		}
+	} else {
+		_target->closeFile();
+		return NULL;
+	}
+	_target->closeFile();
+	return _target->pack();
+}
+
+appendDispatchClass::appendDispatchClass(hackerboatStateClassStorable* target) {
+	name = "append";
+	MurmurHash3_x86_32(_ name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	_target = target;
+}
+
+bool appendDispatchClass::setTarget (hackerboatStateClassStorable* target) {
+	if (target) {
+		_target = target;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* appendDispatchClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	json_err_t *errJSON;
+	// check that we have a target and we can open the file...
+	if (_target && _target->openFile()) {
+		// populate from the body...
+		if (_target->parse(json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON))) {
+			if (_target->isValid()) {
+				if (!_target->append()) {
+					_target->closeFile();
+					return NULL;
+				}
+			} else {
+				_target->closeFile();
+				return errJSON;
+			}
+		} 
+	} else {
+		return NULL;
+	}
+	_target->closeFile();
+	return _target->pack();
+}
+
+json_t* rootRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	return NULL;
+}
+
+json_t* rootRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	return this->root(tokens, tokenHashes, tokenLengths, tokenCnt, currentToken, query, method, body, bodyLen);
+}
+
+boneStateRESTClass::boneStateRESTClass(const char *name) {
+	// set the name and calculate the hash...
+	strncpy(_name, name, MAX_TOKEN_LEN);
+	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	setHashes();
+}
+
+json_t* boneStateRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (!_target->openFile()) return NULL;
+	if (_target->getRecord(_target->count())) {
+		_target->closeFile():
+		return _target->pack();
+	}
+	_target->closeFile():
+	return NULL;
+}
+
+bool boneStateRESTClass::setTarget(boneStateClass* target) {
+	if (target) {
+		_target = target;
+		setHashes();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* boneStateRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	switch (tokenHashes[currentToken]) {
+		case (commandHash):
+			return command(body, bodyLen);
+		case (waypointNextHash):
+			return waypointNext(body, bodyLen);
+		case (waypointStrengthHash):
+			return waypointStrength(body, bodyLen);
+		case (waypointStrengthMaxHash):
+			return waypointStrengthMax(body, bodyLen);
+		case (waypointAccuracyHash):
+			return waypointAccuracy(body, bodyLen);
+		case (autonomousHash):
+			return autonomous(body, bodyLen);
+		default:
+			return NULL;
+	}
+}	
+
+void boneStateRESTClass::setHashes(void) {
+	MurmurHash3_x86_32("command", strnlen("command", MAX_TOKEN_LEN), HASHSEED, &commandHash);
+	MurmurHash3_x86_32("waypointNext", strnlen("waypointNext", MAX_TOKEN_LEN), HASHSEED, &waypointNextHash);
+	MurmurHash3_x86_32("waypointStrength", strnlen("waypointStrength", MAX_TOKEN_LEN), HASHSEED, &waypointStrengthHash);
+	MurmurHash3_x86_32("waypointStrengthMax", strnlen("waypointStrengthMax", MAX_TOKEN_LEN), HASHSEED, &waypointStrengthMaxHash);
+	MurmurHash3_x86_32("waypointAccuracy", strnlen("waypointAccuracy", MAX_TOKEN_LEN), HASHSEED, &waypointAccuracyHash);
+	MurmurHash3_x86_32("autonomous", strnlen("autonomous", MAX_TOKEN_LEN), HASHSEED, &autonomousHash);
+}
+
+json_t* boneStateRESTClass::command(char* body, int bodyLen) {
+	uint32_t hash;
+	char command[MAX_TOKEN_LEN];
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// check that the load went well, load in the the last state vector, 
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((!input) || (!_target->getRecord(_target->count())) || 
+		(json_unpack(input, "{s:s}", "command", command))) {
+		free(input);
+		free(errJSON);
+		return NULL;
+	}
+	// hash the incoming command for comparison
+	MurmurHash3_x86_32(command, strlen(command), HASHSEED, &hash);
+	// iterate over the available states to see if we have a match
+	for (int8_t i = 0; i < boneStateCount; i++) {
+		if (_target->stateHashes[i] == hash) {
+			command = (boneStateClass::boneStateEnum)i; 
+			strcpy(commandString, boneStates[i]);
+			free(input);
+			free(errJSON);
+			// write to the database (return NULL if failed)
+			if (!_target->writeRecord()) return NULL;
+			_target->closeFile();
+			return _target->pack();
 		}
 	}
+	free(input);
+	free(errJSON);
 	return NULL;
+}
+
+json_t* boneStateRESTClass::waypointNext(char* body, int bodyLen) {
+	uint32_t hash;
+	int32_t waypoint;
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((input) && (_target->getrecord(_target->count()))) { 
+		json_unpack(input, "{s:d}", "waypointNext", &waypoint);
+		_target->waypointNext = waypoint;
+		free(input);
+		free(errJSON);
+		if (_target->isValid()) {
+			if (_target->writeRecord()) {
+				_target->closeFile();
+				return _target->pack();
+			} else {
+				_target->closeFile();
+				return NULL;
+			}
+		} else {
+			_target->closeFile();
+			return _target->pack();
+		}
+	} else {
+		free(input);
+		free(errJSON);
+		_target->closeFile();
+		return NULL;
+	}
+}
+
+json_t* boneStateRESTClass::waypointStrength(char* body, int bodyLen) {
+	uint32_t hash;
+	double strength;
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((input) && (_target->getrecord(_target->count()))) { 
+		json_unpack(input, "{s:f}", "waypointStrength", &strength);
+		_target->waypointStrength = strength;
+		free(input);
+		free(errJSON);
+		if (_target->isValid()) {
+			if (_target->writeRecord()) {
+				_target->closeFile();
+				return _target->pack();
+			} else {
+				_target->closeFile();
+				return NULL;
+			}
+		} else {
+			_target->closeFile();
+			return _target->pack();
+		}
+	} else {
+		free(input);
+		free(errJSON);
+		_target->closeFile();
+		return NULL;
+	}
+}
+
+json_t* boneStateRESTClass::waypointStrengthMax(char* body, int bodyLen) {
+	uint32_t hash;
+	double strength;
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((input) && (_target->getrecord(_target->count()))) { 
+		json_unpack(input, "{s:f}", "waypointStrengthMax", &strength);
+		_target->waypointStrengthMax = strength;
+		free(input);
+		free(errJSON);
+		if (_target->isValid()) {
+			if (_target->writeRecord()) {
+				_target->closeFile();
+				return _target->pack();
+			} else {
+				_target->closeFile();
+				return NULL;
+			}
+		} else {
+			_target->closeFile();
+			return _target->pack();
+		}
+	} else {
+		free(input);
+		free(errJSON);
+		_target->closeFile();
+		return NULL;
+	}
+}
+
+json_t* boneStateRESTClass::waypointAccuracy(char* body, int bodyLen) {
+	uint32_t hash;
+	double accuracy;
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((input) && (_target->getrecord(_target->count()))) { 
+		json_unpack(input, "{s:f}", "waypointAccuracy", &accuracy);
+		_target->waypointAccuracy = accuracy;
+		free(input);
+		free(errJSON);
+		if (_target->isValid()) {
+			if (_target->writeRecord()) {
+				_target->closeFile();
+				return _target->pack();
+			} else {
+				_target->closeFile();
+				return NULL;
+			}
+		} else {
+			_target->closeFile();
+			return _target->pack();
+		}
+	} else {
+		free(input);
+		free(errJSON);
+		_target->closeFile();
+		return NULL;
+	}
+}
+
+json_t* boneStateRESTClass::autonomous(char* body, int bodyLen) {
+	uint32_t hash;
+	bool autonomous;
+	json_t *input;
+	json_err_t *errJSON;
+	
+	// make sure that _target is non-NULL and we can open the target file
+	if ((!_target) || (!_target->openFile())) return NULL;
+	// load in incoming request body
+	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
+	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
+	if ((input) && (_target->getrecord(_target->count()))) { 
+		json_unpack(input, "{s:b}", "autonomous", &autonomous);
+		_target->autonomous = autonomous;
+		free(input);
+		free(errJSON);
+		if (_target->isValid()) {
+			if (_target->writeRecord()) {
+				_target->closeFile();
+				return _target->pack();
+			} else {
+				_target->closeFile();
+				return NULL;
+			}
+		} else {
+			_target->closeFile();
+			return _target->pack();
+		}
+	} else {
+		free(input);
+		free(errJSON);
+		_target->closeFile();
+		return NULL;
+	}
+}
+
+json_t* gpsRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (!_target->openFile()) return NULL;
+	if (_target->getRecord(_target->count())) {
+		_target->closeFile():
+		return _target->pack();
+	}
+	_target->closeFile():
+	return NULL;
+}
+
+bool gpsRESTClass::setTarget(gpsFixClass* target) {
+	if (target) {
+		_target = target;
+		setHashes();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* waypointRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (!_target->openFile()) return NULL;
+	if (_target->getRecord(_target->count())) {
+		_target->closeFile():
+		return _target->pack();
+	}
+	_target->closeFile():
+	return NULL;
+}
+
+bool waypointRESTClass::setTarget(waypointClass* target) {
+	if (target) {
+		_target = target;
+		setHashes();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* navRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (!_target->openFile()) return NULL;
+	if (_target->getRecord(_target->count())) {
+		_target->closeFile():
+		return _target->pack();
+	}
+	_target->closeFile():
+	return NULL;
+}
+
+bool navRESTClass::setTarget(navClass* target) {
+	if (target) {
+		_target = target;
+		setHashes();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* arduinoStateRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (!_target->openFile()) return NULL;
+	if (_target->getRecord(_target->count())) {
+		_target->closeFile():
+		return _target->pack();
+	}
+	_target->closeFile():
+	return NULL;
+}
+
+bool arduinoStateRESTClass::setTarget(arduinoStateClass* target) {
+	if (target) {
+		_target = target;
+		setHashes();
+		return true;
+	} else {
+		return false;
+	}
+}
+
+json_t* resetArduinoRest::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	BlackGPIO	ardResetPin(ARDUINO_RESET_PIN, output, FastMode);
+	if (ardResetPin.setValue(low)) {
+		usleep(100000);	// sleep for 100 milliseconds
+		if (ardResetPin.setValue(high)) {
+			return json_pack{"{sb}", "success", true);
+		} else {
+			return json_pack{"{sb}", "success", false);
+		}
+	} else {
+		return json_pack{"{sb}", "success", false);
+	}
+}
+
+json_t* arduinoRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	return this->defaultFunc(tokens, tokenHashes, tokenLength, tokenCnt, currentToken, query, method, body, bodyLen);
+}
+
+json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	json_t* out, in;
+	BlackUART port(ARDUINO_REST_UART, ParityNo, StopOne, Char8);
+	uint32_t cnt = 0;
+	char buf[LOCAL_BUF_LEN];
+	
+	// attempt to open the serial port
+	while (cnt < UART_TIMEOUT) {
+		if (port.open(ReadWrite)) break;
+		usleep(1);
+		cnt++;
+	}
+	
+	// if we timed out, return a NULL
+	if (cnt >= UART_TIMEOUT) {
+		port.close();
+		return NULL;
+	}
+	
+	// write out the incoming URI to the Arduino
+	port.write("/", 1);
+	for (uint8_t i = (currentToken + 1); i < tokenCnt; i++) {
+		port.write(tokens[i], tokenLength[i]);
+		port.write("/", 1);
+	}
+	
+	// read the incoming buffer
+	if (port.read(buf, LOCAL_BUF_LEN)) {
+		return json_loadb(buf, LOCAL_BUF_LEN, 0);
+	} else {
+		return NULL;
+	}
 }
