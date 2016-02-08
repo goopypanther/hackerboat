@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include "config.h"
+#include "location.hpp"
 
 // buffer & string sizes
 #define STATE_STRING_LEN		30
@@ -101,49 +102,6 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 	private:
 		static const char *_format = "";
-};
-
-/**
- * @class locationClass
- *
- * @brief Class for storing a location 
- *
- */
-
-class locationClass : public hackerboatStateClass {
-	public:
-		locationClass (void);
-		locationClass (double lat, double lon);		/**< Create a location object at the given latitude & longitude */
-		bool isValid (void);						/**< Check for validity */
-		
-		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
-		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
-	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-	private:
-		static const char *_format = "";	
-};
-
-/**
- * @class navVectorClass
- *
- * @brief Class for storing a navigation vector
- *
- */
-
-class navVectorClass : public hackerboatStateClass {
-	public:	
-		navVectorClass (void);
-		navVectorClass (char *src, size_t srcLen, double bearing, double strength);
-		bool isValid (void);					/**< Check for validity */
-		
-		char[NAV_SOURCE_NAME_LEN]	source;		/**< Name of the source of this vector. */
-		double 						bearing;	/**< Bearing of this vector in degrees, clockwise from true north. */
-		double				 		strength;	/**< Relative strength of this vector */	
-	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-	private:
-		static const char *_format = "";	
 };
 
 /**
@@ -251,35 +209,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 		
 };
 
-/**
- * @class navClass
- *
- * @brief Stores the current state of the navigation computation 
- *
- */
-
-class navClass : public hackerboatStateClassStorable {
-	public:
-		navClass (void);
-		
-		bool appendVector (navVectorClass vec);	/**< Add a navigation vector to the influence list */
-		bool calc (void);						/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
-		void clearVectors (void);				/**< Clear the contents of navInfluences */
-		
-		locationClass	current;		/**< current location */	
-		waypointClass	target;			/**< target waypoint */
-		double			magCorrection;	/**< Correction between sensed magnetic heading and true direction */
-		navVector		targetVec;		/**< Vector to the target */
-		navVector		total;			/**< Sum of target vector and all influences */
-		
-	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-		
-	private:
-		static const char *_format = "";	
-		navVector[NAV_VEC_LIST_LEN]	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
-		uint16_t					influenceCount; /**< Number of influence vectors */
-};
 
 /**
  * @class arduinoStateClass

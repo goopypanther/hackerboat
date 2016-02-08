@@ -667,7 +667,7 @@ json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size
 	json_t* out, in;
 	BlackUART port(ARDUINO_REST_UART, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
-	char buf[LOCAL_BUF_LEN];
+	char buf[LOCAL_BUF_LEN] = {0};
 	
 	// attempt to open the serial port
 	while (cnt < UART_TIMEOUT) {
