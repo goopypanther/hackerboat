@@ -38,6 +38,9 @@ class locationClass {
 		double _lat = NAN;							/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
 		double _lon = NAN;							/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
 	
+		static double inline deg2rad (double deg);
+		static double inline rad2deg (double rad);
+	
 	protected:
 		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 		

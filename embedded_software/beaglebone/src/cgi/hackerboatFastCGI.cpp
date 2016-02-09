@@ -1,7 +1,7 @@
 /******************************************************************************
- * Hackerboat Beaglebone FastCGI module
- * hackerboatFastCGI.c
- * This module handles incoming REST requests
+ * Hackerboat Beaglebone FastCGI program
+ * hackerboatFastCGI.cpp
+ * This program handles incoming REST requests
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Dec 2015
  * 

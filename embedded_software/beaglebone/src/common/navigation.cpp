@@ -44,6 +44,21 @@ bool navVectorClass::norm (void) {
 	} else return false;
 }
 
+navVectorClass navVectorClass::add (navVectorClass a) {
+	// formulas from http://math.stackexchange.com/questions/1365622/adding-two-polar-vectors
+	navVectorClass out;
+	if ((!a.isValid()) && (!this->isValid())) return out;
+	double deltaBearing;
+	double r1sq, r2sq, r1r2;
+	deltaBearing = locationClass::deg2rad(a._bearing - this->_bearing);
+	r1sq = pow(this->_strength, 2);
+	r1sq = pow(a._strength, 2);
+	r1r2 = a._strength * this->_strength;
+	out._strength = sqrt(r1sq + r2sq + (2 * r1r2 * cos(deltaBearing)));
+	out._bearing = this->_bearing + locationClass::rad2deg(acos((this->_strength + (a._strength * cos(deltaBearing)))/out._strength)); 
+	return out;
+}
+
 bool navVectorClass::parse(json_t *input) {
 	char buf[LOCAL_BUF_LEN];
 	if (json_unpack(input, this->_format, "source", buf, "bearing", &_bearing, "strength", &_strength)) {
@@ -59,7 +74,8 @@ json_t* navVectorClass::pack(void) {
 
 bool navClass::parse(json_t *input) {
 	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
-	if (json_unpack(input, this->_format, 	"current", currentIn,
+	if (json_unpack(input, this->_format, 	"sequenceNum", &_sequenceNum,
+											"current", currentIn,
 											"target", targetIn,
 											"waypointStrength", &waypointStrength,
 											"magCorrection", &magCorrection,
@@ -91,11 +107,57 @@ json_t* navClass::pack (void) {
 	for (uint16_t i; i < influenceCount; i++) {
 		json_array_append_new(array, navInfluences[i].pack());
 	}
-	return json_pack(this->_format,  	"current", current.pack(),
+	return json_pack(this->_format,  	"sequenceNum", _sequenceNum,
+										"current", current.pack(),
 										"target", target.pack(),
 										"waypointStrength", waypointStrength,
 										"magCorrection", magCorrection,
 										"targetVec", targetVec.pack(),
 										"total", total.pack(),
 										"navInfluences", array));
+}
+
+bool navClass::appendVector (navVectorClass vec) {
+	if (vec.isValid() && (this->influenceCount < NAV_VEC_LIST_LEN)) {
+		this->navVector[this->influenceCount] = vec;
+		this->influenceCount++;
+		return true;
+	} else return false;
+}
+
+bool navClass::calc (double maxStrength) {
+	targetVec._bearing = this->current.bearing(target.location, locationClass::RhumbLine);
+	targetVec._strength = waypointStrength;
+	if (targetVec.isValid()) {
+		total = targetVec;
+	} else return false;
+	for (uint16_t i; i < influenceCount; i++) {
+		if (navInfluences[i].isValid()) {
+			total  = total.add(navInfluences[i]);
+		} 
+		if (!total.isValid()) return false;
+	}
+	if (total._strength > maxStrength) total.strength = maxStrength;
+	return true;
+}
+
+void navClass::clearVectors (void) {
+	this->influenceCount = 0;
+}
+
+bool navClass::isValid (void) {
+	bool out = false;
+	if (current.isValid() && target.isValid() &&
+		targetVec.isValid() && total.isValid() &&
+		isnormal(waypointStrength) && isnormal(magCorrection)) {
+		out = true;
+	} else out = false;
+	if (out && this->influenceCount > 0) {
+		if (this->influenceCount <= NAV_VEC_LIST_LEN) {
+			for (uint16_t i; i < influenceCount; i++) {
+				out &= navInfluences[i].isValid();
+			}
+		} else out = false;
+	}
+	return out;
 }

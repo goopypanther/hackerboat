@@ -18,11 +18,11 @@
 #define PI 3.14159265
 #define R 6731000
 
-double inline deg2rad (double deg) {
+static double inline locationClass::deg2rad (double deg) {
 	return ((deg * PI)/180);
 }
 
-double inline rad2deg (double rad) {
+static double inline locationClass::rad2deg (double rad) {
 	return ((rad * 180)/PI);
 }
 
