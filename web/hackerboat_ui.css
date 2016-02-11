@@ -1,0 +1,24 @@
+
+/*
+
+ Empty CSS file for your own CSS
+
+.col:not(:first-child,:last-child) {
+    padding-right:7px;
+    padding-left:7px;
+}
+
+.top-buffer {
+    margin-top:20px;
+}
+
+.full-width {
+    display:block;
+}
+
+*/
+
+.hb-map {
+    width: 100%;
+}
+

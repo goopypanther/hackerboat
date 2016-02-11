@@ -4,101 +4,76 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Bootstrap 3, from LayoutIt!</title>
-
-    <meta name="description" content="Source code generated using layoutit.com">
-    <meta name="author" content="LayoutIt!">
-
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <!--<link href="css/style.css" rel="stylesheet">-->
-	<style>
-	# Empty CSS file for your own CSS
-	.col:not(:first-child,:last-child) {
-	  padding-right:7px;
-	  padding-left:7px;
-	}
-
-	.top-buffer {
-		margin-top:20px;
-	}
-
-	.full-width {
-		display:block;
-	}
-	</style>
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
+    
+    <title>HAX0R__BOTE</title>
+    
+    <meta name="author" content="goopypanther, wiml">
+    
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"> -->
+    <link href="http://openlayers.org/en/v3.13.1/css/ol.css" rel="stylesheet" type="text/css">
+    <link href="hackerboat_ui.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    
   </head>
   <body>
 
-	<div class="container-fluid">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="page-header">
-					<h1>
-						Hackerboat Control v2
-					</h1>
-				</div>
-				<ul class="nav nav-tabs">
-					<li class="active">
-						<a href="#">Home</a>
-					</li>
-					<li>
-						<a href="#">Waypoint Editor</a>
-					</li>
-					<li class="disabled">
-						<a href="#">Status</a>
-					</li>
-					<li class="dropdown pull-right">
-						 <a href="#" data-toggle="dropdown" class="dropdown-toggle">Menue<strong class="caret"></strong></a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="#">Logs</a>
-							</li>
-							<li>
-								<a href="#">Help</a>
-							</li>
-							<li>
-								<a href="#">Haxor</a>
-							</li>
-							<li class="divider">
-							</li>
-							<li>
-								<a href="#">Hackaday.io project</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-			</div>
-		</div>
-		<div class="row top-buffer">
-			<div class="col-md-8">
-				<img alt="Bootstrap Image Preview" class="img-responsive" src="http://www.advancedcustomfields.com/wp-content/uploads/2013/11/acf-google-maps-field-2.png" />
-				<dl>
-					<dt>
-						Google Map <span>Waypoints listed,</span> <span>Course breadcrumbs,</span> <span>Current position,</span> <span>Etc.</span>
-					</dt>
-				</dl> <span class="label label-default full-width">Gps Position lat.latlatlatlatlat, lon.lonlonlonlonlon, alt, timetimetime</span>
-				<table class="table">
-					<thead>
-						<tr>
-							<th>
-								#
-							</th>
-							<th>
-								Lat
-							</th>
-							<th>
-								Lon
-							</th>
-							<th>
-								Status
-							</th>
-						</tr>
-					</thead>
-					<tbody>
+    <div class="container-fluid">
+      <div class="row">
+	<div class="col-md-12">
+	  <div class="page-header">
+	    <h1>Hackerboat Control v2</h1>
+	  </div>
+	  <ul class="nav nav-tabs">
+	    <li class="active">
+	      <a href="#">Home</a>
+	    </li>
+	    <li>
+	      <a href="#">Waypoint Editor</a>
+	    </li>
+	    <li class="disabled">
+	      <a href="#">Status</a>
+	    </li>
+	    <li class="dropdown pull-right">
+	      <a href="#" data-toggle="dropdown" class="dropdown-toggle">Menue<strong class="caret"></strong></a>
+	      <ul class="dropdown-menu">
+		<li>
+		  <a href="#">Logs</a>
+		</li>
+		<li>
+		  <a href="#">Help</a>
+		</li>
+		<li>
+		  <a href="#">Haxor</a>
+		</li>
+		<li class="divider">
+		</li>
+		<li>
+		  <a href="#">Hackaday.io project</a>
+		</li>
+	      </ul>
+	    </li>
+	  </ul>
+	</div>
+      </div>
+      <div class="row top-buffer">
+	<div class="col-md-8">
+          <div id="map" class="hb-map"></div>
+	  <dl>
+	    <dt>
+	      <span>Waypoints listed,</span> <span>Course breadcrumbs,</span> <span>Current position,</span> <span>Etc.</span>
+	    </dt>
+	  </dl> <span class="label label-default full-width">Gps Position lat.latlatlatlatlat, lon.lonlonlonlonlon, alt, timetimetime</span>
+
+          
+	  <table class="table" id="hb-waypoints">
+	    <thead>
+	      <tr>
+		<th>#</th>
+		<th>Position</th>
+		<th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
 						<tr>
 							<td>
 								1
@@ -489,8 +464,45 @@
 		</div>
 	</div>
 
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <div class="row">
+      <div class="col-md-12">
+        <p class="text-muted">
+          <small>
+      With thanks to:
+      <a href="http://jquery.com/">jQuery</a>,
+      <a href="http://getbootstrap.com/">Bootstrap</a>,
+      <a href="http://underscorejs.org/">Underscore</a>,
+      <a href="http://backbonejs.org/">Backbone</a>,
+      <a href="http://www.openstreetmap.org/">OpenStreetMap</a>,
+      <a href="http://openlayers.org/">OpenLayers</a>,
+      <a href="http://openseamap.org/">OpenSeaMap</a>,
+      and many more.
+      </small>
+      </p>
+    </div>
+    </div>
+    
+<script
+   src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.0/jquery.min.js"
+   integrity="sha384-XxcvoeNF5V0ZfksTnV+bejnCsJjOOIzN6UVwF85WBsAnU3zeYh5bloN+L4WLgeNE"
+   crossorigin="anonymous"></script>
+<script
+   src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"
+   integrity="sha384-FZY+KSLVXVyc1qAlqH9oCx1JEOlQh6iXfw3o2n3Iy32qGjXmUPWT9I0Z9e9wxYe3"
+   crossorigin="anonymous"></script>
+<script
+   src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+   integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+   crossorigin="anonymous"></script>
+<script
+   src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone-min.js"
+   integrity="sha384-kgH1F06klaG52/uQEQlpP5QZ9tbJZgcU4omvs1DRSHaJGVZWp//NYtoi93ZmGday"
+   crossorigin="anonymous"></script>
+<script
+   src="http://openlayers.org/en/v3.13.1/build/ol.js"
+   integrity="sha384-LprSQ9UOO3Uh2CuSNNUUWA+SiWVgFOzCs1NWw08/zJxCKvmEyQ2FhpO82H0+usFJ"
+   crossorigin="anonymous"></script>
+<!-- <script src="http://map.openseamap.org/javascript/ais.js" ></script> -->
+<script src="hackerboat_ui.js"></script>
   </body>
 </html>
