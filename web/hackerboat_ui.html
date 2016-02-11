@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Bootstrap 3, from LayoutIt!</title>
+
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="css/style.css" rel="stylesheet">-->
+	<style>
+	# Empty CSS file for your own CSS
+	.col:not(:first-child,:last-child) {
+	  padding-right:7px;
+	  padding-left:7px;
+	}
+
+	.top-buffer {
+		margin-top:20px;
+	}
+
+	.full-width {
+		display:block;
+	}
+	</style>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+  </head>
+  <body>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="page-header">
+					<h1>
+						Hackerboat Control v2
+					</h1>
+				</div>
+				<ul class="nav nav-tabs">
+					<li class="active">
+						<a href="#">Home</a>
+					</li>
+					<li>
+						<a href="#">Waypoint Editor</a>
+					</li>
+					<li class="disabled">
+						<a href="#">Status</a>
+					</li>
+					<li class="dropdown pull-right">
+						 <a href="#" data-toggle="dropdown" class="dropdown-toggle">Menue<strong class="caret"></strong></a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="#">Logs</a>
+							</li>
+							<li>
+								<a href="#">Help</a>
+							</li>
+							<li>
+								<a href="#">Haxor</a>
+							</li>
+							<li class="divider">
+							</li>
+							<li>
+								<a href="#">Hackaday.io project</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="row top-buffer">
+			<div class="col-md-8">
+				<img alt="Bootstrap Image Preview" class="img-responsive" src="http://www.advancedcustomfields.com/wp-content/uploads/2013/11/acf-google-maps-field-2.png" />
+				<dl>
+					<dt>
+						Google Map <span>Waypoints listed,</span> <span>Course breadcrumbs,</span> <span>Current position,</span> <span>Etc.</span>
+					</dt>
+				</dl> <span class="label label-default full-width">Gps Position lat.latlatlatlatlat, lon.lonlonlonlonlon, alt, timetimetime</span>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>
+								#
+							</th>
+							<th>
+								Lat
+							</th>
+							<th>
+								Lon
+							</th>
+							<th>
+								Status
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								1
+							</td>
+							<td>
+								lat.latlatlat
+							</td>
+							<td>
+								lon.lonlonlon
+							</td>
+							<td>
+								Reached
+							</td>
+						</tr>
+						<tr class="active">
+							<td>
+								1
+							</td>
+							<td>
+								<span>lat.latlatlat</span>
+							</td>
+							<td>
+								<span>lon.lonlonlon</span>
+							</td>
+							<td>
+								Reached
+							</td>
+						</tr>
+						<tr class="success">
+							<td>
+								2
+							</td>
+							<td>
+								<span>lat.latlatlat</span>
+							</td>
+							<td>
+								<span>lon.lonlonlon</span>
+							</td>
+							<td>
+								Navigating
+							</td>
+						</tr>
+						<tr class="warning">
+							<td>
+								3
+							</td>
+							<td>
+								<span>lat.latlatlat</span>
+							</td>
+							<td>
+								<span>lon.lonlonlon</span>
+							</td>
+							<td>
+								Pending
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								<span>lat.latlatlat</span>
+							</td>
+							<td>
+								<span>lon.lonlonlon</span>
+							</td>
+							<td>
+								Pending
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="btn-group">
+							 
+							<button class="btn btn-default">
+								Waypoint List Select
+							</button> 
+							<button data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+								<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li>
+									<a href="#">Route 1</a>
+								</li>
+								<li class="disabled">
+									<a href="#">Route 2</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">Other route</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="btn-group">
+							 
+							<button class="btn btn-default">
+								Waypoint number select
+							</button> 
+							<button data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+								<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu">
+								<li>
+									<a href="#">0</a>
+								</li>
+								<li class="disabled">
+									<a href="#">1</a>
+								</li>
+								<li class="divider">
+								</li>
+								<li>
+									<a href="#">2...</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-4">
+						 
+						<button type="button" class="btn btn-default btn-block">
+							Select Waypoint
+						</button>
+					</div>
+				</div>
+				<div class="row top-buffer">
+					<div class="col-md-8">
+						 <span class="label label-default">Compass entry field</span>
+						<p>
+							Compass image with multiple needles
+						</p>
+						<img alt="Bootstrap Image Preview" src="https://lh4.ggpht.com/f8d8CHo_g8568UhSQ9u3Kz3EY2GNLW2b-gkE0edJg4bZyt6X6WA7ZUxyYkFhMcXz6w=w300" />
+						<h2>
+							Rudder image
+						</h2>
+						<img alt="Bootstrap Image Preview"  class="img-responsive" style="width:300px;height:auto" src="http://www.simrad-yachting.com/Root/Images/SimradYachting/Instruments/IS20-rudder-front_lg.jpg" />
+					</div>
+					<div class="col-md-4">
+						 
+						<button type="button" class="btn btn-block btn-default">
+							Horn
+						</button>
+						<div class="progress top-buffer">
+							<div class="progress-bar progress-success">
+							</div>
+						</div> <span class="label label-default">Throttle</span>
+						<div class="progress top-buffer">
+							<div class="progress-bar progress-success">
+							</div>
+						</div> <span class="label label-default">Solar Charge</span>
+						<div class="progress top-buffer">
+							<div class="progress-bar progress-success">
+							</div>
+						</div> <span class="label label-default">Battery voltage</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				 
+				<button type="button" class="btn btn-block btn-default">
+					Self-test
+				</button> 
+				<button type="button" class="btn btn-block btn-default">
+					Disarmed
+				</button> 
+				<button type="button" class="btn btn-block btn-warning">
+					Armed
+				</button> 
+				<button type="button" class="btn btn-block btn-default">
+					Manual
+				</button> 
+				<button type="button" class="btn btn-default btn-block">
+					Course
+				</button> 
+				<button type="button" class="btn btn-block btn-primary">
+					Waypoint
+				</button> 
+				<button type="button" class="btn btn-default btn-block">
+					Return
+				</button> 
+				<button type="button" class="btn btn-block btn-danger">
+					LowBattery
+				</button>
+				<table class="table top-buffer">
+					<thead>
+						<tr>
+							<th>
+								#
+							</th>
+							<th>
+								System
+							</th>
+							<th>
+								Value
+							</th>
+							<th>
+								Status
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								1
+							</td>
+							<td>
+								Status stuff
+							</td>
+							<td>
+								987
+							</td>
+							<td>
+								Active
+							</td>
+						</tr>
+						<tr class="active">
+							<td>
+								1
+							</td>
+							<td>
+								Pitch
+							</td>
+							<td>
+								987987
+							</td>
+							<td>
+							</td>
+						</tr>
+						<tr class="success">
+							<td>
+								2
+							</td>
+							<td>
+								Roll
+							</td>
+							<td>
+								76576
+							</td>
+							<td>
+							</td>
+						</tr>
+						<tr class="warning">
+							<td>
+								3
+							</td>
+							<td>
+								Voltage
+							</td>
+							<td>
+								765
+							</td>
+							<td>
+								Low
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+						<tr class="danger">
+							<td>
+								4
+							</td>
+							<td>
+								GPS Sats
+							</td>
+							<td>
+								77
+							</td>
+							<td>
+								Locked
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+  </body>
+</html>
