@@ -1267,7 +1267,7 @@ int output (throttleState * throttle, double error) {
   }
   currentError = error;
   steeringPID.Compute();
-  long rawSteering = map((long)steeringCmd, (long)pidMin, (long)pidMax, servoMin, servoMax);
+  long rawSteering = map(((long)steeringCmd*10), ((long)pidMin*10), ((long)pidMax*10), servoMin, servoMax);
   Serial.print("\tSteering: "); Serial.print(steeringCmd);
   Serial.print("\tRaw Steering: "); Serial.println(rawSteering);
   steeringServo.writeMicroseconds(rawSteering);	
