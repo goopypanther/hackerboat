@@ -77,3 +77,18 @@ class navClass : public hackerboatStateClassStorable {
 		navVector[NAV_VEC_LIST_LEN]	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 		uint16_t					influenceCount; /**< Number of influence vectors */
 };
+
+/** 
+ * @class navigatorBase
+ *
+ * @brief Pure virtual base class for navigation elements other than waypoint
+ *
+ */
+
+class navigatorBase {
+	public:
+		virtual navigatorBase(void) = 0;
+		virtual navVectorClass calc(void) = 0;
+};
+ 
+ 

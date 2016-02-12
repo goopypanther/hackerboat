@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
- #include <stdlib.h>
+#include <stdlib.h>
 #include <sqlite3.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +21,33 @@
 #include "navigation.hpp"
 #include "location.hpp"
 
+int *navInf(navigatorBase *nav);
+
 int main (void) {
+	navClass nav (NAV_DB_FILE, strlen(NAV_DB_FILE));
+	navigatorBase *navInf;
+	int navCount;
 	
+	navCount = initNav(navInf);
 	
+	for (;;) {
+		if (nav.openFile()) {
+			if (nav.getRecord(nav.count())) {
+				if (navInf) {
+					nav.clearVectors();
+					for (uint16_t i = 0; i < navCount; i++) {
+						nav.appendVector(navInf[i].calc());
+					}
+				}
+				nav.calc();
+				nav.writeRecord();
+			}
+			nav.closeFile();
+		}
+	}
+}
+
+int *navInf(navigatorBase *nav) {
+	nav = NULL;
+	return 0;
 }
