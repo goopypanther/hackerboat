@@ -9,6 +9,9 @@
  *
  ******************************************************************************/
  
+#ifndef LOCATION_H
+#define LOCATION_H
+ 
 #include <jansson.h>
 #include <stdlib.h>
 #include "config.h"
@@ -47,3 +50,5 @@ class locationClass {
 	private:
 		static const char *_format = "{s:f,s:f}";	
 };
+
+#endif /* LOCATION_H */

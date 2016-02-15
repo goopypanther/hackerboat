@@ -8,6 +8,9 @@
  * Version 0.1: First alpha
  *
  ******************************************************************************/
+
+#ifndef RESTDISPATCH_H
+#define RESTDISPATCH_H
  
 #include <fcgi_stdio.h>
 #include <stdlib.h>
@@ -239,3 +242,5 @@ class arduinoRESTClass : public RESTdispatchClass {
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
+
+#endif 

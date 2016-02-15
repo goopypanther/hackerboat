@@ -10,6 +10,9 @@
  *
  ******************************************************************************/
 
+#ifndef LOGS_H
+#define LOGS_H 
+ 
 #include "config.h" 
 
 class logREST {
@@ -37,4 +40,5 @@ class logError {
 		logError& operator=(logError const&){};
 		static logError* _instance;
 };
- 
+
+#endif /* RESTDISPATCH_H */

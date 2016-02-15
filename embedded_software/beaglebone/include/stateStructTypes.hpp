@@ -9,6 +9,9 @@
  * Version 0.1: First alpha
  *
  ******************************************************************************/
+
+#ifndef STATESTRUCTTYPES_H
+#define STATESTRUCTTYPES_H
  
 #include <jansson.h>
 #include <stdlib.h>
@@ -311,3 +314,5 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 			"None"
 		};
 };
+
+#endif /* STATESTRUCTTYPES_H */

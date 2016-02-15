@@ -1,4 +1,5 @@
-
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #define ARDUINO_BUF_LEN 	4096
 #define LOCAL_BUF_LEN		32768
@@ -28,6 +29,6 @@
 #define WP_DB_FILE	
 #define REST_LOGFILE
 
-
+#endif /* CONFIG_H */
 
 	
