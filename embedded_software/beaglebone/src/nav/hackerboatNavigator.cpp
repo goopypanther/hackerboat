@@ -36,7 +36,9 @@ int main (void) {
 				if (navInf) {
 					nav.clearVectors();
 					for (uint16_t i = 0; i < navCount; i++) {
-						nav.appendVector(navInf[i].calc());
+						if (navInf[i] && navInf[i].isValid) {
+							nav.appendVector(navInf[i].calc());
+						} 
 					}
 				}
 				nav.calc();

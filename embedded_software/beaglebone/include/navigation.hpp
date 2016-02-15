@@ -8,6 +8,9 @@
  * Version 0.1: First alpha
  *
  ******************************************************************************/
+
+#ifndef NAVIGATION_H
+#define NAVIGATION_H 
  
 #include <jansson.h>
 #include <stdlib.h>
@@ -89,6 +92,59 @@ class navigatorBase {
 	public:
 		virtual navigatorBase(void) = 0;
 		virtual navVectorClass calc(void) = 0;
+		virtual bool isValid(void) = 0;
+};
+
+/**
+ * @class navDodgePointClass
+ *
+ * @brief 
+ *
+ */
+
+class navDodgePointClass : public navigatorBase {
+	public:
+		navDodgePointClass(void) {};
+		navDodgePointClass(locationClass point) {_point = point;};
+		navDodgePointClass(locationClass point, double strength) {
+			_point = point; 
+			_strength = strength;
+		}
+		navVectorClass calc(void);
+		void setLocation (locationClass point) {_point = point;};
+		locationClass getLocation (void) {return _point;};
+		void setStrength (double strength) {_strength = strength;};
+		double getStrength (void) {return _strength;};
+		bool isValid(void);
+	private:
+		locationClass _point;
+		double _strength = 0;
 };
  
+/** 
+ * @class navDitherClass
+ *
+ * @brief
+ *
+ */
+
+class navDitherClass : public navigatorBase {
+	public:
+		navDitherClass(void) {};
+		navDitherClass(double strength) {_strength = strength;};
+		navDitherClass(double strength, double seed) {
+			_seed = seed; 
+			_strength = strength;
+		}
+		navVectorClass calc(void);
+		void setStrength (double strength) {_strength = strength;};
+		double getStrength (void) {return _strength;};
+		void setSeed (double seed) {_seed = seed;};
+		double getSeed (void) {return _seed;};
+		bool isValid(void) {return (isnormal(_strength) && isnormal(_seed));};
+	private:
+		_strength = 0;
+		_seed = HASHSEED;
+};
  
+#endif /* NAVIGATION_H */ 
