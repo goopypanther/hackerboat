@@ -18,7 +18,7 @@
 #include <string.h>
 #include "config.h"
 #include "stateStructTypes.hpp"
-#include "location.h"
+#include "location.hpp"
 
 /**
  * @class navVectorClass
@@ -30,14 +30,14 @@
 class navVectorClass : public hackerboatStateClass {
 	public:	
 		navVectorClass (void) {};
-		navVectorClass (string src, double bearing, double strength);
+		navVectorClass (std::string src, double bearing, double strength);
 		bool isValid (void);					/**< Check for validity */	
 		bool norm (void);						/**< Normalize the bearing */
 		bool parse (json_t *input);				/**< Populate the object from the given json object */
 		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		navVectorClass add (navVectorclass a);	/**< Vector sum of the current vector and another vector */
 		
-		string	_source  	= "";		/**< Name of the source of this vector. */
+		std::string	_source  	= "";		/**< Name of the source of this vector. */
 		double 	_bearing 	= NAN;		/**< Bearing of this vector in degrees, clockwise from true north. */
 		double	_strength 	= NAN;		/**< Relative strength of this vector */	
 	protected:
@@ -73,7 +73,7 @@ class navClass : public hackerboatStateClassStorable {
 		navVector		total;			/**< Sum of target vector and all influences */
 		
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 		
 	private:
 		static const char *_format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	

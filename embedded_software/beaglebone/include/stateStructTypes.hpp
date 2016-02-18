@@ -16,6 +16,7 @@
 #include <jansson.h>
 #include <stdlib.h>
 #include <sqlite3.h>
+#include <inttypes.h>
 #include "config.h"
 #include "location.hpp"
 
@@ -40,10 +41,10 @@ class hackerboatStateClass {
 		virtual hackerboatStateClass(void);							
 		virtual bool parse (json_t *input);			/**< Populate the object from the given json object */
 		virtual json_t *pack (void);				/**< Pack the contents of the object into a json object and return a pointer to that object*/
-		virtual bool isValid (void) {return true};	/**< Tests whether the current object is in a valid state */
+		virtual bool isValid (void) {return true;};	/**< Tests whether the current object is in a valid state */
 		
 	protected:	
-		virtual char *getFormatString(void);		/**< Get format string for the object */
+		virtual const char *getFormatString(void);		/**< Get format string for the object */
 };
 
 /**
@@ -58,7 +59,7 @@ class hackerboatStateClass {
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
 		virtual hackerboatStateClassStorable(const char *file, size_t len);		/**< Create a state object attached to the given file */
-		int32_t getSequenceNum (void) {return _sequenceNum};					/**< Get the sequenceNum of this object (-1 until populated from a file) */
+		int32_t getSequenceNum (void) {return _sequenceNum;};					/**< Get the sequenceNum of this object (-1 until populated from a file) */
 		virtual bool openFile(const char *name, size_t len);					/**< Open the given database file & store the name */
 		virtual bool openFile(void);											/**< Open the stored database file */
 		virtual bool closeFile(void);											/**< Close the open file */
@@ -66,14 +67,14 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		virtual bool writeRecord (void);										/**< Write the current record to the target database file */
 		virtual bool getRecord(int32_t select);									/**< Populate the object from the open database file */
 		virtual bool getLastRecord(void);										/**< Get the latest record */
-		virtual bool insert(int32_t num) {return false};						/**< Insert the contents of the object into the database table at the given point */
+		virtual bool insert(int32_t num) {return false;};						/**< Insert the contents of the object into the database table at the given point */
 		virtual bool append(void);												/**< Append the contents of the object to the end of the database table */
 		
 	protected:
 		int32_t 	_sequenceNum = -1;	/**< sequence number */
 		char 		*_fileName;			/**< database filename (with path) */
 		sqlite3 	*_db;				/**< database handle */
-}
+};
 
 /**
  * @class gpsFixClass 
@@ -103,7 +104,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		char[GPS_SENTENCE_LEN]		VTG;					/**< VTG sentence from GPS */
 		char[GPS_SENTENCE_LEN]		RMC;					/**< RMC sentence from GPS */
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 	private:
 		static const char *_format = "";
 };
@@ -138,7 +139,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		
 		locationClass	location;				/**< Location of the waypoint */
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 	private:
 		static const char *_format = "";
 		int16_t			index = -1;				/**< Place of this waypoint in the waypoint list */ 
@@ -206,7 +207,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 			"None"
 		};		
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 	private:
 		void initHashes (void);								/**< Initialize state name hashes */
 		static const char *_format = "";
@@ -296,7 +297,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		arduinoStateEnum	originState;
 	
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 		
 	private:
 		static const char *_format = "";	

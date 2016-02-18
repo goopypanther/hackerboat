@@ -45,7 +45,7 @@ class locationClass {
 		static double inline rad2deg (double rad);
 	
 	protected:
-		char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 		
 	private:
 		static const char *_format = "{s:f,s:f}";	
