@@ -38,12 +38,12 @@
 
 class hackerboatStateClass {
 	public:
-		virtual hackerboatStateClass(void);							
 		virtual bool parse (json_t *input);			/**< Populate the object from the given json object */
 		virtual json_t *pack (void);				/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		virtual bool isValid (void) {return true;};	/**< Tests whether the current object is in a valid state */
 		
 	protected:	
+		hackerboatStateClass(void) = default;
 		virtual const char *getFormatString(void);		/**< Get format string for the object */
 };
 
@@ -58,7 +58,7 @@ class hackerboatStateClass {
 
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
-		virtual hackerboatStateClassStorable(const char *file, size_t len);		/**< Create a state object attached to the given file */
+		hackerboatStateClassStorable(const char *file, size_t len);		/**< Create a state object attached to the given file */
 		int32_t getSequenceNum (void) {return _sequenceNum;};					/**< Get the sequenceNum of this object (-1 until populated from a file) */
 		virtual bool openFile(const char *name, size_t len);					/**< Open the given database file & store the name */
 		virtual bool openFile(void);											/**< Open the stored database file */

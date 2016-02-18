@@ -90,9 +90,10 @@ class navClass : public hackerboatStateClassStorable {
 
 class navigatorBase {
 	public:
-		virtual navigatorBase(void) = 0;
 		virtual navVectorClass calc(void) = 0;
 		virtual bool isValid(void) = 0;
+	protected:
+		navigatorBase(void) = default;
 };
 
 /**
