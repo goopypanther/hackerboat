@@ -1,0 +1,5 @@
+These packages need to be installed, along with their pre-requisites:
+
+lighttpd
+sqlite3
+https://github.com/yigityuce/BlackLib
