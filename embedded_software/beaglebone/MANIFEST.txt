@@ -2,5 +2,6 @@ These packages need to be installed, along with their pre-requisites:
 
 lighttpd
 sqlite3
+cmake (to build jansson)
 https://github.com/yigityuce/BlackLib
 https://github.com/akheron/jansson
