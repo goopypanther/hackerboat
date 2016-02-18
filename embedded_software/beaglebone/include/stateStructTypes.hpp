@@ -65,8 +65,9 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		virtual int32_t count (void);											/**< Return the number of records of the object's type in the open database file */
 		virtual bool writeRecord (void);										/**< Write the current record to the target database file */
 		virtual bool getRecord(int32_t select);									/**< Populate the object from the open database file */
+		virtual bool getLastRecord(void);										/**< Get the latest record */
 		virtual bool insert(int32_t num) {return false};						/**< Insert the contents of the object into the database table at the given point */
-		virtual bool append(void) {return false};								/**< Append the contents of the object to the end of the database table */
+		virtual bool append(void);												/**< Append the contents of the object to the end of the database table */
 		
 	protected:
 		int32_t 	_sequenceNum = -1;	/**< sequence number */
