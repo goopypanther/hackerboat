@@ -28,6 +28,7 @@
 #define ARD_LOG_DB_FILE
 #define WP_DB_FILE	
 #define REST_LOGFILE
+#define NAV_LOGFILE
 
 #endif /* CONFIG_H */
 
