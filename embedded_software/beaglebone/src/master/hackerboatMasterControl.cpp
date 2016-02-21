@@ -1,7 +1,7 @@
 /******************************************************************************
- * Hackerboat Beaglebone Navigator program
- * hackerboatNavigator.cpp
- * This program handles navigation
+ * Hackerboat Beaglebone Master Control program
+ * hackerboatMasterControl.cpp
+ * This program is the core vessel control program
  * see the Hackerboat documentation for more details
  * timer code stolen shamelessly from the example at 
  * http://linux.die.net/man/2/timer_create
@@ -10,7 +10,7 @@
  * Version 0.1: First alpha
  *
  ******************************************************************************/
-
+ 
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <stdio.h>
@@ -28,30 +28,29 @@
 #define CLOCKID CLOCK_REALTIME
 #define SIG SIGRTMIN
 
-int initNav(navVectorClass *nav);
 static void handler(int sig, siginfo_t *si, void *uc);
+void input (boneStateClass *state);
+void output (boneStateClass *state);
 
 static bool timerFlag = true;
 
 int main (void) {
-	navClass nav (NAV_DB_FILE, strlen(NAV_DB_FILE));
-	navVectorClass *navInf;
-	int navCount;
+	boneStateClass myState(BONE_LOG_DB_FILE, strlen(BONE_LOG_DB_FILE));
+	stateMachineBase *thisState, *lastState;
 	timer_t timerid;
     struct sigevent sev;
     struct itimerspec its;
     sigset_t mask;
     struct sigaction sa;
 	
-	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
-	navCount = initNav(navInf);					// initialize the list of nav sources
+	logError::instance()->open(MAIN_LOGFILE);
 	
 	// Establish the handler for the timer signal
 	sa.sa_flags = SA_SIGINFO;
     sa.sa_sigaction = handler;
     sigemptyset(&sa.sa_mask);
     if (sigaction(SIG, &sa, NULL) == -1) {
-		logError::instance()->write("nav process", "sigaction");
+		logError::instance()->write("main control", "sigaction");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -60,7 +59,7 @@ int main (void) {
     sev.sigev_signo = SIG;
     sev.sigev_value.sival_ptr = &timerid;
     if (timer_create(CLOCKID, &sev, &timerid) == -1) {
-		logError::instance()->write("nav process", "timer_create");
+		logError::instance()->write("main control", "timer_create");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -70,47 +69,30 @@ int main (void) {
     its.it_interval.tv_sec = its.it_value.tv_sec;
     its.it_interval.tv_nsec = its.it_value.tv_nsec;
 	if (timer_settime(timerid, 0, &its, NULL) == -1) {
-		logError::instance()->write("nav process", "timer_settime");
+		logError::instance()->write("main control", "timer_settime");
 		exit(EXIT_FAILURE);
 	}
 	
+	thisState = new boneStartState(&myState);
+	
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
-		if (nav.openFile()) {
-			if (nav.getLastRecord()) {
-				if (nav.isValid()) {
-					nav.clearVectors();
-					for (uint16_t i = 0; i < navCount; i++) {
-						if (navInf[i] && navInf[i].isValid) {
-							nav.appendVector(navInf[i].calc());
-						} 
-					}
-				} else {
-					logError::instance()->write("nav process", "Fetched record is invalid");
-				}
-				nav.calc();
-				nav.writeRecord();
-			} else {
-				logError::instance()->write("nav process", "Failed to get last nav record");
-			}
-			nav.closeFile();
-		} else {
-			logError::instance()->write("nav process", "Failed to open nav database");
-		}
-		timerFlag = false;		// mark that we're done with the frame
+		input(&myState);
+		lastState = thisState;
+		thisState = thisState->execute();
+		delete lastState;
+		output(&myState);
+		myState.openFile();
+		myState.writeRecord();
+		myState.closeFile();
 	}
-}
-
-int initNav(navigatorBase *nav) {
-	nav = NULL;
-	return 0;
 }
 
 static void handler(int sig, siginfo_t *si, void *uc) {
 	if (!timerFlag) {
 		timerFlag = true;
 	} else {
-		logError::instance()->write("nav process", "frame overrun");
+		logError::instance()->write("main control", "frame overrun");
 	}
 	signal(sig, SIG_IGN);
 }
