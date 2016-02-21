@@ -13,8 +13,8 @@ set -e
 cd "$DEPSDIR"
 
 if [ ! -d BlackLib ]; then
-    git clone -n https://github.com/yigityuce/BlackLib
-    ( cd BlackLib && git checkout 001216dffe0920f564c1d32292abe3c3e5ba25b8 )
+    git clone -n https://github.com/logos-electromechanical/BlackLib.git
+    ( cd BlackLib && git checkout )
 fi
 
 if [ ! -d jansson ]; then
