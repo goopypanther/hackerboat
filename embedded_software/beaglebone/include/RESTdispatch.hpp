@@ -37,8 +37,8 @@
 
 class RESTdispatchClass {
 	public:
-		virtual RESTdispatchClass(void){};
-		virtual RESTdispatchClass(const char *name);			/**< Create a dispatch object with name */
+		RESTdispatchClass(void){};
+		RESTdispatchClass(const char *name);			/**< Create a dispatch object with name */
 		/**
 		 * @brief Constructor for a dispatch object with name and given dispatch table
 		 */
@@ -177,8 +177,8 @@ class rootRESTClass : public RESTdispatchClass {
 
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
-		virtual boneStateRESTClass(void){setHashes()};
-		virtual boneStateRESTClass(const char *name);			/**< Create a dispatch object with name */
+		boneStateRESTClass(void) {setHashes();};
+		boneStateRESTClass(const char *name);			/**< Create a dispatch object with name */
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (boneStateClass* target);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);

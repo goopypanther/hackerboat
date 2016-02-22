@@ -76,15 +76,12 @@ int main (void) {
 	thisState = new boneStartState(&myState);
 	
 	for (;;) {
-		while (!timerFlag);			// wait for the timer flag to go true
+		while (!timerFlag);								// wait for the timer flag to go true
 		input(&myState);
 		lastState = thisState;
 		thisState = thisState->execute();
-		delete lastState;
+		if (thisState == lastState) delete lastState;	// if we have a new state, delete the old object
 		output(&myState);
-		myState.openFile();
-		myState.writeRecord();
-		myState.closeFile();
 	}
 }
 

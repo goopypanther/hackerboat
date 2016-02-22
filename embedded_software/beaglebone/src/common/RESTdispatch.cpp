@@ -320,6 +320,7 @@ bool boneStateRESTClass::setTarget(boneStateClass* target) {
 }
 
 json_t* boneStateRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
+	if (_target) clock_gettime(CLOCK_REALTIME &(_target->lastContact));
 	switch (tokenHashes[currentToken]) {
 		case (commandHash):
 			return command(body, bodyLen);
@@ -665,7 +666,7 @@ json_t* arduinoRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tok
 
 json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	json_t* out, in;
-	BlackUART port(ARDUINO_REST_UART, ParityNo, StopOne, Char8);
+	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
 	char buf[LOCAL_BUF_LEN] = {0};
 	

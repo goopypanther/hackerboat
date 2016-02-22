@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <inttypes.h>
+#include <time.h>
 #include "config.h"
 #include "location.hpp"
 
@@ -88,12 +89,14 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
 		gpsFixClass (void);
+		gpsFixClass (const char *file, size_t len);
 		gpsFixClass (char *sentence, size_t len);			/**< Create a GPS fix from an incoming sentence string */
+		gpsFixClass (string sentence);						/**< Create a GPS fix from an incoming sentence string */
 		
 		bool readSentence (char *sentence, size_t len);		/**< Populate class from incoming sentence string */
 		bool isValid (void);								/**< Check for validity */
 		
-		unsigned long long			uTime;					/**< Time of fix arrival in microseconds since the epoch */
+		timespec					uTime;					/**< Beaglebone time of last fix */
 		double						latitude;				/**< Latitude of last fix */
 		double						longitude;				/**< Longitude of last fix */
 		double						gpsHeading;				/**< True heading, according to GPS */
@@ -174,10 +177,13 @@ class boneStateClass : public hackerboatStateClassStorable {
 		};
 	
 		boneStateClass (void);
-		bool insertFault (char* fault, size_t len);	/**< Add the named fault to the fault string. Returns false if fault string is full */
-		bool removeFault (char* fault, size_t len);	/**< Remove the named fault to the fault string. Returns false if not present */
+		bool insertFault (const string fault);	/**< Add the named fault to the fault string. Returns false if fault string is full */
+		bool removeFault (const string fault);	/**< Remove the named fault to the fault string. Returns false if not present */
+		bool hasFault (const string fault);		/**< Returns true if given fault is present */
+		int faultCount (void);					/**< Returns the current number of faults */
 		
-		unsigned long 				uTime;			/**< Time the record was made, in microseconds past the epoch */
+		timespec 					uTime;			/**< Time the record was made */
+		timespec					lastContact;	/**< Time of the last contact from the shore station */
 		boneStateEnum				state = BONE_NONE;			/**< current state of the beaglebone */	
 		char[STATE_STRING_LEN]		stateString;	/**< current state of the beaglebone, human readable string */
 		boneStateEnum				command = BONE_NONE;		/**< commanded state of the beaglebone */
@@ -242,11 +248,12 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 			BOAT_NONE			= 10		/**< Provides a null value for no command yet received */
 		};        
 
-		arduinoStateClass(void);
+		arduinoStateClass (void);
+		arduinoStateClass (const char *file, size_t len);
 		
-		bool populate (char *interface, size_t len);	/**< Populate the object from the named interface */
+		bool populate (void);	/**< Populate the object from the named interface */
 		
-		unsigned long		uTime;					/**< Time the record was made, in microseconds past the epoch */
+		timespec			uTime;					/**< Time the record was made */
 		arduinoStateEnum 	state;					/**< The current state of the boat                    */
 		arduinoStateEnum	command;				/**< Last state command received by the Arduino */
 		int8_t		 		throttle;   			/**< The current throttle position                    */

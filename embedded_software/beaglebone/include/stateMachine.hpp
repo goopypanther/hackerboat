@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat Beaglebone State machine mode
- * hackerboatStateMachine.cpp
+ * hackerboatStateMachine.hpp
  * This program is the core vessel state machine module
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Feb 2016
@@ -16,18 +16,35 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 #include "config.h"
 #include "stateStructTypes.hpp"
+
+class stateTimer {
+	public:
+		stateTimer (double duration, uint64_t frameTime);	/**< Duration in seconds */
+		stateTimer (uint32_t duration) {_duration = duration;};	/**< Duration in frames */
+		void setDuration (double duration, uint64_t frameTime);
+		void setDuration (uint32_t duration) {_duration = duration;};
+		void count (void) {_current++;};
+		bool isComplete (void) {return (_current >= _duration);};
+		void reset (void) {_current = 0;};
+	private:
+		uint32_t _duration;
+		uint32_t _current;
+}
 
 class stateMachineBase {
 	use boneStateClass;
 	public:
-		stateMachineBase (boneStateClass *state) {_state = state};
-		virtual stateMachineBase *execute (void);
+		stateMachineBase (boneStateClass *state) {_state = state;};
+		virtual stateMachineBase *execute (void) = 0;
 		boneStateClass *getState (void) {return &_state};
 		
 	protected:
 		boneStateClass *_state;
+		gpsFixClass			_fix(GPS_DB_FILE, strlen(GPS_DB_FILE));
+		arduinoStateClass 	_ard(ARD_LOG_DB_FILE, strlen(ARD_LOG_DB_FILE));
 	
 }
 
@@ -38,7 +55,16 @@ class boneStartState : public stateMachineBase {
 
 class boneSelfTestState : public stateMachineBase {
 	public:
+		boneSelfTestState (boneStateClass *state) {
+			_state = state;
+			clock_gettime(CLOCK_REALTIME, &_start);
+			_lastState = this->_state->state;
+		};
 		stateMachineBase *execute (void);
+	private:
+		timespec			_start;
+		uint32_t			_count = 0;
+		boneStateClass::boneStateEnum _lastState;
 }
 
 class boneDisarmedState : public stateMachineBase {
@@ -80,5 +106,7 @@ class boneArmedTestState : public stateMachineBase {
 	public:
 		stateMachineBase *execute (void);
 }
+
+
 
 #endif /* STATEMACHINE_H */
