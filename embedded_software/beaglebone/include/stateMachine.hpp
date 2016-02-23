@@ -37,14 +37,17 @@ class stateTimer {
 class stateMachineBase {
 	use boneStateClass;
 	public:
-		stateMachineBase (boneStateClass *state) {_state = state;};
+		stateMachineBase (boneStateClass *state, arduinoStateClass *ard) {
+			_state = state;
+			_ard = ard;
+		};
 		virtual stateMachineBase *execute (void) = 0;
 		boneStateClass *getState (void) {return &_state};
 		
 	protected:
-		boneStateClass *_state;
+		boneStateClass 		*_state;
 		gpsFixClass			_fix(GPS_DB_FILE, strlen(GPS_DB_FILE));
-		arduinoStateClass 	_ard(ARD_LOG_DB_FILE, strlen(ARD_LOG_DB_FILE));
+		arduinoStateClass	*_ard;
 	
 }
 
@@ -55,8 +58,9 @@ class boneStartState : public stateMachineBase {
 
 class boneSelfTestState : public stateMachineBase {
 	public:
-		boneSelfTestState (boneStateClass *state) {
+		boneSelfTestState (boneStateClass *state, arduinoStateClass *ard) {
 			_state = state;
+			_ard = ard;
 			clock_gettime(CLOCK_REALTIME, &_start);
 			_lastState = this->_state->state;
 		};
@@ -68,11 +72,6 @@ class boneSelfTestState : public stateMachineBase {
 }
 
 class boneDisarmedState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
-
-class boneFaultState : public stateMachineBase {
 	public:
 		stateMachineBase *execute (void);
 }
@@ -107,6 +106,9 @@ class boneArmedTestState : public stateMachineBase {
 		stateMachineBase *execute (void);
 }
 
-
+class boneFaultState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
+}
 
 #endif /* STATEMACHINE_H */

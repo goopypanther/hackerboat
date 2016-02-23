@@ -23,6 +23,8 @@
 #define FRAME_LEN_NS		(100000000)		/// State machine execution frame length, in nanoseconds
 #define UART_TIMEOUT		(100000)		/// UART contention timeout, in microseconds
 #define SELFTEST_FRAMES
+#define SHORE_TIMEOUT		(60)
+#define HORN_TIME			(2)
 
 // File names
 #define	GPS_DB_FILE

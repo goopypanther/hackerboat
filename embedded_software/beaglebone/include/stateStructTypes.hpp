@@ -253,6 +253,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		
 		bool populate (void);	/**< Populate the object from the named interface */
 		
+		bool 				popStatus				/**< State of whether the last call to populate() succeeded or failed */
 		timespec			uTime;					/**< Time the record was made */
 		arduinoStateEnum 	state;					/**< The current state of the boat                    */
 		arduinoStateEnum	command;				/**< Last state command received by the Arduino */

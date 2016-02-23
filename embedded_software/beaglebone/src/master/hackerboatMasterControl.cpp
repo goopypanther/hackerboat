@@ -29,13 +29,14 @@
 #define SIG SIGRTMIN
 
 static void handler(int sig, siginfo_t *si, void *uc);
-void input (boneStateClass *state);
-void output (boneStateClass *state);
+void input (boneStateClass *state, arduinoStateClass *ard);
+void output (boneStateClass *state, arduinoStateClass *ard);
 
 static bool timerFlag = true;
 
 int main (void) {
 	boneStateClass myState(BONE_LOG_DB_FILE, strlen(BONE_LOG_DB_FILE));
+	arduinoStateClass myArd(ARD_LOG_DB_FILE, strlen(ARD_LOG_DB_FILE));
 	stateMachineBase *thisState, *lastState;
 	timer_t timerid;
     struct sigevent sev;
@@ -73,15 +74,15 @@ int main (void) {
 		exit(EXIT_FAILURE);
 	}
 	
-	thisState = new boneStartState(&myState);
+	thisState = new boneStartState(&myState, &myArd);
 	
 	for (;;) {
 		while (!timerFlag);								// wait for the timer flag to go true
-		input(&myState);
+		input(&myState, &myArd);
 		lastState = thisState;
 		thisState = thisState->execute();
-		if (thisState == lastState) delete lastState;	// if we have a new state, delete the old object
-		output(&myState);
+		if (thisState != lastState) delete lastState;	// if we have a new state, delete the old object
+		output(&myState, &myArd);
 	}
 }
 
