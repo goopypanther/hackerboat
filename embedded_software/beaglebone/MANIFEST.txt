@@ -1,7 +1,11 @@
 These packages need to be installed, along with their pre-requisites:
 
 lighttpd
-sqlite3
+libsqlite3-dev
 cmake (to build jansson)
+automake  (at least version 1.10)
+
+These are not available as packages, but are fetched and built by a script:
+
 https://github.com/yigityuce/BlackLib
 https://github.com/akheron/jansson
