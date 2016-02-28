@@ -101,11 +101,11 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		double						longitude;				/**< Longitude of last fix */
 		double						gpsHeading;				/**< True heading, according to GPS */
 		double						gpsSpeed;				/**< Speed over the ground */
-		char[GPS_SENTENCE_LEN]		GGA;					/**< GGA sentence from GPS */
-		char[GPS_SENTENCE_LEN]		GSA;					/**< GSA sentence from GPS */
-		char[GPS_SENTENCE_LEN]		GSV;					/**< GSV sentence from GPS */
-		char[GPS_SENTENCE_LEN]		VTG;					/**< VTG sentence from GPS */
-		char[GPS_SENTENCE_LEN]		RMC;					/**< RMC sentence from GPS */
+		char						GGA[GPS_SENTENCE_LEN];			/**< GGA sentence from GPS */
+		char						GSA[GPS_SENTENCE_LEN];			/**< GSA sentence from GPS */
+		char						GSV[GPS_SENTENCE_LEN];			/**< GSV sentence from GPS */
+		char						VTG[GPS_SENTENCE_LEN];			/**< VTG sentence from GPS */
+		char						RMC[GPS_SENTENCE_LEN];			/**< RMC sentence from GPS */
 	protected:
 		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
 	private:
@@ -185,12 +185,12 @@ class boneStateClass : public hackerboatStateClassStorable {
 		timespec 					uTime;			/**< Time the record was made */
 		timespec					lastContact;	/**< Time of the last contact from the shore station */
 		boneStateEnum				state = BONE_NONE;			/**< current state of the beaglebone */	
-		char[STATE_STRING_LEN]		stateString;	/**< current state of the beaglebone, human readable string */
+		char					stateString[STATE_STRING_LEN];	/**< current state of the beaglebone, human readable string */
 		boneStateEnum				command = BONE_NONE;		/**< commanded state of the beaglebone */
-		char[STATE_STRING_LEN]		commandString;	/**< commanded state of the beaglebone, human readable string */
+		char					commandString[STATE_STRING_LEN];	/**< commanded state of the beaglebone, human readable string */
 		arduinoStateClass::arduinoStateEnum			ardState;		/**< current state of the Arduino */
-		char[STATE_STRING_LEN]		ardStateString;	/**< current state of the Arduino, human readable string */
-		char[FAULT_STRING_LEN]		faultString;	/**< comma separated list of faults */
+		char					ardStateString[STATE_STRING_LEN];	/**< current state of the Arduino, human readable string */
+		char					faultString[STATE_STRING_LEN];	/**< comma separated list of faults */
 		gpsFixClass					gps;			/**< current GPS position */
 		int32_t						waypointNext;	/**< ID of the current target waypoint */
 		double						waypointStrength;		/**< Strength of the waypoint */
@@ -253,7 +253,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		
 		bool populate (void);	/**< Populate the object from the named interface */
 		
-		bool 				popStatus				/**< State of whether the last call to populate() succeeded or failed */
+		bool 				popStatus;				/**< State of whether the last call to populate() succeeded or failed */
 		timespec			uTime;					/**< Time the record was made */
 		arduinoStateEnum 	state;					/**< The current state of the boat                    */
 		arduinoStateEnum	command;				/**< Last state command received by the Arduino */

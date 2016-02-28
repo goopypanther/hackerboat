@@ -34,7 +34,7 @@ class logError {
 	public:
 		static logError* instance(void);
 		bool open(std::string logfile);
-		bool write(const char *source, char *message);
+		bool write(const char *source, const char *message);
 		bool close(void);
 	private:
 		logError(void){};

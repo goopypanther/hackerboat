@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <vector>
 #include "config.h"
 #include "stateStructTypes.hpp"
 #include "location.hpp"
@@ -35,7 +36,7 @@ class navVectorClass : public hackerboatStateClass {
 		bool norm (void);						/**< Normalize the bearing */
 		bool parse (json_t *input);				/**< Populate the object from the given json object */
 		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
-		navVectorClass add (navVectorclass a);	/**< Vector sum of the current vector and another vector */
+		navVectorClass add (navVectorClass a);	/**< Vector sum of the current vector and another vector */
 		
 		std::string	_source  	= "";		/**< Name of the source of this vector. */
 		double 	_bearing 	= NAN;		/**< Bearing of this vector in degrees, clockwise from true north. */
@@ -77,8 +78,7 @@ class navClass : public hackerboatStateClassStorable {
 		
 	private:
 		static const char *_format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
-		navVector[NAV_VEC_LIST_LEN]	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
-		uint16_t					influenceCount; /**< Number of influence vectors */
+		std::vector<navVector>				navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 };
 
 /** 
@@ -107,10 +107,9 @@ class navDodgePointClass : public navigatorBase {
 	public:
 		navDodgePointClass(void) {};
 		navDodgePointClass(locationClass point) {_point = point;};
-		navDodgePointClass(locationClass point, double strength) {
-			_point = point; 
-			_strength = strength;
-		}
+		navDodgePointClass(locationClass point, double strength)
+                    : _point(point), _strength(strength)
+		{ }
 		navVectorClass calc(void);
 		void setLocation (locationClass point) {_point = point;};
 		locationClass getLocation (void) {return _point;};
@@ -144,7 +143,7 @@ class navDitherClass : public navigatorBase {
 		double getSeed (void) {return _seed;};
 		bool isValid(void) {return (isnormal(_strength) && isnormal(_seed));};
 	private:
-		_strength = 0;
+		double _strength = 0;
 		_seed = HASHSEED;
 };
  
