@@ -32,7 +32,7 @@ class locationClass {
 		};
 		locationClass (void) {};
 		locationClass (double lat, double lon);		/**< Create a location object at the given latitude & longitude */
-		bool isValid (void);						/**< Check for validity */
+		bool isValid (void) const;					/**< Check for validity */
 		bool parse (json_t *input);					/**< Populate the object from the given json object */
 		json_t *pack (void);						/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		double bearing (locationClass dest, courseType type = GreatCircle);		/**< Get the bearing from the current location to the target */

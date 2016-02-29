@@ -23,7 +23,7 @@ navVectorClass::navVectorClass (string src, double bearing, double strength) {
 	_strength = strength;
 }
 
-bool inline navVectorClass::isValid (void) {
+bool inline navVectorClass::isValid (void) const {
 	if ((_bearing >= 0) && (_bearing <= 360) && 
 		(_strength >= 0) && isnormal(_bearing) &&
 		isnormal(_strength)) return true;
@@ -145,7 +145,7 @@ void navClass::clearVectors (void) {
 	this->influenceCount = 0;
 }
 
-bool navClass::isValid (void) {
+bool navClass::isValid (void) const {
 	bool out = false;
 	if (current.isValid() && target.isValid() &&
 		targetVec.isValid() && total.isValid() &&

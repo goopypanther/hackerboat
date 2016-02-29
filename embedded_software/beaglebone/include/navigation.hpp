@@ -32,7 +32,7 @@ class navVectorClass : public hackerboatStateClass {
 	public:	
 		navVectorClass (void) {};
 		navVectorClass (std::string src, double bearing, double strength);
-		bool isValid (void);					/**< Check for validity */	
+		bool isValid (void) const;					/**< Check for validity */	
 		bool norm (void);						/**< Normalize the bearing */
 		bool parse (json_t *input);				/**< Populate the object from the given json object */
 		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
@@ -62,7 +62,7 @@ class navClass : public hackerboatStateClassStorable {
 		bool appendVector (navVectorClass vec);	/**< Add a navigation vector to the influence list */
 		bool calc (double maxStrength);			/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
-		bool isValid(void);
+		bool isValid(void) const;
 		bool writeRecord (void);				/**< Write the current record to the target database file */
 		bool getRecord(int32_t select);			/**< Populate the object from the open database file */
 		
@@ -91,7 +91,7 @@ class navClass : public hackerboatStateClassStorable {
 class navigatorBase {
 	public:
 		virtual navVectorClass calc(void) = 0;
-		virtual bool isValid(void) = 0;
+		virtual bool isValid(void) const = 0;
 	protected:
 		navigatorBase(void) = default;
 };
@@ -115,7 +115,7 @@ class navDodgePointClass : public navigatorBase {
 		locationClass getLocation (void) {return _point;};
 		void setStrength (double strength) {_strength = strength;};
 		double getStrength (void) {return _strength;};
-		bool isValid(void);
+		bool isValid(void) const;
 	private:
 		locationClass _point;
 		double _strength = 0;
@@ -141,7 +141,7 @@ class navDitherClass : public navigatorBase {
 		double getStrength (void) {return _strength;};
 		void setSeed (double seed) {_seed = seed;};
 		double getSeed (void) {return _seed;};
-		bool isValid(void) {return (isnormal(_strength) && isnormal(_seed));};
+		bool isValid(void) const {return (isnormal(_strength) && isnormal(_seed));};
 	private:
 		double _strength = 0;
 		_seed = HASHSEED;

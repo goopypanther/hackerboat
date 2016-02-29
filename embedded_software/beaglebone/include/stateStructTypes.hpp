@@ -41,11 +41,10 @@ class hackerboatStateClass {
 	public:
 		virtual bool parse (json_t *input);			/**< Populate the object from the given json object */
 		virtual json_t *pack (void);				/**< Pack the contents of the object into a json object and return a pointer to that object*/
-		virtual bool isValid (void) {return true;};	/**< Tests whether the current object is in a valid state */
+		virtual bool isValid (void) const {return true;};	/**< Tests whether the current object is in a valid state */
 		
 	protected:	
 		hackerboatStateClass(void) = default;
-		virtual const char *getFormatString(void);		/**< Get format string for the object */
 };
 
 /**
@@ -94,7 +93,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		gpsFixClass (string sentence);						/**< Create a GPS fix from an incoming sentence string */
 		
 		bool readSentence (char *sentence, size_t len);		/**< Populate class from incoming sentence string */
-		bool isValid (void);								/**< Check for validity */
+		bool isValid (void) const;								/**< Check for validity */
 		
 		timespec					uTime;					/**< Beaglebone time of last fix */
 		double						latitude;				/**< Latitude of last fix */
