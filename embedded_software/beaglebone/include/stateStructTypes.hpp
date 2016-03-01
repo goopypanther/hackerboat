@@ -196,9 +196,15 @@ class boneStateClass : public hackerboatStateClassStorable {
 		double						waypointAccuracy;		/**< How close the boat gets to each waypoint before going to the next one */
 		double						waypointStrengthMax;	/**< Maximum waypoint strength */
 		bool						autonomous;		/**< When set true, the boat will operate autonomously */	
+		
+	protected:
+		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+	private:
+		void initHashes (void);								/**< Initialize state name hashes */
+		static const char *_format = "";
 		static const uint8_t boneStateCount = 11;
 		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
-		static const char boneStates[][STATE_STRING_LEN] = {
+		static const char * const boneStates[] = {
 			"Start", 
 			"SelfTest", 
 			"Disarmed", 
@@ -211,12 +217,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 			"ArmedTest",
 			"None"
 		};		
-	protected:
-		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-	private:
-		void initHashes (void);								/**< Initialize state name hashes */
-		static const char *_format = "";
-		
 };
 
 
@@ -309,7 +309,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 	private:
 		static const char *_format = "";	
 		static const uint8_t arduinoStateCount = 11;
-		static const char arduinoStates[][STATE_STRING_LEN] = {
+		static const char * const arduinoStates[] = {
 			"PowerUp", 
 			"Armed", 
 			"SelfTest", 
