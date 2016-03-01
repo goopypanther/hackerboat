@@ -78,6 +78,7 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag);								// wait for the timer flag to go true
+		timerFlag = false;
 		input(&myState, &myArd);
 		lastState = thisState;
 		thisState = thisState->execute();
