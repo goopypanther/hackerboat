@@ -16,10 +16,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <vector>
 #include "config.h"
 #include "stateStructTypes.hpp"
 #include "location.hpp"
+
+#include <string>
+#include <vector>
+using namespace string;
+using namespace vector;
 
 /**
  * @class navVectorClass
@@ -38,13 +42,12 @@ class navVectorClass : public hackerboatStateClass {
 		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		navVectorClass add (navVectorClass a);	/**< Vector sum of the current vector and another vector */
 		
-		std::string	_source  	= "";		/**< Name of the source of this vector. */
+		string	_source  	= "";		/**< Name of the source of this vector. */
 		double 	_bearing 	= NAN;		/**< Bearing of this vector in degrees, clockwise from true north. */
 		double	_strength 	= NAN;		/**< Relative strength of this vector */	
-	protected:
-		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
+
 	private:
-		static const char *_format = "{s:s,s:f,s:f}";	
+		static const string _format = "{s:s,s:f,s:f}";	
 };
 
 /**
@@ -73,12 +76,9 @@ class navClass : public hackerboatStateClassStorable {
 		navVector		targetVec;		/**< Vector to the target */
 		navVector		total;			/**< Sum of target vector and all influences */
 		
-	protected:
-		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-		
 	private:
-		static const char *_format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
-		std::vector<navVector>				navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
+		static const string _format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
+		vector<navVector>	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 };
 
 /** 
@@ -131,11 +131,9 @@ class navDodgePointClass : public navigatorBase {
 class navDitherClass : public navigatorBase {
 	public:
 		navDitherClass(void) {};
-		navDitherClass(double strength) {_strength = strength;};
-		navDitherClass(double strength, double seed) {
-			_seed = seed; 
-			_strength = strength;
-		}
+		navDitherClass(double strength) :_strength(strength) {};
+		navDitherClass(double strength, uint32_t seed) :
+			_seed(seed), _strength(strength) {};
 		navVectorClass calc(void);
 		void setStrength (double strength) {_strength = strength;};
 		double getStrength (void) {return _strength;};
@@ -143,8 +141,8 @@ class navDitherClass : public navigatorBase {
 		double getSeed (void) {return _seed;};
 		bool isValid(void) const {return (isnormal(_strength) && isnormal(_seed));};
 	private:
-		double _strength = 0;
-		_seed = HASHSEED;
+		double 		_strength = 0;
+		uint32_t	_seed = HASHSEED;
 };
  
 #endif /* NAVIGATION_H */ 

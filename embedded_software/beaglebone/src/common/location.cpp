@@ -15,6 +15,8 @@
 #include <math.h>
 #include "location.hpp"
 
+#include 
+
 #define PI 3.14159265
 #define R 6731000
 
@@ -38,14 +40,14 @@ bool inline locationClass::isValid(void) const {
 }
 
 bool locationClass::parse(json_t* input) {
-	if (json_unpack(input, this->_format, "latitude", &_lat, "longitude", &_lon)) {
+	if (json_unpack(input, this->_format.c_str(), "latitude", &_lat, "longitude", &_lon)) {
 		return false;
 	}
 	return this->isValid();
 }
 
 json_t* locationClass::pack(void) {
-	return json_pack(this->_format, "latitude", _lat, "longitude", _lon);
+	return json_pack(this->_format.c_str(), "latitude", _lat, "longitude", _lon);
 }
 
 double locationClass::bearing (locationClass dest, courseType type) {

@@ -46,7 +46,6 @@ class stateMachineBase {
 		
 	protected:
 		boneStateClass 		*_state;
-		gpsFixClass			_fix(GPS_DB_FILE, strlen(GPS_DB_FILE));
 		arduinoStateClass	*_ard;
 	
 }
@@ -89,6 +88,8 @@ class boneManualState : public stateMachineBase {
 class boneWaypointState : public stateMachineBase {
 	public:
 		stateMachineBase *execute (void);
+	private:
+		navClass _nav(NAV_DB_FILE);
 }
 
 class boneNoSignalState : public stateMachineBase {
@@ -99,6 +100,8 @@ class boneNoSignalState : public stateMachineBase {
 class boneReturnState : public stateMachineBase {
 	public:
 		stateMachineBase *execute (void);
+	private:
+		navClass _nav(NAV_DB_FILE);
 }
 
 class boneArmedTestState : public stateMachineBase {

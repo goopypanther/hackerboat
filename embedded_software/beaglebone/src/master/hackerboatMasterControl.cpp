@@ -77,7 +77,7 @@ int main (void) {
 	thisState = new boneStartState(&myState, &myArd);
 	
 	for (;;) {
-		while (!timerFlag);								// wait for the timer flag to go true
+		while (!timerFlag) {usleep(100);}	// wait for the timer flag to go true
 		timerFlag = false;
 		input(&myState, &myArd);
 		lastState = thisState;
@@ -85,6 +85,30 @@ int main (void) {
 		if (thisState != lastState) delete lastState;	// if we have a new state, delete the old object
 		output(&myState, &myArd);
 	}
+}
+
+void input (boneStateClass *state, arduinoStateClass *ard) {
+	ard->populate();
+	state->openFile();
+	state->getLastRecord();
+	state->closeFile();
+	state->gps.openFile();
+	if (!state->gps.getLastRecord()) {
+		state->insertFault("No GNSS");
+		state->setState(BONE_FAULT);
+	}
+	state->gps.closeFile();
+}
+
+
+void output (boneStateClass *state, arduinoStateClass *ard) {
+	ard->heartbeat();
+	ard->openFile();
+	ard->writeRecord();
+	ard->closeFile();
+	state->openFile();
+	state->writeRecord();
+	state->closeFile();
 }
 
 static void handler(int sig, siginfo_t *si, void *uc) {

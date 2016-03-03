@@ -17,6 +17,9 @@
 #include "config.h"
 #include <math.h>
 
+#include <string>
+using namespace string;
+
 /**
  * @class locationClass
  *
@@ -43,12 +46,9 @@ class locationClass {
 	
 		static double inline deg2rad (double deg);
 		static double inline rad2deg (double rad);
-	
-	protected:
-		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-		
+			
 	private:
-		static const char *_format = "{s:f,s:f}";	
+		static const string _format = "{s:f,s:f}";	
 };
 
 #endif /* LOCATION_H */
