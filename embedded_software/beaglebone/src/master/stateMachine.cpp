@@ -349,7 +349,7 @@ stateMachineBase *boneFaultState::execute (void) {
 	arduinoFail();
 	
 	// check if there are still faults
-	if (!(_state->hasFault())) return new boneDisarmedState(this->_state, this->_ard);
+	if (!(_state->faultCount())) return new boneDisarmedState(this->_state, this->_ard);
 	
 	// check if we're getting a command for self test
 	if (_state->command == BONE_SELFTEST) return new boneSelfTestState(this->_state, this->_ard);

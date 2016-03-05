@@ -77,8 +77,7 @@ class navClass : public hackerboatStateClassStorable {
 		navVector		total;			/**< Sum of target vector and all influences */
 		
 	private:
-		static const string _format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";
-		static const string _formatFile = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
+		static const string _format = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
 		vector<navVector>	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 };
 

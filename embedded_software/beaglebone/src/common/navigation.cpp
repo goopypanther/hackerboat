@@ -76,30 +76,21 @@ json_t* navVectorClass::pack(bool seq) {
 }
 
 bool navClass::parse(json_t *input,  bool seq) {
-	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
+	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn, *seqIn;
+	if (json_unpack(input, this->_formatFile.c_str(), 
+					"current", currentIn,
+					"target", targetIn,
+					"waypointStrength", &waypointStrength,
+					"magCorrection", &magCorrection,
+					"targetVec", targetVecIn,
+					"total", totalIn,
+					"navInfluences", navArrayIn)) {
+		return false;
+	}
+	
 	if (seq) {
-		if (json_unpack(input, this->_format.c_str(), 	
-						"sequenceNum", &_sequenceNum,
-						"current", currentIn,
-						"target", targetIn,
-						"waypointStrength", &waypointStrength,
-						"magCorrection", &magCorrection,
-						"targetVec", targetVecIn,
-						"total", totalIn,
-						"navInfluences", navArrayIn)) {
-			return false;										
-		}
-	} else {
-		if (json_unpack(input, this->_formatFile.c_str(), 
-						"current", currentIn,
-						"target", targetIn,
-						"waypointStrength", &waypointStrength,
-						"magCorrection", &magCorrection,
-						"targetVec", targetVecIn,
-						"total", totalIn,
-						"navInfluences", navArrayIn)) {
-			return false;
-		}			
+		seqIn = json_object_get(input, "sequenceNum");
+		if (seqIn) _sequenceNum = json_integer_value(seqIn);
 	}
 	current.parse(currentIn));
 	target.parse(targetIn));
@@ -120,31 +111,21 @@ bool navClass::parse(json_t *input,  bool seq) {
 }
 
 json_t* navClass::pack (bool seq) {
-	json_t *array;
+	json_t *array, *output;
 	array = json_array();
 	for (uint16_t i; i < navInfluences.size(); i++) {
 		json_array_append_new(array, navInfluences.at(i).pack());
 	}
-	if (seq) {
-		return json_pack(this->_format.c_str(),  
-						"sequenceNum", _sequenceNum,
+	output = json_pack(this->_format.c_str(),  
 						"current", current.pack(),
 						"target", target.pack(),
 						"waypointStrength", waypointStrength,
 						"magCorrection", magCorrection,
 						"targetVec", targetVec.pack(),
 						"total", total.pack(),
-						"navInfluences", array));
-	} else {
-		return json_pack(this->_formatFile.c_str(),  
-						"current", current.pack(),
-						"target", target.pack(),
-						"waypointStrength", waypointStrength,
-						"magCorrection", magCorrection,
-						"targetVec", targetVec.pack(),
-						"total", total.pack(),
-						"navInfluences", array));
-	}
+						"navInfluences", array);
+	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
+	return output;
 }
 
 bool navClass::appendVector (navVectorClass vec) {

@@ -48,6 +48,8 @@ class hackerboatStateClass {
 		
 	protected:	
 		hackerboatStateClass(void) = default;
+		json_t *packTimeSpec (timespec t);
+		int parseTimeSpec (json_t *input, timespec *t);
 };
 
 /**
@@ -61,9 +63,10 @@ class hackerboatStateClass {
 
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
+		hackerboatStateClassStorable(void);
 		hackerboatStateClassStorable(const string file);		/**< Create a state object attached to the given file */
 		int32_t getSequenceNum (void) {return _sequenceNum;};	/**< Get the sequenceNum of this object (-1 until populated from a file) */
-		bool openFile(const string name, size_t len);			/**< Open the given database file & store the name */
+		bool openFile(const string name);						/**< Open the given database file & store the name */
 		bool openFile(void);									/**< Open the stored database file */
 		bool closeFile(void);									/**< Close the open file */
 		int32_t count (void);									/**< Return the number of records of the object's type in the open database file */
@@ -90,13 +93,10 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
  
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
-		gpsFixClass (void);
-		gpsFixClass (const string file, size_t len);
-		gpsFixClass (string sentence, size_t len);			/**< Create a GPS fix from an incoming sentence string */
-		gpsFixClass (string sentence);						/**< Create a GPS fix from an incoming sentence string */
+		gpsFixClass (const string file, string sentence);
+		gpsFixClass (string sentence);			/**< Create a GPS fix from an incoming sentence string */
 		
-		bool readSentence (string sentence, size_t len);	/**< Populate class from incoming sentence string */
-		bool isValid (void) const;							/**< Check for validity */
+		bool readSentence (string sentence);	/**< Populate class from incoming sentence string */
 		
 		timespec	uTime;					/**< Beaglebone time of last fix */
 		double		latitude;				/**< Latitude of last fix */
@@ -110,7 +110,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		string		RMC;					/**< RMC sentence from GPS */
 	
 	private:
-		static const string _format = "";
+		static const string _format = "{s:o,s:f,s:f,s:f,s:f,s:s,s:s,s:s,s:s,s:s}";
 };
 
 /**
@@ -128,25 +128,18 @@ class waypointClass : public hackerboatStateClassStorable {
 			CONTINUE = 2,
 		};
 		
-		waypointClass (void);
 		waypointClass (locationClass loc);						/**< Create a waypoint at loc */
 		waypointClass (locationClass loc, actionEnum action); 	/**< Create a waypoint at loc with action */
 		
-		waypointClass 	*getNextWaypoint(void);					/**< return the next waypoint to travel towards */
-		bool			setNextWaypoint(waypointClass* next);	/**< Set the next waypoint to the given object (works only if it has a sequenceNum > 0; renumber indices as necessary */
-		bool			setNextWaypoint(int16_t index);			/**< As above, but set by current index; renumbering proceeds as above */
 		int16_t			getNextIndex(void);						/**< Return the index of the next waypoint */
 		bool			setAction(actionEnum action);			/**< Set the action to take when this waypoint is reached */
 		actionEnum		getAction(void);						/**< Return the action that this waypoint is set to */
-		bool 			insert(int32_t num);					/**< Insert this waypoint into the waypoint list after the given index; renumbers following waypoints */
-		bool 			append(void);							/**< Append this waypoint after the last waypoint in the list. This waypoint takes on the action of the previous last action and sets the previous one to 'continue' */
 		
 		locationClass	location;				/**< Location of the waypoint */
 
 	private:
-		static const string _format = "";
+		static const string _format = "{s:o,s:i,s:i}";
 		int16_t			index = -1;				/**< Place of this waypoint in the waypoint list */ 
-		int16_t			nextWaypoint = -1;		/**< _sequenceNum of the next waypoint */
 		actionEnum		act = CONTINUE;			/**< Action to perform when reaching a location */	
 };
 
@@ -176,7 +169,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 			BONE_NONE			= 10		/**< State of the Beaglebone is currently unknown	*/
 		};
 	
-		boneStateClass (void);
 		bool insertFault (const string fault);	/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const string fault);	/**< Remove the named fault to the fault string. Returns false if not present */
 		bool hasFault (const string fault);		/**< Returns true if given fault is present */
@@ -203,7 +195,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		
 	private:
 		void initHashes (void);								/**< Initialize state name hashes */
-		static const char *_format = "";
+		static const char *_format = "{s:o,s:o,s:i,s:s,s:i,s:s,s:i,s:s,s:s,s:o,s:i,s:f,s:f,s:f,s:b,s:o}";
 		static const uint8_t boneStateCount = 11;
 		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
 		static const string boneStates[] = {
@@ -329,8 +321,9 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		};
 		
 	private:
-		string					write(string func, string query);
-		static const string 	_format = "";	
+		json_t 					*packOrientation (sensors_vec_t t);
+		bool 					parseOrientation (json_t *input, sensors_vec_t *t);
+		string					write(string func, string query);		/**< Write to a function on the Arduino */
 		static const uint8_t 	arduinoStateCount = 11;
 };
 
