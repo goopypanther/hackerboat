@@ -42,8 +42,8 @@ using namespace string;
 
 class hackerboatStateClass {
 	public:
-		virtual bool parse (json_t *input);			/**< Populate the object from the given json object */
-		virtual json_t *pack (void);				/**< Pack the contents of the object into a json object and return a pointer to that object*/
+		virtual bool parse (json_t *input, bool seq = true);/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
+		virtual json_t *pack (bool seq = true);				/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
 		virtual bool isValid (void) const {return true;};	/**< Tests whether the current object is in a valid state */
 		
 	protected:	
@@ -63,15 +63,15 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
 		hackerboatStateClassStorable(const string file);		/**< Create a state object attached to the given file */
 		int32_t getSequenceNum (void) {return _sequenceNum;};	/**< Get the sequenceNum of this object (-1 until populated from a file) */
-		virtual bool openFile(const string name, size_t len);	/**< Open the given database file & store the name */
-		virtual bool openFile(void);							/**< Open the stored database file */
-		virtual bool closeFile(void);							/**< Close the open file */
-		virtual int32_t count (void);							/**< Return the number of records of the object's type in the open database file */
-		virtual bool writeRecord (void);						/**< Write the current record to the target database file */
-		virtual bool getRecord(int32_t select);					/**< Populate the object from the open database file */
-		virtual bool getLastRecord(void);						/**< Get the latest record */
+		bool openFile(const string name, size_t len);			/**< Open the given database file & store the name */
+		bool openFile(void);									/**< Open the stored database file */
+		bool closeFile(void);									/**< Close the open file */
+		int32_t count (void);									/**< Return the number of records of the object's type in the open database file */
+		bool writeRecord (void);								/**< Write the current record to the target database file */
+		bool getRecord(int32_t select);							/**< Populate the object from the open database file */
+		bool getLastRecord(void);								/**< Get the latest record */
 		virtual bool insert(int32_t num) {return false;};		/**< Insert the contents of the object into the database table at the given point */
-		virtual bool append(void);								/**< Append the contents of the object to the end of the database table */
+		bool append(void);										/**< Append the contents of the object to the end of the database table */
 		
 	protected:
 		int32_t 	_sequenceNum = -1;	/**< sequence number */
@@ -329,8 +329,9 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		};
 		
 	private:
-		static const string _format = "";	
-		static const uint8_t arduinoStateCount = 11;
+		string					write(string func, string query);
+		static const string 	_format = "";	
+		static const uint8_t 	arduinoStateCount = 11;
 };
 
 #endif /* STATESTRUCTTYPES_H */

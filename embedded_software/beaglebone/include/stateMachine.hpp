@@ -89,7 +89,8 @@ class boneWaypointState : public stateMachineBase {
 	public:
 		stateMachineBase *execute (void);
 	private:
-		navClass _nav(NAV_DB_FILE);
+		navClass 		_nav(NAV_DB_FILE);
+		waypointClass	_wp(WP_DB_FILE);
 }
 
 class boneNoSignalState : public stateMachineBase {

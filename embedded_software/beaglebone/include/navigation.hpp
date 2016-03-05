@@ -36,10 +36,10 @@ class navVectorClass : public hackerboatStateClass {
 	public:	
 		navVectorClass (void) {};
 		navVectorClass (std::string src, double bearing, double strength);
-		bool isValid (void) const;					/**< Check for validity */	
+		bool isValid (void) const;				/**< Check for validity */	
 		bool norm (void);						/**< Normalize the bearing */
-		bool parse (json_t *input);				/**< Populate the object from the given json object */
-		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
+		bool parse (json_t *input);		/**< Populate the object from the given json object */
+		json_t *pack (void);			/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		navVectorClass add (navVectorClass a);	/**< Vector sum of the current vector and another vector */
 		
 		string	_source  	= "";		/**< Name of the source of this vector. */
@@ -59,9 +59,9 @@ class navVectorClass : public hackerboatStateClass {
 
 class navClass : public hackerboatStateClassStorable {
 	public:
-		navClass (void) {};							
-		bool parse (json_t *input);				/**< Populate the object from the given json object */
-		json_t *pack (void);					/**< Pack the contents of the object into a json object and return a pointer to that object*/
+		navClass (void) {};	
+		bool parse (json_t *input, bool seq = true);/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
+		json_t *pack (bool seq = true);				/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
 		bool appendVector (navVectorClass vec);	/**< Add a navigation vector to the influence list */
 		bool calc (double maxStrength);			/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
@@ -72,12 +72,13 @@ class navClass : public hackerboatStateClassStorable {
 		locationClass	current;		/**< current location */	
 		waypointClass	target;			/**< target waypoint */
 		double			waypointStrength;
-		double			magCorrection;	/**< Correction between sensed magnetic heading and true direction */
+		double			magCorrection = 0;	/**< Correction between sensed magnetic heading and true direction */
 		navVector		targetVec;		/**< Vector to the target */
 		navVector		total;			/**< Sum of target vector and all influences */
 		
 	private:
-		static const string _format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
+		static const string _format = "{s:i,s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";
+		static const string _formatFile = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
 		vector<navVector>	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 };
 

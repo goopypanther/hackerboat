@@ -17,6 +17,9 @@
 #include "config.h"
 #include "stateStructTypes.hpp"
 #include "stateMachine.hpp"
+#include "logs.hpp"
+
+logError *err = logError::instance();
 
 using namespace BlackLib;
 
@@ -252,9 +255,53 @@ stateMachineBase *boneWaypointState::execute (void) {
 		return new boneFaultState(this->_state, this->_ard);
 	}
 	
-	// transmit arduino commands
+	// load & write navigation data
+	_nav->openFile();
+	_nav->getLastRecord();
+	if (_nav->isValid()) {
+		// calculate target heading & throttle
+		_ard->headingTarget = _nav->total._bearing + _nav->magCorrection;
+		_ard->throttle = (int8_t)(INT8_MAX * (_nav->total.strength/_state->waypointStrengthMax));
+		// transmit arduino commands
+		_ard->writeThrottle();
+		_ard->writeHeadingTarget();
+	} 
+	_nav->target = _wp;
+	_nav->writeRecord();
+	_nav->closeFile();
 	
-	// check commands
+	// check waypoint distance
+	_wp->openFile();
+	_wp->getRecord(_state->waypointNext);
+	if (_wp->isValid()) {
+		if (_wp->location.distance(_nav->current) < _state->waypointAccuracy) {
+			if (_wp->count() > _state->waypointNext) {
+				_state->waypointNext++;
+			} else {
+				switch (_wp->act) {
+					case HOME:
+						return new boneReturnState(this->_state, this->_ard);
+					case CONTINUE:
+						_state->waypointNext = 0;
+					case STOP:
+					default:
+						_ard->throttle = 0;
+						_ard->writeThrottle();
+						return new boneManualState(this->_state, this->_ard);
+				}
+			}
+		}
+	}
+	_wp->closeFile();
+	
+	// check incoming commands
+	if (_state->command == BONE_ARMED) {
+		return new boneArmedState(this->_state, this->_ard);
+	} else if (_state->command == BONE_MANUAL) {
+		return new boneManualState(this->_state, this->_ard);
+	} else if (_state->command == BONE_RETURN) {
+		return new boneReturnState(this->_state, this->_ard);
+	}
 	
 	return this;
 }
