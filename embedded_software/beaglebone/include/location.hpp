@@ -13,9 +13,11 @@
 #define LOCATION_H
  
 #include <jansson.h>
-#include <stdlib.h>
 #include "config.h"
 #include <math.h>
+
+class sqliteParameterSlice;
+class sqliteRowReference;
 
 /**
  * @class locationClass
@@ -30,25 +32,29 @@ class locationClass {
 			GreatCircle,
 			RhumbLine
 		};
-		locationClass (void) {};
-		locationClass (double lat, double lon);		/**< Create a location object at the given latitude & longitude */
-		bool isValid (void) const;					/**< Check for validity */
-		bool parse (json_t *input);					/**< Populate the object from the given json object */
-		json_t *pack (void);						/**< Pack the contents of the object into a json object and return a pointer to that object*/
-		double bearing (locationClass dest, courseType type = GreatCircle);		/**< Get the bearing from the current location to the target */
-		double distance (locationClass dest, courseType type = GreatCircle);
+		locationClass (void)
+		  : _lat(NAN), _lon(NAN)
+		{ };
+		locationClass (double lat, double lon)					/**< Create a location object at the given latitude & longitude */
+		  : _lat(lat), _lon(lon)
+		{ };
+		bool isValid (void) const;						/**< Check for validity */
+		bool parse (json_t *input);						/**< Populate the object from the given json object */
+		json_t *pack (void) const;						/**< Pack the contents of the object into a json object and return a pointer to that object*/
+		double bearing (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the bearing from the current location to the target */
+		double distance (const locationClass& dest, courseType type = GreatCircle) const;
 
-		double _lat = NAN;							/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
-		double _lon = NAN;							/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
+		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
+		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
 	
-		static double inline deg2rad (double deg);
-		static double inline rad2deg (double rad);
-	
+		static double inline deg2rad (double deg) { return deg * ( M_PI / 180.0 ); }
+		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }
+
+		bool fillRow(sqliteParameterSlice) const;
+		bool readFromRow(sqliteRowReference);
+
 	protected:
-		const char *getFormatString(void) {return _format;};		/**< Get format string for the object */
-		
-	private:
-		static const char *_format = "{s:f,s:f}";	
+		static const char * const _format;
 };
 
 #endif /* LOCATION_H */
