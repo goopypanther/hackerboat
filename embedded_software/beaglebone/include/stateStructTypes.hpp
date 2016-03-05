@@ -146,7 +146,7 @@ class waypointClass : public hackerboatStateClassStorable {
 	private:
 		static const string _format = "";
 		int16_t			index = -1;				/**< Place of this waypoint in the waypoint list */ 
-		int32_t			nextWaypoint = -1;		/**< _sequenceNum of the next waypoint */
+		int16_t			nextWaypoint = -1;		/**< _sequenceNum of the next waypoint */
 		actionEnum		act = CONTINUE;			/**< Action to perform when reaching a location */	
 };
 
