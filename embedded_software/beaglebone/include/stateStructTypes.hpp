@@ -83,6 +83,27 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 };
 
 /**
+ * @class orientationClass
+ *
+ * @brief An orientation, received from the Arduino 
+ *
+ */
+
+class orientationClass : public hackerboatStateClass {
+	public:
+		orientationClass(double r, double p, double y):
+							pitch(p), roll(r), yaw(y);
+		bool normalize (void);
+		double roll 	= NAN;
+		double pitch 	= NAN;
+		double heading 	= NAN;
+	private:
+		static const string _format = "{s:f,s:f,s:f}";
+		static const double	maxVal = 180.0;
+		static const double	minVal = -180.0;
+};
+		
+/**
  * @class gpsFixClass 
  * 
  * @brief A GPS fix of some type
@@ -111,6 +132,15 @@ class gpsFixClass : public hackerboatStateClassStorable {
 	
 	private:
 		static const string _format = "{s:o,s:f,s:f,s:f,s:f,s:s,s:s,s:s,s:s,s:s}";
+		static const double minHeading 		= 0.0;
+		static const double maxHeading 		= 360.0;
+		static const double minLatitude 	= -90.0;
+		static const double maxLatitutde 	= 90.0;
+		static const double minLongitude 	= -180.0;
+		static const double maxLongitude 	= 180.0;
+		static const double minHeading 		= 0.0;
+		static const double maxHeading 		= 360.0;
+		static const double minSpeed 		= 0.0;
 };
 
 /**
@@ -131,7 +161,6 @@ class waypointClass : public hackerboatStateClassStorable {
 		waypointClass (locationClass loc);						/**< Create a waypoint at loc */
 		waypointClass (locationClass loc, actionEnum action); 	/**< Create a waypoint at loc with action */
 		
-		int16_t			getNextIndex(void);						/**< Return the index of the next waypoint */
 		bool			setAction(actionEnum action);			/**< Set the action to take when this waypoint is reached */
 		actionEnum		getAction(void);						/**< Return the action that this waypoint is set to */
 		
@@ -141,6 +170,8 @@ class waypointClass : public hackerboatStateClassStorable {
 		static const string _format = "{s:o,s:i,s:i}";
 		int16_t			index = -1;				/**< Place of this waypoint in the waypoint list */ 
 		actionEnum		act = CONTINUE;			/**< Action to perform when reaching a location */	
+		static const int8_t minActionEnum = 0;
+		static const int8_t maxActionEnum = 3;
 };
 
 /**
@@ -175,6 +206,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		int faultCount (void);					/**< Returns the current number of faults */
 		bool setState (boneStateEnum s);		/**< Set state to the given value */
 		bool setCommand (boneStateEnum c);		/**< Set command to the given value */
+		bool setArduinoState (arduinoStateClass::arduinoStateEnum s); /**< Set Arduino state to the given value */
 		
 		timespec 					uTime;				/**< Time the record was made */
 		timespec					lastContact;		/**< Time of the last contact from the shore station */
@@ -193,11 +225,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 		bool						autonomous;			/**< When set true, the boat will operate autonomously */	
 		locationClass				launchPoint;		/**< Location from which the boat departed */
 		
-	private:
-		void initHashes (void);								/**< Initialize state name hashes */
-		static const char *_format = "{s:o,s:o,s:i,s:s,s:i,s:s,s:i,s:s,s:s,s:o,s:i,s:f,s:f,s:f,s:b,s:o}";
-		static const uint8_t boneStateCount = 11;
-		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
 		static const string boneStates[] = {
 			"Start", 
 			"SelfTest", 
@@ -211,6 +238,14 @@ class boneStateClass : public hackerboatStateClassStorable {
 			"ArmedTest",
 			"None"
 		};		
+		static const uint8_t boneStateCount = 11;
+		
+	private:
+		void initHashes (void);								/**< Initialize state name hashes */
+		static const char *_format = "{s:o,s:o,s:i,s:s,s:i,s:s,s:i,s:s,s:s,s:o,s:i,s:f,s:f,s:f,s:b,s:o}";
+		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
+		
+
 };
 
 
@@ -261,13 +296,13 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		arduinoStateEnum	command;				/**< Last state command received by the Arduino */
 		int8_t		 		throttle;   			/**< The current throttle position                    */
 		boneStateClass::boneStateEnum 	bone;		/**< The current state of the BeagleBone                */
-		sensors_vec_t 		orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
+		orientationClass	orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
 		float 				headingTarget;			/**< The desired magnetic heading                     */  
 		float 				internalVoltage;		/**< The battery voltage measured on the control PCB          */
 		float 				batteryVoltage;			/**< The battery voltage measured at the battery            */
 		float				motorVoltage;
-		uint8_t				enbButton;				/**< State of the enable button. off = 0; on = 0xff           */
-		uint8_t				stopButton;				/**< State of the emergency stop button. off = 0; on = 0xff       */
+		bool				enbButton;				/**< State of the enable button. off = 0; on = 0xff           */
+		bool				stopButton;				/**< State of the emergency stop button. off = 0; on = 0xff       */
 		long 				timeSinceLastPacket;	/**< Number of milliseconds since the last command packet received    */
 		long 				timeOfLastPacket;		/**< Time the last packet arrived */
 		long 				timeOfLastBoneHB;	
@@ -294,14 +329,14 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		float 				gyroX;
 		float 				gyroY;
 		float 				gyroZ;
-		uint8_t 			horn;
-		uint8_t				motorDirRly;
-		uint8_t				motorWhtRly;
-		uint8_t				motorYlwRly;
-		uint8_t				motorRedRly;
-		uint8_t				motorRedWhtRly;
-		uint8_t				motorRedYlwRly;
-		uint8_t				servoPower;
+		bool	 			horn;
+		bool				motorDirRly;
+		bool				motorWhtRly;
+		bool				motorYlwRly;
+		bool				motorRedRly;
+		bool				motorRedWhtRly;
+		bool				motorRedYlwRly;
+		bool				servoPower;
 		long 				startStopTime;
 		long				startStateTime;
 		arduinoStateEnum	originState;
@@ -319,12 +354,13 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 			"ActiveRudder", 
 			"None"
 		};
+		static const uint8_t 	arduinoStateCount = 11;
 		
 	private:
-		json_t 					*packOrientation (sensors_vec_t t);
-		bool 					parseOrientation (json_t *input, sensors_vec_t *t);
+		bool 					setState (arduinoStateEnum s);
+		bool 					setBoneState (boneStateClass::boneStateEnum s);
 		string					write(string func, string query);		/**< Write to a function on the Arduino */
-		static const uint8_t 	arduinoStateCount = 11;
+		
 };
 
 #endif /* STATESTRUCTTYPES_H */
