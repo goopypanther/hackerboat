@@ -13,6 +13,7 @@
 
 extern "C" {
 #include <sqlite3.h>
+#include <assert.h>
 }
 
 #include <memory>
@@ -79,6 +80,10 @@ public:
 		return sqliteParameterSlice(sth, offset + sliceOffset, sliceCount);
 	}
 
+	void assertWidth(int width) {
+		assert (count == width);
+	}
+
 	void bind(int column, double value) {
 		sqlite3_bind_double(sth, column + offset, value);
 	}
@@ -103,19 +108,32 @@ public:
 class sqliteRowReference {
 protected:
 	const int offset;
+#ifndef NDEBUG
+	const int count;
+#endif
 	sqlite3_stmt * const sth;
 
 	sqliteRowReference(sqlite3_stmt *sth, int offset, int count)
 		: sth(sth), offset(offset)
+#ifndef NDEBUG
+		, count(count)
+#endif
 	{};
 
 public:
 	sqliteRowReference(shared_stmt sth, int offset, int count)
 		: sth(sth.get()), offset(offset)
+#ifndef NDEBUG
+		, count(count)
+#endif
 	{};
 	
 	sqliteRowReference slice(int sliceOffset, int sliceCount) {
 		return sqliteRowReference(sth, offset + sliceOffset, sliceCount);
+	}
+
+	void assertWidth(int width) {
+		assert (count == width);
 	}
 
 	struct json_t *json_field(int column) const;
@@ -124,6 +142,9 @@ public:
 	}
 	double double_field(int column) const {
 		return sqlite3_column_double(sth, column + offset);
+	}
+	bool isnull(int column) const {
+		return sqlite3_column_type(sth, column + offset) == SQLITE_NULL;
 	}
 };
 
