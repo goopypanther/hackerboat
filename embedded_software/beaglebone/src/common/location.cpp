@@ -28,17 +28,15 @@ bool inline locationClass::isValid(void) const {
 			(isnormal(_lat)) && (isnormal(_lon)));
 }
 
-const char * const locationClass::_format = "{s:f,s:f}";
-
 bool locationClass::parse(json_t* input) {
-	if (json_unpack(input, this->_format, "latitude", &_lat, "longitude", &_lon)) {
+	if (json_unpack(input, "{s:f,s:f}", "latitude", &_lat, "longitude", &_lon)) {
 		return false;
 	}
 	return this->isValid();
 }
 
 json_t* locationClass::pack(void) const {
-	return json_pack(this->_format, "latitude", _lat, "longitude", _lon);
+	return json_pack("{s:f,s:f}", "latitude", _lat, "longitude", _lon);
 }
 
 bool locationClass::fillRow(sqliteParameterSlice row) const {

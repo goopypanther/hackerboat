@@ -14,24 +14,10 @@
 #include <BlackGPIO.h>
 #include <unistd.h>
 
+#include <string>
+
+using namespace string;
 using namespace BlackLib;
-
-RESTdispatchClass::RESTdispatchClass(const char *name) {
-	// set the name and calculate the hash...
-	strncpy(_name, name, MAX_TOKEN_LEN);
-	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
-}
-
-RESTdispatchClass::RESTdispatchClass(const char *name, 
-										RESTdispatchClass** table, 
-										size_t tableSize) {
-	// set the name and calculate the hash...
-	strncpy(_name, name, MAX_TOKEN_LEN);
-	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
-	// set the dispatch table
-	_tableSize = tableSize;
-	_dispatchTable = table;
-}
 
 json_t* RESTdispatchClass::dispatch (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	int num;
@@ -94,16 +80,16 @@ bool RESTdispatchClass::addNumber (RESTdispatchClass *entry) {
 	}
 }
 
-uint32_t RESTdispatchClass::setName (const char *name) {
+uint32_t RESTdispatchClass::setName (const string name) {
 	// set the name, calculate the hash, and return the hash
-	strncpy(_name, name, MAX_TOKEN_LEN);
-	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	_name = name;
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	return _hash;
 }
 
 allDispatchClass::allDispatchClass(hackerboatStateClassStorable* target) {
 	_name = "all";
-	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	_target = target;
 }
 
@@ -138,7 +124,7 @@ json_t* allDispatchClass::root (char** tokens, uint32_t* tokenHashes, size_t* to
 
 numberDispatchClass::numberDispatchClass(hackerboatStateClassStorable* target) {
 	_name = "";
-	MurmurHash3_x86_32(name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	_target = target;
 }
 
@@ -168,7 +154,7 @@ json_t* numberDispatchClass::root (char** tokens, uint32_t* tokenHashes, size_t*
 
 countDispatchClass::countDispatchClass(hackerboatStateClassStorable* target) {
 	name = "count";
-	MurmurHash3_x86_32(name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	_target = target;
 }
 
@@ -196,7 +182,7 @@ json_t* countDispatchClass::root (char** tokens, uint32_t* tokenHashes, size_t* 
 
 insertDispatchClass::insertDispatchClass(hackerboatStateClassStorable* target) {
 	name = "insert";
-	MurmurHash3_x86_32(_ name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	_target = target;
 }
 
@@ -248,7 +234,7 @@ json_t* insertDispatchClass::root(char** tokens, uint32_t* tokenHashes, size_t* 
 
 appendDispatchClass::appendDispatchClass(hackerboatStateClassStorable* target) {
 	name = "append";
-	MurmurHash3_x86_32(_ name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	_target = target;
 }
 
@@ -292,10 +278,10 @@ json_t* rootRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t*
 	return this->root(tokens, tokenHashes, tokenLengths, tokenCnt, currentToken, query, method, body, bodyLen);
 }
 
-boneStateRESTClass::boneStateRESTClass(const char *name) {
+boneStateRESTClass::boneStateRESTClass(const string name) {
 	// set the name and calculate the hash...
-	strncpy(_name, name, MAX_TOKEN_LEN);
-	MurmurHash3_x86_32(_name, strnlen(_name, MAX_TOKEN_LEN), HASHSEED, &_hash);
+	_name = name
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 	setHashes();
 }
 
@@ -371,8 +357,7 @@ json_t* boneStateRESTClass::command(char* body, int bodyLen) {
 	// iterate over the available states to see if we have a match
 	for (int8_t i = 0; i < boneStateCount; i++) {
 		if (_target->stateHashes[i] == hash) {
-			command = (boneStateClass::boneStateEnum)i; 
-			strcpy(commandString, boneStates[i]);
+			this->setCommand(i);
 			free(input);
 			free(errJSON);
 			// write to the database (return NULL if failed)

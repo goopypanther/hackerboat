@@ -17,6 +17,9 @@
 #include "location.h"
 #include "navigation.hpp"
 
+#include <string>
+using namespace string;
+
 navVectorClass::navVectorClass (string src, double bearing, double strength) {
 	_source = src;
 	_bearing = bearing;
@@ -59,39 +62,45 @@ navVectorClass navVectorClass::add (navVectorClass a) {
 	return out;
 }
 
-bool navVectorClass::parse(json_t *input) {
+bool navVectorClass::parse(json_t *input,  bool seq) {
 	char buf[LOCAL_BUF_LEN];
-	if (json_unpack(input, this->_format, "source", buf, "bearing", &_bearing, "strength", &_strength)) {
+	if (json_unpack(input, this->_format.c_str(), "source", buf, "bearing", &_bearing, "strength", &_strength)) {
 		return false;
 	}
 	this->_source.assign(buf, LOCAL_BUF_LEN);
 	return this->isValid();	
 }
 
-json_t* navVectorClass::pack(void) {
-	return json_pack(this->_format, , "bearing", _bearing, "strength", _strength));
+json_t* navVectorClass::pack(bool seq) {
+	return json_pack(this->_format.c_str(), "source", this->_source.c_str(), "bearing", _bearing, "strength", _strength));
 }
 
-bool navClass::parse(json_t *input) {
-	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
-	if (json_unpack(input, this->_format, 	"sequenceNum", &_sequenceNum,
-											"current", currentIn,
-											"target", targetIn,
-											"waypointStrength", &waypointStrength,
-											"magCorrection", &magCorrection,
-											"targetVec", targetVecIn,
-											"total", totalIn,
-											"navInfluences", navArrayIn)) {
-		return false;										
+bool navClass::parse(json_t *input,  bool seq) {
+	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn, *seqIn;
+	if (json_unpack(input, this->_formatFile.c_str(), 
+					"current", currentIn,
+					"target", targetIn,
+					"waypointStrength", &waypointStrength,
+					"magCorrection", &magCorrection,
+					"targetVec", targetVecIn,
+					"total", totalIn,
+					"navInfluences", navArrayIn)) {
+		return false;
+	}
+	
+	if (seq) {
+		seqIn = json_object_get(input, "sequenceNum");
+		if (seqIn) _sequenceNum = json_integer_value(seqIn);
 	}
 	current.parse(currentIn));
 	target.parse(targetIn));
 	targetVec.parse(targetVecIn));
 	total.parse(totalIn));
-	influenceCount = json_array_size(navArrayIn);
-	if (influenceCount > NAV_VEC_LIST_LEN) influenceCount = NAV_VEC_LIST_LEN;
+	int32_t influenceCount = json_array_size(navArrayIn);
 	for (uint16_t i; i < influenceCount; i++) {
-		navInfluences[i].parse(json_array_get(navInfluences, i));
+		locationClass tmp;
+		tmp.parse(json_array_get(navArrayIn, i));
+		navInfluences.push_back(tmp);
 	}
 	free(navArrayIn);
 	free(currentIn);
@@ -101,26 +110,27 @@ bool navClass::parse(json_t *input) {
 	return this->isValid();
 }
 
-json_t* navClass::pack (void) {
-	json_t *array;
+json_t* navClass::pack (bool seq) {
+	json_t *array, *output;
 	array = json_array();
-	for (uint16_t i; i < influenceCount; i++) {
-		json_array_append_new(array, navInfluences[i].pack());
+	for (uint16_t i; i < navInfluences.size(); i++) {
+		json_array_append_new(array, navInfluences.at(i).pack());
 	}
-	return json_pack(this->_format,  	"sequenceNum", _sequenceNum,
-										"current", current.pack(),
-										"target", target.pack(),
-										"waypointStrength", waypointStrength,
-										"magCorrection", magCorrection,
-										"targetVec", targetVec.pack(),
-										"total", total.pack(),
-										"navInfluences", array));
+	output = json_pack(this->_format.c_str(),  
+						"current", current.pack(),
+						"target", target.pack(),
+						"waypointStrength", waypointStrength,
+						"magCorrection", magCorrection,
+						"targetVec", targetVec.pack(),
+						"total", total.pack(),
+						"navInfluences", array);
+	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
+	return output;
 }
 
 bool navClass::appendVector (navVectorClass vec) {
-	if (vec.isValid() && (this->influenceCount < NAV_VEC_LIST_LEN)) {
-		this->navVector[this->influenceCount] = vec;
-		this->influenceCount++;
+	if (vec.isValid()) {
+		this->navInfluences.push_back(vec);
 		return true;
 	} else return false;
 }
@@ -131,9 +141,9 @@ bool navClass::calc (double maxStrength) {
 	if (targetVec.isValid()) {
 		total = targetVec;
 	} else return false;
-	for (uint16_t i; i < influenceCount; i++) {
-		if (navInfluences[i].isValid()) {
-			total  = total.add(navInfluences[i]);
+	for (uint16_t i; i < this->navInfluences.size(); i++) {
+		if (navInfluences.at(i).isValid()) {
+			total = total.add(navInfluences.at(i));
 		} 
 		if (!total.isValid()) return false;
 	}
@@ -142,7 +152,7 @@ bool navClass::calc (double maxStrength) {
 }
 
 void navClass::clearVectors (void) {
-	this->influenceCount = 0;
+	this->navInfluences.clear();
 }
 
 bool navClass::isValid (void) const {
@@ -152,12 +162,10 @@ bool navClass::isValid (void) const {
 		isnormal(waypointStrength) && isnormal(magCorrection)) {
 		out = true;
 	} else out = false;
-	if (out && this->influenceCount > 0) {
-		if (this->influenceCount <= NAV_VEC_LIST_LEN) {
-			for (uint16_t i; i < influenceCount; i++) {
-				out &= navInfluences[i].isValid();
-			}
-		} else out = false;
+	if (out && this->navInfluences.size() > 0) {
+		for (uint16_t i; i < navInfluences.size(); i++) {
+			out &= navInfluences.at(i).isValid();
+		}
 	}
 	return out;
 }

@@ -13,6 +13,7 @@
 #define GNSS_UART			UART4
 #define GNSS_BPS			B57600
 #define GNSS_BAUD			Baud57600
+#define GNSS_TIMEOUT		(180)
 #define ARDUINO_REST_TTY	"/dev/ttyO2"		
 #define ARDUINO_LOG_TTY		"/dev/ttyO1"
 #define ARDUINO_REST_UART	UART2		
@@ -25,6 +26,7 @@
 #define SELFTEST_FRAMES
 #define SHORE_TIMEOUT		(60)
 #define HORN_TIME			(2)
+#define RETURN_TIMEOUT		(180)
 
 // File names
 #define	GPS_DB_FILE

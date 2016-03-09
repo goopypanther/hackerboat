@@ -40,75 +40,54 @@ class stateMachineBase {
 		stateMachineBase (boneStateClass *state, arduinoStateClass *ard) {
 			_state = state;
 			_ard = ard;
-		};
-		virtual stateMachineBase *execute (void) = 0;
-		boneStateClass *getState (void) {return &_state};
-		
-	protected:
-		boneStateClass 		*_state;
-		gpsFixClass			_fix(GPS_DB_FILE, strlen(GPS_DB_FILE));
-		arduinoStateClass	*_ard;
-	
-}
-
-class boneStartState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
-
-class boneSelfTestState : public stateMachineBase {
-	public:
-		boneSelfTestState (boneStateClass *state, arduinoStateClass *ard) {
-			_state = state;
-			_ard = ard;
 			clock_gettime(CLOCK_REALTIME, &_start);
 			_lastState = this->_state->state;
 		};
-		stateMachineBase *execute (void);
-	private:
+		virtual stateMachineBase *execute (void) = 0;
+		boneStateClass *getState (void) {return _state};
+		arduinoStateClass *getArduino (void) {return _ard}; 
+		bool GNSSFail (void);
+		bool arduinoFail (void);
+		bool shoreFail (void);
+		bool isDisarmed (void);
+		bool isFaulted (void);
+		
+	protected:
+		boneStateClass 		*_state;
+		arduinoStateClass	*_ard;
 		timespec			_start;
-		uint32_t			_count = 0;
 		boneStateClass::boneStateEnum _lastState;
+	
 }
 
-class boneDisarmedState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
+class boneStartState : public stateMachineBase {}
 
-class boneArmedState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
+class boneSelfTestState : public stateMachineBase {}
 
-class boneManualState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
+class boneDisarmedState : public stateMachineBase {}
+
+class boneArmedState : public stateMachineBase {}
+
+class boneManualState : public stateMachineBase {}
 
 class boneWaypointState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
+	private:
+		navClass 		_nav(NAV_DB_FILE);
+		waypointClass	_wp(WP_DB_FILE);
 }
 
 class boneNoSignalState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
+	private:
+		stateMachineBase *returnLastState (void);
 }
 
 class boneReturnState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
+	private:
+		navClass _nav(NAV_DB_FILE);
 }
 
-class boneArmedTestState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
+class boneArmedTestState : public stateMachineBase {}
 
-class boneFaultState : public stateMachineBase {
-	public:
-		stateMachineBase *execute (void);
-}
+class boneFaultState : public stateMachineBase {}
 
 #endif /* STATEMACHINE_H */

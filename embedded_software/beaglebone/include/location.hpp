@@ -15,6 +15,7 @@
 #include <jansson.h>
 #include "config.h"
 #include <math.h>
+#include <string>
 
 class sqliteParameterSlice;
 class sqliteRowReference;
@@ -52,9 +53,6 @@ class locationClass {
 
 		bool fillRow(sqliteParameterSlice) const;
 		bool readFromRow(sqliteRowReference);
-
-	protected:
-		static const char * const _format;
 };
 
 #endif /* LOCATION_H */

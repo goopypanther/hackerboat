@@ -22,6 +22,9 @@
 #include "stateStructTypes.h"
 #include "config.h"
 
+#include <string>
+using namespace string;
+
 /**
  * @class RESTDispatchClass
  *
@@ -37,18 +40,25 @@
 
 class RESTdispatchClass {
 	public:
-		RESTdispatchClass(void){};
-		RESTdispatchClass(const char *name);			/**< Create a dispatch object with name */
+		RESTdispatchClass(void) = default;
+		RESTdispatchClass(const string name) : _name(name) {
+			MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
+		};		/**< Create a dispatch object with name */
 		/**
 		 * @brief Constructor for a dispatch object with name and given dispatch table
 		 */
-		virtual RESTdispatchClass	(const char *name, 			/**< Name of the object */
+		virtual RESTdispatchClass	(const string name, 		/**< Name of the object */
 									RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
-									size_t tableSize); 			/**< Number of items in the dispatch table */
-		
+									size_t tableSize) : 		/**< Number of items in the dispatch table */
+									_name(name),
+									_dispatchTable(table),
+									_tableSize(tableSize) {
+			MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);									
+		};
+									
 		virtual bool addEntry (RESTdispatchClass *entry);		/**< Add an entry to the dispatch table */
 		virtual bool addNumber (RESTdispatchClass *entry);		/**< Add an entry to call when the next token is a decimal number */
-		virtual uint32_t setName (char *name);					/**< Set the name of the object */
+		virtual uint32_t setName (const string name);			/**< Set the name of the object */
 		bool match (uint32_t hash) {return (hash == _hash);};	/**< Check if this object matches the given hash */
 		/**
 		 * @brief Dispatch on the token designated by currentToken
@@ -93,7 +103,7 @@ class RESTdispatchClass {
 		RESTdispatchClass* _numberDispatch	= NULL;				/**< Object to dispatch to if the next token is a number */
 		RESTdispatchClass** _dispatchTable	= NULL;				/**< Dispatch table */
 		size_t _tableSize 					= 0;				/**< Size of the dispatch table */
-		char _name[MAX_TOKEN_LEN] 			= "";				/**< Name of this object */
+		string _name				 		= "";				/**< Name of this object */
 		uint32_t _hash 						= 0;				/**< MurmurHash3 of the object name */
 };
 
@@ -108,7 +118,7 @@ class allDispatchClass : public RESTdispatchClass {
 	public:
 		allDispatchClass(hackerboatStateClassStorable* target);		/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
 		bool setTarget (hackerboatStateClassStorable* target);		/**< Set the target hackerboatStateClassStorable */
-		uint32_t setName (char *name) {return 0;};
+		uint32_t setName (const string name) {return 0;};
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
@@ -128,7 +138,7 @@ class numberDispatchClass : public RESTdispatchClass {
 	public:
 		numberDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		uint32_t setName (char *name) {return 0;};
+		uint32_t setName (const string name) {return 0;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		
@@ -178,7 +188,7 @@ class rootRESTClass : public RESTdispatchClass {
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
 		boneStateRESTClass(void) {setHashes();};
-		boneStateRESTClass(const char *name);			/**< Create a dispatch object with name */
+		boneStateRESTClass(const string name);			/**< Create a dispatch object with name */
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (boneStateClass* target);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
