@@ -15,14 +15,15 @@
  
 #include <jansson.h>
 #include <stdlib.h>
-#include <sqlite3.h>
 #include <inttypes.h>
 #include <time.h>
+#include <string>
+#include <memory>
+#include <vector>
 #include "config.h"
 #include "location.hpp"
 #include "gps.hpp"
 
-#include <string>
 using namespace string;
 
 // buffer & string sizes
@@ -118,22 +119,38 @@ class waypointClass : public hackerboatStateClassStorable {
 			HOME = 1,
 			CONTINUE = 2,
 		};
-		
-		waypointClass (locationClass loc);						/**< Create a waypoint at loc */
-		waypointClass (locationClass loc, actionEnum action); 	/**< Create a waypoint at loc with action */
+		typedef int16_t indexT;
+		waypointClass (void);
+		waypointClass (locationClass loc, actionEnum action = CONTINUE); 	/**< Create a waypoint at loc with action */
 		
 		bool			setAction(actionEnum action);			/**< Set the action to take when this waypoint is reached */
 		actionEnum		getAction(void);						/**< Return the action that this waypoint is set to */
-		
-		locationClass	location;				/**< Location of the waypoint */
 
+		waypointClass 	*getNextWaypoint(void);					/**< return the next waypoint to travel towards */
+		bool			setNextWaypoint(waypointClass* next);		/**< Set the next waypoint to the given object (works only if it has a sequenceNum > 0; renumber indices as necessary */
+		bool			setNextWaypoint(indexT index);			/**< As above, but set by current index; renumbering proceeds as above */
+		indexT			getNextIndex(void);				/**< Return the index of the next waypoint */
+
+		/* Concrete implementations of stateClassStorable */
+		bool parse (json_t *, bool);
+		json_t *pack (bool) const;
+		bool isValid (void) const;
+
+		locationClass location;
 	private:
-		static const string _format = "{s:o,s:i,s:i}";
-		int16_t			index = -1;				/**< Place of this waypoint in the waypoint list */ 
-		actionEnum		act = CONTINUE;			/**< Action to perform when reaching a location */	
+		indexT			index = -1;					/**< Place of this waypoint in the waypoint list */ 
+		sequence		nextWaypoint = -1;				/**< _sequenceNum of the next waypoint */
+		actionEnum		act;						/**< Action to perform when reaching a location */	
 		static const int8_t minActionEnum = 0;
 		static const int8_t maxActionEnum = 3;
+
+	protected:
+		/* Concrete implementations of stateClassStorable */
+		virtual hackerboatStateStorage& storage();
+		virtual bool fillRow(sqliteParameterSlice) const;
+		virtual bool readFromRow(sqliteRowReference, sequence);
 };
+static const char *string(waypointClass::actionEnum);
 
 /**
  * @class boneStateClass
