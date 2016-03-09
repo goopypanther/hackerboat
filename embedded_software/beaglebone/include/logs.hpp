@@ -32,7 +32,7 @@ class logREST {
 
 class logError {
 	public:
-		static logError* instance(void);
+		static logError* instance(void) { return &_instance; }
 		bool open(std::string logfile);
 		bool write(const std::string source, const std::string message);
 		bool close(void);
@@ -40,7 +40,7 @@ class logError {
 		logError(void){};
 		logError(logError const&){};
 		logError& operator=(logError const&){};
-		static logError* _instance;
+		static logError _instance;
 };
 
 #endif /* RESTDISPATCH_H */
