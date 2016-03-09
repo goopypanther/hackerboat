@@ -2,6 +2,8 @@ These packages need to be installed, along with their pre-requisites:
 
 lighttpd
 libsqlite3-dev
+gcc-4.7
+g++-4.7
 cmake (to build jansson)
 automake  (at least version 1.10)
 
