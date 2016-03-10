@@ -14,7 +14,7 @@ LDFLAGS  +=-L dependencies/lib
 
 LDLIBS += -ljansson -lsqlite3 -lm -lrt
 
-LIBHACKERBOAT_SRCS=location.cpp navigation.cpp logs.cpp sqliteStorage.cpp waypoint.cpp
+LIBHACKERBOAT_SRCS=location.cpp navigation.cpp logs.cpp sqliteStorage.cpp waypoint.cpp gps.cpp
 
 NAV_SRCS=nav/hackerboatNavigator.cpp
 

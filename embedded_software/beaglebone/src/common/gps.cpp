@@ -11,21 +11,19 @@
  
 #include <jansson.h>
 #include <stdlib.h>
-#include <sqlite3.h>
-#include <inttypes.h>
 #include <time.h>
 #include <math.h>
-#include "config.h"
-#include "location.hpp"
-#include "stateStructTypes.hpp"
-#include "gps.hpp"
 
 #include <string>
-using namespace string;
 
-json_t *gpsFixClass::pack (bool seq) {
+#include "gps.hpp"
+#include "config.h"
+
+static const char * const _format = "{s:o,s:f,s:f,s:f,s:f,s:s,s:s,s:s,s:s,s:s}";
+
+json_t *gpsFixClass::pack (bool seq) const {
 	json_t *output;
-	output = json_pack(this->_format.c_str(),
+	output = json_pack(_format,
 						"uTime", packTimeSpec(this->uTime), 
 						"latitude", latitude,
 						"longitude", longitude,
@@ -44,7 +42,7 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 	json_t *inTime, *seqIn;
 	char inGGA[LOCAL_BUF_LEN], inGSA[LOCAL_BUF_LEN], inGSV[LOCAL_BUF_LEN];
 	char inVTG[LOCAL_BUF_LEN], inRMC[LOCAL_BUF_LEN];
-	if (json_unpack(input, this->_format.c_str(),
+	if (json_unpack(input, _format,
 					"uTime", inTime, 
 					"latitude", &latitude,
 					"longitude", &longitude,
@@ -70,9 +68,10 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 	return this->isValid();
 }
 
-bool gpsFixClass::isValid (void) {
+bool gpsFixClass::isValid (void) const {
 	if ((GGA.length() == 0) && (GSA.length() == 0) && (GSV.length()) &&
-		(VTG.length() == 0) && (RMC.length() == 0)) return false
+	    (VTG.length() == 0) && (RMC.length() == 0))
+		return false;
 	if (gpsSpeed < minSpeed) return false;
 	if ((gpsHeading < minHeading) || (gpsHeading > maxHeading)) return false;
 	if ((longitude < minLongitude) || (longitude > maxLongitude)) return false;
