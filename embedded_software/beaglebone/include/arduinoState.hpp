@@ -14,6 +14,7 @@
 #include <time.h>
 #include <string>
 #include "stateStructTypes.hpp" 
+#include "boneState.hpp"
 #include "location.hpp"
 
 /**

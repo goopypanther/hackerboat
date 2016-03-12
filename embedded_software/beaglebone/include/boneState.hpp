@@ -14,6 +14,7 @@
 #include <time.h>
 #include <string>
 #include "stateStructTypes.hpp" 
+#include "arduinoState.hpp"
 #include "location.hpp"
 #include "gps.hpp"
 

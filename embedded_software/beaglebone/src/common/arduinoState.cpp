@@ -1,8 +1,8 @@
 /******************************************************************************
- * Hackerboat Arduino module
+ * Hackerboat Arduino State module
  * arduinoState.cpp
  * This modules is compiled into the other modules to give a common interface
- * to the database(s)
+ * to the Arduino. 
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Mar 2016
  * 
