@@ -44,6 +44,9 @@ class boneStateClass : public hackerboatStateClassStorable {
 			BONE_ARMEDTEST		= 9,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
 			BONE_NONE			= 10		/**< State of the Beaglebone is currently unknown	*/
 		};
+		
+		boneStateClass(void) {initHashes();};
+		boneStateClass(const string file) : _fileName(file) {initHashes();};
 	
 		bool insertFault (const string fault);	/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const string fault);	/**< Remove the named fault to the fault string. Returns false if not present */

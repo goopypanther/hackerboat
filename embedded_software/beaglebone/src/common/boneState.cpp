@@ -21,6 +21,7 @@
 #include "gps.hpp"
 #include "arduinoState.hpp"
 #include "boneState.hpp"
+#include "MurmurHash3.h"
 
 #include <string>
 using namespace std;
@@ -108,7 +109,7 @@ bool boneStateClass::isValid (void) {
 
 bool boneStateClass::insertFault (const string fault) {
 	if (!this->hasFault(fault)) {
-		faultString += ":" + fault;
+		faultString += fault + ":";
 	}
 	return true;
 }
@@ -119,14 +120,10 @@ bool boneStateClass::hasFault (const string fault) {
 }
 
 bool boneStateClass::removeFault (const string fault) {
-	size_t index, colon;
+	size_t index;
 	index = faultString.find(fault);
 	if (index != std::basic_string::npos) {
-		faultString.erase(index, fault.length());
-		colon = faultString.find(':', index);
-		if (colon != std::basic_string::npos) {
-			faultString.erase(colon, 1);
-		}
+		faultString.erase(index, fault.length() + 1);	// captures the trailing colon
 		return true;
 	} else return false;
 }
@@ -139,4 +136,31 @@ int boneStateClass::failCount (void) {
 		index = faultString.find(':', index);
 	}
 	return cnt;
+}
+
+bool boneStateClass::setState (boneStateEnum s) {
+	if ((s > boneStateCount) || (s < 0)) return false;
+	state = s;
+	stateString = boneStates[s];
+	return true;
+}
+
+bool boneStateClass::setCommand (boneStateEnum c) {
+	if ((c > boneStateCount) || (c < 0)) return false;
+	command = c;
+	commandString = boneStates[c];
+	return true;
+}
+
+bool boneStateClass::setArduinoState (arduinoStateClass::arduinoStateEnum s) {
+	if ((s > arduinoStateClass::arduinoStateCount) || (s < 0)) return false;
+	ardState = s;
+	ardStateString = arduinoStateClass::arduinoStates[s];
+	return true;
+}
+		
+void boneStateClass::initHashes (void) {
+	for (int i = 0; i < boneStateCount; i++) {
+		MurmurHash3_x86_32(boneStates[i].c_str(), boneStates[i].length(), HASHSEED, &(stateHashes[i]));
+	}
 }
