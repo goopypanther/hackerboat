@@ -321,6 +321,7 @@ bool arduinoStateClass::populate(void) {
 	} else {
 		free(in);
 		free(err);
+		errLog.write("Arduino Serial", "Failed to parse incoming json from Arduino");
 		return false;
 	}
 	return true;

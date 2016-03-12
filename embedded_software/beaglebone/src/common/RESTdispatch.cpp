@@ -655,6 +655,7 @@ json_t* arduinoRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tok
 
 json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	json_t* out, in;
+	json_err_t* errIn;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	std::string buf;
 	uint32_t cnt = 0;
@@ -685,7 +686,16 @@ json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size
 	port >> buf;
 	port.close();
 	if (buf != BlackLib::UART_READ_FAILED) {
-		return json_loadb(buf, LOCAL_BUF_LEN, 0);
+		in = json_loadb(buf.c_str(), JSON_DECODE_ANY, err);
+		if (in) {
+			free(err);
+			return in;
+		} else {
+			free(in);
+			free(err);
+			errLog.write("REST Arduino Serial", "Failed to parse incoming json from Arduino");
+			return NULL;
+		}
 	} else {
 		errLog.write("REST Arduino Serial", "Failed to read return value");
 		return NULL;
