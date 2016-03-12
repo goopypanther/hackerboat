@@ -42,9 +42,6 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 			BOAT_ACTIVERUDDER	= 9,		/**< The Arduino is accepting direct rudder commands */
 			BOAT_NONE			= 10		/**< Provides a null value for no command yet received */
 		};        
-
-		arduinoStateClass (void);
-		arduinoStateClass (const char *file, size_t len);
 		
 		bool populate (void);	/**< Populate the object from the named interface */
 		bool setCommand (arduinoStateEnum c);

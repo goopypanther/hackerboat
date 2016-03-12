@@ -12,12 +12,16 @@
 #include "RESTdispatch.hpp"
 #include "MurmurHash3.h"
 #include <BlackGPIO.h>
+#include <BlackUART.h>
 #include <unistd.h>
+#include "logs.hpp"
 
 #include <string>
 
 using namespace string;
 using namespace BlackLib;
+
+static logError *errLog = logError::instance();
 
 json_t* RESTdispatchClass::dispatch (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	int num;
@@ -652,10 +656,11 @@ json_t* arduinoRESTClass::root(char** tokens, uint32_t* tokenHashes, size_t* tok
 json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	json_t* out, in;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
+	std::string buf;
 	uint32_t cnt = 0;
-	char buf[LOCAL_BUF_LEN] = {0};
 	
 	// attempt to open the serial port
+	port.setReadBufferSize(LOCAL_BUF_LEN);
 	while (cnt < UART_TIMEOUT) {
 		if (port.open(ReadWrite)) break;
 		usleep(1);
@@ -664,21 +669,25 @@ json_t* arduinoRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size
 	
 	// if we timed out, return a NULL
 	if (cnt >= UART_TIMEOUT) {
+		errLog.write("REST Arduino Serial", "Failed to open serial port for write");
 		port.close();
 		return NULL;
 	}
 	
 	// write out the incoming URI to the Arduino
-	port.write("/", 1);
+
 	for (uint8_t i = (currentToken + 1); i < tokenCnt; i++) {
-		port.write(tokens[i], tokenLength[i]);
-		port.write("/", 1);
+		port << "/" << std::string(tokens[i]);
 	}
+	port << "?" << std::string(query);
 	
 	// read the incoming buffer
-	if (port.read(buf, LOCAL_BUF_LEN)) {
+	port >> buf;
+	port.close();
+	if (buf != BlackLib::UART_READ_FAILED) {
 		return json_loadb(buf, LOCAL_BUF_LEN, 0);
 	} else {
+		errLog.write("REST Arduino Serial", "Failed to read return value");
 		return NULL;
 	}
 }
