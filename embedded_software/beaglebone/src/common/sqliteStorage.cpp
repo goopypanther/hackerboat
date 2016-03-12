@@ -34,6 +34,11 @@ public:
 	}
 };
 
+hackerboatStateStorage::hackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns)
+	: dbh(dbh), tableName(tableName), columns(columns.begin(), columns.end())
+{
+}
+
 int hackerboatStateStorage::columnCount() const
 {
 	return columns.size();
@@ -47,7 +52,7 @@ void hackerboatStateStorage::appendColumns(std::ostringstream& s, bool comma)
 		} else {
 			comma = true;
 		}
-		s << *it;
+		s << it->name;
 	}
 }
 
@@ -143,7 +148,7 @@ shared_stmt& hackerboatStateStorage::updateRecord()
 			} else {
 				comma = true;
 			}
-			sql << *it << "=?";
+			sql << it->name << "=?";
 		}
 		sql << " WHERE oid = ?";
 		
@@ -172,7 +177,7 @@ shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 	return dbh;
 }
 
-void hackerboatStateStorage::createTable(const char *const*types)
+void hackerboatStateStorage::createTable()
 {
 	std::ostringstream sql;
 	sql << "CREATE TABLE IF NOT EXISTS " << tableName << "(";
@@ -181,7 +186,7 @@ void hackerboatStateStorage::createTable(const char *const*types)
 		if (i > 0) {
 			sql << ", ";
 		}
-		sql << columns[i] << " " << types[i];
+		sql << columns[i].name << " " << columns[i].type;
 	}
 	sql << ")";
 

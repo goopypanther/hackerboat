@@ -19,6 +19,7 @@ extern "C" {
 #include <memory>
 #include <sstream>
 #include <vector>
+#include <initializer_list>
 
 typedef std::shared_ptr<sqlite3> shared_dbh;
 typedef std::shared_ptr<sqlite3_stmt> shared_stmt;
@@ -29,22 +30,25 @@ typedef std::shared_ptr<sqlite3_stmt> shared_stmt;
  */
 class hackerboatStateStorage {
 public:
-	hackerboatStateStorage(shared_dbh dbh, const char *tableName, std::vector<const char*> columns)
-		: dbh(dbh), tableName(tableName), columns(columns)
-	{};
+	struct column {
+		const char *name;
+		const char *type;
+	};
+
+	hackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns);
 
 	shared_dbh dbh;
 	const std::string tableName;
-	const std::vector<const char *> columns;
+	const std::vector<column> columns;
 	int columnCount() const;
 
 	shared_stmt& queryLastRecord();
-	shared_stmt& queryRecord(int32_t oid);
+	shared_stmt& queryRecord(int64_t oid);
 	shared_stmt& queryRecordCount();
 	shared_stmt& insertRecord();
 	shared_stmt& updateRecord();
 
-	void createTable(const char * const *);
+	void createTable();
 	void logError(void);
 
 	static shared_dbh databaseConnection(const char *filename);
@@ -128,7 +132,7 @@ public:
 #endif
 	{};
 	
-	sqliteRowReference slice(int sliceOffset, int sliceCount) {
+	sqliteRowReference slice(int sliceOffset, int sliceCount) const {
 		return sqliteRowReference(sth, offset + sliceOffset, sliceCount);
 	}
 
