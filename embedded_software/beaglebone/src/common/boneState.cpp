@@ -26,6 +26,20 @@
 #include <string>
 using namespace std;
  
+const enumerationNameTable<boneStateClass::boneStateEnum> boneStateClass::boneStateNames = {
+	"Start", 
+	"SelfTest", 
+	"Disarmed", 
+	"Fault",
+	"Armed", 
+	"Manual", 
+	"WaypointNavigation",
+	"LossOfSignal", 
+	"ReturnToLaunch", 
+	"ArmedTest",
+	"None"
+};
+
 json_t *boneStateClass::pack (bool seq) {
 	json_t *output;
 	output = json_pack(this->_format.c_str(),

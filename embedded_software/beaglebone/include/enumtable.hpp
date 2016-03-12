@@ -8,6 +8,9 @@
  *
  ******************************************************************************/
 
+#ifndef ENUMTABLE_H
+#define ENUMTABLE_H
+
 #include <string>
 #include <vector>
 #include <utility>
@@ -81,3 +84,4 @@ public:
 	}
 };
 
+#endif /* ENUMTABLE_H */

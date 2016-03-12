@@ -13,7 +13,8 @@
 
 #include <time.h>
 #include <string>
-#include "stateStructTypes.hpp" 
+#include "stateStructTypes.hpp"
+#include "enumtable.hpp"
 #include "arduinoState.hpp"
 #include "location.hpp"
 #include "gps.hpp"
@@ -47,6 +48,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		
 		boneStateClass(void) {initHashes();};
 		boneStateClass(const string file) : _fileName(file) {initHashes();};
+		static const enumerationNameTable<boneStateEnum> boneStateNames;
 	
 		bool insertFault (const string fault);	/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const string fault);	/**< Remove the named fault to the fault string. Returns false if not present */
@@ -73,25 +75,9 @@ class boneStateClass : public hackerboatStateClassStorable {
 		bool						autonomous;			/**< When set true, the boat will operate autonomously */	
 		locationClass				launchPoint;		/**< Location from which the boat departed */
 		
-		static const string boneStates[] = {
-			"Start", 
-			"SelfTest", 
-			"Disarmed", 
-			"Fault",
-			"Armed", 
-			"Manual", 
-			"WaypointNavigation",
-			"LossOfSignal", 
-			"ReturnToLaunch", 
-			"ArmedTest",
-			"None"
-		};		
-		static const uint8_t boneStateCount = 11;
 		
 	private:
-		void initHashes (void);								/**< Initialize state name hashes */
 		static const char *_format = "{s:o,s:o,s:i,s:s,s:i,s:s,s:i,s:s,s:s,s:o,s:i,s:f,s:f,s:f,s:b,s:o}";
-		static uint32_t stateHashes[boneStateCount];		/**< All the state names, hashed for easy lookup */
 		
 
 };

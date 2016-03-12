@@ -13,7 +13,8 @@
 
 #include <time.h>
 #include <string>
-#include "stateStructTypes.hpp" 
+#include "stateStructTypes.hpp"
+#include "enumtable.hpp"
 #include "boneState.hpp"
 #include "location.hpp"
 
@@ -42,7 +43,8 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 			BOAT_ARMEDTEST		= 8,		/**< The Arduino is accepting specific pin read/write requests for hardware testing. */
 			BOAT_ACTIVERUDDER	= 9,		/**< The Arduino is accepting direct rudder commands */
 			BOAT_NONE			= 10		/**< Provides a null value for no command yet received */
-		};        
+		};
+		static const enumerationNameTable<arduinoStateEnum> stateNames;
 		
 		bool populate (void);	/**< Populate the object from the named interface */
 		bool setCommand (arduinoStateEnum c);
@@ -105,21 +107,6 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		long 				startStopTime;
 		long				startStateTime;
 		arduinoStateEnum	originState;
-		
-		static const string const arduinoStates[] = {
-			"PowerUp", 
-			"Armed", 
-			"SelfTest", 
-			"Disarmed", 
-			"Active", 
-			"LowBattery", 
-			"Fault", 
-			"SelfRecovery", 
-			"ArmedTest", 
-			"ActiveRudder", 
-			"None"
-		};
-		static const uint8_t 	arduinoStateCount = 11;
 		
 	private:
 		bool 					setState (arduinoStateEnum s);

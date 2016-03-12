@@ -29,6 +29,20 @@ using namespace std;
 
 static logError *errLog = logError::instance();
 
+const enumerationNameTable<arduinoStateClass::arduinoStateEnum> arduinoStateClass::stateNames = {
+	"PowerUp", 
+	"Armed", 
+	"SelfTest", 
+	"Disarmed", 
+	"Active", 
+	"LowBattery", 
+	"Fault", 
+	"SelfRecovery", 
+	"ArmedTest", 
+	"ActiveRudder", 
+	"None"
+};
+
 json_t *arduinoStateClass::pack (bool seq) {
 	json_t *output = json_object();
 	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
