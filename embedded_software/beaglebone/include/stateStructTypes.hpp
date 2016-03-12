@@ -22,7 +22,6 @@
 #include <vector>
 #include "config.h"
 #include "location.hpp"
-#include "gps.hpp"
 
 using namespace string;
 
@@ -33,7 +32,20 @@ using namespace string;
 #define NAV_SOURCE_NAME_LEN		30
 #define NAV_VEC_LIST_LEN		30
 
-// value limits 
+// utility functions, making use of type-based overriding.
+// json(foo) returns a new reference to a json representation of foo.
+// parse(j, x) fills in x with the value represented by json value j, returning true if successful.
+json_t *json(std::string const);
+bool parse(json_t *, std::string *);
+
+inline json_t *json(bool v) {
+	return json_boolean(v);
+}
+
+template<typename T> static inline bool fromString(json_t *j, T *v) {
+	/* json_string_value() detects NULL and non-strings and returns NULL */
+	return fromString(json_string_value(j), v);
+}
 
 /**
  * @class hackerboatStateClass 
@@ -80,8 +92,10 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		
 	protected:
 		int32_t 	_sequenceNum = -1;	/**< sequence number */
-		string 		_fileName;			/**< database filename (with path) */
-		sqlite3 	*_db;				/**< database handle */
+
+		virtual hackerboatStateStorage& storage() = 0;
+		virtual bool fillRow(sqliteParameterSlice) const = 0;
+		virtual bool readFromRow(sqliteRowReference, sequence) = 0;
 };
 
 /**
@@ -114,17 +128,18 @@ class orientationClass : public hackerboatStateClass {
  
 class waypointClass : public hackerboatStateClassStorable {
 	public:	
-		enum actionEnum {
+		enum class action {
 			STOP = 0,						
 			HOME = 1,
 			CONTINUE = 2,
 		};
+
 		typedef int16_t indexT;
 		waypointClass (void);
-		waypointClass (locationClass loc, actionEnum action = CONTINUE); 	/**< Create a waypoint at loc with action */
+		waypointClass (locationClass loc, action action = action::CONTINUE); 	/**< Create a waypoint at loc with action */
 		
-		bool			setAction(actionEnum action);			/**< Set the action to take when this waypoint is reached */
-		actionEnum		getAction(void);						/**< Return the action that this waypoint is set to */
+		bool			setAction(action action);				/**< Set the action to take when this waypoint is reached */
+		action			getAction(void);					/**< Return the action that this waypoint is set to */
 
 		waypointClass 	*getNextWaypoint(void);					/**< return the next waypoint to travel towards */
 		bool			setNextWaypoint(waypointClass* next);		/**< Set the next waypoint to the given object (works only if it has a sequenceNum > 0; renumber indices as necessary */
@@ -140,7 +155,7 @@ class waypointClass : public hackerboatStateClassStorable {
 	private:
 		indexT			index = -1;					/**< Place of this waypoint in the waypoint list */ 
 		sequence		nextWaypoint = -1;				/**< _sequenceNum of the next waypoint */
-		actionEnum		act;						/**< Action to perform when reaching a location */	
+		action			act;						/**< Action to perform when reaching a location */	
 		static const int8_t minActionEnum = 0;
 		static const int8_t maxActionEnum = 3;
 
@@ -150,7 +165,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		virtual bool fillRow(sqliteParameterSlice) const;
 		virtual bool readFromRow(sqliteRowReference, sequence);
 };
-static const char *string(waypointClass::actionEnum);
-
+const char *string(waypointClass::action);
+bool fromString(const char *, waypointClass::action *);
 
 #endif /* STATESTRUCTTYPES_H */

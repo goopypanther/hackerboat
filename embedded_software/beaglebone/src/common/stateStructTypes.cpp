@@ -33,6 +33,11 @@ int hackerboatStateClass::parseTimeSpec (json_t *input, timespec *t) {
 	return json_unpack(input, "{s:i,s:i}", "tv_sec", &(t->tv_sec), "tv_nsec", &(t->tv_nsec));
 }
 
+json_t *json(std::string const v)
+{
+	return json_stringn(v.data(), v.length());
+}
+
 json_t *orientationClass::pack (bool seq) {
 	json_t *output = json_pack(this->_format.c_str(),
 								"roll", roll,
@@ -63,35 +68,3 @@ bool orientationClass::normalize (void) {
 	return result;
 }
 
-json_t *waypointClass::pack (bool seq) {
-	json_t *output;
-	output = json_pack(this->_format.c_str(),
-						"location", location.pack(), 
-						"index", index,
-						"act", act);
-	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
-	return output;
-}
-
-bool waypointClass::parse (json_t *input, bool seq = true) {
-	json_t *inLoc, *seqIn;
-	if (json_unpack(input, this->_format.c_str(),
-					"location", inLoc, 
-					"index", &index,
-					"act", &act)) {
-		return false;
-	}
-	location.parse(inLoc);
-	if (seq) {
-		seqIn = json_object_get(input, "sequenceNum");
-		if (seqIn) _sequenceNum = json_integer_value(seqIn);
-	}
-	free(seqIn);
-	free(inLoc);
-	return this->isValid();	
-}
-
-bool waypointClass::isValid (void) {
-	if ((act < minActionEnum) || (act > maxActionEnum)) return false;
-	return location.isValid();
-}

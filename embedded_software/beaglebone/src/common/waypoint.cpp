@@ -8,30 +8,52 @@
  *
  ******************************************************************************/
 
+#include "stateStructTypes.hpp"
+
+extern "C" {
 #include <jansson.h>
 #include <stdlib.h>
-#include <math.h>
+#include <string.h>
+}
 #include <string>
-#include "config.h"
-#include "stateStructTypes.hpp"
 #include "location.hpp"
-#include "navigation.hpp"
 #include "sqliteStorage.hpp"
 
 waypointClass::waypointClass()
-	: act(CONTINUE)
+	: act(action::CONTINUE)
 {
 }
 
-waypointClass::waypointClass (locationClass loc, actionEnum action)
+waypointClass::waypointClass (locationClass loc, action action)
 	: location(loc), act(action)
 {
 }
 
 bool waypointClass::parse(json_t *input, bool seq)
 {
-#warning Pierce - implement me
-	return false;
+	json_t *val;
+
+	if (!location.parse(input))
+		return false;
+
+	val = json_object_get(input, "index");
+	index = val? json_integer_value(val) : -1;
+
+	val = json_object_get(input, "nextWaypoint");
+	nextWaypoint = val? json_integer_value(val) : -1;
+
+	val = json_object_get(input, "action");
+	if (!fromString(val, &act))
+		return false;
+
+	if (seq) {
+		json_t *seqIn = json_object_get(input, "sequenceNum");
+		if (!seqIn)
+			return false;
+		_sequenceNum = json_integer_value(seqIn);
+	}
+
+	return this->isValid();
 }
 
 json_t *waypointClass::pack(bool seq) const
@@ -48,6 +70,10 @@ json_t *waypointClass::pack(bool seq) const
 				    "action",
 				    json_string(string(act)));
 
+	if (seq && (_sequenceNum >= 0)) {
+		json_object_set_new_nocheck(repr, "sequenceNum", json_integer(_sequenceNum));
+	}
+
 	return repr;
 }
 
@@ -59,22 +85,42 @@ bool waypointClass::isValid(void) const
 	if (index < 0 || nextWaypoint < 0)
 		return false;
 
-#warning Pierce - implement me
+	if (int(act) < 0 || int(act) > maxActionEnum)
+		return false;
 
 	return true;
 }
 
-const char *string(enum waypointClass::actionEnum act)
+const char *string(enum waypointClass::action act)
 {
 	switch(act) {
-	case waypointClass::CONTINUE:
+	case waypointClass::action::CONTINUE:
 		return "CONTINUE";
-	case waypointClass::STOP:
+	case waypointClass::action::STOP:
 		return "STOP";
-	case waypointClass::HOME:
+	case waypointClass::action::HOME:
 		return "HOME";
 	}
 	return NULL;
+}
+
+bool fromString(const char *name, waypointClass::action *act)
+{
+	if (!name)
+		return false;
+	/* World's simplest perfect hash function */
+	waypointClass::action result;
+	switch(name[0] % 3) {
+	case 0: result = waypointClass::action::CONTINUE; break;
+	case 1: result = waypointClass::action::HOME; break;
+	case 2: result = waypointClass::action::STOP; break;
+	}
+	if (!::strcmp(name, string(result))) {
+		*act = result;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool waypointClass::fillRow(sqliteParameterSlice row) const
@@ -124,32 +170,22 @@ bool waypointClass::readFromRow(sqliteRowReference row, sequence id)
 		nextWaypoint = row.int64_field(3);
 	}
 
-	act = static_cast<actionEnum>(row.int64_field(4));
+	act = static_cast<action>(row.int64_field(4));
 
 	return true;
 }
-
-static const char *sqlColumns[] = {
-	"lat",
-	"lon",
-	"index",
-	"next",
-	"action"
-};
-
-static const char *columnTypes[] = {
-	"REAL", "REAL",
-	"INTEGER", "INTEGER",
-	"INTEGER"
-};
 
 hackerboatStateStorage &waypointClass::storage() {
 	static hackerboatStateStorage *waypointStorage;
 
 	if (!waypointStorage) {
 		waypointStorage = new hackerboatStateStorage(0, "WAYPOINT", 
-							     std::vector<const char *>(sqlColumns, sqlColumns+4));
-		waypointStorage->createTable(columnTypes);
+							     { { "latitude",   "REAL" },
+							       { "longitude",  "REAL" },
+							       { "index",      "INTEGER" },
+							       { "next",       "INTEGER" },
+							       { "action",     "INTEGER" } });
+		waypointStorage->createTable();
 	}
 
 	return *waypointStorage;
