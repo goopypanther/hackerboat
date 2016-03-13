@@ -43,7 +43,7 @@ public:
 	int columnCount() const;
 
 	shared_stmt& queryLastRecord();
-	shared_stmt& queryRecord(int64_t oid);
+	shared_stmt& queryRecord();
 	shared_stmt& queryRecordCount();
 	shared_stmt& insertRecord();
 	shared_stmt& updateRecord();
@@ -89,19 +89,29 @@ public:
 	}
 
 	void bind(int column, double value) {
+		assert(column >= 0);
+		assert(column < count);
 		sqlite3_bind_double(sth, column + offset, value);
 	}
 	void bind(int column, int value) {
+		assert(column >= 0);
+		assert(column < count);
 		sqlite3_bind_int(sth, column + offset, value);
 	}
 	void bind(int column, int64_t value) {
+		assert(column >= 0);
+		assert(column < count);
 		sqlite3_bind_int64(sth, column + offset, value);
 	}
-	void bind(int column, std::string& value) {
+	void bind(int column, const std::string& value) {
+		assert(column >= 0);
+		assert(column < count);
 		sqlite3_bind_text(sth, column + offset, value.data(), value.length(), SQLITE_TRANSIENT);
 	}
 	void bind_json_new(int column, struct json_t *value);
 	void bind_null(int column) {
+		assert(column >= 0);
+		assert(column < count);
 		sqlite3_bind_null(sth, column + offset);
 	}
 };
@@ -142,14 +152,21 @@ public:
 
 	struct json_t *json_field(int column) const;
 	int64_t int64_field(int column) const {
+		assert(column >= 0);
+		assert(column < count);
 		return sqlite3_column_int64(sth, column + offset);
 	}
 	double double_field(int column) const {
+		assert(column >= 0);
+		assert(column < count);
 		return sqlite3_column_double(sth, column + offset);
 	}
 	bool isnull(int column) const {
+		assert(column >= 0);
+		assert(column < count);
 		return sqlite3_column_type(sth, column + offset) == SQLITE_NULL;
 	}
+	std::string string_field(int column) const;
 };
 
 #endif

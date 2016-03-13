@@ -66,8 +66,6 @@ class navClass : public hackerboatStateClassStorable {
 		bool calc (double maxStrength);			/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
 		bool isValid(void) const;
-		bool writeRecord (void);				/**< Write the current record to the target database file */
-		bool getRecord(int32_t select);			/**< Populate the object from the open database file */
 		
 		locationClass	current;		/**< current location */	
 		waypointClass	target;			/**< target waypoint */
@@ -76,6 +74,12 @@ class navClass : public hackerboatStateClassStorable {
 		navVector		targetVec;		/**< Vector to the target */
 		navVector		total;			/**< Sum of target vector and all influences */
 		
+	protected:
+		/* Concrete implementations of stateClassStorable */
+		virtual hackerboatStateStorage& storage();
+		virtual bool fillRow(sqliteParameterSlice) const;
+		virtual bool readFromRow(sqliteRowReference, sequence);
+
 	private:
 		static const string _format = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
 		vector<navVector>	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */

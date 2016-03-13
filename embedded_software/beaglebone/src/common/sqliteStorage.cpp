@@ -94,9 +94,27 @@ shared_stmt& hackerboatStateStorage::queryLastRecord()
 		sql << " FROM " << tableName << " ORDER BY oid DESC LIMIT 1";
 		
 		prepare(sth_last, sql.str());
+	} else {
+		sqlite3_reset(sth_last.get());
 	}
 
 	return sth_last;
+}
+
+shared_stmt& hackerboatStateStorage::queryRecord()
+{
+	if (!sth_byOid) {
+		std::ostringstream sql;
+		sql << "SELECT ";
+		appendColumns(sql, false);
+		sql << " FROM " << tableName << " WHERE OID = ?";
+		
+		prepare(sth_byOid, sql.str());
+	} else {
+		sqlite3_reset(sth_byOid.get());
+	}
+
+	return sth_byOid;
 }
 
 shared_stmt& hackerboatStateStorage::queryRecordCount()
@@ -105,6 +123,8 @@ shared_stmt& hackerboatStateStorage::queryRecordCount()
 		std::ostringstream sql;
 		sql << "SELECT COUNT(*) FROM " << tableName;
 		prepare(sth_count, sql.str());
+	} else {
+		sqlite3_reset(sth_count.get());
 	}
 	
 	return sth_count;
@@ -220,9 +240,10 @@ bool hackerboatStateClassStorable::writeRecord(void)
 	hackerboatStateStorage& db = storage();
 	shared_stmt sth = db.updateRecord();
 	int columnCount = db.columnCount();
-	if (!fillRow(sqliteParameterSlice(sth, 0, columnCount)))
+	assert(sqlite3_bind_parameter_count(sth.get()) == columnCount+1);
+	if (!fillRow(sqliteParameterSlice(sth, 1, columnCount)))
 		return false;
-	sqlite3_bind_int64(sth.get(), columnCount, _sequenceNum);
+	sqlite3_bind_int64(sth.get(), columnCount+1, _sequenceNum);
 	int rc = step(sth);
 	if (rc == SQLITE_DONE) {
 		return true;
@@ -236,7 +257,8 @@ bool hackerboatStateClassStorable::appendRecord(void)
 {
 	hackerboatStateStorage& db = storage();
 	shared_stmt sth = db.insertRecord();
-	sqliteParameterSlice parameters(sth, 0, db.columnCount());
+	assert(sqlite3_bind_parameter_count(sth.get()) == db.columnCount());
+	sqliteParameterSlice parameters(sth, 1, db.columnCount());
 	if (!fillRow(parameters))
 		return false;
 	int rc = step(sth);
@@ -266,11 +288,31 @@ bool hackerboatStateClassStorable::getLastRecord(void)
 	}
 }
 
+bool hackerboatStateClassStorable::getRecord(sequence oid)
+{
+	hackerboatStateStorage& db = storage();
+	shared_stmt sth = db.queryRecord();
+	assert(sqlite3_column_count(sth.get()) == db.columnCount());
+	sqlite3_bind_int64(sth.get(), 1, oid);
+	int rc = step(sth);
+	if (rc == SQLITE_ROW) {
+		return readFromRow(sqliteRowReference(sth, 0, db.columnCount()), oid);
+	} else if (rc == SQLITE_DONE) {
+		/* No rows returned: the table is empty. */
+		return false;
+	} else {
+		db.logError();
+		return false;
+	}
+}
+
 //******************************************************************************
 // C++-y helper classes for parameter and row slices
 
 void sqliteParameterSlice::bind_json_new(int column, json_t *j)
 {
+	assert(column >= 0);
+	assert(column < count);
 	if (json_is_null(j)) {
 		sqlite3_bind_null(sth, column + offset);
 	} else {
@@ -282,9 +324,51 @@ void sqliteParameterSlice::bind_json_new(int column, json_t *j)
 
 json_t *sqliteRowReference::json_field(int column) const
 {
+	assert(column >= 0);
+	assert(column < count);
+	int coltype = sqlite3_column_type(sth, column + offset);
+	if (coltype == SQLITE_NULL) {
+		return json_null();
+	}
 	int length = sqlite3_column_bytes(sth, column + offset);
 	const unsigned char *contents = sqlite3_column_text(sth, column + offset);
 	return json_loadb(reinterpret_cast<const char *>(contents), length, 0, NULL);
 }
 
+std::string sqliteRowReference::string_field(int column) const
+{
+	assert(column >= 0);
+	assert(column < count);
+	if (sqlite3_column_type(sth, column + offset) == SQLITE_NULL) {
+		// ...;
+	}
+	int length = sqlite3_column_bytes(sth, column + offset);
+	const unsigned char *contents = sqlite3_column_text(sth, column + offset);
+	return std::string(reinterpret_cast<const char *>(contents), length);
+}
 
+#if 0
+
+bool hackerboatStateClassStorable::openFile()
+{
+	if (!_db) {
+		sqlite3 *dbh = NULL;
+		int err = sqlite3_open_v2(_dbPath.c_str(), &dbh,
+					  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+					  NULL);
+		if (err != SQLITE_OK) {
+			logError::instance()->write("sqlite3", "cannot open db");
+			if (dbh) {
+				sqlite3_close(dbh);
+				dbh = NULL;
+			}
+			return false;
+		} else {
+			_db.reset(dbh, dbh_deleter());
+		}
+	}
+
+	return true;
+}
+
+#endif
