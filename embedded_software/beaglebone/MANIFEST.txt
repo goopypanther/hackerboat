@@ -17,3 +17,4 @@ These are useful for development and debugging:
 sqlite3  (for inspecting database contents)
 libgtest-dev (for the unit tests)
 
+See https://github.com/cdsteinkuehler/beaglebone-universal-io for directions on how to make the IO work.
