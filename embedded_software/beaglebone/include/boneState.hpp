@@ -19,7 +19,6 @@
 #include "location.hpp"
 #include "gps.hpp"
 
-
 /**
  * @class boneStateClass
  *

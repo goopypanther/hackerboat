@@ -2,6 +2,9 @@
 #include <hardwareConfig.h>
 #include <sensorCalibration.h>
 
+aREST     restInput   = aREST();  /**< REST input object **/
+boatVector   boat;         /**< Boat state vector            */
+
 void setup() {
   initIO();
   initREST(&restInput, &boat);
@@ -9,11 +12,18 @@ void setup() {
 }
 
 void loop() {
-  arduinoState thisState = BOAT_NONE;
-  arduinoState lastState = BOAT_NONE;
-  input(&boat);
+  //Serial.print(".");
+  static arduinoState thisState = BOAT_NONE;
+  static arduinoState lastState = BOAT_NONE;
+  input(&restInput, &boat);
+  if (thisState != lastState) {
+    Serial.print(F("State change, origin state: "));
+    Serial.print(lastState); Serial.print(F(" current state: "));
+    Serial.println(thisState);  
+  }
   switch(boat.state) {
     case BOAT_POWERUP:
+      //Serial.println("Got powerup state");
       thisState = boat.state;
       boat.state = executePowerUp(&boat, lastState);
       lastState = thisState;
@@ -24,6 +34,7 @@ void loop() {
       lastState = thisState;
       break;
     case BOAT_SELFTEST:
+      //Serial.println("Got selftest state");
       thisState = boat.state;
       boat.state = executeSelfTest(&boat, lastState);
       lastState = thisState;
@@ -65,7 +76,7 @@ void loop() {
       break;
     case BOAT_NONE:
     default:
-      LogSerial.print(F("Got bad arduino state value: ")); Serial.println(boat.state);
+      LogSerial.print(F("Got bad arduino state value: ")); 
       boat.state = BOAT_SELFTEST;
       lastState = BOAT_NONE;
       thisState = BOAT_NONE;
