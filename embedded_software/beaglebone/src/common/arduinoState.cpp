@@ -29,7 +29,7 @@ using namespace std;
 
 static logError *errLog = logError::instance();
 
-const enumerationNameTable<arduinoStateClass::arduinoStateEnum> arduinoStateClass::stateNames = {
+const enumerationNameTable<arduinoModeEnum> arduinoStateClass::modeNames = {
 	"PowerUp", 
 	"Armed", 
 	"SelfTest", 
@@ -63,9 +63,6 @@ json_t *arduinoStateClass::pack (bool seq) {
 	json_object_set(output, "timeOfLastPacket", json_integer(timeOfLastPacket));
 	json_object_set(output, "timeOfLastBoneHB", json_integer(timeOfLastBoneHB));
 	json_object_set(output, "timeOfLastShoreHB", json_integer(timeOfLastShoreHB));
-	json_object_set(output, "stateString", json_string(stateString.c_str()));
-	json_object_set(output, "boneStateString", json_string(boneStateString.c_str()));
-	json_object_set(output, "commandString", json_string(commandString.c_str()));
 	json_object_set(output, "faultString", json_string(faultString.c_str()));
 	json_object_set(output, "rudder", json_real(rudder));
 	json_object_set(output, "rudderRaw", json_integer(rudderRaw));
@@ -92,7 +89,7 @@ json_t *arduinoStateClass::pack (bool seq) {
 	json_object_set(output, "servoPower", json_boolean(servoPower));
 	json_object_set(output, "startStopTime", json_integer(startStopTime));
 	json_object_set(output, "startStateTime", json_integer(startStateTime));
-	json_object_set(output, "originState", json_integer(originState));
+	json_object_set(output, "originMode", json_integer(originMode));
 	return output;
 }
 
@@ -112,7 +109,7 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 	tmp = json_object_get(input, "state");
 	if (tmp) {
 		state = (arduinoStateEnum)json_integer_value(tmp);
-		setState(state);
+		setMode(state);
 	}
 	free(tmp);
 	tmp = json_object_get(input, "command");
@@ -127,7 +124,7 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 	tmp = json_object_get(input, "bone");
 	if (tmp) {
 		bone = (boneStateClass::boneStateEnum)json_integer_value(tmp);
-		setBoneState(bone);
+		setBoatMode(bone);
 	}
 	free(tmp);
 	tmp = json_object_get(input, "orientation");
@@ -263,8 +260,8 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 	if (tmp) startStateTime = json_integer_value(tmp);
 	free(tmp);
 	
-	tmp = json_object_get(input, "originState");
-	if (tmp) originState = (arduinoStateEnum)json_integer_value(tmp);
+	tmp = json_object_get(input, "originMode");
+	if (tmp) originMode = (arduinoStateEnum)json_integer_value(tmp);
 	free(tmp);
 	
 	return this->isValid();
@@ -273,24 +270,20 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 bool arduinoStateClass::isValid (void) {
 	if (!orientation.isValid()) return false;
 	if ((state > arduinoStateCount) || (state < 0)) return false;
-	if (arduinoStates[state] != stateString) return false;
 	if ((command > arduinoStateCount) || (command < 0)) return false;
-	if (arduinoStates[command] != commandString) return false;
 	if ((bone > boneStateClass::boneStateCount) || (state < 0)) return false;
-	if (boneStateClass::boneStates[bone] != boneStateString) return false;
 	return true;
 }
 
-bool arduinoStateClass::setCommand (arduinoStateEnum c) {
+bool arduinoStateClass::setCommand (arduinoModeEnum c) {
 	if ((c > arduinoStateCount) || (c < 0)) return false;
 	command = c;
-	commandString = arduinoStates[c];
 	return true;
 }
 
-bool arduinoStateClass::writeBoneState(boneStateClass::boneStateEnum s) {
-	if (setBoneState(s)) {
-		std::string ret = write("writeBoneState", std::string.to_string((int)bone));
+bool arduinoStateClass::writeBoatMode(boatModeEnum s) {
+	if (setBoatMode(s)) {
+		std::string ret = write("writeBoatMode", std::string.to_string((int)bone));
 	} else return false;
 	return true;
 }
@@ -341,17 +334,15 @@ bool arduinoStateClass::populate(void) {
 	return true;
 }
 
-bool arduinoStateClass::setState(arduinoStateEnum s) {
+bool arduinoStateClass::setMode(arduinoModeEnum s) {
 	if ((s > arduinoStateCount) || (s < 0)) return false; 
-	state = s;
-	stateString = arduinoStates[s];
+	mode = s;
 	return true;
 }
 
-bool arduinoStateClass::setBoneState(boneStateClass::boneStateEnum s) {
+bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 	if ((s > boneStateClass::boneStateCount) || (s < 0)) return false;
 	bone = s;
-	boneStateString = boneStateClass::boneStates[bone];
 	return true;
 }
 

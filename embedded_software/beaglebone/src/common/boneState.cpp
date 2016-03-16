@@ -19,14 +19,13 @@
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
 #include "gps.hpp"
-#include "arduinoState.hpp"
 #include "boneState.hpp"
 #include "MurmurHash3.h"
 
 #include <string>
 using namespace std;
  
-const enumerationNameTable<boneStateClass::boneStateEnum> boneStateClass::boneStateNames = {
+const enumerationNameTable<boatModeEnum> boneStateClass::modeNames = {
 	"Start", 
 	"SelfTest", 
 	"Disarmed", 
@@ -45,12 +44,9 @@ json_t *boneStateClass::pack (bool seq) {
 	output = json_pack(this->_format.c_str(),
 						"uTime", packTimeSpec(uTime),
 						"lastContact", packTimeSpec(lastContact),
-						"state", state,
-						"stateString", json_string(stateString.c_str()),
+						"mode", mode,
 						"command", command,
-						"commandString", json_string(commandString.c_str()),
-						"ardState", ardState,
-						"ardStateString", json_string(ardStateString.c_str()),
+						"ardMode", ardMode,
 						"faultString", json_string(faultString.c_str()),
 						"gps", gps.pack(),
 						"waypointNext", waypointNext,
@@ -65,17 +61,12 @@ json_t *boneStateClass::pack (bool seq) {
 
 bool boneStateClass::parse (json_t *input, bool seq = true) {
 	json_t *seqIn, *inGNSS, *inUtime, *inLastContact, *inLaunch;
-	char inStateString[LOCAL_BUF_LEN], inCommandString[LOCAL_BUF_LEN];
-	char inArdStateString[LOCAL_BUF_LEN], inFaultString[LOCAL_BUF_LEN];
 	if (json_unpack(input, this->_format.c_str(),
 						"uTime", inUtime,
 						"lastContact", inLastContact,
-						"state", &state,
-						"stateString", inStateString,
+						"mode", &mode,
 						"command", &command,
-						"commandString", inCommandString,
-						"ardState", &ardState,
-						"ardStateString", inArdStateString,
+						"ardMode", &ardMode,
 						"faultString", inFaultString,
 						"gps", inGNSS,
 						"waypointNext", &waypointNext,
@@ -94,9 +85,9 @@ bool boneStateClass::parse (json_t *input, bool seq = true) {
 	parseTimeSpec(inLastContact, &lastContact);
 	gps.parse(inGNSS);
 	launchPoint.parse(inLaunch);
-	setState(state);
+	setMode(mode);
 	setCommand(command);
-	setArduinoState(ardState);
+	setArduinoMode(ardMode);
 	faultString = std::string(inFaultString);
 	free(seqIn);
 	free(inUtime);
@@ -107,12 +98,9 @@ bool boneStateClass::parse (json_t *input, bool seq = true) {
 }
 
 bool boneStateClass::isValid (void) {
-	if ((state > boneStateCount) || (state < 0)) return false;
-	if (boneStates[state] != stateString) return false;
+	if ((mode > boneStateCount) || (mode < 0)) return false;
 	if ((command > boneStateCount) || (command < 0)) return false;
-	if (boneStates[command] != commandString) return false;
-	if ((ardState > arduinoStateClass::arduinoStateCount) || (ardState < 0)) return false;
-	if (arduinoStateClass::arduinoStates[ardState] != ardStateString) return false;
+	if ((ardMode > arduinoStateClass::arduinoStateCount) || (ardMode < 0)) return false;
 	if (!gps.isValid()) return false;
 	if (!launchPoint.isValid()) return false;
 	if (waypointStrength < 0) return false;
@@ -152,24 +140,21 @@ int boneStateClass::failCount (void) {
 	return cnt;
 }
 
-bool boneStateClass::setState (boneStateEnum s) {
+bool boneStateClass::setMode (boneModeEnum s) {
 	if ((s > boneStateCount) || (s < 0)) return false;
 	state = s;
-	stateString = boneStates[s];
 	return true;
 }
 
 bool boneStateClass::setCommand (boneStateEnum c) {
 	if ((c > boneStateCount) || (c < 0)) return false;
 	command = c;
-	commandString = boneStates[c];
 	return true;
 }
 
-bool boneStateClass::setArduinoState (arduinoStateClass::arduinoStateEnum s) {
+bool boneStateClass::setArduinoMode (arduinoStateClass::Mode s) {
 	if ((s > arduinoStateClass::arduinoStateCount) || (s < 0)) return false;
 	ardState = s;
-	ardStateString = arduinoStateClass::arduinoStates[s];
 	return true;
 }
 		

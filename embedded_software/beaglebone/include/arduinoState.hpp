@@ -3,7 +3,7 @@
  * arduinoState.hpp
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Jan 2016
- * 
+ *
  * Version 0.1: First alpha
  *
  ******************************************************************************/
@@ -15,7 +15,6 @@
 #include <string>
 #include "stateStructTypes.hpp"
 #include "enumtable.hpp"
-#include "boneState.hpp"
 #include "location.hpp"
 
 /**
@@ -27,56 +26,38 @@
 
 class arduinoStateClass : public hackerboatStateClassStorable {
 	public:
-	
-		/**
-		 * @brief An enum to store the current state of the Arduino.
-		 */
-		enum arduinoStateEnum {
-			BOAT_POWERUP     	= 0,  		/**< The boat enters this state at the end of initialization */
-			BOAT_ARMED			= 1,  		/**< In this state, the boat is ready to receive go commands over RF */
-			BOAT_SELFTEST   	= 2,  		/**< After powerup, the boat enters this state to determine whether it's fit to run */
-			BOAT_DISARMED   	= 3,  		/**< This is the default safe state. No external command can start the motor */
-			BOAT_ACTIVE     	= 4,  		/**< This is the normal steering state */
-			BOAT_LOWBATTERY   	= 5,  		/**< The battery voltage has fallen below that required to operate the motor */
-			BOAT_FAULT    		= 6,  		/**< The boat is faulted in some fashion */
-			BOAT_SELFRECOVERY 	= 7,   		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
-			BOAT_ARMEDTEST		= 8,		/**< The Arduino is accepting specific pin read/write requests for hardware testing. */
-			BOAT_ACTIVERUDDER	= 9,		/**< The Arduino is accepting direct rudder commands */
-			BOAT_NONE			= 10		/**< Provides a null value for no command yet received */
-		};
-		static const enumerationNameTable<arduinoStateEnum> stateNames;
-		
+
+		typedef arduinoModeEnum Mode;
+		static const enumerationNameTable<arduinoModeEnum> modeNames;
+
 		bool populate (void);	/**< Populate the object from the named interface */
-		bool setCommand (arduinoStateEnum c);
-		
+		bool setCommand (arduinoModeEnum c);
+
 		// Command functions...
-		bool writeBoneState(boneStateClass::boneStateEnum s);
+		bool writeBoatMode(boatModeEnum s);
 		bool writeCommand(void);
 		int16_t writeThrottle(void);
 		double writeHeadingTarget(void);
 		double writeHeadingDelta(double delta);
 		bool heartbeat(void);
-		
-		bool 				popStatus;				/**< State of whether the last call to populate() succeeded or failed */
-		timespec			uTime;					/**< Time the record was made */
-		arduinoStateEnum 	state;					/**< The current state of the boat                    */
-		arduinoStateEnum	command;				/**< Last state command received by the Arduino */
+
+		bool 				popStatus;			/**< State of whether the last call to populate() succeeded or failed */
+		timespec			uTime;				/**< Time the record was made */
+		arduinoModeEnum 		mode;				/**< The current mode of the arduino                    */
+		arduinoModeEnum			command;			/**< Last state command received by the Arduino */
 		int8_t		 		throttle;   			/**< The current throttle position                    */
-		boneStateClass::boneStateEnum 	bone;		/**< The current state of the BeagleBone                */
-		orientationClass	orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
-		float 				headingTarget;			/**< The desired magnetic heading                     */  
+		boatModeEnum 			bone;				/**< The current mode of the BeagleBone                */
+		orientationClass		orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
+		float 				headingTarget;			/**< The desired magnetic heading                     */
 		float 				internalVoltage;		/**< The battery voltage measured on the control PCB          */
 		float 				batteryVoltage;			/**< The battery voltage measured at the battery            */
 		float				motorVoltage;
-		bool				enbButton;				/**< State of the enable button. off = 0; on = 0xff           */
-		bool				stopButton;				/**< State of the emergency stop button. off = 0; on = 0xff       */
-		long 				timeSinceLastPacket;	/**< Number of milliseconds since the last command packet received    */
+		bool				enbButton;			/**< State of the enable button. off = 0; on = 0xff           */
+		bool				stopButton;			/**< State of the emergency stop button. off = 0; on = 0xff       */
+		long 				timeSinceLastPacket;		/**< Number of milliseconds since the last command packet received    */
 		long 				timeOfLastPacket;		/**< Time the last packet arrived */
-		long 				timeOfLastBoneHB;	
+		long 				timeOfLastBoneHB;
 		long 				timeOfLastShoreHB;
-		string				stateString;
-		string 				boneStateString;
-		string				commandString;
 		uint16_t			faultString;			/**< Fault string -- binary string to indicate source of faults */
 		float 				rudder;
 		int16_t				rudderRaw;
@@ -106,13 +87,12 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool				servoPower;
 		long 				startStopTime;
 		long				startStateTime;
-		arduinoStateEnum	originState;
-		
+		arduinoModeEnum			originMode;
+
 	private:
-		bool 					setState (arduinoStateEnum s);
-		bool 					setBoneState (boneStateClass::boneStateEnum s);
+		bool 					setMode (arduinoModeEnum s);
+		bool 					setBoatMode (boatModeEnum s);
 		string					write(string func, string query);		/**< Write to a function on the Arduino */
-		
 };
 
 #endif /* ARDUINOSTATE_H */
