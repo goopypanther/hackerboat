@@ -2,6 +2,7 @@ These packages need to be installed, along with their pre-requisites:
 
 lighttpd
 libsqlite3-dev
+libfcgi-dev
 gcc-4.7
 g++-4.7
 cmake (to build jansson)
@@ -15,6 +16,7 @@ https://github.com/akheron/jansson
 These are useful for development and debugging:
 
 sqlite3  (for inspecting database contents)
+lighttpd-doc
 libgtest-dev (for the unit tests)
 
 See https://github.com/cdsteinkuehler/beaglebone-universal-io for directions on how to make the IO work.

@@ -34,3 +34,8 @@
 *.dxf
 *.FCStd1
 *.tmp
+
+# Temporary files
+*~
+*.orig
+*.rej

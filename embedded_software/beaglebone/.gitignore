@@ -1,5 +1,5 @@
+*.d
 .cproject
 .project
 .settings
-mavlink_udp
 doc/
