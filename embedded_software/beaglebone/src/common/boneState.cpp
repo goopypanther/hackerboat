@@ -20,7 +20,7 @@
 #include "stateStructTypes.hpp"
 #include "gps.hpp"
 #include "boneState.hpp"
-#include "MurmurHash3.h"
+#include "arduinoState.hpp"
 
 #include <string>
 using namespace std;
@@ -124,7 +124,7 @@ bool boneStateClass::hasFault (const string fault) {
 bool boneStateClass::removeFault (const string fault) {
 	size_t index;
 	index = faultString.find(fault);
-	if (index != std::basic_string::npos) {
+	if (index != std::string::npos) {
 		faultString.erase(index, fault.length() + 1);	// captures the trailing colon
 		return true;
 	} else return false;
@@ -133,7 +133,7 @@ bool boneStateClass::removeFault (const string fault) {
 int boneStateClass::failCount (void) {
 	size_t index = faultString.find(':');
 	int cnt = 0;
-	while (index != std::basic_string::npos) {
+	while (index != std::string::npos) {
 		cnt++;
 		index = faultString.find(':', index);
 	}

@@ -23,7 +23,7 @@ using namespace std;
 
 class logREST {
 	public:
-		static logREST* instance(void) { return &_instance; }
+		static logREST* instance(void) { return _instance; }
 		bool open(std::string logfile);
 		bool write(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
 		bool close(void);

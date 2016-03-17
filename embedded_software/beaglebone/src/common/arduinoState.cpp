@@ -16,18 +16,19 @@
 #include <inttypes.h>
 #include <time.h>
 #include <math.h>
+#include <string>
 #include "config.h"
 #include "location.hpp"
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
 #include "arduinoState.hpp"
+#include "boneState.hpp"
 #include "gps.hpp"
-#include <BlackUART.h>
-
-#include <string>
-using namespace std;
+#include <BlackUART/BlackUART.h>
 
 static logError *errLog = logError::instance();
+
+using namespace BlackLib;
 
 const enumerationNameTable<arduinoModeEnum> arduinoStateClass::modeNames = {
 	"PowerUp", 
@@ -328,7 +329,7 @@ bool arduinoStateClass::populate(void) {
 	} else {
 		free(in);
 		free(err);
-		errLog.write("Arduino Serial", "Failed to parse incoming json from Arduino");
+		errLog->write("Arduino Serial", "Failed to parse incoming json from Arduino");
 		return false;
 	}
 	return true;
@@ -361,7 +362,7 @@ string arduinoStateClass::write(string func, string query) {
 	// if we timed out, return an empty string
 	if (cnt >= UART_TIMEOUT) {
 		port.close();
-		errLog.write("Arduino Serial", "Failed to open serial port for write");
+		errLog->write("Arduino Serial", "Failed to open serial port for write");
 		return "";
 	}
 	
@@ -370,7 +371,7 @@ string arduinoStateClass::write(string func, string query) {
 	port >> ret;
 	port.close();
 	if (ret == BlackLib::UART_READ_FAILED) {
-		errLog.write("Arduino Serial", "Failed to read return value");
+		errLog->write("Arduino Serial", "Failed to read return value");
 		return "";
 	}
 	return ret;

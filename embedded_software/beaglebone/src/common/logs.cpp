@@ -25,7 +25,7 @@ std::string timeOutput (void) {
 	thisTime = localtime (&(logTime.tv_sec));
 	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:%S.", thisTime);
 	std::string	ret(timebuf);
-	ret += std::string.to_string(logTime.tv_nsec);
+	ret += std::to_string(logTime.tv_nsec);
 	ret += "]:";
 	return ret;
 }

@@ -22,7 +22,7 @@
 
 /* Reading and writing from JSON and the database. */
 
-bool inline locationClass::isValid(void) const {
+bool locationClass::isValid(void) const {
 	return ((_lat <= 90.0) && (_lat >= -90) && 
 			(_lon <= 180.0) && (_lon >= -180) &&
 			(isnormal(_lat)) && (isnormal(_lon)));

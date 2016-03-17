@@ -12,13 +12,12 @@
 #include <jansson.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string>
+#include <array>
 #include "config.h"
 #include "stateStructTypes.hpp"
-#include "location.h"
+#include "location.hpp"
 #include "navigation.hpp"
-
-#include <string>
-using namespace string;
 
 navVectorClass::navVectorClass (string src, double bearing, double strength) {
 	_source = src;

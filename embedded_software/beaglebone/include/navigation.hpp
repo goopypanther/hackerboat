@@ -22,8 +22,6 @@
 
 #include <string>
 #include <vector>
-using namespace string;
-using namespace vector;
 
 /**
  * @class navVectorClass
@@ -73,12 +71,12 @@ class navClass : public hackerboatStateClassStorable {
 		waypointClass	target;			/**< target waypoint */
 		double			waypointStrength;
 		double			magCorrection = 0;	/**< Correction between sensed magnetic heading and true direction */
-		navVector		targetVec;		/**< Vector to the target */
-		navVector		total;			/**< Sum of target vector and all influences */
-		
+		navVectorClass		targetVec;		/**< Vector to the target */
+		navVectorClass		total;			/**< Sum of target vector and all influences */
+
 	private:
 		static const string _format = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
-		vector<navVector>	navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
+		std::vector<navVectorClass>				navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
 };
 
 /** 

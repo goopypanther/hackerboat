@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <limits>
 #include "stateStructTypes.hpp"
 #include "config.h"
 #include "logs.hpp"
@@ -101,7 +102,7 @@ int main (void) {
 	}
 }
 
-int initNav(navigatorBase *nav) {
+int initNav(navVectorClass *nav) {
 	nav = NULL;
 	return 0;
 }

@@ -23,14 +23,10 @@
 #include "config.h"
 #include "location.hpp"
 
-using namespace string;
 
-// buffer & string sizes
-#define STATE_STRING_LEN		30
-#define GPS_SENTENCE_LEN		120
-#define	FAULT_STRING_LEN		1024
-#define NAV_SOURCE_NAME_LEN		30
-#define NAV_VEC_LIST_LEN		30
+// temporary class definition until we include or define the real one
+class sensors_vec_t {
+};
 
 // utility functions, making use of type-based overriding.
 // json(foo) returns a new reference to a json representation of foo.
@@ -107,8 +103,9 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 
 class orientationClass : public hackerboatStateClass {
 	public:
-		orientationClass(double r, double p, double y):
-							pitch(p), roll(r), yaw(y);
+		orientationClass(double r, double p, double y)
+		  : pitch(p), roll(r), heading(y)
+		{};
 		bool normalize (void);
 		double roll 	= NAN;
 		double pitch 	= NAN;

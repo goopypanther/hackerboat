@@ -30,10 +30,10 @@ int main (void) {
 	char		query[LOCAL_BUF_LEN]			= {0};
 	char		contentLength[LOCAL_BUF_LEN]	= {0}; 
 	char		response[LOCAL_BUF_LEN]			= {0};
-	char*		tokens[MAX_URI_TOKENS], body, tokenState;
+	char		*tokens[MAX_URI_TOKENS], *body, *tokenState;
 	uint32_t	tokenHashes[MAX_URI_TOKENS];
 	size_t		tokenLengths[MAX_URI_TOKENS];
-	json_t*		responseJSON, jsonFinal;
+	json_t		*responseJSON, *jsonFinal;
 	int32_t		uriLen, methodLen, queryLen, bodyLen, contentLenLen;
 	int32_t		result, tokenCnt = 0;
 	rsize_t		tokenRemain;
@@ -63,7 +63,7 @@ int main (void) {
 		FCGI_printf("Content-type: application/json\r\n\r\n");
 		
 		// tokenize the URI & hash the elements
-		for (tokenCnt = 0, tokenCnt < MAX_URI_TOKENS, tokenCnt++) {
+		for (tokenCnt = 0; tokenCnt < MAX_URI_TOKENS; tokenCnt++) {
 			if (tokenCnt) {
 				tokens[tokenCnt] = strtok_s(NULL, &tokenRemain, "/\\", &tokenState);
 			} else {

@@ -19,11 +19,17 @@
 #include <string.h>
 #include <jansson.h>
 #include <time.h>
-#include "stateStructTypes.h"
+#include "stateStructTypes.hpp"
 #include "config.h"
 
 #include <string>
-using namespace string;
+
+class gpsFixClass;
+class navClass;
+class boneStateClass;
+class arduinoStateClass;
+
+using string = std::string;
 
 /**
  * @class RESTDispatchClass
@@ -47,7 +53,7 @@ class RESTdispatchClass {
 		/**
 		 * @brief Constructor for a dispatch object with name and given dispatch table
 		 */
-		virtual RESTdispatchClass	(const string name, 		/**< Name of the object */
+		RESTdispatchClass	(const string name, 		/**< Name of the object */
 									RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
 									size_t tableSize) : 		/**< Number of items in the dispatch table */
 									_name(name),
@@ -170,7 +176,7 @@ class insertDispatchClass : public RESTdispatchClass {
 
 class appendDispatchClass : public RESTdispatchClass {
 	public:
-		insertDispatchClass(hackerboatStateClassStorable* target);
+		appendDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false};
 		bool addNumber (RESTdispatchClass *entry) {return false};
