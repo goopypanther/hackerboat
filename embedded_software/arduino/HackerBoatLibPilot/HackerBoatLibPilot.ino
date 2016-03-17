@@ -13,73 +13,73 @@ void setup() {
 
 void loop() {
   //Serial.print(".");
-  static arduinoState thisState = BOAT_NONE;
-  static arduinoState lastState = BOAT_NONE;
+  static arduinoMode thisMode = ARD_NONE;
+  static arduinoMode lastMode = ARD_NONE;
   input(&restInput, &boat);
-  if (thisState != lastState) {
+  if (thisMode != lastMode) {
     Serial.print(F("State change, origin state: "));
-    Serial.print(lastState); Serial.print(F(" current state: "));
-    Serial.println(thisState);  
+    Serial.print(lastMode); Serial.print(F(" current state: "));
+    Serial.println(lastMode);  
   }
-  switch(boat.state) {
-    case BOAT_POWERUP:
+  switch(boat.mode) {
+    case ARD_POWERUP:
       //Serial.println("Got powerup state");
-      thisState = boat.state;
-      boat.state = executePowerUp(&boat, lastState);
-      lastState = thisState;
+      thisMode = boat.mode;
+      boat.mode = executePowerUp(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_ARMED:
-      thisState = boat.state;
-      boat.state = executeArmed(&boat, lastState);
-      lastState = thisState;
+    case ARD_ARMED:
+      thisMode = boat.mode;
+      boat.mode = executeArmed(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_SELFTEST:
+    case ARD_SELFTEST:
       //Serial.println("Got selftest state");
-      thisState = boat.state;
-      boat.state = executeSelfTest(&boat, lastState);
-      lastState = thisState;
+      thisMode = boat.mode;
+      boat.mode = executeSelfTest(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_DISARMED:
-      thisState = boat.state;
-      boat.state = executeDisarmed(&boat, lastState);
-      lastState = thisState;
+    case ARD_DISARMED:
+      thisMode = boat.mode;
+      boat.mode = executeDisarmed(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_ACTIVE:
-      thisState = boat.state;
-      boat.state = executeActive(&boat, lastState);
-      lastState = thisState;
+    case ARD_ACTIVE:
+      thisMode = boat.mode;
+      boat.mode = executeActive(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_LOWBATTERY:
-      thisState = boat.state;
-      boat.state = executeLowBattery(&boat, lastState);
-      lastState = thisState;
+    case ARD_LOWBATTERY:
+      thisMode = boat.mode;
+      boat.mode = executeLowBattery(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_FAULT:
-      thisState = boat.state;
-      boat.state = executeFault(&boat, lastState);
-      lastState = thisState;
+    case ARD_FAULT:
+      thisMode = boat.mode;
+      boat.mode = executeFault(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_SELFRECOVERY:
-      thisState = boat.state;
-      boat.state = executeSelfRecovery(&boat, lastState);
-      lastState = thisState;
+    case ARD_SELFRECOVERY:
+      thisMode = boat.mode;
+      boat.mode = executeSelfRecovery(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_ARMEDTEST:
-      thisState = boat.state;
-      boat.state = executeArmedTest(&boat, lastState);
-      lastState = thisState;
+    case ARD_ARMEDTEST:
+      thisMode = boat.mode;
+      boat.mode = executeArmedTest(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_ACTIVERUDDER:
-      thisState = boat.state;
-      boat.state = executeActiveRudder(&boat, lastState);
-      lastState = thisState;
+    case ARD_ACTIVERUDDER:
+      thisMode = boat.mode;
+      boat.mode = executeActiveRudder(&boat, lastMode);
+      lastMode = thisMode;
       break;
-    case BOAT_NONE:
+    case ARD_NONE:
     default:
-      LogSerial.print(F("Got bad arduino state value: ")); 
-      boat.state = BOAT_SELFTEST;
-      lastState = BOAT_NONE;
-      thisState = BOAT_NONE;
+      LogSerial.print(F("Got bad arduino mode value: ")); 
+      boat.mode = ARD_SELFTEST;
+      lastMode = ARD_NONE;
+      thisMode = ARD_NONE;
       break;
   }
   output(&boat);
