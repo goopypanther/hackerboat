@@ -61,5 +61,14 @@ class boneStateClass : public hackerboatStateClassStorable {
 
 
 };
+static inline const std::string& toString(boatModeEnum num) {
+	return boneStateClass::modeNames.get(num);
+}
+static inline bool fromString(std::string name, boatModeEnum *value) {
+	return boneStateClass::modeNames.get(name, value);
+}
+inline static json_t *json(boatModeEnum num) {
+	return json(boneStateClass::modeNames.get(num));
+}
 
 #endif /* BONESTATESTRUCT_H */

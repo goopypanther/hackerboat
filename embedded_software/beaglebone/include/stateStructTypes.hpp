@@ -32,13 +32,19 @@ class sensors_vec_t {
 // json(foo) returns a new reference to a json representation of foo.
 // parse(j, x) fills in x with the value represented by json value j, returning true if successful.
 json_t *json(std::string const);
-bool parse(json_t *, std::string *);
-
-inline json_t *json(bool v) {
-	return json_boolean(v);
+json_t *json(bool v);
+inline json_t *json(const char *s) {
+	return json_string(s);
+}
+inline json_t *json(json_int_t i) {
+	return json_integer(i);
+}
+inline json_t *json(double v) {
+	return json_real(v);
 }
 
-template<typename T> static inline bool fromString(json_t *j, T *v) {
+bool parse(json_t *, std::string *);
+template<typename T> static inline bool parse(json_t *j, T *v) {
 	/* json_string_value() detects NULL and non-strings and returns NULL */
 	return fromString(json_string_value(j), v);
 }
@@ -61,6 +67,14 @@ class hackerboatStateClass {
 		json_t *packTimeSpec (timespec t);
 		int parseTimeSpec (json_t *input, timespec *t);
 };
+
+inline json_t *json(timespec t) {
+	return hackerboatStateClass::packTimeSpec(t);
+}
+inline bool parse(json_t *input, timespec *t) {
+	return hackerboatStateClass::parseTimeSpec(input, t) == 0;
+};
+
 
 /**
  * @class hackerboatStateClassStorable 
@@ -162,7 +176,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		virtual bool fillRow(sqliteParameterSlice) const;
 		virtual bool readFromRow(sqliteRowReference, sequence);
 };
-const char *string(waypointClass::action);
+const char *toString(waypointClass::action);
 bool fromString(const char *, waypointClass::action *);
 
 /**

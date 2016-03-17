@@ -94,5 +94,14 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool 					setBoatMode (boatModeEnum s);
 		string					write(string func, string query);		/**< Write to a function on the Arduino */
 };
+inline static const std::string& toString(arduinoModeEnum num) {
+	return arduinoStateClass::modeNames.get(num);
+}
+inline static bool fromString(std::string name, arduinoModeEnum *value) {
+	return arduinoStateClass::modeNames.get(name, value);
+}
+inline static json_t *json(arduinoModeEnum num) {
+	return json(arduinoStateClass::modeNames.get(num));
+}
 
 #endif /* ARDUINOSTATE_H */

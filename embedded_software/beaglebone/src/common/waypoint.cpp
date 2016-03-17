@@ -43,7 +43,7 @@ bool waypointClass::parse(json_t *input, bool seq)
 	nextWaypoint = val? json_integer_value(val) : -1;
 
 	val = json_object_get(input, "action");
-	if (!fromString(val, &act))
+	if (!parse(val, &act))
 		return false;
 
 	if (seq) {
@@ -68,7 +68,7 @@ json_t *waypointClass::pack(bool seq) const
 	}
 	json_object_set_new_nocheck(repr,
 				    "action",
-				    json_string(string(act)));
+				    json_string(toString(act)));
 
 	if (seq && (_sequenceNum >= 0)) {
 		json_object_set_new_nocheck(repr, "sequenceNum", json_integer(_sequenceNum));
@@ -91,7 +91,7 @@ bool waypointClass::isValid(void) const
 	return true;
 }
 
-const char *string(enum waypointClass::action act)
+const char *toString(enum waypointClass::action act)
 {
 	switch(act) {
 	case waypointClass::action::CONTINUE:
@@ -115,7 +115,7 @@ bool fromString(const char *name, waypointClass::action *act)
 	case 1: result = waypointClass::action::HOME; break;
 	case 2: result = waypointClass::action::STOP; break;
 	}
-	if (!::strcmp(name, string(result))) {
+	if (!::strcmp(name, toString(result))) {
 		*act = result;
 		return true;
 	} else {

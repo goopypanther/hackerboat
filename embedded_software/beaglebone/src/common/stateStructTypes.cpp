@@ -38,6 +38,10 @@ json_t *json(std::string const v)
 	return json_stringn(v.data(), v.length());
 }
 
+json_t *json(bool v) {
+	return json_boolean(v);
+}
+
 json_t *orientationClass::pack (bool seq) {
 	json_t *output = json_pack(this->_format.c_str(),
 								"roll", roll,
