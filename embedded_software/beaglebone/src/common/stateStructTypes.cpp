@@ -41,33 +41,33 @@ json_t *json(bool v) {
 	return json_boolean(v);
 }
 
-json_t *orientationClass::pack (bool seq) {
-	json_t *output = json_pack(this->_format.c_str(),
-								"roll", roll,
-								"pitch", pitch,
-								"yaw", yaw);
+json_t *orientationClass::pack () const {
+	json_t *output = json_pack("{s:f,s:f,s:f}",
+				   "roll", roll,
+				   "pitch", pitch,
+				   "yaw", heading);
 	return output;
 }
 
-bool orientationClass::parse (json_t *input, bool seq = true) {
-	if (json_unpack(input, this->_format.c_str(),					
-					"roll", roll,
-					"pitch", pitch,
-					"yaw", yaw)) {
+bool orientationClass::parse (json_t *input) {
+	if (json_unpack(input, "{s:f,s:f,s:f}",
+			"roll", &roll,
+			"pitch", &pitch,
+			"yaw", &heading)) {
 		return false;
 	}
-	return this->isValid();
+	return this->normalize();
 }
 
-bool orientationClass::isValid (void) {
-	return this->normalize();
+bool orientationClass::isValid (void) const {
+	return isfinite(roll) && isfinite(pitch) && isfinite(heading);
 }
 
 bool orientationClass::normalize (void) {
 	bool result = true;
 	if (isfinite(roll)) {roll = fmod(roll, maxVal);} else {result = false;}
 	if (isfinite(pitch)) {pitch = fmod(pitch, maxVal);} else {result = false;}
-	if (isfinite(yaw)) {yaw = fmod(yaw, maxVal);} else {result = false;}
+	if (isfinite(heading)) {heading = fmod(heading, maxVal);} else {result = false;}
 	return result;
 }
 

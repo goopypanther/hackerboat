@@ -124,7 +124,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
  *
  */
 
-class orientationClass : public hackerboatStateClass {
+class orientationClass {
 	public:
 		orientationClass(double r, double p, double y)
 		  : pitch(p), roll(r), heading(y)
@@ -133,10 +133,14 @@ class orientationClass : public hackerboatStateClass {
 		double roll 	= NAN;
 		double pitch 	= NAN;
 		double heading 	= NAN;
+
+		bool parse (json_t *);
+		json_t *pack (void) const;
+		bool isValid (void) const;
+
 	private:
-		static const string _format = "{s:f,s:f,s:f}";
-		static const double	maxVal = 180.0;
-		static const double	minVal = -180.0;
+		static const double constexpr	maxVal = 180.0;
+		static const double constexpr	minVal = -180.0;
 };
 		
 /**
