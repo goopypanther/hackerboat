@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 #include <array>
 #include <string>
 #include "config.h"
@@ -50,7 +51,7 @@ json_t *orientationClass::pack () const {
 }
 
 bool orientationClass::parse (json_t *input) {
-	if (json_unpack(input, "{s:f,s:f,s:f}",
+	if (json_unpack(input, "{s:F,s:F,s:F}",
 			"roll", &roll,
 			"pitch", &pitch,
 			"yaw", &heading)) {

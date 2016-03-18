@@ -63,7 +63,7 @@ navVectorClass navVectorClass::add (const navVectorClass& a) const {
 
 bool navVectorClass::parse(json_t *input) {
 	json_t *buf;
-	if (json_unpack(input, "{s:o,s:f,s:f}", "source", &buf, "bearing", &_bearing, "strength", &_strength)) {
+	if (json_unpack(input, "{s:o,s:F,s:F}", "source", &buf, "bearing", &_bearing, "strength", &_strength)) {
 		return false;
 	}
 	if (!json_is_string(buf))
@@ -199,7 +199,7 @@ bool navClass::readFromRow(sqliteRowReference row, sequence assignedId)
 	json_decref(repr);
 
 	repr = row.json_field(3);
-	if (json_unpack(repr, "{s:f,s:f,s:o,s:o}",
+	if (json_unpack(repr, "{s:F,s:F,s:o,s:o}",
 			"waypointStrength", &waypointStrength,
 			"magCorrection", &magCorrection,
 			"targetVec", &targetVecIn,

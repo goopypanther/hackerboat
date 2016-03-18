@@ -41,7 +41,7 @@ hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
-storage_test: enumtable_test.o sqliteStorage_test.o gtest.o gtest_main.o libhackerboat.a
+storage_test: enumtable_test.o sqliteStorage_test.o smallJson_test.o test_utilities.o gtest.o gtest_main.o libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 test: storage_test
 	./storage_test

@@ -9,7 +9,7 @@ enum class silly : short { ALPHA, BETA, GAMMA, DELTA };
 const enumerationNameTable<silly> staticTable = { "Alpha", "Beta", "Gamma", "Delta" };
 
 
-TEST(Enumerations, Static) {
+TEST(Serialization, Enumerations) {
 	silly s(silly::GAMMA);
 
 	// Test that we can look up some strings

@@ -29,7 +29,7 @@ bool locationClass::isValid(void) const {
 }
 
 bool locationClass::parse(json_t* input) {
-	if (json_unpack(input, "{s:f,s:f}", "latitude", &_lat, "longitude", &_lon)) {
+	if (json_unpack(input, "{s:F,s:F}", "latitude", &_lat, "longitude", &_lon)) {
 		return false;
 	}
 	return this->isValid();

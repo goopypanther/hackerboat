@@ -423,7 +423,7 @@ json_t* boneStateRESTClass::waypointStrength(char* body, int bodyLen) {
 	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((input) && (_target->getrecord(_target->count()))) { 
-		json_unpack(input, "{s:f}", "waypointStrength", &strength);
+		json_unpack(input, "{s:F}", "waypointStrength", &strength);
 		_target->waypointStrength = strength;
 		free(input);
 		free(errJSON);
@@ -459,7 +459,7 @@ json_t* boneStateRESTClass::waypointStrengthMax(char* body, int bodyLen) {
 	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((input) && (_target->getrecord(_target->count()))) { 
-		json_unpack(input, "{s:f}", "waypointStrengthMax", &strength);
+		json_unpack(input, "{s:F}", "waypointStrengthMax", &strength);
 		_target->waypointStrengthMax = strength;
 		free(input);
 		free(errJSON);
@@ -495,7 +495,7 @@ json_t* boneStateRESTClass::waypointAccuracy(char* body, int bodyLen) {
 	input = json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((input) && (_target->getrecord(_target->count()))) { 
-		json_unpack(input, "{s:f}", "waypointAccuracy", &accuracy);
+		json_unpack(input, "{s:F}", "waypointAccuracy", &accuracy);
 		_target->waypointAccuracy = accuracy;
 		free(input);
 		free(errJSON);
