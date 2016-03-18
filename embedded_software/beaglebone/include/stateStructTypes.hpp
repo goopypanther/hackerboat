@@ -23,6 +23,10 @@
 #include "config.h"
 #include "location.hpp"
 
+// forward declarations
+class hackerboatStateStorage;
+class sqliteParameterSlice;
+class sqliteRowReference;
 
 // temporary class definition until we include or define the real one
 class sensors_vec_t {
@@ -87,21 +91,26 @@ inline bool parse(json_t *input, timespec *t) {
 
 class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
-		hackerboatStateClassStorable(void);
-		hackerboatStateClassStorable(const string file);		/**< Create a state object attached to the given file */
-		int32_t getSequenceNum (void) {return _sequenceNum;};	/**< Get the sequenceNum of this object (-1 until populated from a file) */
+		typedef int64_t sequence;			/**< The type of sequence numbers / OIDs in persistent storage. Negative numbers indicate invalid / missing data */
+
+		sequence getSequenceNum (void) const {return _sequenceNum;};				/**< Get the sequenceNum of this object (-1 until populated from or inserted into a file) */
+
 		bool openFile(const string name);						/**< Open the given database file & store the name */
 		bool openFile(void);									/**< Open the stored database file */
 		bool closeFile(void);									/**< Close the open file */
-		int32_t count (void);									/**< Return the number of records of the object's type in the open database file */
-		bool writeRecord (void);								/**< Write the current record to the target database file */
-		bool getRecord(int32_t select);							/**< Populate the object from the open database file */
+		sequence countRecords (void);								/**< Return the number of records of the object's type in the open database file */
+		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
+		bool getRecord(sequence select);							/**< Populate the object from the open database file */
 		bool getLastRecord(void);								/**< Get the latest record */
-		virtual bool insert(int32_t num) {return false;};		/**< Insert the contents of the object into the database table at the given point */
-		bool append(void);										/**< Append the contents of the object to the end of the database table */
+		virtual bool insert(sequence num) {return false;};					/**< Insert the contents of the object into the database table at the given point */
+		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
 		
 	protected:
-		int32_t 	_sequenceNum = -1;	/**< sequence number */
+		hackerboatStateClassStorable()			/**< Create a state object */
+			: _sequenceNum(-1)
+		{};
+
+		sequence 	_sequenceNum;			/**< sequence number in the database */
 
 		virtual hackerboatStateStorage& storage() = 0;
 		virtual bool fillRow(sqliteParameterSlice) const = 0;

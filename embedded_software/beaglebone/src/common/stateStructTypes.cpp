@@ -16,14 +16,13 @@
 #include <inttypes.h>
 #include <time.h>
 #include <math.h>
+#include <array>
+#include <string>
 #include "config.h"
 #include "location.hpp"
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
 #include "gps.hpp"
-
-#include <string>
-using namespace std;
 
 json_t *hackerboatStateClass::packTimeSpec (timespec t) {
 	return json_pack("{s:i,s:i}", "tv_sec", t.tv_sec, "tv_nsec", t.tv_nsec);

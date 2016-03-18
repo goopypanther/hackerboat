@@ -127,6 +127,102 @@ json_t* navClass::pack (bool seq) {
 	return output;
 }
 
+bool navClass::parseInfluences(json_t *navArrayIn) {
+	if (!json_is_array(navArrayIn))
+	    return false;
+	int influenceCount = json_array_size(navArrayIn);
+	navInfluences.resize(influenceCount);
+	for (int i; i < influenceCount; i++) {
+		if (!navInfluences[i].parse(json_array_get(navArrayIn, i)))
+			return false;
+	}
+}
+
+json_t *navClass::packInfluences(void) const {
+	json_t *array = json_array();
+	for (auto it = navInfluences.cbegin(); it != navInfluences.cend(); it ++) {
+		json_array_append_new(array, it->pack());
+	}
+	return array;
+}
+
+hackerboatStateStorage &navClass::storage() {
+	static hackerboatStateStorage *navStorage;
+
+	if (!navStorage) {
+		navStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(":memory:"),
+							"NAV",
+							{ { "current", "TEXT"    },
+							  { "target",  "INTEGER" },
+							  { "total",   "TEXT"    },
+							  { "other",   "TEXT"    } });
+		navStorage->createTable();
+	}
+
+	return *navStorage;
+}
+
+bool navClass::fillRow(sqliteParameterSlice row) const
+{
+	row.assertWidth(4);
+
+	row.bind_json_new(0, current.pack());
+	row.bind(1, target.getSequenceNum());
+	row.bind_json_new(2, total.pack());
+
+	json_t *array = json_array();
+	for (int i = 0; i < navInfluences.size(); i++) {
+		json_array_append_new(array, navInfluences[i].pack());
+	}
+	row.bind_json_new(3, json_pack("{s:f,s:f,s:o,s:o}",
+				       "waypointStrength", waypointStrength,
+				       "magCorrection", magCorrection,
+				       "targetVec", targetVec.pack(),
+				       "navInfluences", array));
+
+	return true;
+}
+
+bool navClass::readFromRow(sqliteRowReference row, sequence assignedId)
+{
+	row.assertWidth(4);
+	json_t *repr, *targetVecIn, *influences;
+
+	bool success = true;
+
+	_sequenceNum = assignedId;
+
+	repr = row.json_field(0);
+	if (!current.parse(repr))
+		success = false;
+	json_decref(repr);
+
+	sequence foo = row.int64_field(1);
+#warning Wim - implement simple foreign key support, or change class interface
+
+	repr = row.json_field(2);
+	if (!total.parse(repr))
+		success = false;
+	json_decref(repr);
+
+	repr = row.json_field(3);
+	if (json_unpack(repr, "{s:f,s:f,s:o,s:o}",
+			"waypointStrength", &waypointStrength,
+			"magCorrection", &magCorrection,
+			"targetVec", &targetVecIn,
+			"navInfluences", &influences)) {
+		success = false;
+	}
+
+	if (!targetVec.parse(targetVecIn))
+		success = false;
+	if (!parseInfluences(influences))
+		success = false;
+	json_decref(repr);
+
+	return success;
+}
+
 bool navClass::appendVector (navVectorClass vec) {
 	if (vec.isValid()) {
 		this->navInfluences.push_back(vec);
