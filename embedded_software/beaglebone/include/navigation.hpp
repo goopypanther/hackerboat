@@ -30,22 +30,19 @@
  *
  */
 
-class navVectorClass : public hackerboatStateClass {
-	public:	
+class navVectorClass {
+	public:
 		navVectorClass (void) {};
 		navVectorClass (std::string src, double bearing, double strength);
-		bool isValid (void) const;				/**< Check for validity */	
+		bool isValid (void) const;			/**< Check for validity */
 		bool norm (void);						/**< Normalize the bearing */
-		bool parse (json_t *input);		/**< Populate the object from the given json object */
-		json_t *pack (void);			/**< Pack the contents of the object into a json object and return a pointer to that object*/
-		navVectorClass add (navVectorClass a);	/**< Vector sum of the current vector and another vector */
+		bool parse (json_t *);				/**< Populate the object from the given json object */
+		json_t *pack (void) const;			/**< Pack the contents of the object into a json object and return a pointer to that object*/
+		navVectorClass add (const navVectorClass& a) const;	/**< Vector sum of the current vector and another vector */
 		
-		string	_source  	= "";		/**< Name of the source of this vector. */
+		std::string _source	= "";		/**< Name of the source of this vector. */
 		double 	_bearing 	= NAN;		/**< Bearing of this vector in degrees, clockwise from true north. */
 		double	_strength 	= NAN;		/**< Relative strength of this vector */	
-
-	private:
-		static const string _format = "{s:s,s:f,s:f}";	
 };
 
 /**
@@ -57,10 +54,9 @@ class navVectorClass : public hackerboatStateClass {
 
 class navClass : public hackerboatStateClassStorable {
 	public:
-		navClass (void) {};	
 		bool parse (json_t *input, bool seq = true);/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
-		json_t *pack (bool seq = true);				/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
-		bool appendVector (navVectorClass vec);	/**< Add a navigation vector to the influence list */
+		json_t *pack (bool seq = true) const;				/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
+		bool appendVector (const navVectorClass& vec);	/**< Add a navigation vector to the influence list */
 		bool calc (double maxStrength);			/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
 		bool isValid(void) const;
@@ -79,8 +75,10 @@ class navClass : public hackerboatStateClassStorable {
 		virtual bool readFromRow(sqliteRowReference, sequence);
 
 	private:
-		static const string _format = "{s:o,s:o,s:f,s:f,s:o,s:o,s:[o]}";	
 		std::vector<navVectorClass>				navInfluences;	/**< Array to hold the influences of other navigation sources (i.e. collision avoidance) */
+
+		bool parseInfluences(json_t *);
+		json_t *packInfluences(void) const;
 };
 
 /** 
@@ -101,15 +99,14 @@ class navigatorBase {
 /**
  * @class navDodgePointClass
  *
- * @brief 
+ * @brief
  *
  */
 
 class navDodgePointClass : public navigatorBase {
 	public:
 		navDodgePointClass(void) {};
-		navDodgePointClass(locationClass point) {_point = point;};
-		navDodgePointClass(locationClass point, double strength)
+		navDodgePointClass(locationClass point, double strength = 0)
                     : _point(point), _strength(strength)
 		{ }
 		navVectorClass calc(void);
@@ -132,10 +129,12 @@ class navDodgePointClass : public navigatorBase {
 
 class navDitherClass : public navigatorBase {
 	public:
-		navDitherClass(void) {};
-		navDitherClass(double strength) :_strength(strength) {};
-		navDitherClass(double strength, uint32_t seed) :
-			_seed(seed), _strength(strength) {};
+		navDitherClass(void)
+		  : _strength(0), _seed(HASHSEED)
+	        {};
+		navDitherClass(double strength, uint32_t seed = HASHSEED)
+		  : _seed(seed), _strength(strength)
+		{};
 		navVectorClass calc(void);
 		void setStrength (double strength) {_strength = strength;};
 		double getStrength (void) {return _strength;};
