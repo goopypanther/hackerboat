@@ -21,18 +21,31 @@ LDFLAGS  +=-L dependencies/lib
 
 LDLIBS += -ljansson -lsqlite3 -lm -lrt
 
-LIBHACKERBOAT_SRCS=location.cpp navigation.cpp logs.cpp sqliteStorage.cpp waypoint.cpp gps.cpp enumtable.cpp
-
-NAV_SRCS=nav/hackerboatNavigator.cpp
-
 OBJ=obj
 VPATH=src/common:src/nav
 
+all: nav hb.fcgi
+.PHONY: all test
+
+LIBHACKERBOAT_SRCS= stateStructTypes.cpp location.cpp navigation.cpp logs.cpp sqliteStorage.cpp waypoint.cpp gps.cpp enumtable.cpp arduinoState.cpp boneState.cpp MurmurHash3.cpp
+libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
+
+arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
+
+NAV_SRCS=nav/hackerboatNavigator.cpp
 nav: $(addprefix src/,$(NAV_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+FCGI_SRCS=cgi/hackerboatFastCGI.cpp
+hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
+# Unit test targets
+storage_test: enumtable_test.o sqliteStorage_test.o gtest.o gtest_main.o libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+test: storage_test
+	./storage_test
+
 
 # gtest rules
 gtest.o: $(GTEST_DIR) $(GTEST_INC)
