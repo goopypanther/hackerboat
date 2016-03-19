@@ -61,7 +61,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		long 				timeOfLastPacket;		/**< Time the last packet arrived */
 		long 				timeOfLastBoneHB;
 		long 				timeOfLastShoreHB;
-		uint16_t			faultString;			/**< Fault string -- binary string to indicate source of faults */
+		std::string			faultString;			/**< Fault string -- string to indicate source of faults */
 		float 				rudder;
 		int16_t				rudderRaw;
 		int16_t				internalVoltageRaw;

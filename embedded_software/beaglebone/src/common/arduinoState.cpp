@@ -162,7 +162,7 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 	if (tmp) timeOfLastShoreHB = json_integer_value(tmp);
 	free(tmp);
 	tmp = json_object_get(input, "faultString");
-	if (tmp) faultString = json_integer_value(tmp);
+	if (tmp) faultString = std::string(json_string_value(tmp));
 	free(tmp);
 	tmp = json_object_get(input, "rudder");
 	if (tmp) rudder = json_real_value(tmp);
