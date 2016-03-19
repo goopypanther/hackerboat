@@ -24,6 +24,7 @@
 #include "arduinoState.hpp"
 #include "boneState.hpp"
 #include "gps.hpp"
+#include "json_utilities.hpp"
 #include <BlackUART/BlackUART.h>
 
 static logError *errLog = logError::instance();

@@ -27,7 +27,9 @@ VPATH=src/common:src/nav
 all: nav hb.fcgi
 .PHONY: all test
 
-LIBHACKERBOAT_SRCS= stateStructTypes.cpp location.cpp navigation.cpp logs.cpp sqliteStorage.cpp waypoint.cpp gps.cpp enumtable.cpp arduinoState.cpp boneState.cpp MurmurHash3.cpp
+LIBHACKERBOAT_SRCS= stateStructTypes.cpp logs.cpp sqliteStorage.cpp
+LIBHACKERBOAT_SRCS+= location.cpp navigation.cpp waypoint.cpp gps.cpp arduinoState.cpp boneState.cpp
+LIBHACKERBOAT_SRCS+= enumtable.cpp  MurmurHash3.cpp jansson_extras.cpp json_utilities.cpp json_ostream.cpp
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 
 arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)

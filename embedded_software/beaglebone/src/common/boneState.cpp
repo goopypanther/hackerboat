@@ -15,6 +15,7 @@
 #include <time.h>
 #include <math.h>
 #include "config.h"
+#include "json_utilities.hpp"
 #include "location.hpp"
 #include "logs.hpp"
 #include "stateStructTypes.hpp"

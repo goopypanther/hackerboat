@@ -22,6 +22,7 @@
 #include <vector>
 #include "config.h"
 #include "location.hpp"
+#include "json_utilities.hpp"
 
 // forward declarations
 class hackerboatStateStorage;
@@ -31,27 +32,6 @@ class sqliteRowReference;
 // temporary class definition until we include or define the real one
 class sensors_vec_t {
 };
-
-// utility functions, making use of type-based overriding.
-// json(foo) returns a new reference to a json representation of foo.
-// parse(j, x) fills in x with the value represented by json value j, returning true if successful.
-json_t *json(std::string const);
-json_t *json(bool v);
-inline json_t *json(const char *s) {
-	return json_string(s);
-}
-inline json_t *json(json_int_t i) {
-	return json_integer(i);
-}
-inline json_t *json(double v) {
-	return json_real(v);
-}
-
-bool parse(json_t *, std::string *);
-template<typename T> static inline bool parse(json_t *j, T *v) {
-	/* json_string_value() detects NULL and non-strings and returns NULL */
-	return fromString(json_string_value(j), v);
-}
 
 /**
  * @class hackerboatStateClass 

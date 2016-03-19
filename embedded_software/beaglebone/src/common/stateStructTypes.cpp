@@ -33,14 +33,7 @@ int hackerboatStateClass::parseTimeSpec (json_t *input, timespec *t) {
 	return json_unpack(input, "{s:i,s:i}", "tv_sec", &(t->tv_sec), "tv_nsec", &(t->tv_nsec));
 }
 
-json_t *json(std::string const v)
-{
-	return json_stringn(v.data(), v.length());
-}
 
-json_t *json(bool v) {
-	return json_boolean(v);
-}
 
 json_t *orientationClass::pack () const {
 	json_t *output = json_pack("{s:f,s:f,s:f}",

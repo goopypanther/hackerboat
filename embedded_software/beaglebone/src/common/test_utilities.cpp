@@ -6,10 +6,6 @@ extern "C" {
 #include <gtest/gtest.h>
 #include <list>
 
-extern "C" {
-	static int jansson_ostream(const char *buffer, size_t size, void *ctxt);
-}
-
 class pathelt {
 public:
 	pathelt *prev;
@@ -22,18 +18,6 @@ static int json_describe_array_differences(pathelt *path, std::ostream& os, json
 static int json_describe_object_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right);
 static int json_describe_some_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right);
 static int json_diffnums(pathelt *path, std::ostream& os, json_t *left, json_t *right, bool reversed);
-
-static int jansson_ostream(const char *buffer, size_t size, void *ctxt)
-{
-	std::ostream *os = static_cast<std::ostream *>(ctxt);
-	os->write(buffer, size);
-	return 0;
-}
-
-std::ostream& operator<< (std::ostream& os, json_t *j)
-{
-	json_dump_callback(j, jansson_ostream, static_cast<void *>(&os), 0);
-}
 
 std::ostream& operator<< (std::ostream& os, pathelt *p)
 {
