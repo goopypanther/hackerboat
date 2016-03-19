@@ -63,8 +63,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
-		virtual bool fillRow(sqliteParameterSlice) const;
-		virtual bool readFromRow(sqliteRowReference, sequence);
 };
 static inline const std::string& toString(boatModeEnum num) {
 	return boneStateClass::modeNames.get(num);

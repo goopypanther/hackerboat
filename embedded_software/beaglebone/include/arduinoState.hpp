@@ -97,8 +97,6 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
-		virtual bool fillRow(sqliteParameterSlice) const;
-		virtual bool readFromRow(sqliteRowReference, sequence);
 };
 inline static const std::string& toString(arduinoModeEnum num) {
 	return arduinoStateClass::modeNames.get(num);

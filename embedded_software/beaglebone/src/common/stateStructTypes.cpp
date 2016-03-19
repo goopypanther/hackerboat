@@ -12,7 +12,6 @@
  
 #include <jansson.h>
 #include <stdlib.h>
-#include <sqlite3.h>
 #include <inttypes.h>
 #include <time.h>
 #include <math.h>
@@ -24,6 +23,7 @@
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
 #include "gps.hpp"
+#include "sqliteStorage.hpp"
 
 json_t *hackerboatStateClass::packTimeSpec (timespec t) {
 	return json_pack("{s:i,s:i}", "tv_sec", t.tv_sec, "tv_nsec", t.tv_nsec);
@@ -33,7 +33,25 @@ int hackerboatStateClass::parseTimeSpec (json_t *input, timespec *t) {
 	return json_unpack(input, "{s:i,s:i}", "tv_sec", &(t->tv_sec), "tv_nsec", &(t->tv_nsec));
 }
 
+bool hackerboatStateClassStorable::fillRow(sqliteParameterSlice row) const {
+	row.assertWidth(1);
+	json_t *representation = this->pack(false);
+	if (!representation)
+		return false;
+	row.bind_json_new(0, representation);
+	return true;
+}
 
+bool hackerboatStateClassStorable::readFromRow(sqliteRowReference row, sequence seq) {
+	row.assertWidth(1);
+	_sequenceNum = seq;
+	json_t *representation = row.json_field(0);
+	if (!representation)
+		return false;
+	bool success = this->parse(representation, false);
+	json_decref(representation);
+	return success;
+}
 
 json_t *orientationClass::pack () const {
 	json_t *output = json_pack("{s:f,s:f,s:f}",

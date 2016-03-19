@@ -93,8 +93,8 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		sequence 	_sequenceNum;			/**< sequence number in the database */
 
 		virtual hackerboatStateStorage& storage() = 0;
-		virtual bool fillRow(sqliteParameterSlice) const = 0;
-		virtual bool readFromRow(sqliteRowReference, sequence) = 0;
+		virtual bool fillRow(sqliteParameterSlice) const;
+		virtual bool readFromRow(sqliteRowReference, sequence);
 };
 
 /**
