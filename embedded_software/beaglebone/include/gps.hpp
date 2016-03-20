@@ -29,6 +29,7 @@
  
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
+		gpsFixClass ();
 		gpsFixClass (std::string sentence);			/**< Create a GPS fix from an incoming sentence string */
 		
 		bool readSentence (std::string sentence);	/**< Populate class from incoming sentence string */
