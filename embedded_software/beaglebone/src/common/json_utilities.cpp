@@ -17,6 +17,15 @@ json_t *json(bool v) {
 	return json_boolean(v);
 }
 
+bool parse(json_t *j, std::string *s) {
+	if (!json_is_string(j))
+		return false;
+	const char *p = json_string_value(j);
+	size_t l = json_string_length(j);
+	s->assign(p, l);
+	return true;
+}
+
 bool parse(json_t *j, bool *b) {
 	if (!j)
 		return false;

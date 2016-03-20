@@ -5,6 +5,7 @@ extern "C" {
 }
 #include <gtest/gtest.h>
 #include <list>
+#include "json_utilities.hpp"
 
 class pathelt {
 public:
@@ -13,7 +14,6 @@ public:
 	pathelt(pathelt *prev, std::string p) : prev(prev), elt(p) {};
 };
 
-
 static int json_describe_array_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right);
 static int json_describe_object_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right);
 static int json_describe_some_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right);
@@ -21,6 +21,10 @@ static int json_diffnums(pathelt *path, std::ostream& os, json_t *left, json_t *
 
 std::ostream& operator<< (std::ostream& os, pathelt *p)
 {
+	if (!p) {
+		return os << "\t<root>";
+	}
+
 	if (p->prev) {
 		os << p->prev << ".";
 	} else {
@@ -62,6 +66,9 @@ static int json_describe_some_differences(pathelt *path, std::ostream& os, json_
 {
 	if (left == right)
 		return 0;
+
+	if (!left || !right)
+		return 1;
 
 #if 1
 	if (json_typeof(left) == JSON_INTEGER && json_typeof(right) == JSON_REAL)
@@ -108,7 +115,7 @@ static int json_describe_some_differences(pathelt *path, std::ostream& os, json_
 
 	case JSON_STRING:
 		if (!json_equal(left, right)) {
-			os << path << ": strings \"" << json_string_value(left) << "\" vs. \"" << json_string_value(right) << "\"" << std::endl;
+			os << path << ": strings " << left << " vs. " << right << std::endl;
 			return 1;
 		} else {
 			return 0;
@@ -170,26 +177,24 @@ static int json_describe_array_differences(pathelt *path, std::ostream& os, json
 
 static int json_describe_object_differences(pathelt *path, std::ostream& os, json_t *left, json_t *right)
 {
-	std::list<std::string> missing_left;
-	std::list<std::string> missing_right;
+	std::list<const char *> missing_left;
+	std::list<const char *> missing_right;
 	const char *key;
 	json_t *value;
-	int count = 0;
+	int count;
 
 	json_object_foreach(left, key, value) {
 		if (!json_object_get(right, key)) {
 			missing_right.emplace_back(key);
-			count ++;
 		}
 	}
 	json_object_foreach(right, key, value) {
 		if (!json_object_get(left, key)) {
 			missing_left.emplace_back(key);
-			count ++;
 		}
 	}
 
-	if (count) {
+	if (!missing_left.empty() || !missing_right.empty()) {
 		os << path << ": " << (missing_left.size()) << "/" << (missing_right.size()) << " missing keys:";
 		for (auto it = missing_left.cbegin(); it != missing_left.cend(); it ++) {
 			os << " " << (*it);
@@ -202,6 +207,7 @@ static int json_describe_object_differences(pathelt *path, std::ostream& os, jso
 		return 1;
 	}
 
+	count = 0;
 	json_object_foreach(left, key, value) {
 		json_t *right_value = json_object_get(right, key);
 		pathelt subp(path, std::string(key));

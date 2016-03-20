@@ -25,7 +25,7 @@ OBJ=obj
 VPATH=src/common:src/nav
 
 all: nav hb.fcgi
-.PHONY: all test
+.PHONY: all
 
 LIBHACKERBOAT_SRCS= stateStructTypes.cpp logs.cpp sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp navigation.cpp waypoint.cpp gps.cpp arduinoState.cpp boneState.cpp
@@ -43,13 +43,18 @@ hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
-storage_test: enumtable_test.o sqliteStorage_test.o smallJson_test.o test_utilities.o gtest.o gtest_main.o libhackerboat.a
+GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
+storage_test: enumtable_test.o sqliteStorage_test.o smallJson_test.o arduinoState_test.o $(GTEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 test: storage_test
 	./storage_test
+.PHONY: test
 
-
-# gtest rules
+# gtest rules:
+# gtest isn't installed as a library by the debian package because it
+# depends on compiler flags. Instead, the recommended way to use it is
+# to compile its pieces into object files ourselves and then link
+# those in.
 gtest.o: $(GTEST_DIR) $(GTEST_INC)
 	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -I $(GTEST_DIR) -c -o $@ $(GTEST_DIR)/src/gtest-all.cc
 gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc

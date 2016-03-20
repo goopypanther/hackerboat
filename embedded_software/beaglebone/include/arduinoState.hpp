@@ -92,6 +92,11 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		long				startModeTime;
 		arduinoModeEnum		originMode;
 
+
+		/* Concrete implementations of stateClassStorable */
+		virtual bool parse (json_t *input, bool seq);
+		virtual json_t *pack (bool seq = true) const;
+		virtual bool isValid (void) const;
 	private:
 		bool 	setMode (arduinoModeEnum s);
 		bool 	setBoatMode (boatModeEnum s);

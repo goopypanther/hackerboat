@@ -42,14 +42,15 @@ class sensors_vec_t {
 
 class hackerboatStateClass {
 	public:
-		virtual bool parse (json_t *input, bool seq = true);/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
-		virtual json_t *pack (bool seq = true);				/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
+		virtual bool parse (json_t *input, bool seq) = 0;	/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
+		virtual json_t *pack (bool seq = true) const = 0;	/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
 		virtual bool isValid (void) const {return true;};	/**< Tests whether the current object is in a valid state */
-		
-	protected:	
-		hackerboatStateClass(void) = default;
-		json_t *packTimeSpec (timespec t);
-		int parseTimeSpec (json_t *input, timespec *t);
+
+		static json_t *packTimeSpec (timespec t);
+		static int parseTimeSpec (json_t *input, timespec *t);
+
+	protected:
+		hackerboatStateClass(void) {};
 };
 
 inline json_t *json(timespec t) {
