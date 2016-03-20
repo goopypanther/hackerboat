@@ -27,16 +27,16 @@
 
 class boneStateClass : public hackerboatStateClassStorable {
 	public:
-		boneStateClass(void) {initHashes();};
-		boneStateClass(const string file) : _fileName(file) {initHashes();};
-
 		typedef boatModeEnum Mode;
 		static const enumerationNameTable<boatModeEnum> modeNames;
+
+		boneStateClass ();
 
 		bool insertFault (const string fault);		/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const string fault);		/**< Remove the named fault from the fault string. Returns false if not present */
 		bool hasFault (const string fault);		/**< Returns true if given fault is present */
 		int faultCount (void);				/**< Returns the current number of faults */
+
 		bool setMode (boatModeEnum s);			/**< Set state to the given value */
 		bool setCommand (boatModeEnum c);		/**< Set command to the given value */
 		bool setArduinoMode (arduinoModeEnum s);	/**< Set Arduino state to the given value */
@@ -56,9 +56,10 @@ class boneStateClass : public hackerboatStateClassStorable {
 		locationClass					launchPoint;		/**< Location from which the boat departed */
 
 
-	private:
-		static const char *_format = "{s:o,s:o,s:i,s:s,s:i,s:s,s:i,s:s,s:s,s:o,s:i,s:f,s:f,s:f,s:b,s:o}";
-
+		/* Concrete implementations of stateClassStorable */
+		virtual bool parse (json_t *input, bool seq);
+		virtual json_t *pack (bool seq = true) const;
+		virtual bool isValid (void) const;
 
 	protected:
 		/* Concrete implementations of stateClassStorable */

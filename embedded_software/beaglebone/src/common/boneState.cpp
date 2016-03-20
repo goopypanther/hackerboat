@@ -10,7 +10,6 @@
  
 #include <jansson.h>
 #include <stdlib.h>
-#include <sqlite3.h>
 #include <inttypes.h>
 #include <time.h>
 #include <math.h>
@@ -22,6 +21,7 @@
 #include "gps.hpp"
 #include "boneState.hpp"
 #include "arduinoState.hpp"
+#include "sqliteStorage.hpp"
 
 #include <string>
 using namespace std;
@@ -40,68 +40,87 @@ const enumerationNameTable<boatModeEnum> boneStateClass::modeNames = {
 	"None"
 };
 
-json_t *boneStateClass::pack (bool seq) {
+boneStateClass::boneStateClass() {
+}
+
+json_t *boneStateClass::pack (bool seq) const {
 	json_t *output;
-	output = json_pack(this->_format.c_str(),
-						"uTime", packTimeSpec(uTime),
-						"lastContact", packTimeSpec(lastContact),
-						"mode", mode,
-						"command", command,
-						"ardMode", ardMode,
-						"faultString", json_string(faultString.c_str()),
-						"gps", gps.pack(),
-						"waypointNext", waypointNext,
-						"waypointStrength", waypointStrength,
-						"waypointAccuracy", waypointAccuracy,
-						"waypointStrengthMax", waypointStrengthMax,
-						"autonomous", autonomous,
-						"launchPoint", launchPoint.pack());
+	output = json_pack("{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:f,s:f,s:f,s:b,s:o}",
+			   "uTime", packTimeSpec(uTime),
+			   "lastContact", packTimeSpec(lastContact),
+			   "mode", json(mode),
+			   "command", json(command),
+			   "ardMode", json(ardMode),
+			   "faultString", json_string(faultString.c_str()), // Pierce - fix this
+			   "gps", gps.pack(seq /* Pierce: FIXME - what should we pass for seq? */),
+			   "waypointNext", waypointNext,
+			   "waypointStrength", waypointStrength,
+			   "waypointAccuracy", waypointAccuracy,
+			   "waypointStrengthMax", waypointStrengthMax,
+			   "autonomous", autonomous,
+			   "launchPoint", launchPoint.pack());
 	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
 	return output;
 }
 
 bool boneStateClass::parse (json_t *input, bool seq = true) {
-	json_t *seqIn, *inGNSS, *inUtime, *inLastContact, *inLaunch;
-	if (json_unpack(input, this->_format.c_str(),
-						"uTime", inUtime,
-						"lastContact", inLastContact,
-						"mode", &mode,
-						"command", &command,
-						"ardMode", &ardMode,
-						"faultString", inFaultString,
-						"gps", inGNSS,
+	json_t *inGNSS, *inUtime, *inLastContact, *inMode, *inCommand, *inArdMode, *inFaultString, *inLaunch;
+	if (json_unpack(input, "{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:F,s:F,s:F,s:b,s:o}",
+						"uTime", &inUtime,
+						"lastContact", &inLastContact,
+						"mode", &inMode,
+						"command", &inCommand,
+						"ardMode", &inArdMode,
+						"faultString", &inFaultString,
+						"gps", &inGNSS,
 						"waypointNext", &waypointNext,
 						"waypointStrength", &waypointStrength,
 						"waypointAccuracy", &waypointAccuracy,
 						"waypointStrengthMax", &waypointStrengthMax,
 						"autonomous", &autonomous,
-						"launchPoint", inLaunch)) {
+						"launchPoint", &inLaunch)) {
 		return false;
 	}
 	if (seq) {
-		seqIn = json_object_get(input, "sequenceNum");
-		if (seqIn) _sequenceNum = json_integer_value(seqIn);
+		json_t *seqIn = json_object_get(input, "sequenceNum");
+		if (!seqIn)
+			return false;
+		_sequenceNum = json_integer_value(seqIn);
 	}
-	parseTimeSpec(inUtime, &uTime);
-	parseTimeSpec(inLastContact, &lastContact);
-	gps.parse(inGNSS);
-	launchPoint.parse(inLaunch);
-	setMode(mode);
-	setCommand(command);
-	setArduinoMode(ardMode);
-	faultString = std::string(inFaultString);
-	free(seqIn);
-	free(inUtime);
-	free(inGNSS);
-	free(inLastContact);
-	free(inLaunch);
+	if (!::parse(inUtime, &uTime) ||
+	    !::parse(inLastContact, &lastContact) ||
+	    !::parse(inFaultString, &faultString) ||
+	    !gps.parse(inGNSS, seq /* Pierce: FIXME - what should seq be? */ ) ||
+	    !launchPoint.parse(inLaunch))
+		return false;
+	{
+		Mode tmp_mode;
+		if (!::parse(inMode, &tmp_mode))
+			return false;
+		if (!setMode(tmp_mode))
+			return false;
+	}
+	{
+		Mode tmp_mode;
+		if (!::parse(inCommand, &tmp_mode))
+			return false;
+		if (!setCommand(tmp_mode))
+			return false;
+	}
+	{
+		arduinoModeEnum tmp_mode;
+		if (!::parse(inArdMode, &tmp_mode))
+			return false;
+		if (!setArduinoMode(tmp_mode))
+			return false;
+	}
 	return this->isValid();	
 }
 
-bool boneStateClass::isValid (void) {
-	if ((mode > boneStateCount) || (mode < 0)) return false;
-	if ((command > boneStateCount) || (command < 0)) return false;
-	if ((ardMode > arduinoStateClass::arduinoStateCount) || (ardMode < 0)) return false;
+bool boneStateClass::isValid (void) const {
+	if (!modeNames.valid(mode)) return false;
+	if (!modeNames.valid(command)) return false;
+	if (!arduinoStateClass::modeNames.valid(ardMode)) return false;
 	if (!gps.isValid()) return false;
 	if (!launchPoint.isValid()) return false;
 	if (waypointStrength < 0) return false;
