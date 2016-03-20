@@ -16,6 +16,7 @@
 #include "stateStructTypes.hpp"
 #include "enumtable.hpp"
 #include "location.hpp"
+#include <jansson.h>
 
 /**
  * @class arduinoStateClass
@@ -35,7 +36,9 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 
 		// Command functions...
 		bool writeBoatMode(boatModeEnum s);
+		bool writeCommand(boatModeEnum s);
 		bool writeCommand(void);
+		int16_t writeThrottle(int16_t t);
 		int16_t writeThrottle(void);
 		double writeHeadingTarget(void);
 		double writeHeadingDelta(double delta);
@@ -43,11 +46,11 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 
 		bool 				popStatus;			/**< State of whether the last call to populate() succeeded or failed */
 		timespec			uTime;				/**< Time the record was made */
-		arduinoModeEnum 		mode;				/**< The current mode of the arduino                    */
-		arduinoModeEnum			command;			/**< Last state command received by the Arduino */
+		arduinoModeEnum 	mode;				/**< The current mode of the arduino                    */
+		arduinoModeEnum		command;			/**< Last state command received by the Arduino */
 		int8_t		 		throttle;   			/**< The current throttle position                    */
-		boatModeEnum 			bone;				/**< The current mode of the BeagleBone                */
-		orientationClass		orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
+		boatModeEnum 		boat;				/**< The current mode of the BeagleBone                */
+		orientationClass	orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
 		float 				headingTarget;			/**< The desired magnetic heading                     */
 		float 				internalVoltage;		/**< The battery voltage measured on the control PCB          */
 		float 				batteryVoltage;			/**< The battery voltage measured at the battery            */
@@ -58,7 +61,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		long 				timeOfLastPacket;		/**< Time the last packet arrived */
 		long 				timeOfLastBoneHB;
 		long 				timeOfLastShoreHB;
-		uint16_t			faultString;			/**< Fault string -- binary string to indicate source of faults */
+		std::string			faultString;			/**< Fault string -- string to indicate source of faults */
 		float 				rudder;
 		int16_t				rudderRaw;
 		int16_t				internalVoltageRaw;
@@ -86,13 +89,13 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool				motorRedYlwRly;
 		bool				servoPower;
 		long 				startStopTime;
-		long				startStateTime;
-		arduinoModeEnum			originMode;
+		long				startModeTime;
+		arduinoModeEnum		originMode;
 
 	private:
-		bool 					setMode (arduinoModeEnum s);
-		bool 					setBoatMode (boatModeEnum s);
-		string					write(string func, string query);		/**< Write to a function on the Arduino */
+		bool 	setMode (arduinoModeEnum s);
+		bool 	setBoatMode (boatModeEnum s);
+		json_t	*write(string func, string query);		/**< Write to a function on the Arduino */
 
 	protected:
 		/* Concrete implementations of stateClassStorable */
