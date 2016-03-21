@@ -51,8 +51,8 @@ json_t *boneStateClass::pack (bool seq) const {
 			   "mode", json(mode),
 			   "command", json(command),
 			   "ardMode", json(ardMode),
-			   "faultString", json_string(faultString.c_str()), // Pierce - fix this
-			   "gps", gps.pack(seq /* Pierce: FIXME - what should we pass for seq? */),
+			   "faultString", json_string(faultString.c_str()), 
+			   "gps", gps.pack(true),
 			   "waypointNext", waypointNext,
 			   "waypointStrength", waypointStrength,
 			   "waypointAccuracy", waypointAccuracy,
@@ -90,7 +90,7 @@ bool boneStateClass::parse (json_t *input, bool seq = true) {
 	if (!::parse(inUtime, &uTime) ||
 	    !::parse(inLastContact, &lastContact) ||
 	    !::parse(inFaultString, &faultString) ||
-	    !gps.parse(inGNSS, seq /* Pierce: FIXME - what should seq be? */ ) ||
+	    !gps.parse(inGNSS, true) ||
 	    !launchPoint.parse(inLaunch))
 		return false;
 	{
