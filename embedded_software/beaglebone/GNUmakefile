@@ -4,11 +4,10 @@
 OPTS = -gdwarf-4 -g3 -Os
 
 # Paths
-DEPSDIR=dependencies
 GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
-BLACKLIB=$(DEPSDIR)/BlackLib/v3_0
+BLACKLIB=submodules/BlackLib/v3_0
 
 # On the Beaglebone, the default compiler is gcc 4.6, which doesn't support the C++11 features we use (mostly, initializers for non-static data members). This can be any C++11-capable compiler.
 CC = gcc-4.7
@@ -16,15 +15,16 @@ CXX = g++-4.7
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
-CPPFLAGS +=-I dependencies/include -I include -MMD -MT $@
-LDFLAGS  +=-L dependencies/lib
+CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
+LDFLAGS  +=-L submodules/lib
 
-LDLIBS += -ljansson -lsqlite3 -lm -lrt
+LDLIBS += -ljansson -lsqlite3 -lBlackLib -lm -lrt
 
-OBJ=obj
+export CC CXX OPTS
+
 VPATH=src/common:src/nav
 
-all: nav hb.fcgi
+all: submodules nav hb.fcgi master
 .PHONY: all
 
 LIBHACKERBOAT_SRCS= stateStructTypes.cpp logs.cpp sqliteStorage.cpp
@@ -43,8 +43,9 @@ hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
+TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
-storage_test: enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o $(GTEST_OBJS) libhackerboat.a
+storage_test: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 test: storage_test
 	./storage_test
@@ -60,8 +61,10 @@ gtest.o: $(GTEST_DIR) $(GTEST_INC)
 gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -c -o $@ $^
 
-$(OBJ)/:
-	mkdir -p $(OBJ)
+
+submodules:
+	@$(MAKE) -C submodules
+.PHONY: submodules
 
 -include $(LIBHACKERBOAT_SRCS:.cpp=.d)
 -include $(addprefix src/,$(NAV_SRCS:.cpp=.d))
