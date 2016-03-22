@@ -79,7 +79,7 @@ int main (void) {
 		responseJSON = root->dispatch(tokens, tokenHashes, tokenLengths, tokenCnt, 0, query, method, body, bodyLen);
 		
 		// add some things to the JSON response...
-		jsonFinal = json_pack("{sosissss}", "response", responseJSON, 
+		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
 								"id", REST_ID, 
 								"name", REST_NAME,
 								"connected", "true");
@@ -95,8 +95,7 @@ int main (void) {
 		
 		// clean up
 		free(body);
-		free(responseJSON);
-		free(jsonFinal);
+		json_decref(jsonFinal);
 		for (uint8_t i = 0; i < MAX_URI_TOKENS; i++) {
 			tokens[i] = NULL;
 		}

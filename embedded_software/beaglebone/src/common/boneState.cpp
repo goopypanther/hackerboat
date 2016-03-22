@@ -83,7 +83,7 @@ bool boneStateClass::parse (json_t *input, bool seq = true) {
 	}
 	if (seq) {
 		json_t *seqIn = json_object_get(input, "sequenceNum");
-		if (!seqIn)
+		if (!json_is_integer(seqIn))
 			return false;
 		_sequenceNum = json_integer_value(seqIn);
 	}
@@ -136,8 +136,8 @@ bool boneStateClass::insertFault (const string fault) {
 	return true;
 }
 
-bool boneStateClass::hasFault (const string fault) {
-	if (faultString.find(fault) != std::basic_string::npos) return true;
+bool boneStateClass::hasFault (const std::string fault) const {
+	if (faultString.find(fault) != std::string::npos) return true;
 	return false;
 }
 
@@ -150,7 +150,7 @@ bool boneStateClass::removeFault (const string fault) {
 	} else return false;
 }
 
-int boneStateClass::failCount (void) {
+int boneStateClass::faultCount (void) const {
 	size_t index = faultString.find(':');
 	int cnt = 0;
 	while (index != std::string::npos) {
@@ -160,21 +160,24 @@ int boneStateClass::failCount (void) {
 	return cnt;
 }
 
-bool boneStateClass::setMode (boneModeEnum s) {
-	if ((s > boneStateCount) || (s < 0)) return false;
-	state = s;
+bool boneStateClass::setMode (boatModeEnum m) {
+	if (!modeNames.valid(m))
+		return false;
+	mode = m;
 	return true;
 }
 
-bool boneStateClass::setCommand (boneStateEnum c) {
-	if ((c > boneStateCount) || (c < 0)) return false;
-	command = c;
+bool boneStateClass::setCommand (boatModeEnum m) {
+	if (!modeNames.valid(m))
+		return false;
+	command = m;
 	return true;
 }
 
 bool boneStateClass::setArduinoMode (arduinoStateClass::Mode s) {
-	if ((s > arduinoStateClass::arduinoStateCount) || (s < 0)) return false;
-	ardState = s;
+	if (!arduinoStateClass::modeNames.valid(s))
+		return false;
+	ardMode = s;
 	return true;
 }
 		

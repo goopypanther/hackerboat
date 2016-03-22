@@ -216,36 +216,39 @@ bool arduinoStateClass::isValid (void) const {
 }
 
 bool arduinoStateClass::setCommand (arduinoModeEnum c) {
-	if ((c > arduinoStateCount) || (c < 0)) return false;
+	if (!modeNames.valid(c))
+		return false;
 	command = c;
 	return true;
 }
 
-bool arduinoStateClass::writeBoatMode(boatModeEnum s) {
-	if (setBoatMode(s)) {
-		std::string ret = write("writeBoatMode", std::string.to_string((int)bone));
+bool arduinoStateClass::writeBoatMode(boatModeEnum m) {
+	if (setBoatMode(m)) {
+		json_t *ret = write("writeBoatMode", boneStateClass::modeNames.get(m));
+		if (!ret)
+			return false;
+		json_decref(ret);
 	} else return false;
 	return true;
 }
 
 bool arduinoStateClass::writeCommand(void) {
 	bool retVal = false;
-	json_t *ret = write("writeCommand", enumerationNameTable::get(command));
+	json_t *ret = write("writeCommand", modeNames.get(command));
 	if (ret) {
 		json_t *result = json_object_get(ret, "command");
 		if (result) {
 			std::string check = string(json_string_value(result));
-			if (check == enumerationNameTable::get(command)) {
+			if (check == modeNames.get(command)) {
 				retVal = true;
 			} else {
 				retVal = false;
 			}
-			free(result);
 		} else {
 			retVal = false;
 		}
+		json_decref(ret);
 	} else retVal = false;
-	free(ret);
 	return retVal;
 }
 
@@ -255,48 +258,44 @@ bool arduinoStateClass::writeCommand(arduinoModeEnum c) {
 	} else return false;
 }
 
-int16_t writeThrottle(int16_t t) {
+int16_t arduinoStateClass::writeThrottle(int16_t t) {
 	throttle = t;
 	return writeThrottle();
 }
 
 int16_t arduinoStateClass::writeThrottle(void) {
-	bool retVal = false;
-	json_t *ret = write("writeThrottle", std::string.to_string((int)throttle));
+	json_t *ret = write("writeThrottle", std::to_string((int)throttle));
 	if (ret) {
 		json_t *result = json_object_get(ret, "throttle");
 		if (result) {
 			throttle = json_integer_value(result);
-			free(result);
 		}
+		json_decref(ret);
 	}
-	free(ret);
 	return throttle;
 }
 
 double arduinoStateClass::writeHeadingTarget(void) {
-	json_t *ret = write("writeHeadingTarget", std::string.to_string(headingTarget));
+	json_t *ret = write("writeHeadingTarget", std::to_string(headingTarget));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
 			headingTarget = json_integer_value(result);
-			free(result);
 		}
+		json_decref(ret);
 	}
-	free(ret);
 	return headingTarget;
 }
 
 double arduinoStateClass::writeHeadingDelta(double delta) {
-	json_t *ret = write("writeHeadingDelta", std::string.to_string(delta));
+	json_t *ret = write("writeHeadingDelta", std::to_string(delta));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
 			headingTarget = json_integer_value(result);
-			free(result);
 		}
+		json_decref(ret);
 	}
-	free(ret);
 	return headingTarget;
 }
 
@@ -306,18 +305,24 @@ bool arduinoStateClass::heartbeat(void) {
 }
 
 bool arduinoStateClass::populate(void) {
-	bool result = true;
-	json_error_t *err;
 	bool result;
 	json_t *in = write("dumpCoreState", "");
+
 	json_t *other = write("dumpOrientationState", "");
-	json_update(in, other);
+	json_object_update(in, other);
+	json_decref(other);
+
 	other = write("dumpInputState", "");
-	json_update(in, other);
+	json_object_update(in, other);
+	json_decref(other);
+
 	other = write("dumpRawInputState", "");
-	json_update(in, other);
+	json_object_update(in, other);
+	json_decref(other);
+
 	other = write("dumpOutputState", "");
-	json_update(in, other);
+	json_object_update(in, other);
+	json_decref(other);
 	
 	if (in) {
 		this->parse(in, false);
@@ -326,20 +331,21 @@ bool arduinoStateClass::populate(void) {
 		result = false;
 		errLog->write("Arduino Serial", "Failed to parse incoming json from Arduino");
 	}
-	free(in);
-	free(other);
-	free(err);
+
+	json_decref(in);
 	return result;
 }
 
-bool arduinoStateClass::setMode(arduinoModeEnum s) {
-	if ((s > arduinoStateCount) || (s < 0)) return false; 
-	mode = s;
+bool arduinoStateClass::setMode(arduinoModeEnum m) {
+	if (!modeNames.valid(m))
+		return false;
+	mode = m;
 	return true;
 }
 
 bool arduinoStateClass::setBoatMode(boatModeEnum s) {
-	if ((s > boneStateClass::boneStateCount) || (s < 0)) return false;
+	if (!boneStateClass::modeNames.valid(s))
+		return false;
 	boat = s;
 	return true;
 }
@@ -347,7 +353,7 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 json_t *arduinoStateClass::write(string func, string params) {
 	std::string ret;
 	json_t *result;
-	json_err_t *err;
+	json_error_t err;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
 	
@@ -373,7 +379,7 @@ json_t *arduinoStateClass::write(string func, string params) {
 		errLog->write("Arduino Serial", "Failed to read return value");
 		return NULL;
 	}
-	result = json_loads(ret.c_str(), JSON_DECODE_ANY, err);
+	result = json_loads(ret.c_str(), JSON_DECODE_ANY, &err);
 	return result;
 }
 	

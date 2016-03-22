@@ -34,8 +34,8 @@ class boneStateClass : public hackerboatStateClassStorable {
 
 		bool insertFault (const string fault);		/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const string fault);		/**< Remove the named fault from the fault string. Returns false if not present */
-		bool hasFault (const string fault);		/**< Returns true if given fault is present */
-		int faultCount (void);				/**< Returns the current number of faults */
+		bool hasFault (const std::string fault) const;	/**< Returns true if given fault is present */
+		int faultCount (void) const;			/**< Returns the current number of faults */
 
 		bool setMode (boatModeEnum s);			/**< Set state to the given value */
 		bool setCommand (boatModeEnum c);		/**< Set command to the given value */
