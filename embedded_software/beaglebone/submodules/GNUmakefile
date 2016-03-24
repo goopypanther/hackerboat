@@ -7,9 +7,9 @@ tohere:=$(shell git rev-parse --show-prefix)
 
 # Submodules
 BlackLib/.git:
-	( cd $(base) && git submodule update -- $(tohere)/BlackLib )
+	( cd $(base) && git submodule update --init -- $(tohere)/BlackLib )
 jansson/.git:
-	( cd $(base) && git submodule update -- $(tohere)/jansson )
+	( cd $(base) && git submodule update --init -- $(tohere)/jansson )
 
 # Build jansson
 lib/libjansson.a include/jansson.a: jansson/.git
