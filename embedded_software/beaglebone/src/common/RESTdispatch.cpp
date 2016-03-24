@@ -18,10 +18,22 @@
 
 #include <string>
 
-using namespace string;
 using namespace BlackLib;
 
 static logError *errLog = logError::instance();
+
+RESTdispatchClass::RESTdispatchClass(const string name)
+  : _name(name) {
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
+};
+
+
+RESTdispatchClass::RESTdispatchClass(const string name, RESTdispatchClass** table, size_t tableSize)
+	: _name(name),
+	  _dispatchTable(table),
+	  _tableSize(tableSize) {
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
+};
 
 json_t* RESTdispatchClass::dispatch (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen) {
 	int num;

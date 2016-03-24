@@ -18,7 +18,9 @@
 #include <string.h>
 #include <time.h>
 #include "config.h"
-#include "stateStructTypes.hpp"
+#include "boneState.hpp"
+#include "arduinoState.hpp"
+#include "navigation.hpp"
 
 class stateTimer {
 	public:
@@ -32,20 +34,19 @@ class stateTimer {
 	private:
 		uint32_t _duration;
 		uint32_t _current;
-}
+};
 
 class stateMachineBase {
-	use boneStateClass;
 	public:
 		stateMachineBase (boneStateClass *state, arduinoStateClass *ard) {
 			_state = state;
 			_ard = ard;
 			clock_gettime(CLOCK_REALTIME, &_start);
-			_lastState = this->_state->state;
+			_lastState = this->_state->mode;
 		};
 		virtual stateMachineBase *execute (void) = 0;
-		boneStateClass *getState (void) {return _state};
-		arduinoStateClass *getArduino (void) {return _ard}; 
+		boneStateClass *getState (void) {return _state;};
+		arduinoStateClass *getArduino (void) {return _ard;}; 
 		bool GNSSFail (void);
 		bool arduinoFail (void);
 		bool shoreFail (void);
@@ -55,39 +56,46 @@ class stateMachineBase {
 	protected:
 		boneStateClass 		*_state;
 		arduinoStateClass	*_ard;
-		timespec			_start;
-		boneStateClass::boneStateEnum _lastState;
+		timespec		_start;
+		boatModeEnum		_lastState;
 	
-}
+};
 
-class boneStartState : public stateMachineBase {}
+class boneStartState : public stateMachineBase {
+};
 
-class boneSelfTestState : public stateMachineBase {}
+class boneSelfTestState : public stateMachineBase {
+};
 
-class boneDisarmedState : public stateMachineBase {}
+class boneDisarmedState : public stateMachineBase {
+};
 
-class boneArmedState : public stateMachineBase {}
+class boneArmedState : public stateMachineBase {
+};
 
-class boneManualState : public stateMachineBase {}
+class boneManualState : public stateMachineBase {
+};
 
 class boneWaypointState : public stateMachineBase {
 	private:
 		navClass 		_nav(NAV_DB_FILE);
 		waypointClass	_wp(WP_DB_FILE);
-}
+};
 
 class boneNoSignalState : public stateMachineBase {
 	private:
 		stateMachineBase *returnLastState (void);
-}
+};
 
 class boneReturnState : public stateMachineBase {
 	private:
 		navClass _nav(NAV_DB_FILE);
-}
+};
 
-class boneArmedTestState : public stateMachineBase {}
+class boneArmedTestState : public stateMachineBase {
+};
 
-class boneFaultState : public stateMachineBase {}
+class boneFaultState : public stateMachineBase {
+};
 
 #endif /* STATEMACHINE_H */

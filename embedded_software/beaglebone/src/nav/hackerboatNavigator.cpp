@@ -25,6 +25,7 @@
 #include "logs.hpp"
 #include "navigation.hpp"
 #include "location.hpp"
+#include "boneState.hpp"
 
 #define CLOCKID CLOCK_REALTIME
 #define SIG SIGRTMIN

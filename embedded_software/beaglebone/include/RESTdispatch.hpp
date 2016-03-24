@@ -46,21 +46,15 @@ using string = std::string;
 
 class RESTdispatchClass {
 	public:
-		RESTdispatchClass(void) = default;
-		RESTdispatchClass(const string name) : _name(name) {
-			MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
-		};		/**< Create a dispatch object with name */
+		RESTdispatchClass(const string name); 		/**< Create a dispatch object with name */
+
 		/**
 		 * @brief Constructor for a dispatch object with name and given dispatch table
 		 */
 		RESTdispatchClass	(const string name, 		/**< Name of the object */
-									RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
-									size_t tableSize) : 		/**< Number of items in the dispatch table */
-									_name(name),
-									_dispatchTable(table),
-									_tableSize(tableSize) {
-			MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);									
-		};
+					 RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
+					 size_t tableSize 		/**< Number of items in the dispatch table */
+					 );
 									
 		virtual bool addEntry (RESTdispatchClass *entry);		/**< Add an entry to the dispatch table */
 		virtual bool addNumber (RESTdispatchClass *entry);		/**< Add an entry to call when the next token is a decimal number */
@@ -89,7 +83,7 @@ class RESTdispatchClass {
 									char* query, 				/**< Query string, if any, from the request */
 									char* method, 				/**< Request method, generally either GET or POST */
 									char* body, 				/**< POST request body, if any */
-									int bodyLen); 				/**< Length of the body */
+									int bodyLen) 				/**< Length of the body */
 									{return NULL;};		
 		/**
 		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
@@ -102,7 +96,7 @@ class RESTdispatchClass {
 									char* query, 				/**< Query string, if any, from the request */
 									char* method, 				/**< Request method, generally either GET or POST */
 									char* body, 				/**< POST request body, if any */
-									int bodyLen); 				/**< Length of the body */
+									int bodyLen) 				/**< Length of the body */
 									{return NULL;}; 
 		
 	protected:	
@@ -156,8 +150,8 @@ class countDispatchClass : public RESTdispatchClass {
 	public:
 		countDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		bool addEntry (RESTdispatchClass *entry) {return false};
-		bool addNumber (RESTdispatchClass *entry) {return false};
+		bool addEntry (RESTdispatchClass *entry) {return false;};
+		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 	private:
 		hackerboatStateClassStorable* _target;
@@ -167,8 +161,8 @@ class insertDispatchClass : public RESTdispatchClass {
 	public:
 		insertDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		bool addEntry (RESTdispatchClass *entry) {return false};
-		bool addNumber (RESTdispatchClass *entry) {return false};
+		bool addEntry (RESTdispatchClass *entry) {return false;};
+		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 	private:
 		hackerboatStateClassStorable* _target;
@@ -178,8 +172,8 @@ class appendDispatchClass : public RESTdispatchClass {
 	public:
 		appendDispatchClass(hackerboatStateClassStorable* target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		bool addEntry (RESTdispatchClass *entry) {return false};
-		bool addNumber (RESTdispatchClass *entry) {return false};
+		bool addEntry (RESTdispatchClass *entry) {return false;};
+		bool addNumber (RESTdispatchClass *entry) {return false;};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 	private:
 		hackerboatStateClassStorable* _target;

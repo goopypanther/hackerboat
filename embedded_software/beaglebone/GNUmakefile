@@ -42,6 +42,10 @@ FCGI_SRCS=cgi/hackerboatFastCGI.cpp
 hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+MASTER_SRCS=master/hackerboatMasterControl.cpp master/stateMachine.cpp
+master: $(addprefix src/,$(MASTER_SRCS:.cpp=.o)) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
 # Unit test targets
 TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o

@@ -11,19 +11,20 @@
  *
  ******************************************************************************/
  
+#include "config.h"
+
 #include <stdlib.h>
-#include <sqlite3.h>
 #include <stdio.h>
 #include <string.h>
-#include <jansson.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+
 #include "stateStructTypes.hpp"
-#include "config.h"
+#include "boneState.hpp"
+#include "arduinoState.hpp"
 #include "logs.hpp"
-#include "navigation.hpp"
-#include "location.hpp"
+#include "stateMachine.hpp"
 
 #define CLOCKID CLOCK_REALTIME
 #define SIG SIGRTMIN
@@ -97,7 +98,7 @@ void input (boneStateClass *state, arduinoStateClass *ard) {
 	state->gps.openFile();
 	if (!state->gps.getLastRecord()) {
 		state->insertFault("No GNSS");
-		state->setState(BONE_FAULT);
+		state->setMode(state->Mode::FAULT);
 	}
 	state->gps.closeFile();
 }
