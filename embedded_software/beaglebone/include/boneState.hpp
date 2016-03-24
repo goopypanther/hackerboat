@@ -32,8 +32,8 @@ class boneStateClass : public hackerboatStateClassStorable {
 
 		boneStateClass ();
 
-		bool insertFault (const string fault);		/**< Add the named fault to the fault string. Returns false if fault string is full */
-		bool removeFault (const string fault);		/**< Remove the named fault from the fault string. Returns false if not present */
+		bool insertFault (const std::string fault);	/**< Add the named fault to the fault string. Returns false if fault string is full */
+		bool removeFault (const std::string fault);	/**< Remove the named fault from the fault string. Returns false if not present */
 		bool hasFault (const std::string fault) const;	/**< Returns true if given fault is present */
 		int faultCount (void) const;			/**< Returns the current number of faults */
 
@@ -46,7 +46,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		boatModeEnum				mode = Mode::NONE;	/**< current mode of the beaglebone */
 		boatModeEnum				command = Mode::NONE;	/**< commanded mode of the beaglebone */
 		arduinoModeEnum				ardMode;		/**< current mode of the Arduino */
-		string						faultString;		/**< comma separated list of faults */
+		std::string					faultString;		/**< comma separated list of faults */
 		gpsFixClass					gps;			/**< current GPS position */
 		int32_t						waypointNext;		/**< ID of the current target waypoint */
 		double						waypointStrength;	/**< Strength of the waypoint */
