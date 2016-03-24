@@ -16,3 +16,9 @@ $ wpa_passphrase <boat ssid> <boat passphrase>
 ```
 
 ## rc.d changes
+
+Run the following commands:
+
+```
+$ update-rc.d -f apache2 remove
+```
