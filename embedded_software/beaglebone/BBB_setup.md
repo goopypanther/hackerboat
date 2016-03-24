@@ -20,5 +20,6 @@ $ wpa_passphrase <boat ssid> <boat passphrase>
 Run the following commands:
 
 ```
-$ update-rc.d -f apache2 remove
+# update-rc.d -f apache2 remove
+# update-rc.d -f lighttpd defaults
 ```
