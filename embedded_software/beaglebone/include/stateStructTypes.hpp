@@ -76,9 +76,6 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 
 		sequence getSequenceNum (void) const {return _sequenceNum;};				/**< Get the sequenceNum of this object (-1 until populated from or inserted into a file) */
 
-		bool openFile(const string name);						/**< Open the given database file & store the name */
-		bool openFile(void);									/**< Open the stored database file */
-		bool closeFile(void);									/**< Close the open file */
 		sequence countRecords (void);								/**< Return the number of records of the object's type in the open database file */
 		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
 		bool getRecord(sequence select);							/**< Populate the object from the open database file */

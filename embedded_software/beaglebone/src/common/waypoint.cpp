@@ -179,7 +179,8 @@ hackerboatStateStorage &waypointClass::storage() {
 	static hackerboatStateStorage *waypointStorage;
 
 	if (!waypointStorage) {
-		waypointStorage = new hackerboatStateStorage(0, "WAYPOINT", 
+		waypointStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(WP_DB_FILE),
+							     "WAYPOINT",
 							     { { "latitude",   "REAL" },
 							       { "longitude",  "REAL" },
 							       { "index",      "INTEGER" },

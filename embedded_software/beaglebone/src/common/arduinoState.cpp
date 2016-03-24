@@ -215,6 +215,19 @@ bool arduinoStateClass::isValid (void) const {
 	return true;
 }
 
+hackerboatStateStorage &arduinoStateClass::storage() {
+	static hackerboatStateStorage *arduinoStorage;
+
+	if (!arduinoStorage) {
+		arduinoStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(ARD_LOG_DB_FILE),
+							    "ARDUINO",
+							    { { "json", "TEXT"    } });
+		arduinoStorage->createTable();
+	}
+
+	return *arduinoStorage;
+}
+
 bool arduinoStateClass::setCommand (arduinoModeEnum c) {
 	if (!modeNames.valid(c))
 		return false;

@@ -38,8 +38,6 @@ static bool timerFlag = true;
 logError *err = logError::instance();
 
 int main (void) {
-	boneStateClass myState(BONE_LOG_DB_FILE, strlen(BONE_LOG_DB_FILE));
-	arduinoStateClass myArd(ARD_LOG_DB_FILE, strlen(ARD_LOG_DB_FILE));
 	stateMachineBase *thisState, *lastState;
 	timer_t timerid;
     struct sigevent sev;

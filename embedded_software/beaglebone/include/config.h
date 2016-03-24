@@ -29,15 +29,17 @@
 #define RETURN_TIMEOUT		(180)
 
 // File names
-#define	GPS_DB_FILE
-#define	NAV_DB_FILE
-#define	BONE_LOG_DB_FILE
-#define ARD_LOG_DB_FILE
-#define WP_DB_FILE	
-#define REST_LOGFILE
-#define NAV_LOGFILE
-#define MAIN_LOGFILE
+#define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
+#define GPS_DB_FILE		"gps.db"
+#define NAV_DB_FILE		"nav.db"
+#define BONE_LOG_DB_FILE	"boatstate.db"
+#define ARD_LOG_DB_FILE  	"boatstate.db"
+#define WP_DB_FILE		"waypoint.db"
+
+#define REST_LOGFILE		"REST.log"
+#define NAV_LOGFILE       	"nav.log"
+#define MAIN_LOGFILE		"main.log"
 
 #endif /* CONFIG_H */
 
-	
+

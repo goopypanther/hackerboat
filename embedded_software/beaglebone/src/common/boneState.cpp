@@ -129,6 +129,19 @@ bool boneStateClass::isValid (void) const {
 	return true;
 }
 
+hackerboatStateStorage &boneStateClass::storage() {
+	static hackerboatStateStorage *boneStorage;
+
+	if (!boneStorage) {
+		boneStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(BONE_LOG_DB_FILE),
+							    "BEAGLEBONE",
+							    { { "json", "TEXT"    } });
+		boneStorage->createTable();
+	}
+
+	return *boneStorage;
+}
+
 bool boneStateClass::insertFault (const string fault) {
 	if (!this->hasFault(fault)) {
 		faultString += fault + ":";

@@ -9,11 +9,15 @@
 #include "sqliteStorage.hpp"
 #include "stateStructTypes.hpp"
 #include "logs.hpp"
+#include "config.h"
 
+#include <string>
 #include <sstream>
+#include <unordered_map>
 
 extern "C" {
 #include <err.h>
+#include <string.h>
 #include <sqlite3.h>
 #include "jansson.h"
 }
@@ -183,15 +187,44 @@ shared_stmt& hackerboatStateStorage::updateRecord()
 //******************************************************************************
 // Database connection and schema setup
 
+static std::unordered_map<std::string, shared_dbh> open_files;
+
 shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 {
-	static shared_dbh dbh;
-	if (!dbh) {
-		sqlite3 *p;
-		if (sqlite3_open("/tmp/foo.sqlite", &p) != SQLITE_OK) {
-			errx(1, "Failed to open sqlite database.");
-		}
+	std::string name( filename? filename : ":memory:" );
+
+
+	auto curs = open_files.find(name);
+	if (curs != open_files.end())
+		return curs->second;
+
+	std::string path;
+
+	if (filename) {
+		const char *db_dir = ::getenv("DB_DIRECTORY");
+		if (!db_dir)
+			db_dir = DB_DIRECTORY;
+
+		path.append(db_dir);
+		if (!path.empty() && path.back() != '/')
+			path.append("/");
+		path.append(name);
+	} else {
+		path = name; /* ":memory:" */
+	}
+
+	shared_dbh dbh;
+	sqlite3 *p;
+	if (sqlite3_open_v2(path.c_str(), &p,
+			    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+			    NULL) != SQLITE_OK) {
+		warnx("sqlite3_open: %s: %s",
+		      path.c_str(),
+		      p? sqlite3_errmsg(p) : ::strerror(errno));
+		sqlite3_close(p /* NULL OK */);
+	} else {
 		dbh.reset(p, dbh_deleter());
+		open_files.emplace(name, dbh);
 	}
 
 	return dbh;

@@ -36,7 +36,6 @@ static void handler(int sig, siginfo_t *si, void *uc);
 static bool timerFlag = true;
 
 int main (void) {
-	navClass nav (NAV_DB_FILE, strlen(NAV_DB_FILE));
 	navVectorClass *navInf;
 	int navCount;
 	timer_t timerid;

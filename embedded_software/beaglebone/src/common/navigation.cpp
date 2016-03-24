@@ -143,12 +143,9 @@ hackerboatStateStorage &navClass::storage() {
 	static hackerboatStateStorage *navStorage;
 
 	if (!navStorage) {
-		navStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(":memory:"),
+		navStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(NAV_DB_FILE),
 							"NAV",
-							{ { "current", "TEXT"    },
-							  { "target",  "INTEGER" },
-							  { "total",   "TEXT"    },
-							  { "other",   "TEXT"    } });
+							{ { "json", "TEXT"    } });
 		navStorage->createTable();
 	}
 

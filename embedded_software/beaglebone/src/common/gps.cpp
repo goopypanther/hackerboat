@@ -92,7 +92,7 @@ hackerboatStateStorage &gpsFixClass::storage() {
 	static hackerboatStateStorage *gpsStorage;
 
 	if (!gpsStorage) {
-		gpsStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection("gps"),
+		gpsStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
 							{ { "time", "REAL" },
 							  { "latitude", "REAL" },
