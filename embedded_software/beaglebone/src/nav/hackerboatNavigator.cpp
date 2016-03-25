@@ -78,22 +78,24 @@ int main (void) {
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
 		navClass nav;
-			if (nav.getLastRecord()) {
-				if (nav.isValid()) {
-					nav.clearVectors();
-					for (uint16_t i = 0; i < navCount; i++) {
-						if (navInf[i].isValid()) {
-							nav.appendVector(navInf[i].calc());
-						} 
-					}
-				} else {
-					logError::instance()->write("nav process", "Fetched record is invalid");
+		boneStateClass boat;
+		boat.getLastRecord();
+		if (nav.getLastRecord()) {
+			if (nav.isValid() && boat.getLastRecord.isValid()) {
+				nav.clearVectors();
+				for (uint16_t i = 0; i < navCount; i++) {
+					if (navInf[i].isValid()) {
+						nav.appendVector(navInf[i].calc(boat.waypointStrengthMax));
+					} 
 				}
-				nav.calc();
-				nav.writeRecord();
 			} else {
-				logError::instance()->write("nav process", "Failed to get last nav record");
+				logError::instance()->write("nav process", "Fetched record is invalid");
 			}
+			nav.calc();
+			nav.writeRecord();
+		} else {
+			logError::instance()->write("nav process", "Failed to get last nav record");
+		}
 		timerFlag = false;		// mark that we're done with the frame
 	}
 }

@@ -30,8 +30,8 @@ class sqliteParameterSlice;
 class sqliteRowReference;
 
 // temporary class definition until we include or define the real one
-class sensors_vec_t {
-};
+//class sensors_vec_t {
+//};
 
 /**
  * @class hackerboatStateClass 

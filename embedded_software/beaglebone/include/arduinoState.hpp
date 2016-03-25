@@ -46,11 +46,11 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 
 		bool 				popStatus;			/**< State of whether the last call to populate() succeeded or failed */
 		timespec			uTime;				/**< Time the record was made */
-		arduinoModeEnum 		mode;				/**< The current mode of the arduino                    */
-		arduinoModeEnum			command;			/**< Last state command received by the Arduino */
+		arduinoModeEnum 	mode;				/**< The current mode of the arduino                    */
+		arduinoModeEnum		command;			/**< Last state command received by the Arduino */
 		int8_t		 		throttle;   			/**< The current throttle position                    */
-		boatModeEnum 			boat;				/**< The current mode of the BeagleBone                */
-		orientationClass		orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
+		boatModeEnum 		boat;				/**< The current mode of the BeagleBone                */
+		orientationClass	orientation;			/**< The current accelerometer tilt and magnetic heading of the boat  */
 		float 				headingTarget;			/**< The desired magnetic heading                     */
 		float 				internalVoltage;		/**< The battery voltage measured on the control PCB          */
 		float 				batteryVoltage;			/**< The battery voltage measured at the battery            */
@@ -90,7 +90,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool				servoPower;
 		long 				startStopTime;
 		long				startModeTime;
-		arduinoModeEnum			originMode;
+		arduinoModeEnum		originMode;
 
 
 		/* Concrete implementations of stateClassStorable */

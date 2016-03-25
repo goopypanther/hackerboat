@@ -103,7 +103,7 @@ class RESTdispatchClass {
 		RESTdispatchClass* _numberDispatch	= NULL;				/**< Object to dispatch to if the next token is a number */
 		RESTdispatchClass** _dispatchTable	= NULL;				/**< Dispatch table */
 		size_t _tableSize 					= 0;				/**< Size of the dispatch table */
-		string std::_name			 		= "";				/**< Name of this object */
+		std::string _name			 		= "";				/**< Name of this object */
 		uint32_t _hash 						= 0;				/**< MurmurHash3 of the object name */
 };
 
