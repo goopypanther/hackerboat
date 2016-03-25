@@ -36,7 +36,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 
 		// Command functions...
 		bool writeBoatMode(boatModeEnum s);
-		bool writeCommand(boatModeEnum s);
+		bool writeCommand(arduinoModeEnum s);
 		bool writeCommand(void);
 		int16_t writeThrottle(int16_t t);
 		int16_t writeThrottle(void);
