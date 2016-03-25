@@ -72,3 +72,8 @@ submodules:
 
 -include $(LIBHACKERBOAT_SRCS:.cpp=.d)
 -include $(addprefix src/,$(NAV_SRCS:.cpp=.d))
+
+clean:
+	rm -rf *.o
+	rm -rf *.d
+	rm -rf *.a
