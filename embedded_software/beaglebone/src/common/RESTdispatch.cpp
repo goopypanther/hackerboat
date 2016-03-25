@@ -96,7 +96,7 @@ bool RESTdispatchClass::addNumber (RESTdispatchClass *entry) {
 	}
 }
 
-uint32_t RESTdispatchClass::setName (const string name) {
+uint32_t RESTdispatchClass::setName (const std::string name) {
 	// set the name, calculate the hash, and return the hash
 	_name = name;
 	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
@@ -294,7 +294,7 @@ json_t* rootRESTClass::defaultFunc(char** tokens, uint32_t* tokenHashes, size_t*
 	return this->root(tokens, tokenHashes, tokenLengths, tokenCnt, currentToken, query, method, body, bodyLen);
 }
 
-boneStateRESTClass::boneStateRESTClass(const string name) {
+boneStateRESTClass::boneStateRESTClass(const std::string name) {
 	// set the name and calculate the hash...
 	_name = name
 	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);

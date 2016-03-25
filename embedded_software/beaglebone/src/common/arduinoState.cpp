@@ -363,7 +363,7 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 	return true;
 }
 
-json_t *arduinoStateClass::write(string func, string params) {
+json_t *arduinoStateClass::write(std::string func, std::string params) {
 	std::string ret;
 	json_t *result;
 	json_error_t err;

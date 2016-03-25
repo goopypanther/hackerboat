@@ -36,7 +36,9 @@ static void handler(int sig, siginfo_t *si, void *uc);
 static bool timerFlag = true;
 
 int main (void) {
-	navVectorClass *navInf;
+	//navClass nav (NAV_DB_FILE, strlen(NAV_DB_FILE));
+	navClass nav;
+	navigatorBase *navInf;
 	int navCount;
 	timer_t timerid;
     struct sigevent sev;
@@ -77,12 +79,12 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
-		if (nav.openFile()) {
+		if (nav.openFile(NAV_DB_FILE)) {
 			if (nav.getLastRecord()) {
 				if (nav.isValid()) {
 					nav.clearVectors();
 					for (uint16_t i = 0; i < navCount; i++) {
-						if (navInf[i] && navInf[i].isValid) {
+						if (navInf[i] && navInf[i].isValid()) {
 							nav.appendVector(navInf[i].calc());
 						} 
 					}
