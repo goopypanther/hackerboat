@@ -25,11 +25,12 @@ navVectorClass::navVectorClass (std::string src, double bearing, double strength
 {
 }
 
-bool inline navVectorClass::isValid (void) const {
-	if ((_bearing >= 0) && (_bearing <= 360) && 
-		(_strength >= 0) && isnormal(_bearing) &&
-		isnormal(_strength)) return true;
-	return false;
+bool navVectorClass::isValid (void) const {
+	if (!isfinite(_bearing) || !((_bearing >= 0) && (_bearing <= 360)))
+		return false;
+	if (!isfinite(_strength) || !(_strength >= 0))
+		return false;
+	return true;
 }
 
 bool navVectorClass::norm (void) {
@@ -76,11 +77,9 @@ json_t* navVectorClass::pack(void) const {
 	return json_pack("{s:s,s:f,s:f}", "source", _source.c_str(), "bearing", _bearing, "strength", _strength);
 }
 
-static const char * const _format = "{s:o,s:o,s:f,s:f,s:o,s:o,s:o}";
-
 bool navClass::parse(json_t *input, bool seq) {
 	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
-	if (json_unpack(input, _format,
+	if (json_unpack(input, "{s:o,s:o,s:F,s:F,s:o,s:o,s:o}",
 			"current", &currentIn,
 			"target", &targetIn,
 			"waypointStrength", &waypointStrength,
@@ -98,17 +97,22 @@ bool navClass::parse(json_t *input, bool seq) {
 		if (seqIn) _sequenceNum = json_integer_value(seqIn);
 	}
 
-	current.parse(currentIn);
-	target.parse(targetIn, seq); // FIXME: What should we be passing for the `seq` parameter here?
-	targetVec.parse(targetVecIn);
-	total.parse(totalIn);
-	parseInfluences(navArrayIn);
+	if (!current.parse(currentIn))
+		return false;
+	if (!target.parse(targetIn, seq))
+		return false;
+	if (!targetVec.parse(targetVecIn))
+		return false;
+	if (!total.parse(totalIn))
+		return false;
+	if (!parseInfluences(navArrayIn))
+		return false;
 	/* We asked json_unpack() to give us borrowed references for all of these values, so we don't need to decref them here. */
 	return this->isValid();
 }
 
 json_t* navClass::pack (bool seq) const {
-	json_t *output = json_pack(_format,
+	json_t *output = json_pack("{s:o,s:o,s:f,s:f,s:o,s:o,s:o}",
 				   "current", current.pack(),
 				   "target", target.pack(seq), /* FIXME: seq? */
 				   "waypointStrength", waypointStrength,
@@ -123,18 +127,25 @@ json_t* navClass::pack (bool seq) const {
 bool navClass::parseInfluences(json_t *navArrayIn) {
 	if (!json_is_array(navArrayIn))
 	    return false;
-	int influenceCount = json_array_size(navArrayIn);
+	size_t influenceCount = json_array_size(navArrayIn);
 	navInfluences.resize(influenceCount);
-	for (int i; i < influenceCount; i++) {
+	for (size_t i = 0; i < influenceCount; i++) {
 		if (!navInfluences[i].parse(json_array_get(navArrayIn, i)))
 			return false;
 	}
+
+	return true;
 }
 
 json_t *navClass::packInfluences(void) const {
 	json_t *array = json_array();
 	for (auto it = navInfluences.cbegin(); it != navInfluences.cend(); it ++) {
-		json_array_append_new(array, it->pack());
+		json_t *entry = it->pack();
+		if (!entry) {
+			json_decref(array);
+			return NULL;
+		}
+		json_array_append_new(array, entry);
 	}
 	return array;
 }
@@ -161,7 +172,7 @@ bool navClass::fillRow(sqliteParameterSlice row) const
 	row.bind_json_new(2, total.pack());
 
 	json_t *array = json_array();
-	for (int i = 0; i < navInfluences.size(); i++) {
+	for (typeof(navInfluences.size()) i = 0; i < navInfluences.size(); i++) {
 		json_array_append_new(array, navInfluences[i].pack());
 	}
 	row.bind_json_new(3, json_pack("{s:f,s:f,s:o,s:o}",

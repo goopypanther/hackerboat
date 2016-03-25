@@ -47,7 +47,7 @@ master: $(addprefix src/,$(MASTER_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
-TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o
+TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o navigation_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 storage_test: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)

@@ -29,6 +29,12 @@ waypointClass::waypointClass (locationClass loc, action action)
 {
 }
 
+bool waypointClass::setAction(waypointClass::action action)
+{
+	act = action;
+	return true;
+}
+
 bool waypointClass::parse(json_t *input, bool seq)
 {
 	json_t *val;
@@ -37,13 +43,23 @@ bool waypointClass::parse(json_t *input, bool seq)
 		return false;
 
 	val = json_object_get(input, "index");
-	index = val? json_integer_value(val) : -1;
+	if (val) {
+		if (!json_is_integer(val))
+			return false;
+		index = json_integer_value(val);
+	} else
+		index = -1;
 
 	val = json_object_get(input, "nextWaypoint");
-	nextWaypoint = val? json_integer_value(val) : -1;
+	if (val) {
+		if (!json_is_integer(val))
+			return false;
+		nextWaypoint = json_integer_value(val);
+	} else
+		nextWaypoint = -1;
 
 	val = json_object_get(input, "action");
-	if (!parse(val, &act))
+	if (!::parse(val, &act))
 		return false;
 
 	if (seq) {
@@ -111,9 +127,10 @@ bool fromString(const char *name, waypointClass::action *act)
 	/* World's simplest perfect hash function */
 	waypointClass::action result;
 	switch(name[0] % 3) {
-	case 0: result = waypointClass::action::CONTINUE; break;
-	case 1: result = waypointClass::action::HOME; break;
+	case 0: result = waypointClass::action::HOME; break;
+	case 1: result = waypointClass::action::CONTINUE; break;
 	case 2: result = waypointClass::action::STOP; break;
+	default: return false;
 	}
 	if (!::strcmp(name, toString(result))) {
 		*act = result;
