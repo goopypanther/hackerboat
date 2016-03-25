@@ -36,7 +36,7 @@ static void handler(int sig, siginfo_t *si, void *uc);
 static bool timerFlag = true;
 
 int main (void) {
-	navVectorClass *navInf;
+	navigatorBase *navInf;
 	int navCount;
 	timer_t timerid;
     struct sigevent sev;
@@ -77,15 +77,13 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
-
 		navClass nav;
-
 			if (nav.getLastRecord()) {
 				if (nav.isValid()) {
 					nav.clearVectors();
 					for (uint16_t i = 0; i < navCount; i++) {
 						if (navInf[i].isValid()) {
-							nav.appendVector(navInf[i]);
+							nav.appendVector(navInf[i].calc());
 						} 
 					}
 				} else {
