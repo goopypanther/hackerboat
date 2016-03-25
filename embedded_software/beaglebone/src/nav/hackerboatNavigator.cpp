@@ -85,13 +85,13 @@ int main (void) {
 				nav.clearVectors();
 				for (uint16_t i = 0; i < navCount; i++) {
 					if (navInf[i].isValid()) {
-						nav.appendVector(navInf[i].calc(boat.waypointStrengthMax));
+						nav.appendVector(navInf[i].calc());
 					} 
 				}
 			} else {
 				logError::instance()->write("nav process", "Fetched record is invalid");
 			}
-			nav.calc();
+			nav.calc(boat.waypointStrengthMax);
 			nav.writeRecord();
 		} else {
 			logError::instance()->write("nav process", "Failed to get last nav record");
