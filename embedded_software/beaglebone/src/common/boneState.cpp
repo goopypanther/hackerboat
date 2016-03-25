@@ -23,9 +23,8 @@
 #include "arduinoState.hpp"
 #include "sqliteStorage.hpp"
 
-#include <string>
-using namespace std;
- 
+using string = std::string;
+
 const enumerationNameTable<boatModeEnum> boneStateClass::modeNames = {
 	"Start", 
 	"SelfTest", 
@@ -51,8 +50,8 @@ json_t *boneStateClass::pack (bool seq) const {
 			   "mode", json(mode),
 			   "command", json(command),
 			   "ardMode", json(ardMode),
-			   "faultString", json_string(faultString.c_str()), 
-			   "gps", gps.pack(true),
+			   "faultString", json(faultString),
+			   "gps", gps.pack(seq),
 			   "waypointNext", waypointNext,
 			   "waypointStrength", waypointStrength,
 			   "waypointAccuracy", waypointAccuracy,
@@ -90,7 +89,7 @@ bool boneStateClass::parse (json_t *input, bool seq = true) {
 	if (!::parse(inUtime, &uTime) ||
 	    !::parse(inLastContact, &lastContact) ||
 	    !::parse(inFaultString, &faultString) ||
-	    !gps.parse(inGNSS, true) ||
+	    !gps.parse(inGNSS, seq) ||
 	    !launchPoint.parse(inLaunch))
 		return false;
 	{
@@ -149,7 +148,7 @@ bool boneStateClass::insertFault (const string fault) {
 	return true;
 }
 
-bool boneStateClass::hasFault (const std::string fault) const {
+bool boneStateClass::hasFault (const string fault) const {
 	if (faultString.find(fault) != std::string::npos) return true;
 	return false;
 }
@@ -194,8 +193,4 @@ bool boneStateClass::setArduinoMode (arduinoStateClass::Mode s) {
 	return true;
 }
 		
-void boneStateClass::initHashes (void) {
-	for (int i = 0; i < boneStateCount; i++) {
-		MurmurHash3_x86_32(boneStates[i].c_str(), boneStates[i].length(), HASHSEED, &(stateHashes[i]));
-	}
-}
+

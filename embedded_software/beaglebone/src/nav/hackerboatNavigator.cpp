@@ -77,13 +77,15 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
-		if (nav.openFile()) {
+
+		navClass nav;
+
 			if (nav.getLastRecord()) {
 				if (nav.isValid()) {
 					nav.clearVectors();
 					for (uint16_t i = 0; i < navCount; i++) {
-						if (navInf[i] && navInf[i].isValid) {
-							nav.appendVector(navInf[i].calc());
+						if (navInf[i].isValid()) {
+							nav.appendVector(navInf[i]);
 						} 
 					}
 				} else {
@@ -94,10 +96,6 @@ int main (void) {
 			} else {
 				logError::instance()->write("nav process", "Failed to get last nav record");
 			}
-			nav.closeFile();
-		} else {
-			logError::instance()->write("nav process", "Failed to open nav database");
-		}
 		timerFlag = false;		// mark that we're done with the frame
 	}
 }

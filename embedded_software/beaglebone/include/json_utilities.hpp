@@ -110,7 +110,7 @@ extern "C" {
 static inline
 std::ostream& operator<< (std::ostream& os, json_t *j)
 {
-	json_dump_callback(j, jansson_ostream, static_cast<void *>(&os), 0);
+	json_dump_callback(j, jansson_ostream, static_cast<void *>(&os), JSON_ENCODE_ANY);
 	return os;
 }
 

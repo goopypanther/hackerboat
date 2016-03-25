@@ -385,7 +385,11 @@ json_t *arduinoStateClass::write(string func, string params) {
 	}
 	
 	port.setReadBufferSize(LOCAL_BUF_LEN);
-	port << func << "?params=" << params << "\r\n" << std::endl;
+
+	std::ostringstream cmd;
+	cmd << func << "?params=" << params << "\r\n" << std::endl;
+
+	port.write(cmd.str());
 	port >> ret;
 	port.close();
 	if (ret == BlackLib::UART_READ_FAILED) {

@@ -16,13 +16,11 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
-#include <array>
 #include <string>
 #include "config.h"
 #include "location.hpp"
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
-#include "gps.hpp"
 #include "sqliteStorage.hpp"
 
 json_t *hackerboatStateClass::packTimeSpec (timespec t) {

@@ -104,6 +104,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 
 class orientationClass {
 	public:
+		orientationClass() {};
 		orientationClass(double r, double p, double y)
 		  : pitch(p), roll(r), heading(y)
 		{};
