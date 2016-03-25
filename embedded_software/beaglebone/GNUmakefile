@@ -10,8 +10,8 @@ GTEST_INC=/usr/include/gtest
 BLACKLIB=submodules/BlackLib/v3_0
 
 # On the Beaglebone, the default compiler is gcc 4.6, which doesn't support the C++11 features we use (mostly, initializers for non-static data members). This can be any C++11-capable compiler.
-CC = gcc-4.7
-CXX = g++-4.7
+CC = gcc
+CXX = g++
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
