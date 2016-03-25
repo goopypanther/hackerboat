@@ -98,7 +98,7 @@ int main (void) {
 	}
 }
 
-int initNav(navVectorClass *nav) {
+int initNav(navigatorBase *nav) {
 	nav = NULL;
 	return 0;
 }
