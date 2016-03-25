@@ -37,7 +37,6 @@ static bool timerFlag = true;
 
 int main (void) {
 	navigatorBase *navInf;
-	int navCount;
 	timer_t timerid;
     struct sigevent sev;
     struct itimerspec its;
@@ -45,7 +44,7 @@ int main (void) {
     struct sigaction sa;
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
-	navCount = initNav(navInf);					// initialize the list of nav sources
+	int navCount = initNav(navInf);					// initialize the list of nav sources
 	
 	// Establish the handler for the timer signal
 	sa.sa_flags = SA_SIGINFO;
@@ -81,7 +80,7 @@ int main (void) {
 		boneStateClass boat;
 		boat.getLastRecord();
 		if (nav.getLastRecord()) {
-			if (nav.isValid() && boat.getLastRecord.isValid()) {
+			if (nav.isValid() && boat.isValid()) {
 				nav.clearVectors();
 				for (uint16_t i = 0; i < navCount; i++) {
 					if (navInf[i].isValid()) {
