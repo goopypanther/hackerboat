@@ -30,7 +30,7 @@
 #define CLOCKID CLOCK_REALTIME
 #define SIG SIGRTMIN
 
-int initNav(navVectorClass *nav);
+int initNav(navigatorBase *nav);
 static void handler(int sig, siginfo_t *si, void *uc);
 
 static bool timerFlag = true;
