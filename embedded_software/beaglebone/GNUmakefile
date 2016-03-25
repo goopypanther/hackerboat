@@ -15,14 +15,14 @@ CXX = g++
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
-CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
+CPPFLAGS +=-I submodules/include -I include -I submodules/smhasher/src -MMD -MT $@
 LDFLAGS  +=-L submodules/lib
 
 LDLIBS += -ljansson -lsqlite3 -lBlackLib -lm -lrt
 
 export CC CXX OPTS
 
-VPATH=src/common:src/nav
+VPATH=src/common:src/nav:submodules/smhasher/src
 
 all: submodules nav hb.fcgi master
 .PHONY: all

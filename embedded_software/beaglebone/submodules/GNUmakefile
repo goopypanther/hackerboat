@@ -10,6 +10,8 @@ BlackLib/.git:
 	( cd $(base) && git submodule update --init -- $(tohere)/BlackLib )
 jansson/.git:
 	( cd $(base) && git submodule update --init -- $(tohere)/jansson )
+smhasher/.git:
+	( cd $(base) && git submodule update --init -- $(tohere)/smhasher )
 
 # Build jansson
 lib/libjansson.a include/jansson.a: jansson/.git
