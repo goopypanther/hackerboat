@@ -25,10 +25,7 @@
 RESTdispatchClass *initRESTDispatch (void);
 
 int main (void) {
-	char 		uri[LOCAL_BUF_LEN]				= {0}; 
-	char 		method[LOCAL_BUF_LEN]			= {0};
-	char		query[LOCAL_BUF_LEN]			= {0};
-	char		contentLength[LOCAL_BUF_LEN]	= {0}; 
+	char 		*uri, *method, *query, *contentLength;
 	char		response[LOCAL_BUF_LEN]			= {0};
 	char		*tokens[MAX_URI_TOKENS], *body, *tokenState;
 	uint32_t	tokenHashes[MAX_URI_TOKENS];
@@ -36,7 +33,7 @@ int main (void) {
 	json_t		*responseJSON, *jsonFinal;
 	int32_t		uriLen, methodLen, queryLen, bodyLen, contentLenLen;
 	int32_t		result, tokenCnt = 0;
-	rsize_t		tokenRemain;
+	size_t		tokenRemain;
 	RESTdispatchClass*	root;
 	logREST*	log = logREST::instance();
 	logError*	err = logError::instance();
@@ -46,11 +43,17 @@ int main (void) {
 	
 	while (FCGI_Accept() >= 0) {
 		// read in the critical environment variables and go to next iteration if any fail
-		if (getenv_s(&uriLen, uri, LOCAL_BUF_LEN, "REQUEST_URI")) continue;
-		if (getenv_s(&methodLen, method, LOCAL_BUF_LEN, "REQUEST_METHOD")) continue;
-		if (getenv_s(&queryLen, query, LOCAL_BUF_LEN, "QUERY_STRING")) continue;
-		if (getenv_s(&contentLenLen, contentLength, LOCAL_BUF_LEN, "CONTENT_LENGTH")) continue;
+		if (!(uri = getenv("REQUEST_URI")) continue;
+		if (!(method = getenv("REQUEST_METHOD")) continue;
+		if (!(query = getenv("QUERY_STRING")) continue;
+		if (!(contentLength = getenv("CONTENT_LENGTH")) continue;
 
+		// figure out the lengths of the various strings
+		uriLen = strlen(uri);
+		methodLen = strlen(method);
+		queryLen = strlen(query);
+		contentLenLen = strlen(contentLength);
+		
 		// if there is post data, read it in
 		bodyLen 	= atoi(contentLength);
 		if (bodyLen > 0) {
@@ -65,9 +68,9 @@ int main (void) {
 		// tokenize the URI & hash the elements
 		for (tokenCnt = 0; tokenCnt < MAX_URI_TOKENS; tokenCnt++) {
 			if (tokenCnt) {
-				tokens[tokenCnt] = strtok_s(NULL, &tokenRemain, "/\\", &tokenState);
+				tokens[tokenCnt] = strtok(NULL, "/\\");
 			} else {
-				tokens[tokenCnt] = strtok_s(uri, &tokenRemain, "/\\", &tokenState);
+				tokens[tokenCnt] = strtok(uri, "/\\");
 			}
 			if (tokens[tokenCnt] == NULL) break;
 			tokenLengths[tokenCnt] = strlen(tokens[tokenCnt]);
