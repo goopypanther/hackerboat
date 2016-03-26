@@ -26,6 +26,7 @@
 #include "navigation.hpp"
 #include "location.hpp"
 #include "boneState.hpp"
+#include "sqliteStorage.hpp"
 
 #define CLOCKID CLOCK_REALTIME
 #define SIG SIGRTMIN

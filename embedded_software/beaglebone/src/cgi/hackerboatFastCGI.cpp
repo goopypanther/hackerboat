@@ -114,8 +114,8 @@ RESTdispatchClass *initRESTDispatch (void) {
 	static arduinoStateClass		arduinoState;
 	
 	// leaf nodes
-	static resetArduinoRest			reset(std::string("resetArduino"));
-	static arduinoRESTClass			arduino(std::string("a"));
+	static resetArduinoRest			reset(const std::string("resetArduino"));
+	static arduinoRESTClass			arduino(const std::string("a"));
 	static allDispatchClass			boneAll(&boat);
 	static allDispatchClass			gpsAll(&gps);
 	static allDispatchClass			waypointAll(&waypoint);
