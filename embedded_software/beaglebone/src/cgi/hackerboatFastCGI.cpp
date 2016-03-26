@@ -23,6 +23,8 @@
 #include "logs.hpp"
 #include "boneState.hpp"
 #include "arduinoState.hpp"
+#include "navigation.hpp"
+#include "gps.hpp"
 
 RESTdispatchClass *initRESTDispatch (void);
 
