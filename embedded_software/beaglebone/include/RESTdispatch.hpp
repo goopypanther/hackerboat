@@ -182,14 +182,14 @@ class appendDispatchClass : public RESTdispatchClass {
 
 class rootRESTClass : public RESTdispatchClass {
 	public:
+		rootRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
 
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
-//		boneStateRESTClass(void) {setHashes();};
-//		boneStateRESTClass(const std::string name);			/**< Create a dispatch object with name */
+		boneStateRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (boneStateClass* target);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
@@ -213,6 +213,7 @@ class boneStateRESTClass : public RESTdispatchClass {
 
 class gpsRESTClass : public RESTdispatchClass {
 	public:
+		gpsRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (gpsFixClass* target);
 	private:
@@ -221,6 +222,7 @@ class gpsRESTClass : public RESTdispatchClass {
 
 class waypointRESTClass : public RESTdispatchClass {
 	public:
+		waypointRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (waypointClass* target);
 	private:
@@ -229,6 +231,7 @@ class waypointRESTClass : public RESTdispatchClass {
 
 class navRESTClass : public RESTdispatchClass {
 	public:
+		navRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (navClass* target);
 	private:
@@ -237,6 +240,7 @@ class navRESTClass : public RESTdispatchClass {
 
 class arduinoStateRESTClass : public RESTdispatchClass {
 	public:
+		arduinoStateRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		bool setTarget (arduinoStateClass* target);
 	private:
