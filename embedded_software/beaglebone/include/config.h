@@ -30,11 +30,11 @@
 
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
-#define GPS_DB_FILE		"gps.db"
-#define NAV_DB_FILE		"nav.db"
+#define GPS_DB_FILE			"gps.db"
+#define NAV_DB_FILE			"nav.db"
 #define BONE_LOG_DB_FILE	"boatstate.db"
 #define ARD_LOG_DB_FILE  	"boatstate.db"
-#define WP_DB_FILE		"waypoint.db"
+#define WP_DB_FILE			"waypoint.db"
 
 #define REST_LOGFILE		"REST.log"
 #define NAV_LOGFILE       	"nav.log"

@@ -21,6 +21,8 @@
 #include "config.h"
 #include <MurmurHash3.h>
 #include "logs.hpp"
+#include "boneState.hpp"
+#include "arduinoState.hpp"
 
 RESTdispatchClass *initRESTDispatch (void);
 
