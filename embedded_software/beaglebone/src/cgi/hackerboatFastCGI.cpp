@@ -107,46 +107,46 @@ int main (void) {
 
 RESTdispatchClass *initRESTDispatch (void) {
 	// data structure objects
-	static gpsFixClass				gps;
-	static navClass					nav;
-	static waypointClass			waypoint;
-	static boneStateClass			boat;
-	static arduinoStateClass		arduinoState;
+	gpsFixClass				*gps = new gpsFixClass;
+	navClass				*nav = new navClass;
+	waypointClass			*waypoint = new waypointClass;
+	boneStateClass			*boat = new boneStateClass;
+	arduinoStateClass		*arduinoState = new arduinoStateClass;
 	
 	// leaf nodes
-	static resetArduinoRest			reset(const std::string("resetArduino"));
-	static arduinoRESTClass			arduino(const std::string("a"));
-	static allDispatchClass			boneAll(&boat);
-	static allDispatchClass			gpsAll(&gps);
-	static allDispatchClass			waypointAll(&waypoint);
-	static allDispatchClass			navAll(&nav);
-	static allDispatchClass			arduinoAll(&arduinoState);
-	static numberDispatchClass		boneNum(&boat);
-	static numberDispatchClass		gpsNum(&gps);
-	static numberDispatchClass		waypointNum(&waypoint);
-	static numberDispatchClass		navNum(&nav); 
-	static numberDispatchClass		arduinoNum(&arduinoState);
-	static countDispatchClass		boneCount(&boat);
-	static countDispatchClass		gpsCount(&gps); 
-	static countDispatchClass		waypointCount(&waypoint);
-	static countDispatchClass		navCount(&nav); 
-	static countDispatchClass		arduinoCount(&arduinoState);
-	static appendDispatchClass		waypointAppend(&waypoint);
-	static insertDispatchClass		waypointInsert(&waypoint);
+	resetArduinoRest		*reset = new resetArduinoRest((const)std::string("resetArduino"));
+	arduinoRESTClass		*arduino = new arduinoRESTClass((const)std::string("a"));
+	allDispatchClass		*boneAll = new allDispatchClass(boat);
+	allDispatchClass		*gpsAll = new allDispatchClass(gps);
+	allDispatchClass		*waypointAll = new allDispatchClass(waypoint);
+	allDispatchClass		*navAll = new allDispatchClass(nav);
+	allDispatchClass		*arduinoAll = new allDispatchClass(arduinoState);
+	numberDispatchClass		*boneNum = new numberDispatchClass(boat);
+	numberDispatchClass		*gpsNum = new numberDispatchClass(gps);
+	numberDispatchClass		*waypointNum = new numberDispatchClass(waypoint);
+	numberDispatchClass		*navNum = new numberDispatchClass(nav); 
+	numberDispatchClass		*arduinoNum = new numberDispatchClass(arduinoState);
+	countDispatchClass		*boneCount = new countDispatchClass(boat);
+	countDispatchClass		*gpsCount = new countDispatchClass(gps); 
+	countDispatchClass		*waypointCount = new countDispatchClass(waypoint);
+	countDispatchClass		*navCount = new countDispatchClass(nav); 
+	countDispatchClass		*arduinoCount = new countDispatchClass(arduinoState);
+	appendDispatchClass		*waypointAppend = new appendDispatchClass(waypoint);
+	insertDispatchClass		*waypointInsert = new insertDispatchClass(waypoint);
 	
 	// root & branch nodes
-	static boneStateRESTClass 		boatREST("boneState", {&boneAll, &boneCount}, 2);
-	static gpsRESTClass 			gpsREST("gps", {&gpsAll, &gpsCount}, 2);
-	static waypointRESTClass		waypointREST("waypoint", {&waypointAll, &waypointCount, &waypointAppend, &waypointInsert}, 4);
-	static navRESTClass				navREST("nav", {&navAll, &navCount}, 2);
-	static arduinoStateRESTClass	arduinoREST("arduinoState", {&arduinoAll, &arduinoCount}, 2);
-	static rootRESTClass			root("", {&boatREST, &gpsREST, &waypointREST, &navREST, &arduinoREST, &arduino, &reset}, 7);
+	boneStateRESTClass 		*boatREST = new boneStateRESTClass("boneState", {&boneAll, &boneCount}, 2);
+	gpsRESTClass 			*gpsREST = new gpsRESTClass("gps", {&gpsAll, &gpsCount}, 2);
+	waypointRESTClass		*waypointREST = new waypointRESTClass("waypoint", {&waypointAll, &waypointCount, &waypointAppend, &waypointInsert}, 4);
+	navRESTClass			*navREST = new navRESTClass("nav", {&navAll, &navCount}, 2);
+	arduinoStateRESTClass	*arduinoREST = new arduinoStateRESTClass("arduinoState", {&arduinoAll, &arduinoCount}, 2);
+	rootRESTClass			*root = new rootRESTClass("", {&boatREST, &gpsREST, &waypointREST, &navREST, &arduinoREST, &arduino, &reset}, 7);
 
-	boatREST.addNumber(&boneNum);
-	gpsREST.addNumber(&gpsNum);
-	waypointREST.addNumber(&waypointNum);
-	navREST.addNumber(&navNum);
-	arduinoREST.addNumber(&arduinoNum);
+	boatREST->addNumber(boneNum);
+	gpsREST->addNumber(gpsNum);
+	waypointREST->addNumber(waypointNum);
+	navREST->addNumber(navNum);
+	arduinoREST->addNumber(arduinoNum);
 	
-	return &root;
+	return root;
 }
