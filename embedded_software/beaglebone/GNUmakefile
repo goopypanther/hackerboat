@@ -9,7 +9,6 @@ GTEST_INC=/usr/include/gtest
 
 BLACKLIB=submodules/BlackLib/v3_0
 
-# On the Beaglebone, the default compiler is gcc 4.6, which doesn't support the C++11 features we use (mostly, initializers for non-static data members). This can be any C++11-capable compiler.
 CC = gcc
 CXX = g++
 
@@ -27,10 +26,24 @@ VPATH=src/common:src/nav:submodules/smhasher/src
 all: submodules nav hb.fcgi master
 .PHONY: all
 
-LIBHACKERBOAT_SRCS= stateStructTypes.cpp logs.cpp sqliteStorage.cpp
-LIBHACKERBOAT_SRCS+= location.cpp navigation.cpp waypoint.cpp gps.cpp arduinoState.cpp boneState.cpp
-LIBHACKERBOAT_SRCS+= enumtable.cpp  MurmurHash3.cpp jansson_extras.cpp json_utilities.cpp json_ostream.cpp
-libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
+MurmurHash3.o: 
+
+LIBHACKERBOAT_SRCS= stateStructTypes.cpp 
+LIBHACKERBOAT_SRCS+= logs.cpp 
+LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
+LIBHACKERBOAT_SRCS+= location.cpp 
+LIBHACKERBOAT_SRCS+= navigation.cpp 
+LIBHACKERBOAT_SRCS+= waypoint.cpp 
+LIBHACKERBOAT_SRCS+= gps.cpp 
+LIBHACKERBOAT_SRCS+= arduinoState.cpp 
+LIBHACKERBOAT_SRCS+= boneState.cpp
+LIBHACKERBOAT_SRCS+= enumtable.cpp  
+#LIBHACKERBOAT_SRCS+= MurmurHash3.cpp 
+LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
+LIBHACKERBOAT_SRCS+= json_utilities.cpp 
+LIBHACKERBOAT_SRCS+= json_ostream.cpp
+
+libhackerboat.a: libhackerboat.a ($(LIBHACKERBOAT_SRCS:.cpp=.o))
 
 arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
 
