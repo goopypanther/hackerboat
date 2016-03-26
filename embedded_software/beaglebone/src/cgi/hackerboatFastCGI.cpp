@@ -107,46 +107,46 @@ int main (void) {
 
 RESTdispatchClass *initRESTDispatch (void) {
 	// data structure objects
-	static gpsFixClass				gpsStruct;
-	static navClass					navStruct;
-	static waypointClass			waypointStruct;
-	static boneStateClass			boneStruct;
-	static arduinoStateClass		ardStruct;
+	static gpsFixClass				gps;
+	static navClass					nav;
+	static waypointClass			waypoint;
+	static boneStateClass			boat;
+	static arduinoStateClass		arduinoState;
 	
 	// leaf nodes
-	static resetArduinoRest			reset("resetArduino");
-	static arduinoRESTClass			arduino("a");
-	static allDispatchClass			boneAll(&boneStruct);
-	static allDispatchClass			gpsAll(&gpsStruct);
-	static allDispatchClass			waypointAll(&waypointStruct);
-	static allDispatchClass			navAll(&navStruct);
-	static allDispatchClass			arduinoAll(&ardStruct);
-	static numberDispatchClass		boneNum(&boneStruct);
-	static numberDispatchClass		gpsNum(&gpsStruct);
-	static numberDispatchClass		waypointNum(&waypointStruct);
-	static numberDispatchClass		navNum(&navStruct); 
-	static numberDispatchClass		arduinoNum(&ardStruct);
-	static countDispatchClass		boneCount(&boneStruct);
-	static countDispatchClass		gpsCount(&gpsStruct); 
-	static countDispatchClass		waypointCount(&waypointStruct);
-	static countDispatchClass		navCount(&navStruct); 
-	static countDispatchClass		arduinoCount(&ardStruct);
-	static appendDispatchClass		waypointAppend(&waypointStruct);
-	static insertDispatchClass		waypointInsert(&waypointStruct);
+	static resetArduinoRest			reset(std::string("resetArduino"));
+	static arduinoRESTClass			arduino(std::string("a"));
+	static allDispatchClass			boneAll(&boat);
+	static allDispatchClass			gpsAll(&gps);
+	static allDispatchClass			waypointAll(&waypoint);
+	static allDispatchClass			navAll(&nav);
+	static allDispatchClass			arduinoAll(&arduinoState);
+	static numberDispatchClass		boneNum(&boat);
+	static numberDispatchClass		gpsNum(&gps);
+	static numberDispatchClass		waypointNum(&waypoint);
+	static numberDispatchClass		navNum(&nav); 
+	static numberDispatchClass		arduinoNum(&arduinoState);
+	static countDispatchClass		boneCount(&boat);
+	static countDispatchClass		gpsCount(&gps); 
+	static countDispatchClass		waypointCount(&waypoint);
+	static countDispatchClass		navCount(&nav); 
+	static countDispatchClass		arduinoCount(&arduinoState);
+	static appendDispatchClass		waypointAppend(&waypoint);
+	static insertDispatchClass		waypointInsert(&waypoint);
 	
 	// root & branch nodes
-	static boneStateRESTClass 		bone("boneState", {&boneAll, &boneCount}, 2);
-	static gpsRESTClass 			gps("gps", {&gpsAll, &gpsCount}, 2);
-	static waypointRESTClass		waypoint("waypoint", {&waypointAll, &waypointCount, &waypointAppend, &waypointInsert}, 4);
-	static navRESTClass				nav("nav", {&navAll, &navCount}, 2);
-	static arduinoStateRESTClass	ardState("arduinoState", {&arduinoAll, &arduinoCount}, 2);
-	static rootRESTClass			root("", {&bone, &gps, &waypoint, &nav, &ardState, &arduino, &reset}, 7);
+	static boneStateRESTClass 		boatREST("boneState", {&boneAll, &boneCount}, 2);
+	static gpsRESTClass 			gpsREST("gps", {&gpsAll, &gpsCount}, 2);
+	static waypointRESTClass		waypointREST("waypoint", {&waypointAll, &waypointCount, &waypointAppend, &waypointInsert}, 4);
+	static navRESTClass				navREST("nav", {&navAll, &navCount}, 2);
+	static arduinoStateRESTClass	arduinoREST("arduinoState", {&arduinoAll, &arduinoCount}, 2);
+	static rootRESTClass			root("", {&boatREST, &gpsREST, &waypointREST, &navREST, &arduinoREST, &arduino, &reset}, 7);
 
-	bone.addNumber(&boneNum);
-	gps.addNumber(&gpsNum);
-	waypoint.addNumber(&waypointNum);
-	nav.addNumber(&navNum);
-	ardState.addNumber(&arduinoNum);
+	boatREST.addNumber(&boneNum);
+	gpsREST.addNumber(&gpsNum);
+	waypointREST.addNumber(&waypointNum);
+	navREST.addNumber(&navNum);
+	arduinoREST.addNumber(&arduinoNum);
 	
 	return &root;
 }
