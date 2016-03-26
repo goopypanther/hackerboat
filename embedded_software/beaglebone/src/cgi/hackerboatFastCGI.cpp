@@ -43,10 +43,10 @@ int main (void) {
 	
 	while (FCGI_Accept() >= 0) {
 		// read in the critical environment variables and go to next iteration if any fail
-		if (!(uri = getenv("REQUEST_URI")) continue;
-		if (!(method = getenv("REQUEST_METHOD")) continue;
-		if (!(query = getenv("QUERY_STRING")) continue;
-		if (!(contentLength = getenv("CONTENT_LENGTH")) continue;
+		if (!(uri = getenv("REQUEST_URI"))) continue;
+		if (!(method = getenv("REQUEST_METHOD"))) continue;
+		if (!(query = getenv("QUERY_STRING"))) continue;
+		if (!(contentLength = getenv("CONTENT_LENGTH"))) continue;
 
 		// figure out the lengths of the various strings
 		uriLen = strlen(uri);
@@ -57,7 +57,7 @@ int main (void) {
 		// if there is post data, read it in
 		bodyLen 	= atoi(contentLength);
 		if (bodyLen > 0) {
-			body = calloc(bodyLen, sizeof(char));
+			body = (char *)calloc(bodyLen, sizeof(char));
 			if (body == NULL) continue;
 		}
 		FCGI_fread(body, 1, bodyLen, FCGI_stdin);
@@ -107,11 +107,11 @@ int main (void) {
 
 RESTdispatchClass *initRESTDispatch (void) {
 	// data structure objects
-	static gpsFixClass				gpsStruct(GPS_DB_FILE, strlen(GPS_DB_FILE));
-	static navClass					navStruct(NAV_DB_FILE, strlen(NAV_DB_FILE));
-	static waypointClass			waypointStruct(WP_DB_FILE, strlen(WP_DB_FILE));
-	static boneStateClass			boneStruct(BONE_LOG_DB_FILE, strlen(BONE_LOG_DB_FILE));
-	static arduinoStateClass		ardStruct(ARD_LOG_DB_FILE, strlen(ARD_LOG_DB_FILE));
+	static gpsFixClass				gpsStruct();
+	static navClass					navStruct();
+	static waypointClass			waypointStruct();
+	static boneStateClass			boneStruct();
+	static arduinoStateClass		ardStruct();
 	
 	// leaf nodes
 	static resetArduinoRest			reset("resetArduino");
