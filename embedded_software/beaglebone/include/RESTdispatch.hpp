@@ -21,6 +21,7 @@
 #include <time.h>
 #include "stateStructTypes.hpp"
 #include "config.h"
+#include "MurmurHash3.h"
 
 #include <string>
 
