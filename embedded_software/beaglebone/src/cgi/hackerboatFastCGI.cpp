@@ -107,11 +107,11 @@ int main (void) {
 
 RESTdispatchClass *initRESTDispatch (void) {
 	// data structure objects
-	gpsFixClass				*gps = new gpsFixClass;
-	navClass				*nav = new navClass;
-	waypointClass			*waypoint = new waypointClass;
-	boneStateClass			*boat = new boneStateClass;
-	arduinoStateClass		*arduinoState = new arduinoStateClass;
+	gpsFixClass				*gps = new gpsFixClass();
+	navClass				*nav = new navClass();
+	waypointClass			*waypoint = new waypointClass();
+	boneStateClass			*boat = new boneStateClass();
+	arduinoStateClass		*arduinoState = new arduinoStateClass();
 	
 	// leaf nodes
 	resetArduinoRest		*reset = new resetArduinoRest("resetArduino");
