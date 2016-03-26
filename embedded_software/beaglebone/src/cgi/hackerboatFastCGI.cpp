@@ -114,8 +114,8 @@ RESTdispatchClass *initRESTDispatch (void) {
 	arduinoStateClass		*arduinoState = new arduinoStateClass;
 	
 	// leaf nodes
-	resetArduinoRest		*reset = new resetArduinoRest((const)std::string("resetArduino"));
-	arduinoRESTClass		*arduino = new arduinoRESTClass((const)std::string("a"));
+	resetArduinoRest		*reset = new resetArduinoRest("resetArduino");
+	arduinoRESTClass		*arduino = new arduinoRESTClass("a");
 	allDispatchClass		*boneAll = new allDispatchClass(boat);
 	allDispatchClass		*gpsAll = new allDispatchClass(gps);
 	allDispatchClass		*waypointAll = new allDispatchClass(waypoint);
