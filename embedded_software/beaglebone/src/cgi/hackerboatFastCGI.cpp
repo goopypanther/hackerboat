@@ -107,15 +107,15 @@ int main (void) {
 
 RESTdispatchClass *initRESTDispatch (void) {
 	// data structure objects
-	static gpsFixClass				gpsStruct();
-	static navClass					navStruct();
-	static waypointClass			waypointStruct();
-	static boneStateClass			boneStruct();
-	static arduinoStateClass		ardStruct();
+	static gpsFixClass				gpsStruct;
+	static navClass					navStruct;
+	static waypointClass			waypointStruct;
+	static boneStateClass			boneStruct;
+	static arduinoStateClass		ardStruct;
 	
 	// leaf nodes
-	static resetArduinoRest			reset("resetArduino");
-	static arduinoRESTClass			arduino("a");
+	static resetArduinoRest			reset;
+	static arduinoRESTClass			arduino;
 	static allDispatchClass			boneAll(&boneStruct);
 	static allDispatchClass			gpsAll(&gpsStruct);
 	static allDispatchClass			waypointAll(&waypointStruct);
