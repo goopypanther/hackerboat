@@ -46,8 +46,8 @@ using string = std::string;
 
 class RESTdispatchClass {
 	public:
-		RESTdispatchClass(const string name); 		/**< Create a dispatch object with name */
-
+		RESTdispatchClass(const string name);	 		/**< Create a dispatch object with name */
+		RESTdispatchClass(char const* name);
 		/**
 		 * @brief Constructor for a dispatch object with name and given dispatch table
 		 */
@@ -244,13 +244,15 @@ class arduinoStateRESTClass : public RESTdispatchClass {
 
 class resetArduinoRest : public RESTdispatchClass {
 	public:
-		//resetArduinoRest(void) {setName("resetArduino");};
+		resetArduinoRest(const string name) : RESTdispatchClass(name) {};	 		/**< Create a dispatch object with name */
+		resetArduinoRest(char const* name) : RESTdispatchClass(name) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
 
 class arduinoRESTClass : public RESTdispatchClass {
 	public:
-		//arduinoRESTClass(void) {setName("a");};
+		arduinoRESTClass(const string name) : RESTdispatchClass(name) {};	 		/**< Create a dispatch object with name */
+		arduinoRESTClass(char const* name) : RESTdispatchClass(name) {};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };

@@ -27,6 +27,10 @@ RESTdispatchClass::RESTdispatchClass(const string name)
 	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
 };
 
+RESTdispatchClass::RESTdispatchClass(char const* name) {
+	_name = std::string(name);
+	MurmurHash3_x86_32(_name.c_str(), _name.length(), HASHSEED, &_hash);
+};
 
 RESTdispatchClass::RESTdispatchClass(const string name, RESTdispatchClass** table, size_t tableSize)
 	: _name(name),
