@@ -43,7 +43,7 @@ LIBHACKERBOAT_SRCS+= jansson_extras.cpp
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
 
-libhackerboat.a: libhackerboat.a ($(LIBHACKERBOAT_SRCS:.cpp=.o))
+libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 
 arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
 
