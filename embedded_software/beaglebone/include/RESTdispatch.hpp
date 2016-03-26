@@ -21,9 +21,10 @@
 #include <time.h>
 #include "stateStructTypes.hpp"
 #include "config.h"
-#include "MurmurHash3.h"
 
 #include <string>
+#include <vector>
+#include <map>
 
 class gpsFixClass;
 class navClass;
@@ -47,65 +48,45 @@ using string = std::string;
 
 class RESTdispatchClass {
 	public:
-		RESTdispatchClass(const string name);	 		/**< Create a dispatch object with name */
-		RESTdispatchClass(char const* name);
+		RESTdispatchClass (void) = default;
 		/**
-		 * @brief Constructor for a dispatch object with name and given dispatch table
+		 * @brief Constructor for a dispatch object with given dispatch table
 		 */
-		RESTdispatchClass	(const string name, 		/**< Name of the object */
-					 RESTdispatchClass** table,	/**< Table of leaf nodes to dispatch on */
-					 size_t tableSize 		/**< Number of items in the dispatch table */
-					 );
+		RESTdispatchClass (std::map<string,RESTdispatchClass*>& table) : _dispatchTable(table) {};;	/**< Map of leaf nodes to dispatch on */
 									
 		virtual bool addEntry (RESTdispatchClass *entry);		/**< Add an entry to the dispatch table */
 		virtual bool addNumber (RESTdispatchClass *entry);		/**< Add an entry to call when the next token is a decimal number */
-		virtual uint32_t setName (const std::string name);			/**< Set the name of the object */
-		bool match (uint32_t hash) {return (hash == _hash);};	/**< Check if this object matches the given hash */
+
 		/**
 		 * @brief Dispatch on the token designated by currentToken
 		 */
-		virtual json_t* dispatch 	(char** tokens, 			/**< Array of tokens from the URI request */
-									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
-									size_t* tokenLengths, 		/**< The length of each token */
-									int tokenCnt, 				/**< Number of tokens */
-									int currentToken, 			/**< Token to dispatch on */
-									char* query, 				/**< Query string, if any, from the request */
-									char* method, 				/**< Request method, generally either GET or POST */
-									char* body, 				/**< POST request body, if any */
-									int bodyLen); 				/**< Length of the body */
+		virtual json_t* dispatch (std::vector<std::string> tokens,	/**< Array of tokens from the URI request */
+									int currentToken, 				/**< Token to dispatch on */
+									std::string query, 				/**< Query string, if any, from the request */
+									std::string method, 			/**< Request method, generally either GET or POST */
+									std::string body); 				/**< POST request body, if any */
 		/**
 		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
 		 */							
-		virtual json_t* root 		(char** tokens, 			/**< Array of tokens from the URI request */
-									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
-									size_t* tokenLengths, 		/**< The length of each token */
-									int tokenCnt, 				/**< Number of tokens */
-									int currentToken, 			/**< Token to dispatch on */
-									char* query, 				/**< Query string, if any, from the request */
-									char* method, 				/**< Request method, generally either GET or POST */
-									char* body, 				/**< POST request body, if any */
-									int bodyLen) 				/**< Length of the body */
+		virtual json_t* root 	(std::vector<std::string> tokens, 	/**< Array of tokens from the URI request */
+									int currentToken, 				/**< Token to dispatch on */
+									std::string query, 				/**< Query string, if any, from the request */
+									std::string method, 			/**< Request method, generally either GET or POST */
+									std::string body)				/**< POST request body, if any */
 									{return NULL;};		
 		/**
 		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
 		 */														
-		virtual json_t*	defaultFunc (char** tokens, 			/**< Array of tokens from the URI request */
-									uint32_t* tokenHashes, 		/**< Array of hashes of each token */
-									size_t* tokenLengths, 		/**< The length of each token */
-									int tokenCnt, 				/**< Number of tokens */
-									int currentToken, 			/**< Token to dispatch on */
-									char* query, 				/**< Query string, if any, from the request */
-									char* method, 				/**< Request method, generally either GET or POST */
-									char* body, 				/**< POST request body, if any */
-									int bodyLen) 				/**< Length of the body */
+		virtual json_t*	defaultFunc (std::vector<std::string> tokens,/**< Array of tokens from the URI request */
+									int currentToken,  				/**< Token to dispatch on */
+									std::string query, 				/**< Query string, if any, from the request */
+									std::string method, 			/**< Request method, generally either GET or POST */
+									std::string body) 				/**< POST request body, if any */
 									{return NULL;}; 
 		
 	protected:	
-		RESTdispatchClass* _numberDispatch	= NULL;				/**< Object to dispatch to if the next token is a number */
-		RESTdispatchClass** _dispatchTable	= NULL;				/**< Dispatch table */
-		size_t _tableSize 					= 0;				/**< Size of the dispatch table */
-		std::string _name			 		= "";				/**< Name of this object */
-		uint32_t _hash 						= 0;				/**< MurmurHash3 of the object name */
+		RESTdispatchClass* _numberDispatch	= NULL;					/**< Object to dispatch to if the next token is a number */
+		std::map<std::string,RESTdispatchClass*>& _dispatchTable;	/**< Dispatch table */
 };
 
 /** 
@@ -117,12 +98,11 @@ class RESTdispatchClass {
  
 class allDispatchClass : public RESTdispatchClass {
 	public:
-		allDispatchClass(hackerboatStateClassStorable* target);		/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
+		allDispatchClass(hackerboatStateClassStorable* target) : _target(target);		/**< Create an 'all' dispatch item attached to hackerboatStateClassStorable target*/
 		bool setTarget (hackerboatStateClassStorable* target);		/**< Set the target hackerboatStateClassStorable */
-		uint32_t setName (const std::string name) {return 0;};
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		
 	private:
 		hackerboatStateClassStorable* _target;
@@ -137,11 +117,10 @@ class allDispatchClass : public RESTdispatchClass {
  
 class numberDispatchClass : public RESTdispatchClass {
 	public:
-		numberDispatchClass(hackerboatStateClassStorable* target);
+		numberDispatchClass(hackerboatStateClassStorable* target) : _target(target);
 		bool setTarget (hackerboatStateClassStorable* target);
-		uint32_t setName (const std::string name) {return 0;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		
 	private:
 		hackerboatStateClassStorable* _target;
@@ -149,72 +128,62 @@ class numberDispatchClass : public RESTdispatchClass {
 
 class countDispatchClass : public RESTdispatchClass {
 	public:
-		countDispatchClass(hackerboatStateClassStorable* target);
+		countDispatchClass(hackerboatStateClassStorable* target) : _target(target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
 
 class insertDispatchClass : public RESTdispatchClass {
 	public:
-		insertDispatchClass(hackerboatStateClassStorable* target);
+		insertDispatchClass(hackerboatStateClassStorable* target) : _target(target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
 
 class appendDispatchClass : public RESTdispatchClass {
 	public:
-		appendDispatchClass(hackerboatStateClassStorable* target);
+		appendDispatchClass(hackerboatStateClassStorable* target) : _target(target);
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
 
 class rootRESTClass : public RESTdispatchClass {
 	public:
-		rootRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc  (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 };
 
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
-		boneStateRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		bool setTarget (boneStateClass* target);
-		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 											
 	private:
-		void setHashes (void);
-		json_t*	command (char* body, int bodyLen);
-		json_t*	waypointNext (char* body, int bodyLen);
-		json_t*	waypointStrength (char* body, int bodyLen);
-		json_t*	waypointStrengthMax (char* body, int bodyLen);
-		json_t*	waypointAccuracy (char* body, int bodyLen);
-		json_t*	autonomous (char* body, int bodyLen);
+		json_t*	command (std::string body);
+		json_t*	waypointNext (std::string body);
+		json_t*	waypointStrength (std::string body);
+		json_t*	waypointStrengthMax (std::string body);
+		json_t*	waypointAccuracy (std::string body);
+		json_t*	autonomous (std::string body);
 		boneStateClass* _target = NULL;
-		static uint32_t commandHash;
-		static uint32_t waypointNextHash;
-		static uint32_t waypointStrengthHash;
-		static uint32_t waypointStrengthMaxHash;
-		static uint32_t waypointAccuracyHash;
-		static uint32_t autonomousHash;
 };
 
 class gpsRESTClass : public RESTdispatchClass {
 	public:
-		gpsRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		bool setTarget (gpsFixClass* target);
 	private:
 		gpsFixClass* _target;
@@ -222,8 +191,7 @@ class gpsRESTClass : public RESTdispatchClass {
 
 class waypointRESTClass : public RESTdispatchClass {
 	public:
-		waypointRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		bool setTarget (waypointClass* target);
 	private:
 		waypointClass* _target;
@@ -231,8 +199,7 @@ class waypointRESTClass : public RESTdispatchClass {
 
 class navRESTClass : public RESTdispatchClass {
 	public:
-		navRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		bool setTarget (navClass* target);
 	private:
 		navClass* _target;
@@ -240,8 +207,7 @@ class navRESTClass : public RESTdispatchClass {
 
 class arduinoStateRESTClass : public RESTdispatchClass {
 	public:
-		arduinoStateRESTClass (const string name, RESTdispatchClass** table, size_t tableSize) : RESTdispatchClass(name, table, tableSize) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 		bool setTarget (arduinoStateClass* target);
 	private:
 		arduinoStateClass* _target;
@@ -249,17 +215,13 @@ class arduinoStateRESTClass : public RESTdispatchClass {
 
 class resetArduinoRest : public RESTdispatchClass {
 	public:
-		resetArduinoRest(const string name) : RESTdispatchClass(name) {};	 		/**< Create a dispatch object with name */
-		resetArduinoRest(char const* name) : RESTdispatchClass(name) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 };
 
 class arduinoRESTClass : public RESTdispatchClass {
 	public:
-		arduinoRESTClass(const string name) : RESTdispatchClass(name) {};	 		/**< Create a dispatch object with name */
-		arduinoRESTClass(char const* name) : RESTdispatchClass(name) {};
-		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
-		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
 };
 
 #endif 

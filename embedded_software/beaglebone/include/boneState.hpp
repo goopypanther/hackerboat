@@ -53,7 +53,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		double						waypointAccuracy;	/**< How close the boat gets to each waypoint before going to the next one */
 		double						waypointStrengthMax;	/**< Maximum waypoint strength */
 		bool						autonomous;		/**< When set true, the boat will operate autonomously */
-		locationClass					launchPoint;		/**< Location from which the boat departed */
+		locationClass				launchPoint;		/**< Location from which the boat departed */
 
 
 		/* Concrete implementations of stateClassStorable */
@@ -65,12 +65,15 @@ class boneStateClass : public hackerboatStateClassStorable {
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
 };
+
 static inline const std::string& toString(boatModeEnum num) {
 	return boneStateClass::modeNames.get(num);
 }
+
 static inline bool fromString(std::string name, boatModeEnum *value) {
 	return boneStateClass::modeNames.get(name, value);
 }
+
 inline static json_t *json(boatModeEnum num) {
 	return json(boneStateClass::modeNames.get(num));
 }
