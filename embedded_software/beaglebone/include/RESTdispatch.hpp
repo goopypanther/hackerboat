@@ -244,13 +244,13 @@ class arduinoStateRESTClass : public RESTdispatchClass {
 
 class resetArduinoRest : public RESTdispatchClass {
 	public:
-		resetArduinoRest(void) {setName("resetArduino");};
+		//resetArduinoRest(void) {setName("resetArduino");};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
 
 class arduinoRESTClass : public RESTdispatchClass {
 	public:
-		arduinoRESTClass(void) {setName("a");};
+		//arduinoRESTClass(void) {setName("a");};
 		json_t* root (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 		json_t*	defaultFunc (char** tokens, uint32_t* tokenHashes, size_t* tokenLengths, int tokenCnt, int currentToken, char* query, char* method, char* body, int bodyLen);
 };
