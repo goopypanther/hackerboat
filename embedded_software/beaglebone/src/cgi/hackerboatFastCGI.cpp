@@ -19,7 +19,7 @@
 #include "stateStructTypes.hpp"
 #include "RESTdispatch.hpp"
 #include "config.h"
-#include "MurmurHash3.h"
+#include <MurmurHash3.h>
 #include "logs.hpp"
 
 RESTdispatchClass *initRESTDispatch (void);

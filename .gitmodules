@@ -9,4 +9,4 @@
 	url = https://github.com/logos-electromechanical/BlackLib.git
 [submodule "embedded_software/beaglebone/submodules/smhasher"]
 	path = embedded_software/beaglebone/submodules/smhasher
-	url = git@github.com:aappleby/smhasher.git
+	url = https://github.com/aappleby/smhasher.git
