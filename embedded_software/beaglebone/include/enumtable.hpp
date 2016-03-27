@@ -1,5 +1,6 @@
-/******************************************************************************
- * Enumeration name table
+/**************************************************************************//**
+ * @brief  Enumeration name table
+ * @file   enumtable.hpp
  * 
  * A utility class for holding a statically-defined bidirectional
  * integer/string mapping.
@@ -16,16 +17,21 @@
 #include <utility>
 #include <unordered_map>
 
-/**
+/** Integer-to-name mapping
  *
+ * Provides a bidirectional mapping between integers 0..N and string names.
  */
-
 class integerNameTable {
 public:
+	/** Constructs an integer name table given a list of names */
 	integerNameTable(std::initializer_list<const char *> names);
 
+	/** Returns true if the integer is within the range of numbers in the table */
 	bool valid(int) const;
 
+	/** Retrieve the string name for a given number.
+	 * @throws std::out_of_range
+	 */
 	const std::string& get(int) const;
 
 protected:
@@ -44,6 +50,8 @@ protected:
  * enumerationNameTable is a purely inline specialization of
  * integerNameTable which provides methods for strongly-typed enums
  * ("enum class").
+ *
+ * \tparam T The enumeration type.
  */
 
 template<typename T>
@@ -65,6 +73,12 @@ public:
 	// parent's versions of those methods into scope here.
 	using integerNameTable::valid;
 
+	/** Retrieve the enumeration for a string name.
+	 *
+	 * @param[in]  str  A string naming an enumerated value
+	 * @param[out] num  The value corresponding to str
+	 * @returns         true if the name corresponds to a value; false otherwise
+	 */
 	bool get(const std::string& str, T *num) const {
 		auto p = find(str);
 		if (p == backward.cend()) {
@@ -75,6 +89,9 @@ public:
 		}
 	};
 
+	/** Retrieve the string name of an enumerated value
+	 * @throws std::out_of_range
+	 */
 	const std::string& get(T num) const {
 		return integerNameTable::get(static_cast<int>(num));
 	}

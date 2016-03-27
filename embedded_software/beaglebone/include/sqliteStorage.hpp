@@ -1,10 +1,8 @@
-/******************************************************************************
+/**************************************************************************//**
  * Hackerboat Beaglebone SQLite storage adapter
  *
- * see the Hackerboat documentation for more details
- * Written by Wim Lewis, Mar 2016
- * 
- * Version 0.1: 
+ * @file sqliteStorage.hpp
+ * @author Wim Lewis
  *
  ******************************************************************************/
 
@@ -27,6 +25,12 @@ typedef std::shared_ptr<sqlite3_stmt> shared_stmt;
 /**
  * Represents a database connection and schema information
  *
+ * This contains a database handle, cached SQLite queries, and enough
+ * information about the table schema to create queries and to create
+ * the initial empty table in the database.
+ *
+ * This is used by hackerboatStateClassStorable to write objects to
+ * persistent storage.
  */
 class hackerboatStateStorage {
 public:
@@ -48,9 +52,19 @@ public:
 	shared_stmt& insertRecord();
 	shared_stmt& updateRecord();
 
+	/** Create the table in the database.
+	 * This issues a <tt>CREATE TABLE IF NOT EXISTS</tt> query, so it is a no-op if the table already exists.
+	 */
 	void createTable();
 	void logError(void);
 
+	/** Gets an open connection to the database
+	 *
+	 * This maintains a table of filenames to open database handles
+	 * and returns a shared reference to an existing handle, or a new
+	 * handle. The directory in which database files are stored is
+	 * defined in config.h.
+	 */
 	static shared_dbh databaseConnection(const char *filename);
 protected:
 	class sth_deleter;
@@ -80,6 +94,7 @@ public:
 		: sth(sth.get()), offset(offset), count(count)
 	{};
 
+	/** Return a sub-slice */
 	sqliteParameterSlice slice(int sliceOffset, int sliceCount) {
 		return sqliteParameterSlice(sth, offset + sliceOffset, sliceCount);
 	}

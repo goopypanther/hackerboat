@@ -98,6 +98,10 @@ extern "C" {
 	 *
 	 * The format string may contain spaces for
 	 * grouping/readability, which are ignored.
+	 *
+	 * @param[inout] obj   The JSON object to modify
+	 * @param[in] types    The types of the values being added.
+	 * @return             0 on succes, nonzero on failure.
 	 */
 	int json_object_add(json_t *obj, const char *types, ...);
 

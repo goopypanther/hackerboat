@@ -1,11 +1,13 @@
-/******************************************************************************
- * Hackerboat Beaglebone types module
- * stateStructTypes.hpp
+/**************************************************************************//**
+ * @brief Hackerboat Beaglebone types module
+ * @file  stateStructTypes.hpp
+ *
  * This modules is compiled into the other modules to give a common interface
  * to the database(s)
  * see the Hackerboat documentation for more details
+ *
  * Written by Pierce Nichols, Jan 2016
- * 
+ *
  * Version 0.1: First alpha
  *
  ******************************************************************************/
@@ -29,13 +31,9 @@ class hackerboatStateStorage;
 class sqliteParameterSlice;
 class sqliteRowReference;
 
-// temporary class definition until we include or define the real one
-//class sensors_vec_t {
-//};
-
 /**
- * @class hackerboatStateClass 
- * 
+ * @class hackerboatStateClass
+ *
  * @brief Base class for holding various types of object used by the core functions of the Hackerboat
  *
  */
@@ -62,11 +60,11 @@ inline bool parse(json_t *input, timespec *t) {
 
 
 /**
- * @class hackerboatStateClassStorable 
- * 
+ * @class hackerboatStateClassStorable
+ *
  * @brief Base class for holding various types of object used by the core functions of the Hackerboat
  *
- * This base class connects to a database of records containing instances of the object type.  
+ * This base class connects to a database of records containing instances of the object type.
  *
  */
 
@@ -74,13 +72,16 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 	public:
 		typedef int64_t sequence;			/**< The type of sequence numbers / OIDs in persistent storage. Negative numbers indicate invalid / missing data */
 
-		sequence getSequenceNum (void) const {return _sequenceNum;};				/**< Get the sequenceNum of this object (-1 until populated from or inserted into a file) */
+		/** Get the sequenceNum of this object.
+		 * An object's sequence number is -1 until populated from or inserted into a file.
+		 */
+		sequence getSequenceNum (void) const
+		{ return _sequenceNum; }
 
-		sequence countRecords (void);								/**< Return the number of records of the object's type in the open database file */
+		sequence countRecords (void);							/**< Return the number of records of the object's type in the open database file */
 		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
-		bool getRecord(sequence select);							/**< Populate the object from the open database file */
+		bool getRecord(sequence select);						/**< Populate the object from the open database file */
 		bool getLastRecord(void);								/**< Get the latest record */
-		virtual bool insert(sequence num) {return false;};					/**< Insert the contents of the object into the database table at the given point */
 		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
 		
 	protected:
@@ -88,10 +89,37 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 			: _sequenceNum(-1)
 		{};
 
-		sequence 	_sequenceNum;			/**< sequence number in the database */
+		sequence 	_sequenceNum;				/**< sequence number in the database, or -1 */
 
+		/** Returns a sqlite storage object for this instance.
+		 *
+		 * Concrete classes must implement this to return a
+		 * hackerboatStateStorage object representing the database,
+		 * table name, and columns of the place this instance is
+		 * stored. Typically this returns a single shared storage
+		 * instance for all instances of a given class, but that's not
+		 * required.
+		 *
+		 * The columns defined by the returned storage object must
+		 * match whatever this class's fillRow() and readFromRow()
+		 * implementations expect.
+		 */
 		virtual hackerboatStateStorage& storage() = 0;
+
+		/** Write the receiver's state into a set of sqlite columns.
+		 *
+		 * The default implementation calls
+		 * hackerboatStateClass::pack() and expects the database to
+		 * contain a single JSON column.
+		 */
 		virtual bool fillRow(sqliteParameterSlice) const;
+
+		/** Populate the receiver from a database row.
+		 *
+		 * The default implementation expects a single column
+		 * containing JSON text which is deserialized and given to
+		 * hackerboatStateClass::parse().
+		 */
 		virtual bool readFromRow(sqliteRowReference, sequence);
 };
 
@@ -172,6 +200,7 @@ const char *toString(waypointClass::action);
 bool fromString(const char *, waypointClass::action *);
 
 /**
+ * @enum arduinoModeEnum
  * @brief An enum to store the current operating mode of the Arduino.
  */
 enum class arduinoModeEnum {
