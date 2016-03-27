@@ -30,7 +30,7 @@ static const pair<vector<string>, unordered_map<string, int> > computeHashes(ini
 	}
 
 	result.second.reserve(names.size());
-	for(int i = 0; i < names.size(); i++) {
+	for(typeof(names.size()) i = 0; i < names.size(); i++) {
 		result.second.emplace(result.first[i], i);
 	}
 
@@ -48,7 +48,7 @@ integerNameTable::integerNameTable(std::initializer_list<const char *> names)
 
 bool integerNameTable::valid(int num) const
 {
-	return num >= 0 && num < forward.size();
+	return num >= 0 && (unsigned)num < forward.size();
 }
 
 const std::string& integerNameTable::get(int num) const
