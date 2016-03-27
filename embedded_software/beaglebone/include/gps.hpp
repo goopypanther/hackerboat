@@ -47,7 +47,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 	
 		/* Concrete implementations of stateClassStorable */
 		bool parse (json_t *, bool);
-		json_t *pack (bool) const;
+		json_t *pack (bool seq = false) const;
 		bool isValid (void) const;
 
 	protected:

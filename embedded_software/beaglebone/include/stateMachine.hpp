@@ -56,46 +56,66 @@ class stateMachineBase {
 	protected:
 		boneStateClass 		*_state;
 		arduinoStateClass	*_ard;
-		timespec		_start;
+		timespec			_start;
 		boatModeEnum		_lastState;
 	
 };
 
 class boneStartState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 class boneSelfTestState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 class boneDisarmedState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 class boneArmedState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 class boneManualState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
-class boneWaypointState : public stateMachineBase {
+class boneWaypointState : public stateMahineBase {
+	public:
+		stateMachineBase *execute (void);
 	private:
 		navClass 		_nav(NAV_DB_FILE);
 		waypointClass	_wp(WP_DB_FILE);
 };
 
 class boneNoSignalState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 	private:
 		stateMachineBase *returnLastState (void);
 };
 
 class boneReturnState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 	private:
 		navClass _nav(NAV_DB_FILE);
 };
 
 class boneArmedTestState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 class boneFaultState : public stateMachineBase {
+	public:
+		stateMachineBase *execute (void);
 };
 
 #endif /* STATEMACHINE_H */

@@ -35,7 +35,7 @@ bool waypointClass::setAction(waypointClass::action action)
 	return true;
 }
 
-bool waypointClass::parse(json_t *input, bool seq)
+bool waypointClass::parse(json_t *input, bool seq = false)
 {
 	json_t *val;
 

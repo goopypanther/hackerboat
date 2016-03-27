@@ -18,20 +18,23 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
 class logREST {
 	public:
-		static logREST* instance(void) { return _instance; }
+		static logREST* instance(void) { return &_instance; }
 		bool open(std::string logfile);
-		bool write(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
+		//bool write(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
+		bool write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response);
 		bool close(void);
 	private:
 		logREST(void){};
 		logREST(logREST const&){};
 		logREST& operator=(logREST const&){};
-		static logREST* _instance;
+		static logREST _instance;
+		ofstream log;
 };
 
 class logError {

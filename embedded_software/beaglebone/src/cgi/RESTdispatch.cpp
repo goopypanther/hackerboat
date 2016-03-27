@@ -10,10 +10,18 @@
  ******************************************************************************/
  
 #include "RESTdispatch.hpp"
-#include <BlackGPIO.h>
-#include <BlackUART.h>
+#include <BlackUART/BlackUART.h>
+#include <BlackGPIO/BlackGPIO.h>
 #include <unistd.h>
 #include "logs.hpp"
+#include "stateStructTypes.hpp"
+#include "boneState.hpp"
+#include "arduinoState.hpp"
+#include "json_utilities.hpp"
+#include "jansson.h"
+#include "navigation.hpp"
+#include "gps.hpp"
+
 
 #include <string>
 #include <vector>
@@ -25,15 +33,15 @@ static logError *errLog = logError::instance();
 
 json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
 	// check if we've reached the end of URI...
-	if (currentToken < tokens.length()) {
+	if (currentToken < tokens.size()) {
 		// check for the token in the dispatch map
-		if (_dispatchTable.count(tokens[currentToken])) {
-			return _dispatchTable[currentToken]->dispatch(tokens, (currentToken + 1), query, method, body);
+		if (_dispatchTable->count(tokens[currentToken])) {
+			return (_dispatchTable->at(tokens[currentToken])).dispatch(tokens, (currentToken + 1), query, method, body);
 		}
 		 
 		// check if the token is a number; if not, call the default function
-		int idx = 0;
-		int num = tokens[currentToken].stoi(&idx);
+		size_t idx = 0;
+		int num = std::stoi(tokens[currentToken], &idx);
 		if (idx) {
 			return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
 		} else {
@@ -45,10 +53,10 @@ json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int curren
 	}
 }
 
-bool RESTdispatchClass::addEntry (RESTdispatchClass *entry) {
+bool RESTdispatchClass::addEntry (std::string name, RESTdispatchClass *entry) {
 	// check that we got a real reference
 	if (entry) {
-		return _dispatchTable.emplace(entry->getName(), entry).second;
+		return (_dispatchTable->emplace(name, *entry)).second;
 	} else {
 		return false;
 	}
@@ -76,7 +84,7 @@ bool allDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
 	json_t* out = json_array();
 	if (!_target) return NULL;
-	int count = _target->count();
+	int count = _target->countRecords();
 	if (count > 0) {
 		for (int i; i < count; i++) {
 			_target->getRecord(i);
@@ -98,8 +106,8 @@ bool numberDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 
 json_t* numberDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
 	if (!_target) return NULL;
-	int count;
-	int val = tokens[currentToken].stoi(&count);
+	size_t count;
+	int val = std::stoi(tokens[currentToken], &count);
 	if (count > 0) {
 		if (_target->getRecord(val)) {
 			return _target->pack();
@@ -121,7 +129,7 @@ json_t* countDispatchClass::root (std::vector<std::string> tokens, int currentTo
 	json_int_t count;
 	json_t *out = json_object();
 	if (!_target) return NULL;
-	count = _target->count();
+	count = _target->countRecords();
 	json_object_set(out, "count", json_integer(count));
 	return out;
 }
@@ -136,33 +144,33 @@ bool insertDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 }
 
 json_t* insertDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	int32_t insert;
 	// check that we have a target and we can open the file...
 	if (_target) {
 		// populate from the body...
-		if (_target->parse(json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON))) {
+		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON), false)) {
 			if (!_target->isValid()) {
 				return NULL;
 			}
 			// check and see if we have a trailing number...
-			int count;
-			insert = tokens[currentToken + 1].stoi(&count);
+			size_t count;
+			insert = std::stoi(tokens[currentToken + 1], &count);
 			if (count > 0) {
-				if (insert < _target->count()) {
-					if (!_target->insert(count)) {
-						if (!_target->append()) {
+				if (insert < _target->countRecords()) {
+					if (true/*!_target->insert(count)*/) {
+						if (!_target->appendRecord()) {
 							return NULL;
 						}
 					}  
-				} else if (!_target->append()) {
+				} else if (!_target->appendRecord()) {
 					return NULL;
 				}
-			} else if (!_target->append()) {
+			} else if (!_target->appendRecord()) {
 				return NULL;
 			}
 		} else {
-			return errJSON;
+			return NULL;
 		}
 	} else {
 		return NULL;
@@ -180,17 +188,17 @@ bool appendDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 }
 
 json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	// check that we have a target and we can open the file...
 	if (_target) {
 		// populate from the body...
-		if (_target->parse(json_loadb(body, bodyLen, JSON_DECODE_ANY, errJSON))) {
+		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON), false)) {
 			if (_target->isValid()) {
-				if (!_target->append()) {
+				if (!_target->appendRecord()) {
 					return NULL;
 				}
 			} else {
-				return errJSON;
+				return NULL;
 			}
 		} 
 	} else {
@@ -209,7 +217,7 @@ json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, int current
 
 json_t* boneStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
 	if (!_target) return NULL;
-	if (_target->getRecord(_target->count())) {
+	if (_target->getLastRecord()) {
 		return _target->pack();
 	}
 	return NULL;
@@ -218,7 +226,6 @@ json_t* boneStateRESTClass::root (std::vector<std::string> tokens, int currentTo
 bool boneStateRESTClass::setTarget(boneStateClass* target) {
 	if (target) {
 		_target = target;
-		setHashes();
 		return true;
 	} else {
 		return false;
@@ -247,7 +254,7 @@ json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, int cu
 json_t* boneStateRESTClass::command(std::string body) {
 	std::string command;
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	boatModeEnum cmd;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -285,7 +292,7 @@ json_t* boneStateRESTClass::command(std::string body) {
 
 json_t* boneStateRESTClass::waypointNext(std::string body) {
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
@@ -318,7 +325,7 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 
 json_t* boneStateRESTClass::waypointStrength(std::string body) {
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
@@ -351,7 +358,7 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 
 json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
@@ -384,7 +391,7 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 
 json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
@@ -417,7 +424,7 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 
 json_t* boneStateRESTClass::autonomous(std::string body) {
 	json_t *input, *obj;
-	json_err_t *errJSON;
+	json_error_t *errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
@@ -535,8 +542,8 @@ json_t* arduinoRESTClass::root (std::vector<std::string> tokens, int currentToke
 }
 
 json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
-	json_t* out, in;
-	json_err_t* errIn;
+	json_t *out, *in;
+	json_error_t *errIn;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	std::string buf;
 	uint32_t cnt = 0;
@@ -551,34 +558,37 @@ json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int curr
 	
 	// if we timed out, return a NULL
 	if (cnt >= UART_TIMEOUT) {
-		errLog.write("REST Arduino Serial", "Failed to open serial port for write");
+		errLog->write("REST Arduino Serial", "Failed to open serial port for write");
 		port.close();
 		return NULL;
 	}
 	
 	// write out the incoming URI to the Arduino
 
-	for (uint8_t i = (currentToken + 1); i < tokenCnt; i++) {
-		port << "/" << std::string(tokens[i]);
+	for (uint8_t i = (currentToken + 1); i < tokens.size(); i++) {
+		port.write("/");
+		port.write(tokens[i].c_str());
 	}
-	port << "?" << std::string(query);
+	port.write("?");
+	port.write(query.c_str());
+	port.write("\r\n");
 	
 	// read the incoming buffer
 	port >> buf;
 	port.close();
 	if (buf != BlackLib::UART_READ_FAILED) {
-		in = json_loadb(buf.c_str(), JSON_DECODE_ANY, err);
+		in = json_loadb(buf.c_str(), buf.length(), JSON_DECODE_ANY, errIn);
 		if (in) {
-			free(err);
+			free(errIn);
 			return in;
 		} else {
-			free(in);
-			free(err);
-			errLog.write("REST Arduino Serial", "Failed to parse incoming json from Arduino");
+			json_decref(in);
+			free(errIn);
+			errLog->write("REST Arduino Serial", "Failed to parse incoming json from Arduino");
 			return NULL;
 		}
 	} else {
-		errLog.write("REST Arduino Serial", "Failed to read return value");
+		errLog->write("REST Arduino Serial", "Failed to read return value");
 		return NULL;
 	}
 }

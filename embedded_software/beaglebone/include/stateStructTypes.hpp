@@ -151,7 +151,7 @@ class waypointClass : public hackerboatStateClassStorable {
 
 		/* Concrete implementations of stateClassStorable */
 		bool parse (json_t *, bool);
-		json_t *pack (bool) const;
+		json_t *pack (bool seq = true) const;
 		bool isValid (void) const;
 
 		locationClass location;

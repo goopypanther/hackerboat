@@ -14,19 +14,17 @@ CXX = g++
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
-CPPFLAGS +=-I submodules/include -I include -I submodules/smhasher/src -MMD -MT $@
+CPPFLAGS +=-I submodules/include -I $(BLACKLIB) -I include -MMD -MT $@
 LDFLAGS  +=-L submodules/lib
 
-LDLIBS += -ljansson -lsqlite3 -lBlackLib -lm -lrt
+LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
 
 export CC CXX OPTS
 
-VPATH=src/common:src/nav:submodules/smhasher/src
+VPATH=src/common:src/nav
 
 all: submodules nav hb.fcgi master
 .PHONY: all
-
-MurmurHash3.o: 
 
 LIBHACKERBOAT_SRCS= stateStructTypes.cpp 
 LIBHACKERBOAT_SRCS+= logs.cpp 
@@ -38,20 +36,20 @@ LIBHACKERBOAT_SRCS+= gps.cpp
 LIBHACKERBOAT_SRCS+= arduinoState.cpp 
 LIBHACKERBOAT_SRCS+= boneState.cpp
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
-#LIBHACKERBOAT_SRCS+= MurmurHash3.cpp 
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 
-arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
+#arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
 
 NAV_SRCS=nav/hackerboatNavigator.cpp
 nav: $(addprefix src/,$(NAV_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-FCGI_SRCS=cgi/hackerboatFastCGI.cpp
+FCGI_SRCS= cgi/hackerboatFastCGI.cpp
+FCGI_SRCS+= cgi/RESTdispatch.cpp
 hb.fcgi:  $(addprefix src/,$(FCGI_SRCS:.cpp=.o)) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 

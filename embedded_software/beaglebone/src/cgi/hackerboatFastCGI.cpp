@@ -63,7 +63,7 @@ int main (void) {
 		} else continue;
 		
 		// if there is post data, read it in
-		bodyLen = contentLength.stoi();
+		bodyLen = std::stoi(contentLength, NULL);
 		if (bodyLen > 0) {
 			bodyBuf = (char *)calloc(bodyLen, sizeof(char));
 			if (bodyBuf == NULL) continue;
@@ -105,7 +105,7 @@ int main (void) {
 
 		// log everything
 		log->open(REST_LOGFILE);
-		log->write(tokens, tokenCnt, query, body, bodyLen, method, response);
+		log->write(tokens, query, body, method, response);
 		log->close();
 		
 		// clean up
@@ -144,31 +144,37 @@ RESTdispatchClass *initRESTDispatch (void) {
 	appendDispatchClass		*waypointAppend = new appendDispatchClass(waypoint);
 	insertDispatchClass		*waypointInsert = new insertDispatchClass(waypoint);
 	
-	// root & branch nodes
-	boneStateRESTClass 		*boatREST = new boneStateRESTClass({{"all", boneAll}, 
-																{"count", boneCount}});
-	gpsRESTClass 			*gpsREST = new gpsRESTClass({{"all", gpsAll}, 
-														{"count", gpsCount}});
-	waypointRESTClass		*waypointREST = new waypointRESTClass({{"all", waypointAll}, 
-																	{"count", waypointCount}, 
-																	{"append", waypointAppend}, 
-																	{"insert", waypointInsert}});
-	navRESTClass			*navREST = new navRESTClass({{"all", navAll}, {"count", navCount}});
-	arduinoStateRESTClass	*arduinoREST = new arduinoStateRESTClass({{"all", arduinoAll}, 
-																		{"count", arduinoCount}});
-	rootRESTClass			*root = new rootRESTClass({{"boneState",boatREST}, 
-														{"gps", gpsREST}, 
-														{"waypoint", waypointREST}, 
-														{"nav", navREST}, 
-														{"arduinoState", arduinoREST}, 
-														{"arduino", arduino}, 
-														{"resetArduino", reset}});
-
+	// dispatch map declarations and branch nodes
+	static map<std::string, RESTdispatchClass&> boatMap = {{"all", *boneAll}, {"count", *boneCount}};
+	boneStateRESTClass 	*boatREST = new boneStateRESTClass(&boatMap);
+	static map<std::string, RESTdispatchClass&> gpsMap = {{"all", *gpsAll}, {"count", *gpsCount}};
+	gpsRESTClass *gpsREST = new gpsRESTClass(&gpsMap);
+	static map<std::string, RESTdispatchClass&> wpMap = {{"all", *waypointAll}, {"count", *waypointCount}, 
+													{"append", *waypointAppend}, {"insert", *waypointInsert}};
+	waypointRESTClass *waypointREST = new waypointRESTClass(&wpMap);
+	static map<std::string, RESTdispatchClass&> navMap = {{"all", *navAll}, {"count", *navCount}};														
+	navRESTClass *navREST = new navRESTClass(&navMap);
+	static map<std::string, RESTdispatchClass&> ardMap = {{"all", *arduinoAll}, {"count", *arduinoCount}};
+	arduinoStateRESTClass *arduinoREST = new arduinoStateRESTClass(&ardMap);	
+	static map<std::string, RESTdispatchClass&> rootMap = {{"boneState", *boatREST}, {"gps", *gpsREST}, 
+													{"waypoint", *waypointREST}, {"nav", *navREST}, 
+													{"arduinoState", *arduinoREST}, {"arduino", *arduino}, 
+													{"resetArduino", *reset}};							;														
+	rootRESTClass *root = new rootRESTClass(&rootMap);
+					
+	// number assignments
 	boatREST->addNumber(boneNum);
 	gpsREST->addNumber(gpsNum);
 	waypointREST->addNumber(waypointNum);
 	navREST->addNumber(navNum);
 	arduinoREST->addNumber(arduinoNum);
+	
+	// set targets
+	boatREST->setTarget(boat);
+	gpsREST->setTarget(gps);
+	waypointREST->setTarget(waypoint);
+	navREST->setTarget(nav);
+	arduinoREST->setTarget(arduinoState);
 	
 	return root;
 }

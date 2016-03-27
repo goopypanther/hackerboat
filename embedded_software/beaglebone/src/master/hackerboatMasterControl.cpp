@@ -39,6 +39,8 @@ logError *err = logError::instance();
 
 int main (void) {
 	stateMachineBase *thisState, *lastState;
+	boneStateClass myBoat;
+	arduinoStateClass myArduino;
 	timer_t timerid;
     struct sigevent sev;
     struct itimerspec its;
@@ -75,16 +77,16 @@ int main (void) {
 		exit(EXIT_FAILURE);
 	}
 	
-	thisState = new boneStartState(&myState, &myArd);
+	thisState = new boneStartState(&myBoat, &myArduino);
 	
 	for (;;) {
 		while (!timerFlag) {usleep(100);}	// wait for the timer flag to go true
 		timerFlag = false;
-		input(&myState, &myArd);
+		input(&myBoat, &myArduino);
 		lastState = thisState;
 		thisState = thisState->execute();
 		if (thisState != lastState) delete lastState;	// if we have a new state, delete the old object
-		output(&myState, &myArd);
+		output(&myBoat, &myArduino);
 	}
 }
 

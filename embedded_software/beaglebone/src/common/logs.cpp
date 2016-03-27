@@ -13,6 +13,8 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -49,3 +51,23 @@ bool logError::write(std::string source, std::string message)
 }
 
 logError logError::_instance;
+
+bool logREST::open(std::string path)
+{
+	log.open(path);
+	return log.is_open();
+}
+
+bool logREST::close(void)
+{
+	log.close();
+	return !log.is_open();
+}
+
+bool logREST::write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response) {
+	//log << timeOutput() << source << ": " << message << std::endl;
+	#warning Implement logREST::write()! -PN
+	return true;
+}
+
+logREST logREST::_instance;
