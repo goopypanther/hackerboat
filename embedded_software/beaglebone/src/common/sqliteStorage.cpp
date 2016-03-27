@@ -270,6 +270,8 @@ hackerboatStateClassStorable::sequence hackerboatStateClassStorable::countRecord
 
 bool hackerboatStateClassStorable::writeRecord(void)
 {
+	if (_sequenceNum < 0)
+		return false;
 	hackerboatStateStorage& db = storage();
 	shared_stmt sth = db.updateRecord();
 	int columnCount = db.columnCount();
