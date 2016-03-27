@@ -19,25 +19,26 @@
 #include "stateStructTypes.hpp"
 #include "RESTdispatch.hpp"
 #include "config.h"
-#include <MurmurHash3.h>
 #include "logs.hpp"
 #include "boneState.hpp"
 #include "arduinoState.hpp"
 #include "navigation.hpp"
 #include "gps.hpp"
 
+#include <string>
+#include <map>
+#include <vector>
+
 RESTdispatchClass *initRESTDispatch (void);
 
 int main (void) {
-	char 		*uri, *method, *query, *contentLength;
+	std::string	uri, method, query, contentLength, body;
+	std::vector<std::string> tokens;
+	char 		*ptr, *bodyBuf;
 	char		response[LOCAL_BUF_LEN]			= {0};
-	char		*tokens[MAX_URI_TOKENS], *body, *tokenState;
-	uint32_t	tokenHashes[MAX_URI_TOKENS];
-	size_t		tokenLengths[MAX_URI_TOKENS];
 	json_t		*responseJSON, *jsonFinal;
-	int32_t		uriLen, methodLen, queryLen, bodyLen, contentLenLen;
-	int32_t		result, tokenCnt = 0;
-	size_t		tokenRemain;
+	size_t 		bodyLen, tokenLen;
+	size_t		tokenPos = 0, nextTokenPos = 0;
 	RESTdispatchClass*	root;
 	logREST*	log = logREST::instance();
 	logError*	err = logError::instance();
@@ -47,43 +48,50 @@ int main (void) {
 	
 	while (FCGI_Accept() >= 0) {
 		// read in the critical environment variables and go to next iteration if any fail
-		if (!(uri = getenv("REQUEST_URI"))) continue;
-		if (!(method = getenv("REQUEST_METHOD"))) continue;
-		if (!(query = getenv("QUERY_STRING"))) continue;
-		if (!(contentLength = getenv("CONTENT_LENGTH"))) continue;
-
-		// figure out the lengths of the various strings
-		uriLen = strlen(uri);
-		methodLen = strlen(method);
-		queryLen = strlen(query);
-		contentLenLen = strlen(contentLength);
+		// Note that the assignment in if statements is deliberate to detect the null pointer
+		if (ptr = getenv("REQUEST_URI")) {
+			uri.assign(ptr);
+		} else continue;
+		if (ptr = getenv("REQUEST_METHOD")) {
+			method.assign(ptr);
+		} else continue;
+		if (ptr = getenv("QUERY_STRING")) {
+			query.assign(ptr);
+		} else continue;
+		if (ptr = getenv("CONTENT_LENGTH")) {
+			contentLength.assign(ptr);
+		} else continue;
 		
 		// if there is post data, read it in
-		bodyLen 	= atoi(contentLength);
+		bodyLen = contentLength.stoi();
 		if (bodyLen > 0) {
-			body = (char *)calloc(bodyLen, sizeof(char));
-			if (body == NULL) continue;
+			bodyBuf = (char *)calloc(bodyLen, sizeof(char));
+			if (bodyBuf == NULL) continue;
 		}
-		FCGI_fread(body, 1, bodyLen, FCGI_stdin);
+		FCGI_fread(bodyBuf, 1, bodyLen, FCGI_stdin);
+		body.assign(bodyBuf, bodyLen);
+		free(bodyBuf);
 		
 		// print the first line of the response
 		FCGI_printf("Content-type: application/json\r\n\r\n");
 		
-		// tokenize the URI & hash the elements
-		for (tokenCnt = 0; tokenCnt < MAX_URI_TOKENS; tokenCnt++) {
-			if (tokenCnt) {
-				tokens[tokenCnt] = strtok(NULL, "/\\");
+		// chop up the URI and move the elements into a vector of strings
+		tokens.clear();
+		tokenPos = 0;
+		nextTokenPos = 0;
+		while (uri.find_first_of("/\\", tokenPos) != std::string::npos) {
+			tokenPos = uri.find_first_of("/\\", tokenPos);
+			nextTokenPos = uri.find_first_of("/\\", tokenPos);
+			if (nextTokenPos == std::string::npos) {
+				tokenLen = nextTokenPos;
 			} else {
-				tokens[tokenCnt] = strtok(uri, "/\\");
+				tokenLen = (nextTokenPos - tokenPos);
 			}
-			if (tokens[tokenCnt] == NULL) break;
-			tokenLengths[tokenCnt] = strlen(tokens[tokenCnt]);
-			MurmurHash3_x86_32(&(tokens[tokenCnt]), tokenLengths[tokenCnt], 
-								HASHSEED, &(tokenHashes[tokenCnt]));
+			tokens.push_back(uri.substr(tokenPos, tokenLen));
 		}
 		
 		// dispatch on the URI
-		responseJSON = root->dispatch(tokens, tokenHashes, tokenLengths, tokenCnt, 0, query, method, body, bodyLen);
+		responseJSON = root->dispatch(tokens, 0, query, method, body);
 		
 		// add some things to the JSON response...
 		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
@@ -101,11 +109,9 @@ int main (void) {
 		log->close();
 		
 		// clean up
-		free(body);
+		tokens.clear();
 		json_decref(jsonFinal);
-		for (uint8_t i = 0; i < MAX_URI_TOKENS; i++) {
-			tokens[i] = NULL;
-		}
+		tokenPos = 0;
 	}
 }
 
@@ -118,8 +124,8 @@ RESTdispatchClass *initRESTDispatch (void) {
 	arduinoStateClass		*arduinoState = new arduinoStateClass();
 	
 	// leaf nodes
-	resetArduinoRest		*reset = new resetArduinoRest("resetArduino");
-	arduinoRESTClass		*arduino = new arduinoRESTClass("a");
+	resetArduinoRest		*reset = new resetArduinoRest();
+	arduinoRESTClass		*arduino = new arduinoRESTClass();
 	allDispatchClass		*boneAll = new allDispatchClass(boat);
 	allDispatchClass		*gpsAll = new allDispatchClass(gps);
 	allDispatchClass		*waypointAll = new allDispatchClass(waypoint);
@@ -139,12 +145,24 @@ RESTdispatchClass *initRESTDispatch (void) {
 	insertDispatchClass		*waypointInsert = new insertDispatchClass(waypoint);
 	
 	// root & branch nodes
-	boneStateRESTClass 		*boatREST = new boneStateRESTClass("boneState", {&boneAll, &boneCount}, 2);
-	gpsRESTClass 			*gpsREST = new gpsRESTClass("gps", {&gpsAll, &gpsCount}, 2);
-	waypointRESTClass		*waypointREST = new waypointRESTClass("waypoint", {&waypointAll, &waypointCount, &waypointAppend, &waypointInsert}, 4);
-	navRESTClass			*navREST = new navRESTClass("nav", {&navAll, &navCount}, 2);
-	arduinoStateRESTClass	*arduinoREST = new arduinoStateRESTClass("arduinoState", {&arduinoAll, &arduinoCount}, 2);
-	rootRESTClass			*root = new rootRESTClass("", {&boatREST, &gpsREST, &waypointREST, &navREST, &arduinoREST, &arduino, &reset}, 7);
+	boneStateRESTClass 		*boatREST = new boneStateRESTClass({{"all", boneAll}, 
+																{"count", boneCount}});
+	gpsRESTClass 			*gpsREST = new gpsRESTClass({{"all", gpsAll}, 
+														{"count", gpsCount}});
+	waypointRESTClass		*waypointREST = new waypointRESTClass({{"all", waypointAll}, 
+																	{"count", waypointCount}, 
+																	{"append", waypointAppend}, 
+																	{"insert", waypointInsert}});
+	navRESTClass			*navREST = new navRESTClass({{"all", navAll}, {"count", navCount}});
+	arduinoStateRESTClass	*arduinoREST = new arduinoStateRESTClass({{"all", arduinoAll}, 
+																		{"count", arduinoCount}});
+	rootRESTClass			*root = new rootRESTClass({{"boneState",boatREST}, 
+														{"gps", gpsREST}, 
+														{"waypoint", waypointREST}, 
+														{"nav", navREST}, 
+														{"arduinoState", arduinoREST}, 
+														{"arduino", arduino}, 
+														{"resetArduino", reset}});
 
 	boatREST->addNumber(boneNum);
 	gpsREST->addNumber(gpsNum);
