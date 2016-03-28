@@ -204,16 +204,16 @@ bool fromString(const char *, waypointClass::action *);
  * @brief An enum to store the current operating mode of the Arduino.
  */
 enum class arduinoModeEnum {
-	POWERUP     	= 0,  		/**< The boat enters this state at the end of initialization */
+	POWERUP     = 0,  		/**< The boat enters this state at the end of initialization */
 	ARMED		= 1,  		/**< In this state, the boat is ready to receive go commands over RF */
 	SELFTEST   	= 2,  		/**< After powerup, the boat enters this state to determine whether it's fit to run */
 	DISARMED   	= 3,  		/**< This is the default safe state. No external command can start the motor */
 	ACTIVE     	= 4,  		/**< This is the normal steering state */
-	LOWBATTERY   	= 5,  		/**< The battery voltage has fallen below that required to operate the motor */
+	LOWBATTERY  = 5,  		/**< The battery voltage has fallen below that required to operate the motor */
 	FAULT    	= 6,  		/**< The boat is faulted in some fashion */
-	SELFRECOVERY 	= 7,   		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
+	SELFRECOVERY= 7,   		/**< The Beaglebone has failed and/or is not transmitting, so time to self-recover*/
 	ARMEDTEST	= 8,		/**< The Arduino is accepting specific pin read/write requests for hardware testing. */
-	ACTIVERUDDER	= 9,		/**< The Arduino is accepting direct rudder commands */
+	ACTIVERUDDER= 9,		/**< The Arduino is accepting direct rudder commands */
 	NONE		= 10		/**< Provides a null value for no command yet received */
 };
 

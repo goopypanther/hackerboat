@@ -92,26 +92,19 @@ int main (void) {
 
 void input (boneStateClass *state, arduinoStateClass *ard) {
 	ard->populate();
-	state->openFile();
 	state->getLastRecord();
-	state->closeFile();
-	state->gps.openFile();
+	clock_gettime(CLOCK_REALTIME, &(state->uTime));
 	if (!state->gps.getLastRecord()) {
 		state->insertFault("No GNSS");
-		state->setMode(state->Mode::FAULT);
+		state->setMode(boatModeEnum::FAULT);
 	}
-	state->gps.closeFile();
 }
 
 
 void output (boneStateClass *state, arduinoStateClass *ard) {
 	ard->heartbeat();
-	ard->openFile();
 	ard->writeRecord();
-	ard->closeFile();
-	state->openFile();
 	state->writeRecord();
-	state->closeFile();
 }
 
 static void handler(int sig, siginfo_t *si, void *uc) {

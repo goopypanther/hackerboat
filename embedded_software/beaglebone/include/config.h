@@ -14,6 +14,7 @@
 #define GNSS_BPS			B57600
 #define GNSS_BAUD			Baud57600
 #define GNSS_TIMEOUT		(180)
+#define ARDUINO_TIMEOUT		(60)
 #define ARDUINO_REST_TTY	"/dev/ttyO2"		
 #define ARDUINO_LOG_TTY		"/dev/ttyO1"
 #define ARDUINO_REST_UART	UART2		
@@ -23,7 +24,7 @@
 #define ARDUINO_RESET_PIN	GPIO_48
 #define FRAME_LEN_NS		(100000000)		/// State machine execution frame length, in nanoseconds
 #define UART_TIMEOUT		(100000)		/// UART contention timeout, in microseconds
-#define SELFTEST_FRAMES
+#define SELFTEST_DELAY		(30)
 #define SHORE_TIMEOUT		(60)
 #define HORN_TIME			(2)
 #define RETURN_TIMEOUT		(180)

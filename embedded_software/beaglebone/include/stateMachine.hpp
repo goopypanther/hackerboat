@@ -63,39 +63,46 @@ class stateMachineBase {
 
 class boneStartState : public stateMachineBase {
 	public:
+		boneStartState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
 class boneSelfTestState : public stateMachineBase {
 	public:
+		boneSelfTestState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
 class boneDisarmedState : public stateMachineBase {
 	public:
+		boneDisarmedState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
 class boneArmedState : public stateMachineBase {
 	public:
+		boneArmedState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
 class boneManualState : public stateMachineBase {
 	public:
+		boneManualState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
-class boneWaypointState : public stateMahineBase {
+class boneWaypointState : public stateMachineBase {
 	public:
+		boneWaypointState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 	private:
-		navClass 		_nav(NAV_DB_FILE);
-		waypointClass	_wp(WP_DB_FILE);
+		navClass 		_nav;
+		waypointClass	_wp;
 };
 
 class boneNoSignalState : public stateMachineBase {
 	public:
+		boneNoSignalState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 	private:
 		stateMachineBase *returnLastState (void);
@@ -103,18 +110,21 @@ class boneNoSignalState : public stateMachineBase {
 
 class boneReturnState : public stateMachineBase {
 	public:
+		boneReturnState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 	private:
-		navClass _nav(NAV_DB_FILE);
+		navClass _nav;
 };
 
 class boneArmedTestState : public stateMachineBase {
 	public:
+		boneArmedTestState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
 class boneFaultState : public stateMachineBase {
 	public:
+		boneFaultState (boneStateClass *state, arduinoStateClass *ard) : stateMachineBase(state,ard) {};
 		stateMachineBase *execute (void);
 };
 
