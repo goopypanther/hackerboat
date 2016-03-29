@@ -35,7 +35,7 @@ void output (boneStateClass *state, arduinoStateClass *ard);
 
 static bool timerFlag = true;
 
-logError *err = logError::instance();
+static logError *err = logError::instance();
 
 int main (void) {
 	stateMachineBase *thisState, *lastState;

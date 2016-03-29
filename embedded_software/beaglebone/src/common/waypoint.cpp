@@ -20,19 +20,13 @@ extern "C" {
 #include "sqliteStorage.hpp"
 
 waypointClass::waypointClass()
-	: act(action::CONTINUE)
+	: _act(action::CONTINUE)
 {
 }
 
 waypointClass::waypointClass (locationClass loc, action action)
-	: location(loc), act(action)
+	: location(loc), _act(action)
 {
-}
-
-bool waypointClass::setAction(waypointClass::action action)
-{
-	act = action;
-	return true;
 }
 
 bool waypointClass::parse(json_t *input, bool seq = false)
@@ -59,7 +53,7 @@ bool waypointClass::parse(json_t *input, bool seq = false)
 		nextWaypoint = -1;
 
 	val = json_object_get(input, "action");
-	if (!::parse(val, &act))
+	if (!::parse(val, &_act))
 		return false;
 
 	if (seq) {
@@ -84,7 +78,7 @@ json_t *waypointClass::pack(bool seq) const
 	}
 	json_object_set_new_nocheck(repr,
 				    "action",
-				    json_string(toString(act)));
+				    json_string(toString(_act)));
 
 	if (seq && (_sequenceNum >= 0)) {
 		json_object_set_new_nocheck(repr, "sequenceNum", json_integer(_sequenceNum));
@@ -101,7 +95,7 @@ bool waypointClass::isValid(void) const
 	if (index < 0 || nextWaypoint < 0)
 		return false;
 
-	if (int(act) < 0 || int(act) > maxActionEnum)
+	if (int(_act) < 0 || int(_act) > maxActionEnum)
 		return false;
 
 	return true;
@@ -157,7 +151,7 @@ bool waypointClass::fillRow(sqliteParameterSlice row) const
 	else
 		row.bind_null(3);
 
-	row.bind(4, int(act));
+	row.bind(4, int(_act));
 
 	return true;
 }
@@ -187,7 +181,7 @@ bool waypointClass::readFromRow(sqliteRowReference row, sequence id)
 		nextWaypoint = row.int64_field(3);
 	}
 
-	act = static_cast<action>(row.int64_field(4));
+	_act = static_cast<action>(row.int64_field(4));
 
 	return true;
 }

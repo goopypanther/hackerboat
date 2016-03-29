@@ -19,7 +19,7 @@
 #include "stateMachine.hpp"
 #include "logs.hpp"
 
-logError *err = logError::instance();
+static logError *err = logError::instance();
 
 using namespace BlackLib;
 
@@ -346,6 +346,26 @@ stateMachineBase *boneFaultState::execute (void) {
 	
 	// check if we're getting a command for self test
 	if (_state->command == boatModeEnum::SELFTEST) return new boneSelfTestState(this->_state, this->_ard);
+	
+	return this;
+}
+
+stateMachineBase *boneArmedTestState::execute (void) {
+	
+	this->_state->setMode(boatModeEnum::ARMEDTEST);
+	
+	// check for GNSS, arduino, and shore signal
+	GNSSFail();
+	shoreFail();
+	arduinoFail();
+	
+	// check for faults
+	if ((_state->faultCount())) return new boneFaultState(this->_state, this->_ard);
+	
+	// check for commands & arduino states
+	if (isDisarmed()) {
+		return new boneDisarmedState(this->_state, this->_ard);
+	}		
 	
 	return this;
 }

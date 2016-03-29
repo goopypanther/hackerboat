@@ -169,8 +169,8 @@ class waypointClass : public hackerboatStateClassStorable {
 		waypointClass (void);
 		waypointClass (locationClass loc, action action = action::CONTINUE); 	/**< Create a waypoint at loc with action */
 		
-		bool			setAction(action action);				/**< Set the action to take when this waypoint is reached */
-		action			getAction(void);					/**< Return the action that this waypoint is set to */
+		bool			setAction(action act) {this->_act = act;};				/**< Set the action to take when this waypoint is reached */
+		action			getAction(void) {return this->_act;};					/**< Return the action that this waypoint is set to */
 
 		waypointClass 	*getNextWaypoint(void);					/**< return the next waypoint to travel towards */
 		bool			setNextWaypoint(waypointClass* next);		/**< Set the next waypoint to the given object (works only if it has a sequenceNum > 0; renumber indices as necessary */
@@ -186,7 +186,7 @@ class waypointClass : public hackerboatStateClassStorable {
 	private:
 		indexT			index = -1;					/**< Place of this waypoint in the waypoint list */ 
 		sequence		nextWaypoint = -1;				/**< _sequenceNum of the next waypoint */
-		action			act;						/**< Action to perform when reaching a location */	
+		action			_act;						/**< Action to perform when reaching a location */	
 		static const int8_t minActionEnum = 0;
 		static const int8_t maxActionEnum = 3;
 
