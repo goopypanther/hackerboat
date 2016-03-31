@@ -13,15 +13,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "BlackUART/BlackUART.h"
 #include "config.h"
 #include "stateStructTypes.hpp"
 #include "stateMachine.hpp"
 #include "logs.hpp"
 
 static logError *err = logError::instance();
-
-using namespace BlackLib;
 
 stateTimer::stateTimer (double duration, uint64_t frameTime) {
 	this->setDuration(duration, frameTime);

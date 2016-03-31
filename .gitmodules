@@ -7,6 +7,3 @@
 [submodule "embedded_software/beaglebone/submodules/BlackLib"]
 	path = embedded_software/beaglebone/submodules/BlackLib
 	url = https://github.com/logos-electromechanical/BlackLib.git
-[submodule "embedded_software/beaglebone/submodules/smhasher"]
-	path = embedded_software/beaglebone/submodules/smhasher
-	url = https://github.com/aappleby/smhasher.git

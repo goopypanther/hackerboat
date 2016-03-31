@@ -30,9 +30,9 @@ class logREST {
 		bool write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response);
 		bool close(void);
 	private:
-		logREST(void){};
-		logREST(logREST const&){};
-		logREST& operator=(logREST const&){};
+		logREST(void) = default;
+		logREST(logREST const&) = delete;
+		logREST& operator=(logREST const&) = delete;
 		static logREST _instance;
 		ofstream log;
 };
@@ -44,9 +44,9 @@ class logError {
 		bool write(const std::string source, const std::string message);
 		bool close(void);
 	private:
-		logError(void){};
-		logError(logError const&){};
-		logError& operator=(logError const&){};
+		logError(void) = default;
+		logError(logError const&) = delete;
+		logError& operator=(logError const&) = delete;
 		static logError _instance;
 		ofstream log;
 };

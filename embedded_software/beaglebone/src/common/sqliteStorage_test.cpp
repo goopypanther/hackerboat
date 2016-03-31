@@ -102,6 +102,7 @@ bool simpleValues::readFromRow(sqliteRowReference row, sequence seq)
 	i = row.int64_field(0);
 	f = row.double_field(1);
 	s = row.string_field(2);
+	return true;
 }
 
 TEST(StorageTest, SimpleValues) {
