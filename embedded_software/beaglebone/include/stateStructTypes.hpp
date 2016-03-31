@@ -169,7 +169,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		waypointClass (void);
 		waypointClass (locationClass loc, action action = action::CONTINUE); 	/**< Create a waypoint at loc with action */
 		
-		bool			setAction(action act) {this->_act = act;};				/**< Set the action to take when this waypoint is reached */
+		void			setAction(action act) {this->_act = act;};				/**< Set the action to take when this waypoint is reached */
 		action			getAction(void) {return this->_act;};					/**< Return the action that this waypoint is set to */
 
 		waypointClass 	*getNextWaypoint(void);					/**< return the next waypoint to travel towards */
