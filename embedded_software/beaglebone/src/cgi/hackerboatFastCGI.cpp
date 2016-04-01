@@ -32,8 +32,6 @@
 RESTdispatchClass *initRESTDispatch (void);
 
 int main (void) {
-	std::string	uri, method, query, contentLength, body;
-	std::vector<std::string> tokens;
 	char 		*ptr, *bodyBuf;
 	char		response[LOCAL_BUF_LEN]			= {0};
 	json_t		*responseJSON, *jsonFinal;
@@ -47,9 +45,11 @@ int main (void) {
 	root = initRESTDispatch();
 	
 	while (FCGI_Accept() >= 0) {
+		std::string	uri, method, query, body;
+		std::vector<std::string> tokens;
 		// read in the critical environment variables and go to next iteration if any fail
 		// Note that the assignment in if statements is deliberate to detect the null pointer
-		if (ptr = getenv("REQUEST_URI")) {
+		if (ptr = getenv("PATH_INFO")) {
 			uri.assign(ptr);
 		} else continue;
 		if (ptr = getenv("REQUEST_METHOD")) {
@@ -59,35 +59,40 @@ int main (void) {
 			query.assign(ptr);
 		} else continue;
 		if (ptr = getenv("CONTENT_LENGTH")) {
-			contentLength.assign(ptr);
-		} else continue;
+		        bodyLen = ::atoi(ptr);
+		} else {
+	                 // For GET requests, etc., we don't get a CONTENT_LENGTH, which is OK.
+		         bodyLen = 0;
+		}
 		
 		// if there is post data, read it in
-		bodyLen = std::stoi(contentLength, NULL);
 		if (bodyLen > 0) {
 			bodyBuf = (char *)calloc(bodyLen, sizeof(char));
 			if (bodyBuf == NULL) continue;
+			FCGI_fread(bodyBuf, 1, bodyLen, FCGI_stdin);
+			body.assign(bodyBuf, bodyLen);
+			free(bodyBuf);
 		}
-		FCGI_fread(bodyBuf, 1, bodyLen, FCGI_stdin);
-		body.assign(bodyBuf, bodyLen);
-		free(bodyBuf);
-		
+
 		// print the first line of the response
 		FCGI_printf("Content-type: application/json\r\n\r\n");
 		
 		// chop up the URI and move the elements into a vector of strings
 		tokens.clear();
 		tokenPos = 0;
-		nextTokenPos = 0;
-		while (uri.find_first_of("/\\", tokenPos) != std::string::npos) {
-			tokenPos = uri.find_first_of("/\\", tokenPos);
-			nextTokenPos = uri.find_first_of("/\\", tokenPos);
+		while (tokenPos < uri.length() && uri.at(tokenPos) == '/')
+			tokenPos ++;
+		nextTokenPos = tokenPos;
+		while (tokenPos != std::string::npos) {
+			nextTokenPos = uri.find_first_of("/\\", tokenPos+1);
 			if (nextTokenPos == std::string::npos) {
-				tokenLen = nextTokenPos;
+			        tokenLen = uri.length() - tokenPos;
 			} else {
 				tokenLen = (nextTokenPos - tokenPos);
+				nextTokenPos ++;
 			}
 			tokens.push_back(uri.substr(tokenPos, tokenLen));
+			tokenPos = nextTokenPos;
 		}
 		
 		// dispatch on the URI
