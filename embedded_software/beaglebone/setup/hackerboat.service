@@ -1,0 +1,16 @@
+#
+# This is a systemd service unit which runs the hackerboat daemons from a service tree.
+#
+#
+# Place a copy of this file in /etc/systemd/system/hackerboat.service, edit XXX to point to the service tree directory and YYY to the username running the services, and enable it.
+
+[Unit]
+Description=Hackerboat Helmsman
+Wants=lighttpd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/svscan XXX
+User=YYY
+
+

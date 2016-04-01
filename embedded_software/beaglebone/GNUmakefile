@@ -25,6 +25,17 @@ test: storage_test
 	./storage_test
 .PHONY: all test
 
+ifdef SVCTREE
+svctree: submodules nav hb.fcgi master
+	./setup/make-svctree.sh . $(SVCTREE)
+else
+svctree:
+	@echo "Error: You must define SVCTREE (e.g., \"$(MAKE) SVCTREE=/home/foo/svc $(MAKECMDGOALS)\")"
+	@false
+endif
+run: svctree
+	svscan $(SVCTREE)
+.PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= stateStructTypes.cpp 
 LIBHACKERBOAT_SRCS+= logs.cpp 
