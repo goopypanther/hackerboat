@@ -16,6 +16,7 @@
 #include <string.h>
 #include <jansson.h>
 #include <time.h>
+#include <cxxabi.h>
 #include "stateStructTypes.hpp"
 #include "RESTdispatch.hpp"
 #include "config.h"
@@ -30,13 +31,11 @@
 #include <vector>
 
 RESTdispatchClass *initRESTDispatch (void);
+static void writeJSONResponse(json_t *j, size_t flags);
 
 int main (void) {
-	char 		*ptr, *bodyBuf;
-	char		response[LOCAL_BUF_LEN]			= {0};
+	char 		*ptr;
 	json_t		*responseJSON, *jsonFinal;
-	size_t 		bodyLen, tokenLen;
-	size_t		tokenPos = 0, nextTokenPos = 0;
 	RESTdispatchClass*	root;
 	logREST*	log = logREST::instance();
 	logError*	err = logError::instance();
@@ -47,6 +46,8 @@ int main (void) {
 	while (FCGI_Accept() >= 0) {
 		std::string	uri, method, query, body;
 		std::vector<std::string> tokens;
+		size_t 		bodyLen;
+		size_t		tokenPos;
 		// read in the critical environment variables and go to next iteration if any fail
 		// Note that the assignment in if statements is deliberate to detect the null pointer
 		if (ptr = getenv("PATH_INFO")) {
@@ -67,26 +68,23 @@ int main (void) {
 		
 		// if there is post data, read it in
 		if (bodyLen > 0) {
-			bodyBuf = (char *)calloc(bodyLen, sizeof(char));
+			char *bodyBuf = (char *)calloc(bodyLen, sizeof(char));
 			if (bodyBuf == NULL) continue;
 			FCGI_fread(bodyBuf, 1, bodyLen, FCGI_stdin);
 			body.assign(bodyBuf, bodyLen);
 			free(bodyBuf);
 		}
 
-		// print the first line of the response
-		FCGI_printf("Content-type: application/json\r\n\r\n");
-		
 		// chop up the URI and move the elements into a vector of strings
 		tokens.clear();
 		tokenPos = 0;
 		while (tokenPos < uri.length() && uri.at(tokenPos) == '/')
 			tokenPos ++;
-		nextTokenPos = tokenPos;
 		while (tokenPos != std::string::npos) {
-			nextTokenPos = uri.find_first_of("/\\", tokenPos+1);
+			size_t nextTokenPos = uri.find_first_of("/\\", tokenPos+1);
+			size_t tokenLen;
 			if (nextTokenPos == std::string::npos) {
-			        tokenLen = uri.length() - tokenPos;
+				tokenLen = uri.length() - tokenPos;
 			} else {
 				tokenLen = (nextTokenPos - tokenPos);
 				nextTokenPos ++;
@@ -96,7 +94,22 @@ int main (void) {
 		}
 		
 		// dispatch on the URI
-		responseJSON = root->dispatch(tokens, 0, query, method, body);
+		try {
+			responseJSON = root->dispatch(tokens, 0, query, method, body);
+		} catch (const std::exception& exc) {
+			const char *mangled = typeid(exc).name();
+			int status = -1;
+			char *demangled = abi::__cxa_demangle(mangled, NULL, NULL, &status);
+			FCGI_printf("Status: 500\r\nContent-type: text/plain\r\n\r\n"
+						"Uncaught exception while processing request:\n"
+						"Exception: %s\n"
+						"What: %s\n\n",
+						(status == 0 && demangled != 0)? demangled : mangled,
+						exc.what());
+			if (demangled != 0)
+				free(demangled);
+			continue;
+		}
 		
 		// add some things to the JSON response...
 		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
@@ -105,12 +118,14 @@ int main (void) {
 								"connected", "true");
 		
 		// print the result back to the client
-		snprintf(response, LOCAL_BUF_LEN, "%s", json_dumps(jsonFinal, JSON_COMPACT));
-		FCGI_printf("%s\r\n", response);
+		writeJSONResponse(jsonFinal, JSON_COMPACT);
 
 		// log everything
 		log->open(REST_LOGFILE);
+		char *response = jsonFinal? json_dumps(jsonFinal, JSON_COMPACT) : NULL;
 		log->write(tokens, query, body, method, response);
+		if (response)
+			::free(response);
 		log->close();
 		
 		// clean up
@@ -182,4 +197,14 @@ RESTdispatchClass *initRESTDispatch (void) {
 	arduinoREST->setTarget(arduinoState);
 	
 	return root;
+}
+
+static int fcgi_out_jansson(const char *buffer, size_t size, void *ctxt)
+{
+	return (1 != FCGI_fwrite(const_cast<char *>(buffer), size, 1, static_cast<FCGI_FILE *>(ctxt)));
+}
+
+static void writeJSONResponse(json_t *j, size_t flags) {
+	FCGI_fputs("Content-Type: application/json\r\n\r\n", FCGI_stdout);
+	json_dump_callback(j, fcgi_out_jansson, static_cast<void *>(FCGI_stdout), flags);
 }
