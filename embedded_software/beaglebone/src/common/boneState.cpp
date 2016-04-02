@@ -44,7 +44,6 @@ boneStateClass::boneStateClass() {
 
 json_t *boneStateClass::pack (bool seq) const {
 	json_t *output;
-	clock_gettime(CLOCK_REALTIME, &uTime);
 	output = json_pack("{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:f,s:f,s:f,s:b,s:o}",
 			   "uTime", packTimeSpec(uTime),
 			   "lastContact", packTimeSpec(lastContact),

@@ -8,18 +8,20 @@ GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
 BLACKLIB=submodules/BlackLib/v3_0
+MINMEA=submodules/minmea
 
-CFLAGS   += $(OPTS)
+CFLAGS   += $(OPTS) -std=gnu11
 CXXFLAGS += $(OPTS) -std=gnu++11
-CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
+CPPFLAGS += -I submodules/include -I include -MMD -MT $@
 CPPFLAGS += -I $(BLACKLIB)
-LDFLAGS  +=-L submodules/lib
+CPPFLAGS += -I $(MINMEA)
+LDFLAGS  += -L submodules/lib
 
 LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
 
 export OPTS
 
-VPATH=src/common:src/nav
+VPATH=src/common:src/nav:submodules/minmea
 
 all: submodules nav hb.fcgi master
 test: storage_test
@@ -46,12 +48,12 @@ LIBHACKERBOAT_SRCS+= navigation.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp 
 LIBHACKERBOAT_SRCS+= gps.cpp 
 LIBHACKERBOAT_SRCS+= arduinoState.cpp 
-arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
 LIBHACKERBOAT_SRCS+= boneState.cpp
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
+LIBHACKERBOAT_SRCS+= minmea.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)
@@ -75,6 +77,12 @@ ALL_OBJS+=$(MASTER_OBJS)
 master: $(MASTER_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+GPS_SRCS= gpsParse/gpsReader.cpp
+GPS_OBJS=$(addprefix src/,$(GPS_SRCS:.cpp=.o))
+ALL_OBJS+=$(GPS_OBJS)
+gpsParse: $(GPS_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
 # Unit test targets
 TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o navigation_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
@@ -100,6 +108,9 @@ clean:
 	rm -f libhackerboat.a
 	rm -f $(ALL_OBJS)
 	rm -f $(ALL_OBJS:.o=.d)
+	rm -f master
+	rm -f hb.fcgi
+	
 .PHONY: clean
 
 -include $(ALL_OBJS:.o=.d)
