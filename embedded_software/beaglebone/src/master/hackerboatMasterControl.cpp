@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <BlackGPIO/BlackGPIO.h>
 
 #include "stateStructTypes.hpp"
 #include "boneState.hpp"
@@ -38,6 +39,7 @@ static bool timerFlag = true;
 static logError *err = logError::instance();
 
 int main (void) {
+	BlackGPIO clockPin(GPIO_38, output, FastMode);
 	stateMachineBase *thisState, *lastState;
 	boneStateClass myBoat;
 	arduinoStateClass myArduino;
@@ -48,6 +50,7 @@ int main (void) {
     struct sigaction sa;
 	
 	logError::instance()->open(MAIN_LOGFILE);
+	clockPin.setValue(low);
 	
 	// Establish the handler for the timer signal
 	sa.sa_flags = SA_SIGINFO;
@@ -81,12 +84,14 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag) {usleep(100);}	// wait for the timer flag to go true
+		clockPin.setValue(high);
 		timerFlag = false;
 		input(&myBoat, &myArduino);
 		lastState = thisState;
 		thisState = thisState->execute();
 		if (thisState != lastState) delete lastState;	// if we have a new state, delete the old object
 		output(&myBoat, &myArduino);
+		clockPin.setValue(low);
 	}
 }
 
