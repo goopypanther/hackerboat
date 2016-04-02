@@ -12,6 +12,7 @@ BLACKLIB=submodules/BlackLib/v3_0
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
 CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
+CPPFLAGS += -I $(BLACKLIB)
 LDFLAGS  +=-L submodules/lib
 
 LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
