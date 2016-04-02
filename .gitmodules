@@ -7,3 +7,9 @@
 [submodule "embedded_software/beaglebone/submodules/BlackLib"]
 	path = embedded_software/beaglebone/submodules/BlackLib
 	url = https://github.com/logos-electromechanical/BlackLib.git
+[submodule "embedded_software/beaglebone/minmea"]
+	path = embedded_software/beaglebone/submodules/minmea
+	url = https://github.com/logos-electromechanical/minmea.git
+[submodule "embedded_software/beaglebone/submodules/minmea"]
+	path = embedded_software/beaglebone/submodules/minmea
+	url = https://github.com/logos-electromechanical/minmea.git

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <minmea.h>
 
 #include <string>
 
@@ -25,12 +26,14 @@ gpsFixClass::gpsFixClass() {
 
 json_t *gpsFixClass::pack (bool seq) const {
 	json_t *output;
-	output = json_pack("{s:o,s:f,s:f,s:f,s:f}",
+	output = json_pack("{s:o,s:o,s:f,s:f,s:f,s:f,s:b}",
 			   "uTime", packTimeSpec(this->uTime),
+			   "gpsTime", packTimeSpec(this->gpsTime),
 			   "latitude", latitude,
 			   "longitude", longitude,
 			   "heading", gpsHeading,
-			   "speed", gpsSpeed);
+			   "speed", gpsSpeed,
+			   "valid", fixValid);
 
 	if (!GGA.empty()) json_object_set_new(output, "GGA", json(GGA));
 	if (!GSA.empty()) json_object_set_new(output, "GSA", json(GSA));
@@ -45,17 +48,20 @@ json_t *gpsFixClass::pack (bool seq) const {
 }
 
 bool gpsFixClass::parse (json_t *input, bool seq = true) {
-	json_t *inTime;
-	if (json_unpack(input, "{s:o,s:F,s:F,s:F,s:F}",
+	json_t *inTime, *gpsInTime;
+	if (json_unpack(input, "{s:o,s:o,s:F,s:F,s:F,s:F,s:b}",
 			"uTime", &inTime,
+			"gpsTime", &gpsInTime,
 			"latitude", &latitude,
 			"longitude", &longitude,
 			"heading", &gpsHeading,
-			"speed", &gpsSpeed)) {
+			"speed", &gpsSpeed,
+			"valid", &fixValid)) {
 		return false;
 	}
-	if (!::parse(inTime, &uTime))
+	if ((!::parse(inTime, &uTime)) && (!::parse(inGPSTime, &gpsTime))) {
 		return false;
+	}
 
 	json_t *tmp;
 
@@ -85,7 +91,7 @@ bool gpsFixClass::isValid (void) const {
 	if ((gpsHeading < minHeading) || (gpsHeading > maxHeading)) return false;
 	if ((longitude < minLongitude) || (longitude > maxLongitude)) return false;
 	if ((latitude < minLatitude) || (latitude > maxLatitude)) return false;
-	return true;
+	return fixValid;
 }
 
 hackerboatStateStorage &gpsFixClass::storage() {
@@ -139,5 +145,81 @@ bool gpsFixClass::fillRow(sqliteParameterSlice row) const {
 }
 
 bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
+	#warning Implement GPS readFromRow()
 	return false;
+}
+
+bool gpsFixClass::readSentence (std::string sentence) {
+	clock_gettime(CLOCK_REALTIME, &uTime);
+	switch(minmea_sentence_id(sentence.c_str(), true)) {
+		case MINMEA_SENTENCE_RMC:
+			struct minmea_sentence_rmc frame;
+			if (minmea_parse_rmc(&frame, sentence.c_str())) {
+				clearStrings();
+				RMC = sentence;
+				return packRMC(&frame);
+			}
+			break;
+		case MINMEA_SENTENCE_GGA:
+			struct minmea_sentence_gga frame;
+			if (minmea_parse_gga(&frame, sentence.c_str())) {
+				clearStrings();
+				GGA = sentence;
+				return packRMC(&frame);
+			}
+			break;
+		case MINMEA_SENTENCE_GSA:
+			struct minmea_sentence_gsa frame;
+			if (minmea_parse_gsa(&frame, sentence.c_str())) {
+				clearStrings();
+				GSA = sentence;
+				return packRMC(&frame);
+			}
+			break;
+		case MINMEA_SENTENCE_GSV:
+			struct minmea_sentence_gsv frame;
+			if (minmea_parse_gsv(&frame, sentence.c_str())) {
+				clearStrings();
+				GSV = sentence;
+				return packRMC(&frame);
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
+	if (frame->valid) {
+		this->fixValid = true;
+		this->longtitude = minmea_tofloat(frame->longitude);
+		this->latitude = minmea_tofloat(frame->latitude);
+		this->gpsHeading = minmea_tofloat(frame->course);
+		this->gpsSpeed = minmea_tofloat(frame->speed);
+		minmea_gettime(&gpsTime, frame->date, frame->time);
+	} return false;
+}
+
+double		latitude;				/**< Latitude of last fix */
+		double		longitude;				/**< Longitude of last fix */
+		double		gpsHeading;				/**< True heading, according to GPS */
+		double		gpsSpeed;				/**< Speed over the ground */
+		bool 		fixValid;				/**< Checks whether this fix is valid or not */				
+		
+
+bool gpsFixClass::packGSA (struct minmea_sentence_rmc *frame) {
+	return true;
+}
+
+bool gpsFixClass::packGSV (struct minmea_sentence_rmc *frame) {
+	return true;
+}
+
+bool gpsFixClass::packGGA (struct minmea_sentence_rmc *frame) {
+	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
+		this->fixValid = true;
+		this->longtitude = minmea_tofloat(frame->longitude);
+		this->latitude = minmea_tofloat(frame->latitude);
+	} else return false;
 }
