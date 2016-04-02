@@ -70,10 +70,12 @@ bool stateMachineBase::isFaulted (void) {
 }
 
 stateMachineBase *boneStartState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	return new boneSelfTestState(this->_state, this->_ard);
 }
 
 stateMachineBase *boneSelfTestState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	bool passFlag = true;
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
@@ -124,6 +126,7 @@ stateMachineBase *boneSelfTestState::execute (void) {
 }
 
 stateMachineBase *boneDisarmedState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	// check if we're starting with a fault
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
@@ -148,6 +151,7 @@ stateMachineBase *boneDisarmedState::execute (void) {
 }
 
 stateMachineBase *boneArmedState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
 	
@@ -176,6 +180,7 @@ stateMachineBase *boneArmedState::execute (void) {
 }
 	
 stateMachineBase *boneManualState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
 	
@@ -200,6 +205,7 @@ stateMachineBase *boneManualState::execute (void) {
 }
 
 stateMachineBase *boneWaypointState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
 	
@@ -272,6 +278,7 @@ stateMachineBase *boneNoSignalState::returnLastState (void) {
 }
 
 stateMachineBase *boneNoSignalState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
 	
@@ -294,6 +301,7 @@ stateMachineBase *boneNoSignalState::execute (void) {
 }
 
 stateMachineBase *boneReturnState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	if (isFaulted()) return new boneFaultState(this->_state, this->_ard);
 	
@@ -330,6 +338,7 @@ stateMachineBase *boneReturnState::execute (void) {
 }
 	
 stateMachineBase *boneFaultState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	this->_state->setMode(boatModeEnum::FAULT);
 	
@@ -348,6 +357,7 @@ stateMachineBase *boneFaultState::execute (void) {
 }
 
 stateMachineBase *boneArmedTestState::execute (void) {
+	clock_gettime(CLOCK_REALTIME, &(_state->uTime));
 	
 	this->_state->setMode(boatModeEnum::ARMEDTEST);
 	

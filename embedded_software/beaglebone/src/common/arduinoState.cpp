@@ -319,6 +319,7 @@ bool arduinoStateClass::heartbeat(void) {
 
 bool arduinoStateClass::populate(void) {
 	bool result;
+	clock_gettime(CLOCK_REALTIME, &uTime);
 	json_t *in = write("dumpCoreState", "");
 
 	json_t *other = write("dumpOrientationState", "");
@@ -397,6 +398,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 		return NULL;
 	}
 	result = json_loads(ret.c_str(), JSON_DECODE_ANY, &err);
+	clock_gettime(CLOCK_REALTIME, &uTime);
 	return result;
 }
 	
