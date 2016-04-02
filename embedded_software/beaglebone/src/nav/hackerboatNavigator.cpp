@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <time.h>
 #include <limits>
+#include <BlackGPIO/BlackGPIO.h>
 #include "stateStructTypes.hpp"
 #include "config.h"
 #include "logs.hpp"
@@ -36,7 +37,8 @@ static void handler(int sig, siginfo_t *si, void *uc);
 
 static bool timerFlag = true;
 
-int main (void) {
+int main (void) {{
+	BlackGPIO clockPin(GPIO_39, output, FastMode);
 	navigatorBase *navInf;
 	timer_t timerid;
     struct sigevent sev;
@@ -46,6 +48,7 @@ int main (void) {
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	int navCount = initNav(navInf);					// initialize the list of nav sources
+	clockPin.setValue(low);
 	
 	// Establish the handler for the timer signal
 	sa.sa_flags = SA_SIGINFO;
@@ -77,6 +80,7 @@ int main (void) {
 	
 	for (;;) {
 		while (!timerFlag);			// wait for the timer flag to go true
+		clockPin.setValue(high);
 		navClass nav;
 		boneStateClass boat;
 		boat.getLastRecord();
@@ -97,6 +101,7 @@ int main (void) {
 			logError::instance()->write("nav process", "Failed to get last nav record");
 		}
 		timerFlag = false;		// mark that we're done with the frame
+		clockPin.setValue(low);
 	}
 }
 
