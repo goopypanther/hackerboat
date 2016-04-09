@@ -59,7 +59,7 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 			"valid", &fixValid)) {
 		return false;
 	}
-	if ((!::parse(inTime, &uTime)) && (!::parse(inGPSTime, &gpsTime))) {
+	if ((!::parse(inTime, &uTime)) && (!::parse(gpsInTime, &gpsTime))) {
 		return false;
 	}
 
@@ -153,35 +153,35 @@ bool gpsFixClass::readSentence (std::string sentence) {
 	clock_gettime(CLOCK_REALTIME, &uTime);
 	switch(minmea_sentence_id(sentence.c_str(), true)) {
 		case MINMEA_SENTENCE_RMC:
-			struct minmea_sentence_rmc frame;
-			if (minmea_parse_rmc(&frame, sentence.c_str())) {
+			struct minmea_sentence_rmc frame_rmc;
+			if (minmea_parse_rmc(&frame_rmc, sentence.c_str())) {
 				clearStrings();
 				RMC = sentence;
-				return packRMC(&frame);
+				return packRMC(&frame_rmc);
 			}
 			break;
 		case MINMEA_SENTENCE_GGA:
-			struct minmea_sentence_gga frame;
-			if (minmea_parse_gga(&frame, sentence.c_str())) {
+			struct minmea_sentence_gga frame_gga;
+			if (minmea_parse_gga(&frame_gga, sentence.c_str())) {
 				clearStrings();
 				GGA = sentence;
-				return packRMC(&frame);
+				return packGGA(&frame_gga);
 			}
 			break;
 		case MINMEA_SENTENCE_GSA:
-			struct minmea_sentence_gsa frame;
-			if (minmea_parse_gsa(&frame, sentence.c_str())) {
+			struct minmea_sentence_gsa frame_gsa;
+			if (minmea_parse_gsa(&frame_gsa, sentence.c_str())) {
 				clearStrings();
 				GSA = sentence;
-				return packRMC(&frame);
+				return packGSA(&frame_gsa);
 			}
 			break;
 		case MINMEA_SENTENCE_GSV:
-			struct minmea_sentence_gsv frame;
-			if (minmea_parse_gsv(&frame, sentence.c_str())) {
+			struct minmea_sentence_gsv frame_gsv;
+			if (minmea_parse_gsv(&frame_gsv, sentence.c_str())) {
 				clearStrings();
 				GSV = sentence;
-				return packRMC(&frame);
+				return packGSV(&frame_gsv);
 			}
 			break;
 		default:
