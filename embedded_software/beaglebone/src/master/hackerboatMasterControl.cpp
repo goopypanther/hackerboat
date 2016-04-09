@@ -32,8 +32,8 @@
 
 using namespace BlackLib;
 
-void input (boneStateClass *state, arduinoStateClass *ard);
-void output (boneStateClass *state, arduinoStateClass *ard);
+void inputBB (boneStateClass *state, arduinoStateClass *ard);
+void outputBB (boneStateClass *state, arduinoStateClass *ard);
 
 static logError *err = logError::instance();
 
@@ -58,11 +58,11 @@ int main (void) {
 	for (;;) {
 		clock_gettime(CLOCK_REALTIME, &startTime); 			// grab the time at the start of the frame
 		clockPin.setValue(digitalValue::high);				// mark the start of the frame for debug
-		input(&myBoat, &myArduino);							// read all inputs
+		inputBB(&myBoat, &myArduino);							// read all inputs
 		lastState = thisState;								// store a pointer to the old state
 		thisState = thisState->execute();					// run the current state
 		if (thisState != lastState) delete lastState;		// if we have a new state, delete the old state object
-		output(&myBoat, &myArduino);						// write outputs
+		outputBB(&myBoat, &myArduino);						// write outputs
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
 		clockPin.setValue(digitalValue::low);				// mark the end of the frame for debug
 		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
@@ -74,7 +74,7 @@ int main (void) {
 	}
 }
 
-void input (boneStateClass *state, arduinoStateClass *ard) {
+void inputBB (boneStateClass *state, arduinoStateClass *ard) {
 	ard->populate();
 	state->getLastRecord();
 	clock_gettime(CLOCK_REALTIME, &(state->uTime));
@@ -84,7 +84,7 @@ void input (boneStateClass *state, arduinoStateClass *ard) {
 	}
 }
 
-void output (boneStateClass *state, arduinoStateClass *ard) {
+void outputBB (boneStateClass *state, arduinoStateClass *ard) {
 	ard->heartbeat();
 	ard->writeRecord();
 	state->writeRecord();
