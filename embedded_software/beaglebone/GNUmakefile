@@ -12,14 +12,9 @@ MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
-<<<<<<< HEAD
-CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
+CPPFLAGS += -I submodules/include -I include -MMD -MT $@
 CPPFLAGS += -I $(BLACKLIB)
 LDFLAGS  +=-L submodules/lib
-=======
-CPPFLAGS += -I submodules/include -I include -MMD -MT $@
-LDFLAGS  += -L submodules/lib
->>>>>>> gps_parser
 
 LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
 
