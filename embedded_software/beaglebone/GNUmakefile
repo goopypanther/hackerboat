@@ -21,7 +21,7 @@ LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
 
 export OPTS
 
-VPATH=src/common:src/nav
+VPATH=src/common:src/nav:submodules/minmea
 
 all: submodules nav hb.fcgi master
 test: storage_test
@@ -53,7 +53,7 @@ LIBHACKERBOAT_SRCS+= enumtable.cpp
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
-LIBHACKERBOAT_SRCS+= ../submodules/minmea/minmea.cpp
+LIBHACKERBOAT_SRCS+= minmea.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)
@@ -102,6 +102,9 @@ clean:
 	rm -f libhackerboat.a
 	rm -f $(ALL_OBJS)
 	rm -f $(ALL_OBJS:.o=.d)
+	rm -f master
+	rm -f hb.fcgi
+	
 .PHONY: clean
 
 -include $(ALL_OBJS:.o=.d)
