@@ -8,12 +8,18 @@ GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
 BLACKLIB=submodules/BlackLib/v3_0
+MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS)
 CXXFLAGS += $(OPTS) -std=gnu++11
+<<<<<<< HEAD
 CPPFLAGS +=-I submodules/include -I include -MMD -MT $@
 CPPFLAGS += -I $(BLACKLIB)
 LDFLAGS  +=-L submodules/lib
+=======
+CPPFLAGS += -I submodules/include -I include -MMD -MT $@
+LDFLAGS  += -L submodules/lib
+>>>>>>> gps_parser
 
 LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
 
@@ -45,13 +51,15 @@ LIBHACKERBOAT_SRCS+= location.cpp
 LIBHACKERBOAT_SRCS+= navigation.cpp 
 LIBHACKERBOAT_SRCS+= waypoint.cpp 
 LIBHACKERBOAT_SRCS+= gps.cpp 
+gps.o: CPPFLAGS += -I $(MINMEA)
 LIBHACKERBOAT_SRCS+= arduinoState.cpp 
-arduinoState.o: CPPFLAGS+= -I $(BLACKLIB)
+arduinoState.o: CPPFLAGS += -I $(BLACKLIB)
 LIBHACKERBOAT_SRCS+= boneState.cpp
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
+LIBHACKERBOAT_SRCS+= ../submodules/minmea/minmea.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)

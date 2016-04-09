@@ -35,10 +35,12 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		bool readSentence (std::string sentence);	/**< Populate class from incoming sentence string */
 		
 		timespec	uTime;					/**< Beaglebone time of last fix */
+		timespec	gpsTime;				/**< GPS time of last fix */
 		double		latitude;				/**< Latitude of last fix */
 		double		longitude;				/**< Longitude of last fix */
 		double		gpsHeading;				/**< True heading, according to GPS */
 		double		gpsSpeed;				/**< Speed over the ground */
+		bool 		fixValid;				/**< Checks whether this fix is valid or not */				
 		std::string	GGA;					/**< GGA sentence from GPS */
 		std::string	GSA;					/**< GSA sentence from GPS */
 		std::string	GSV;					/**< GSV sentence from GPS */
@@ -64,6 +66,17 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		static const constexpr double minLongitude 	= -180.0;
 		static const constexpr double maxLongitude 	= 180.0;
 		static const constexpr double minSpeed 		= 0.0;
+		bool packRMC (struct minmea_sentence_rmc *frame);
+		bool packGSA (struct minmea_sentence_rmc *frame);
+		bool packGSV (struct minmea_sentence_rmc *frame);
+		bool packGGA (struct minmea_sentence_rmc *frame);
+		void clearStrings (void) {
+			GGA.clear();
+			GSA.clear();
+			VTG.clear();
+			GSV.clear();
+			RMC.clear();
+		}
 };
 
 #endif
