@@ -32,7 +32,7 @@
 
 #define CLOCKID CLOCK_REALTIME
 
-using BlackLib;
+using namespace BlackLib;
 
 int initNav(navigatorBase *nav);
 
