@@ -36,7 +36,7 @@ using namespace BlackLib;
 
 int initNav(navigatorBase *nav);
 
-int main (void) {{
+int main (void) {
 	BlackGPIO clockPin(gpioName::GPIO_39, direction::output, workingMode::FastMode);
 	navigatorBase *navInf;
 	timespec startTime, endTime, waitTime, frametime, framerun;
