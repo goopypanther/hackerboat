@@ -32,8 +32,9 @@
 
 #define CLOCKID CLOCK_REALTIME
 
-int initNav(navigatorBase *nav);
+using BlackLib;
 
+int initNav(navigatorBase *nav);
 
 int main (void) {{
 	BlackGPIO clockPin(GPIO_39, output, FastMode);
