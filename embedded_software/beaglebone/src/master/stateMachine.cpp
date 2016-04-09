@@ -20,15 +20,6 @@
 
 static logError *err = logError::instance();
 
-stateTimer::stateTimer (double duration, uint64_t frameTime) {
-	this->setDuration(duration, frameTime);
-}
-
-void stateTimer::setDuration (double duration, uint64_t frameTime) {
-	double period = (frameTime/1e9);
-	this->_duration = duration/period;
-}
-
 bool stateMachineBase::GNSSFail (void) {
 	if ((!_state->gps.isValid()) || ((_state->uTime.tv_sec - _state->gps.uTime.tv_sec) > GNSS_TIMEOUT)) {
 		_state->insertFault("No GNSS");
