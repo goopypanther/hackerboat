@@ -193,7 +193,7 @@ bool gpsFixClass::readSentence (std::string sentence) {
 bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
 	if (frame->valid) {
 		this->fixValid = true;
-		this->longtitude = minmea_tofloat(&(frame->longitude));
+		this->longitude = minmea_tofloat(&(frame->longitude));
 		this->latitude = minmea_tofloat(&(frame->latitude));
 		this->gpsHeading = minmea_tofloat(&(frame->course));
 		this->gpsSpeed = minmea_tofloat(&(frame->speed));
@@ -212,7 +212,7 @@ bool gpsFixClass::packGSV (struct minmea_sentence_gsv *frame) {
 bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
 		this->fixValid = true;
-		this->longtitude = minmea_tofloat(&(frame->longitude));
+		this->longitude = minmea_tofloat(&(frame->longitude));
 		this->latitude = minmea_tofloat(&(frame->latitude));
 	} else return false;
 }

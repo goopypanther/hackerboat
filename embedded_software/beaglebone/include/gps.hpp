@@ -67,9 +67,9 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		static const constexpr double maxLongitude 	= 180.0;
 		static const constexpr double minSpeed 		= 0.0;
 		bool packRMC (struct minmea_sentence_rmc *frame);
-		bool packGSA (struct minmea_sentence_rmc *frame);
-		bool packGSV (struct minmea_sentence_rmc *frame);
-		bool packGGA (struct minmea_sentence_rmc *frame);
+		bool packGSA (struct minmea_sentence_gsa *frame);
+		bool packGSV (struct minmea_sentence_gsv *frame);
+		bool packGGA (struct minmea_sentence_gga *frame);
 		void clearStrings (void) {
 			GGA.clear();
 			GSA.clear();
