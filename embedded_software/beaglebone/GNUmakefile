@@ -77,6 +77,12 @@ ALL_OBJS+=$(MASTER_OBJS)
 master: $(MASTER_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+GPS_SRCS= gpsParse/gpsReader.cpp
+GPS_OBJS=$(addprefix src/,$(GPS_SRCS:.cpp=.o))
+ALL_OBJS+=$(GPS_OBJS)
+gpsParse: $(GPS_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
 # Unit test targets
 TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o navigation_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
