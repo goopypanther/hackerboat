@@ -193,33 +193,26 @@ bool gpsFixClass::readSentence (std::string sentence) {
 bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
 	if (frame->valid) {
 		this->fixValid = true;
-		this->longtitude = minmea_tofloat(frame->longitude);
-		this->latitude = minmea_tofloat(frame->latitude);
-		this->gpsHeading = minmea_tofloat(frame->course);
-		this->gpsSpeed = minmea_tofloat(frame->speed);
-		minmea_gettime(&gpsTime, frame->date, frame->time);
+		this->longtitude = minmea_tofloat(&(frame->longitude));
+		this->latitude = minmea_tofloat(&(frame->latitude));
+		this->gpsHeading = minmea_tofloat(&(frame->course));
+		this->gpsSpeed = minmea_tofloat(&(frame->speed));
+		minmea_gettime(&gpsTime, &(frame->date), &(frame->time));
 	} return false;
 }
 
-double		latitude;				/**< Latitude of last fix */
-		double		longitude;				/**< Longitude of last fix */
-		double		gpsHeading;				/**< True heading, according to GPS */
-		double		gpsSpeed;				/**< Speed over the ground */
-		bool 		fixValid;				/**< Checks whether this fix is valid or not */				
-		
-
-bool gpsFixClass::packGSA (struct minmea_sentence_rmc *frame) {
+bool gpsFixClass::packGSA (struct minmea_sentence_gsa *frame) {
 	return true;
 }
 
-bool gpsFixClass::packGSV (struct minmea_sentence_rmc *frame) {
+bool gpsFixClass::packGSV (struct minmea_sentence_gsv *frame) {
 	return true;
 }
 
-bool gpsFixClass::packGGA (struct minmea_sentence_rmc *frame) {
+bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
 		this->fixValid = true;
-		this->longtitude = minmea_tofloat(frame->longitude);
-		this->latitude = minmea_tofloat(frame->latitude);
+		this->longtitude = minmea_tofloat(&(frame->longitude));
+		this->latitude = minmea_tofloat(&(frame->latitude));
 	} else return false;
 }
