@@ -30,22 +30,22 @@
 
 #define CLOCKID CLOCK_REALTIME
 
+using namespace BlackLib;
+
 void input (boneStateClass *state, arduinoStateClass *ard);
 void output (boneStateClass *state, arduinoStateClass *ard);
-
-static bool timerFlag = true;
 
 static logError *err = logError::instance();
 
 int main (void) {
-	BlackGPIO clockPin(GPIO_38, output, FastMode);
+	BlackGPIO clockPin(gpioName::GPIO_38, direction::output, workingMode::FastMode);
 	stateMachineBase *thisState, *lastState;
 	boneStateClass myBoat;
 	arduinoStateClass myArduino;
 	timespec startTime, endTime, waitTime, frametime, framerun;
 	
 	logError::instance()->open(MAIN_LOGFILE);
-	clockPin.setValue(low);
+	clockPin.setValue(digitalValue::low);
 	
 	thisState = new boneStartState(&myBoat, &myArduino);
 	
@@ -57,14 +57,14 @@ int main (void) {
 	
 	for (;;) {
 		clock_gettime(CLOCK_REALTIME, &startTime); 			// grab the time at the start of the frame
-		clockPin.setValue(high);							// mark the start of the frame for debug
+		clockPin.setValue(digitalValue::high);				// mark the start of the frame for debug
 		input(&myBoat, &myArduino);							// read all inputs
 		lastState = thisState;								// store a pointer to the old state
 		thisState = thisState->execute();					// run the current state
 		if (thisState != lastState) delete lastState;		// if we have a new state, delete the old state object
 		output(&myBoat, &myArduino);						// write outputs
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
-		clockPin.setValue(low);								// mark the end of the frame for debug
+		clockPin.setValue(digitalValue::low);				// mark the end of the frame for debug
 		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
 		if (subtract_timespec(&frametime, &framerun, &waitTime)) {	// this returns false if the running frame time is longer than the specified frame time
 			nanosleep(&waitTime, &waitTime);
