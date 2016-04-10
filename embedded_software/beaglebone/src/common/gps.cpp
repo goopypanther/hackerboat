@@ -59,7 +59,7 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 			"fixValid", &fixValid)) {
 		return false;
 	}
-	if ((!::parse(inTime, &uTime)) && (!::parse(gpsInTime, &gpsTime))) {
+	if ((!::parse(inTime, &uTime)) || (!::parse(gpsInTime, &gpsTime))) {
 		return false;
 	}
 
