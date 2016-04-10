@@ -33,7 +33,7 @@ json_t *gpsFixClass::pack (bool seq) const {
 			   "longitude", longitude,
 			   "heading", gpsHeading,
 			   "speed", gpsSpeed,
-			   "valid", fixValid);
+			   "fixValid", fixValid);
 
 	if (!GGA.empty()) json_object_set_new(output, "GGA", json(GGA));
 	if (!GSA.empty()) json_object_set_new(output, "GSA", json(GSA));
@@ -56,7 +56,7 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 			"longitude", &longitude,
 			"heading", &gpsHeading,
 			"speed", &gpsSpeed,
-			"valid", &fixValid)) {
+			"fixValid", &fixValid)) {
 		return false;
 	}
 	if ((!::parse(inTime, &uTime)) && (!::parse(gpsInTime, &gpsTime))) {

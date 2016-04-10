@@ -30,7 +30,7 @@ TEST(Serialization, BoneState) {
 	" \"latitude\": 42.5, \"longitude\": -122.75, "
 	" \"heading\": 18.5, "
 	" \"speed\": 0.75, "
-	" \"GGA\": \"BLAH,BLAH,BLAH\" "
+	" \"fixValid\": true "
 	"}";
 
 	json_t *sample = json_loads(s, 0, NULL);
@@ -38,8 +38,8 @@ TEST(Serialization, BoneState) {
 	json_object_set_new(sample, "gps", json_loads(g, 0, NULL));
 
 	boneStateClass b;
-	EXPECT_TRUE(b.parse(sample, false));
-
+	ASSERT_TRUE(b.parse(sample, false));
+	
 	json_t *roundtrip = b.pack(false);
 	EXPECT_JSON_EQ(sample, roundtrip);
 	json_decref(roundtrip);

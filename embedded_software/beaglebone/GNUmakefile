@@ -10,7 +10,7 @@ GTEST_INC=/usr/include/gtest
 BLACKLIB=submodules/BlackLib/v3_0
 MINMEA=submodules/minmea
 
-CFLAGS   += $(OPTS) -std=gnu11
+CFLAGS   += $(OPTS) -std=gnu11 -pthread
 CXXFLAGS += $(OPTS) -std=gnu++11
 CPPFLAGS += -I submodules/include -I include -MMD -MT $@
 CPPFLAGS += -I $(BLACKLIB)
