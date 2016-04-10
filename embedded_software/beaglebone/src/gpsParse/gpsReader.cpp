@@ -64,6 +64,7 @@ int main (void) {
 				}
 			}
 		} else input.clear();
+		usleep(10000);
 	}
 	port.close();	
 }
