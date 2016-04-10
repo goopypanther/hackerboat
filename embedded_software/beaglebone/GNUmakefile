@@ -29,7 +29,7 @@ test: storage_test
 .PHONY: all test
 
 ifdef SVCTREE
-svctree: submodules nav hb.fcgi master 
+svctree: submodules nav hb.fcgi master gpsParse
 	./setup/make-svctree.sh . $(SVCTREE)
 else
 svctree:

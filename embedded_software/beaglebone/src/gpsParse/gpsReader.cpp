@@ -37,7 +37,7 @@ int main (void) {
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	
 	// attempt to open the serial port
-	while (!port.open(ReadOnly)) {
+	while (!port.open(ReadOnly | NonBlock)) {
 		logError::instance()->write("GNSS", "Failed to open serial port");
 		usleep(500);
 	}
