@@ -373,7 +373,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 	
 	// attempt to open the serial port
 	while (cnt < UART_TIMEOUT) {
-		if (port.open(ReadWrite)) break;
+		if (port.open(ReadWrite|NonBlock)) break;
 		usleep(1);
 		cnt++;
 	}

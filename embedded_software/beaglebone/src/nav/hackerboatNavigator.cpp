@@ -65,12 +65,12 @@ int main (void) {
 					} 
 				}
 			} else {
-				logError::instance()->write("nav process", "Fetched record is invalid");
+				logError::instance()->write("Navigation", "Fetched record is invalid");
 			}
 			nav.calc(boat.waypointStrengthMax);
 			nav.writeRecord();
 		} else {
-			logError::instance()->write("nav process", "Failed to get last nav record");
+			logError::instance()->write("Navigation", "Failed to get last nav record");
 		}
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
 		clockPin.setValue(digitalValue::low);								// mark the end of the frame for debug
