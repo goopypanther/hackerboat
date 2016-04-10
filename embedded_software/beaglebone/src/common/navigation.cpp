@@ -234,7 +234,7 @@ bool navClass::appendVector (const navVectorClass& vec) {
 }
 
 bool navClass::calc (double maxStrength) {
-	waypointClass target();
+	waypointClass target;
 	if (!target.getRecord(targetWaypoint)) return false;
 	targetVec._bearing = this->current.bearing(target.location, locationClass::RhumbLine);
 	targetVec._strength = waypointStrength;
