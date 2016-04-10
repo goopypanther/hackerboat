@@ -28,6 +28,7 @@
 #define SHORE_TIMEOUT		(60)
 #define HORN_TIME			(2)
 #define RETURN_TIMEOUT		(180)
+#define LAUNCH_WAYPOINT		(0)
 
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
