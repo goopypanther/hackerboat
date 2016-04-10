@@ -45,7 +45,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		timespec					lastContact;		/**< Time of the last contact from the shore station */
 		boatModeEnum				mode = Mode::NONE;	/**< current mode of the beaglebone */
 		boatModeEnum				command = Mode::NONE;	/**< commanded mode of the beaglebone */
-		arduinoModeEnum				ardMode;		/**< current mode of the Arduino */
+		arduinoModeEnum				ardMode = arduinoModeEnum::NONE;		/**< current mode of the Arduino */
 		std::string					faultString;		/**< comma separated list of faults */
 		gpsFixClass					gps;			/**< current GPS position */
 		int32_t						waypointNext;		/**< ID of the current target waypoint */
