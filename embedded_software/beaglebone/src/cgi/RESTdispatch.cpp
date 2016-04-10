@@ -41,10 +41,13 @@ json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int curren
 		 
 		// check if the token is a number; if not, call the default function
 		size_t idx = 0;
-		int num = std::stoi(tokens[currentToken], &idx);
-		if (idx) {
-			return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
-		} else {
+		int num = 0;
+		try {
+			num = std::stoi(tokens[currentToken], &idx);
+			if (idx >= tokens[currentToken].size()) {
+				return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
+			} else return NULL;
+		} catch (const std::invalid_argument& ia) {
 			return this->defaultFunc(tokens, currentToken, query, method, body);
 		}
 	} else {
