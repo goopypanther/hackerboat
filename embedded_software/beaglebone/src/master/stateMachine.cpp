@@ -217,7 +217,7 @@ stateMachineBase *boneWaypointState::execute (void) {
 	// load & write navigation data
 	_nav.getLastRecord();
 	_wp.getRecord(_state->waypointNext);
-	_nav.target = _wp.getSequenceNum();
+	_nav.targetWaypoint = _wp.getSequenceNum();
 	if (_nav.isValid()) {
 		// calculate target heading & throttle
 		_ard->headingTarget = _nav.total._bearing + _nav.magCorrection;
