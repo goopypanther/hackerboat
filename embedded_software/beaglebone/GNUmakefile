@@ -23,13 +23,13 @@ export OPTS
 
 VPATH=src/common:src/nav:submodules/minmea
 
-all: submodules nav hb.fcgi master
+all: submodules nav hb.fcgi master gpsParse
 test: storage_test
 	./storage_test
 .PHONY: all test
 
 ifdef SVCTREE
-svctree: submodules nav hb.fcgi master
+svctree: submodules nav hb.fcgi master 
 	./setup/make-svctree.sh . $(SVCTREE)
 else
 svctree:
