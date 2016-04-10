@@ -65,8 +65,17 @@ bool logREST::close(void)
 }
 
 bool logREST::write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response) {
-	//log << timeOutput() << source << ": " << message << std::endl;
-	#warning Implement logREST::write()! -PN
+	log << "==============================================================" << std::endl;
+	log << timeOutput() << std::endl;
+	log << "URI: ";
+	for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+		log << "/" << *it;
+	}
+	log << std::endl << "Query: " << query << std::endl;
+	log << "Method: " << method << std::endl;
+	log << "Body: " << body << std::endl;
+	log << "Response: " << std::string(response) << endl;
+	
 	return true;
 }
 

@@ -118,6 +118,11 @@ public:
 		assert(column < count);
 		sqlite3_bind_int64(sth, column + offset, value);
 	}
+	void bind(int column, bool value) {
+		assert(column >= 0);
+		assert(column < count);
+		sqlite3_bind_int64(sth, column + offset, value? 1 : 0);
+	}
 	void bind(int column, const std::string& value) {
 		assert(column >= 0);
 		assert(column < count);
@@ -180,6 +185,11 @@ public:
 		assert(column >= 0);
 		assert(column < count);
 		return sqlite3_column_type(sth, column + offset) == SQLITE_NULL;
+	}
+	bool bool_field(int column) const {
+		assert(column >= 0);
+		assert(column < count);
+		return sqlite3_column_int64(sth, column + offset) ? true : false;
 	}
 	std::string string_field(int column) const;
 };
