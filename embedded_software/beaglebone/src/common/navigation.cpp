@@ -81,7 +81,7 @@ bool navClass::parse(json_t *input, bool seq) {
 	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
 	if (json_unpack(input, "{s:o,s:o,s:F,s:F,s:o,s:o,s:o}",
 			"current", &currentIn,
-			"target", &targetIn,
+			"targetWaypoint", &targetIn,
 			"waypointStrength", &waypointStrength,
 			"magCorrection", &magCorrection,
 			"targetVec", &targetVecIn,
@@ -99,7 +99,7 @@ bool navClass::parse(json_t *input, bool seq) {
 
 	if (!current.parse(currentIn))
 		return false;
-	if (!target.parse(targetIn, seq))
+	if (!::parse(targetIn, &targetWaypoint))
 		return false;
 	if (!targetVec.parse(targetVecIn))
 		return false;
@@ -112,9 +112,9 @@ bool navClass::parse(json_t *input, bool seq) {
 }
 
 json_t* navClass::pack (bool seq) const {
-	json_t *output = json_pack("{s:o,s:o,s:f,s:f,s:o,s:o,s:o}",
+	json_t *output = json_pack("{s:o,s:i,s:f,s:f,s:o,s:o,s:o}",
 				   "current", current.pack(),
-				   "target", target.pack(seq), /* FIXME: seq? */
+				   "targetWaypoint", (int)targetWaypoint,
 				   "waypointStrength", waypointStrength,
 				   "magCorrection", magCorrection,
 				   "targetVec", targetVec.pack(),
@@ -168,7 +168,7 @@ bool navClass::fillRow(sqliteParameterSlice row) const
 	row.assertWidth(4);
 
 	row.bind_json_new(0, current.pack());
-	row.bind(1, target.getSequenceNum());
+	row.bind(1, targetWaypoint);
 	row.bind_json_new(2, total.pack());
 
 	json_t *array = json_array();
@@ -234,6 +234,8 @@ bool navClass::appendVector (const navVectorClass& vec) {
 }
 
 bool navClass::calc (double maxStrength) {
+	waypointClass target;
+	if (!target.getRecord(targetWaypoint)) return false;
 	targetVec._bearing = this->current.bearing(target.location, locationClass::RhumbLine);
 	targetVec._strength = waypointStrength;
 	if (!targetVec.isValid()) {
@@ -255,6 +257,8 @@ void navClass::clearVectors (void) {
 }
 
 bool navClass::isValid (void) const {
+	if (targetWaypoint < 0)
+		return false;
 	if (!current.isValid())
 		return false;
 	if (!targetVec.isValid())

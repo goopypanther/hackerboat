@@ -130,8 +130,11 @@ stateMachineBase *boneDisarmedState::execute (void) {
 	if (arduinoFail()) return new boneFaultState(this->_state, this->_ard);
 	
 	// update the start location
-	_state->launchPoint._lat = _state->gps.latitude;
-	_state->launchPoint._lon = _state->gps.longitude;
+	waypointClass wp;
+	wp.getRecord(LAUNCH_WAYPOINT);
+	wp.location._lat = _state->gps.latitude;
+	wp.location._lon = _state->gps.longitude;
+	wp.writeRecord();
 	
 	// check if we're arming
 	if ((_ard->mode == arduinoModeEnum::ARMED) && (_state->command == boatModeEnum::ARMED)) {
@@ -155,8 +158,11 @@ stateMachineBase *boneArmedState::execute (void) {
 	if (isDisarmed()) return new boneDisarmedState(this->_state, this->_ard);
 	
 	// update the start location
-	_state->launchPoint._lat = _state->gps.latitude;
-	_state->launchPoint._lon = _state->gps.longitude;
+	waypointClass wp;
+	wp.getRecord(LAUNCH_WAYPOINT);
+	wp.location._lat = _state->gps.latitude;
+	wp.location._lon = _state->gps.longitude;
+	wp.writeRecord();
 	
 	// check for commands
 	if (_state->command == boatModeEnum::MANUAL) {
@@ -211,7 +217,7 @@ stateMachineBase *boneWaypointState::execute (void) {
 	// load & write navigation data
 	_nav.getLastRecord();
 	_wp.getRecord(_state->waypointNext);
-	_nav.target = _wp;
+	_nav.targetWaypoint = _wp.getSequenceNum();
 	if (_nav.isValid()) {
 		// calculate target heading & throttle
 		_ard->headingTarget = _nav.total._bearing + _nav.magCorrection;
@@ -305,7 +311,7 @@ stateMachineBase *boneReturnState::execute (void) {
 	
 	// load & write navigation data
 	_nav.getLastRecord();
-	_nav.target.location = _state->launchPoint;
+	_nav.targetWaypoint = LAUNCH_WAYPOINT;
 	if (_nav.isValid()) {
 		// calculate target heading & throttle
 		_ard->headingTarget = _nav.total._bearing + _nav.magCorrection;
