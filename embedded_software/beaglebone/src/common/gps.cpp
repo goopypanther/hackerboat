@@ -129,7 +129,7 @@ bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
 	row.assertWidth(5);
 	double timestamp = row.double_field(0);
 	uTime.tv_sec = floor(timestamp);
-	utime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
+	uTime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
 	latitude = row.double_field(1);
 	longitude = row.double_field(2);
 	gpsHeading = row.double_field(3);
