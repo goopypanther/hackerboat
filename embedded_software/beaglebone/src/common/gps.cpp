@@ -105,8 +105,7 @@ hackerboatStateStorage &gpsFixClass::storage() {
 							  { "longitude", "REAL" },
 							  { "heading", "REAL" },
 							  { "speed", "REAL" },
-							  { "sentence", "TEXT" },
-							  { "data", "TEXT" } });
+							  { "fixValid", "INTEGER" } });
 		gpsStorage->createTable();
 	}
 
@@ -114,39 +113,28 @@ hackerboatStateStorage &gpsFixClass::storage() {
 }
 
 bool gpsFixClass::fillRow(sqliteParameterSlice row) const {
-	row.assertWidth(7);
+	row.assertWidth(6);
 	row.bind(0, (double)uTime.tv_sec + 1e-9 * uTime.tv_nsec);
 	row.bind(1, latitude);
 	row.bind(2, longitude);
 	row.bind(3, gpsHeading);
 	row.bind(4, gpsSpeed);
-
-	if (GGA.length()) {
-		row.bind(5, "GGA");
-		row.bind(6, GGA);
-	} else if (GSA.length()) {
-		row.bind(5, "GSA");
-		row.bind(6, GSA);
-	} else if (GSV.length()) {
-		row.bind(5, "GSV");
-		row.bind(6, GSV);
-	} else if (VTG.length()) {
-		row.bind(5, "VTG");
-		row.bind(6, VTG);
-	} else if (RMC.length()) {
-		row.bind(5, "RMC");
-		row.bind(6, RMC);
-	} else {
-		row.bind_null(5);
-		row.bind_null(6);
-	}
+	row.bind(5, fixValid);
 
 	return true;
 }
 
 bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
-	#warning Implement GPS readFromRow()
-	return false;
+	_sequenceNum = seq;
+	row.assertWidth(5);
+	double timestamp = row.double_field(0);
+	uTime.tv_sec = floor(timestamp);
+	utime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
+	latitude = row.double_field(1);
+	longitude = row.double_field(2);
+	gpsHeading = row.double_field(3);
+	gpsSpeed = row.double_field(4);
+	fixValid = row.bool_field(5);
 }
 
 bool gpsFixClass::readSentence (std::string sentence) {
