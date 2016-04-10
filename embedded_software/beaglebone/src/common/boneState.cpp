@@ -167,7 +167,7 @@ int boneStateClass::faultCount (void) const {
 	int cnt = 0;
 	while (index != std::string::npos) {
 		cnt++;
-		index = faultString.find(':', index);
+		index = faultString.find(':', (index + 1));
 	}
 	return cnt;
 }
