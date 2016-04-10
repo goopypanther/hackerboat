@@ -101,6 +101,7 @@ hackerboatStateStorage &gpsFixClass::storage() {
 		gpsStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
 							{ { "time", "REAL" },
+							  { "gpsTime", "REAL"},
 							  { "latitude", "REAL" },
 							  { "longitude", "REAL" },
 							  { "heading", "REAL" },
@@ -113,28 +114,32 @@ hackerboatStateStorage &gpsFixClass::storage() {
 }
 
 bool gpsFixClass::fillRow(sqliteParameterSlice row) const {
-	row.assertWidth(6);
+	row.assertWidth(7);
 	row.bind(0, (double)uTime.tv_sec + 1e-9 * uTime.tv_nsec);
-	row.bind(1, latitude);
-	row.bind(2, longitude);
-	row.bind(3, gpsHeading);
-	row.bind(4, gpsSpeed);
-	row.bind(5, fixValid);
+	row.bind(1, (double)gpsTime.tv_sec + 1e-9 * gpsTime.tv_nsec);
+	row.bind(2, latitude);
+	row.bind(3, longitude);
+	row.bind(4, gpsHeading);
+	row.bind(5, gpsSpeed);
+	row.bind(6, fixValid);
 
 	return true;
 }
 
 bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
 	_sequenceNum = seq;
-	row.assertWidth(5);
+	row.assertWidth(7);
 	double timestamp = row.double_field(0);
 	uTime.tv_sec = floor(timestamp);
 	uTime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
-	latitude = row.double_field(1);
-	longitude = row.double_field(2);
-	gpsHeading = row.double_field(3);
-	gpsSpeed = row.double_field(4);
-	fixValid = row.bool_field(5);
+	timestamp = row.double_field(1);
+	gpsTime.tv_sec = floor(timestamp);
+	gpsTime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
+	latitude = row.double_field(2);
+	longitude = row.double_field(3);
+	gpsHeading = row.double_field(4);
+	gpsSpeed = row.double_field(5);
+	fixValid = row.bool_field(6);
 }
 
 bool gpsFixClass::readSentence (std::string sentence) {
