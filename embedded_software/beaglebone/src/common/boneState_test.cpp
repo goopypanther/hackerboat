@@ -27,6 +27,7 @@ TEST(Serialization, BoneState) {
 	const char *g =
 	"{ "
 	" \"uTime\": { \"tv_sec\": 987654321, \"tv_nsec\": 123312 }, "
+	" \"gpsTime\": { \"tv_sec\": 987654221, \"tv_nsec\": 120000 }, "
 	" \"latitude\": 42.5, \"longitude\": -122.75, "
 	" \"heading\": 18.5, "
 	" \"speed\": 0.75, "
