@@ -39,7 +39,7 @@ bool subtract_timespec (timespec* a, timespec* b, timespec* result) {
 	if ((b->tv_sec == a->tv_sec) &&				// This would also result in a negative timespec
 		(b->tv_nsec > a->tv_nsec)) return false;
 	result->tv_sec = a->tv_sec - b->tv_sec;
-	result->tv_nsec = a->tv_sec - b->tv_nsec;
+	result->tv_nsec = a->tv_nsec - b->tv_nsec;
 	norm_timespec(result);
 	
 	return true;
