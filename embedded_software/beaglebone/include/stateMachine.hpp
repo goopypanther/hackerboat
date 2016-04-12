@@ -22,20 +22,6 @@
 #include "arduinoState.hpp"
 #include "navigation.hpp"
 
-class stateTimer {
-	public:
-		stateTimer (double duration, uint64_t frameTime);	/**< Duration in seconds */
-		stateTimer (uint32_t duration) {_duration = duration;};	/**< Duration in frames */
-		void setDuration (double duration, uint64_t frameTime);
-		void setDuration (uint32_t duration) {_duration = duration;};
-		void count (void) {_current++;};
-		bool isComplete (void) {return (_current >= _duration);};
-		void reset (void) {_current = 0;};
-	private:
-		uint32_t _duration;
-		uint32_t _current;
-};
-
 class stateMachineBase {
 	public:
 		stateMachineBase (boneStateClass *state, arduinoStateClass *ard) {

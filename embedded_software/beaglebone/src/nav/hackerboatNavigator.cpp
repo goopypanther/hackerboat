@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <time.h>
 #include <limits>
+#include <BlackGPIO/BlackGPIO.h>
 #include "stateStructTypes.hpp"
 #include "config.h"
 #include "logs.hpp"
@@ -27,56 +28,31 @@
 #include "location.hpp"
 #include "boneState.hpp"
 #include "sqliteStorage.hpp"
+#include "timer_utils.hpp"
 
 #define CLOCKID CLOCK_REALTIME
-#define SIG SIGRTMIN
+
+using namespace BlackLib;
 
 int initNav(navigatorBase *nav);
-static void handler(int sig, siginfo_t *si, void *uc);
-
-static bool timerFlag = true;
 
 int main (void) {
+	BlackGPIO clockPin(gpioName::GPIO_39, direction::output, workingMode::FastMode);
 	navigatorBase *navInf;
-	timer_t timerid;
-    struct sigevent sev;
-    struct itimerspec its;
-    sigset_t mask;
-    struct sigaction sa;
+	timespec startTime, endTime, waitTime, frametime, framerun;
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	int navCount = initNav(navInf);					// initialize the list of nav sources
+	clockPin.setValue(digitalValue::low);
 	
-	// Establish the handler for the timer signal
-	sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = handler;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIG, &sa, NULL) == -1) {
-		logError::instance()->write("nav process", "sigaction");
-		exit(EXIT_FAILURE);
-	}
-	
-	// Create the timer
-	sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIG;
-    sev.sigev_value.sival_ptr = &timerid;
-    if (timer_create(CLOCKID, &sev, &timerid) == -1) {
-		logError::instance()->write("nav process", "timer_create");
-		exit(EXIT_FAILURE);
-	}
-	
-	// Start the timer
-    its.it_value.tv_sec = 0;
-    its.it_value.tv_nsec = FRAME_LEN_NS;
-    its.it_interval.tv_sec = its.it_value.tv_sec;
-    its.it_interval.tv_nsec = its.it_value.tv_nsec;
-	if (timer_settime(timerid, 0, &its, NULL) == -1) {
-		logError::instance()->write("nav process", "timer_settime");
-		exit(EXIT_FAILURE);
-	}
+	// initialize the frametime timespec
+	frametime.tv_sec = 0;
+	frametime.tv_nsec = FRAME_LEN_NS;
+	norm_timespec(&frametime);
 	
 	for (;;) {
-		while (!timerFlag);			// wait for the timer flag to go true
+		clock_gettime(CLOCK_REALTIME, &startTime);
+		clockPin.setValue(digitalValue::high);
 		navClass nav;
 		boneStateClass boat;
 		boat.getLastRecord();
@@ -89,14 +65,21 @@ int main (void) {
 					} 
 				}
 			} else {
-				logError::instance()->write("nav process", "Fetched record is invalid");
+				logError::instance()->write("Navigation", "Fetched record is invalid");
 			}
 			nav.calc(boat.waypointStrengthMax);
 			nav.writeRecord();
 		} else {
-			logError::instance()->write("nav process", "Failed to get last nav record");
+			logError::instance()->write("Navigation", "Failed to get last nav record");
 		}
-		timerFlag = false;		// mark that we're done with the frame
+		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
+		clockPin.setValue(digitalValue::low);								// mark the end of the frame for debug
+		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
+		if (subtract_timespec(&frametime, &framerun, &waitTime)) {	// this returns false if the running frame time is longer than the specified frame time
+			nanosleep(&waitTime, &waitTime);
+		} else {
+			logError::instance()->write("Navigation", "Frame overrun");
+		}
 	}
 }
 
@@ -105,11 +88,3 @@ int initNav(navigatorBase *nav) {
 	return 0;
 }
 
-static void handler(int sig, siginfo_t *si, void *uc) {
-	if (!timerFlag) {
-		timerFlag = true;
-	} else {
-		logError::instance()->write("nav process", "frame overrun");
-	}
-	signal(sig, SIG_IGN);
-}

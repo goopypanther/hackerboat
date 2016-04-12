@@ -60,6 +60,7 @@ bool parse(json_t *, unsigned short *);
 bool parse(json_t *, int *);
 bool parse(json_t *, unsigned int *);
 bool parse(json_t *, long *);
+bool parse(json_t *, long long *);
 
 /* Generics using C++'s ridiculous metaprogramming syntax. The first
    one dispatches to fromString() if possible, and the second one

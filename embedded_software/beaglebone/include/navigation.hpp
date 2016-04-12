@@ -61,12 +61,13 @@ class navClass : public hackerboatStateClassStorable {
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
 		bool isValid(void) const;
 		
-		locationClass	current;		/**< current location */	
-		waypointClass	target;			/**< target waypoint */
+		locationClass	current;		/**< current location */
+		sequence		targetWaypoint;	/**< sequence number of the target waypoint */
+		//waypointClass	target;			/**< target waypoint */
 		double			waypointStrength;
 		double			magCorrection = 0;	/**< Correction between sensed magnetic heading and true direction */
-		navVectorClass		targetVec;		/**< Vector to the target */
-		navVectorClass		total;			/**< Sum of target vector and all influences */
+		navVectorClass	targetVec;		/**< Vector to the target */
+		navVectorClass	total;			/**< Sum of target vector and all influences */
 
 	protected:
 		/* Concrete implementations of stateClassStorable */

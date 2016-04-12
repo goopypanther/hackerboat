@@ -60,3 +60,4 @@ bool parse(json_t *j, int *i)   	{ return parsei(j, i); }
 bool parse(json_t *j, long *i)  	{ return parsei(j, i); }
 bool parse(json_t *j, unsigned char *i)  { return parsei(j, i); }
 bool parse(json_t *j, unsigned short *i) { return parsei(j, i); }
+bool parse(json_t *j, long long *i)  	{ return parsei(j, i); }

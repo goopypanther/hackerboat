@@ -373,7 +373,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 	
 	// attempt to open the serial port
 	while (cnt < UART_TIMEOUT) {
-		if (port.open(ReadWrite)) break;
+		if (port.open(ReadWrite|NonBlock)) break;
 		usleep(1);
 		cnt++;
 	}
@@ -391,12 +391,25 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 	cmd << func << "?params=" << params << "\r\n" << std::endl;
 
 	port.write(cmd.str());
-	port >> ret;
-	port.close();
+	usleep(100);
+	ret = port.read();
 	if (ret == BlackLib::UART_READ_FAILED) {
 		errLog->write("Arduino Serial", "Failed to read return value");
+		port.close();
 		return NULL;
 	}
+	cnt = 0;
+	while (ret.find("\r\n\r\n") == std::string::npos) {
+		ret += port.read();
+		usleep(100);
+		cnt++;
+		if (cnt >= UART_TIMEOUT) {
+			errLog->write("Arduino Serial", "Failed to read return value");
+			port.close();
+			return NULL;
+		}
+	}
+	port.close();
 	result = json_loads(ret.c_str(), JSON_DECODE_ANY, &err);
 	clock_gettime(CLOCK_REALTIME, &uTime);
 	return result;

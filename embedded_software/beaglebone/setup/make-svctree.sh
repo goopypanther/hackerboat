@@ -11,7 +11,7 @@ if [ $# -ne 2 -o ! -d "$1" ]; then
     exit 1
 fi
 
-daemons="master hb.fcgi nav"
+daemons="master hb.fcgi nav gpsParse"
 
 for daemon in $daemons
 do

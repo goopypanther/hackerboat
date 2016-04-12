@@ -44,7 +44,6 @@ boneStateClass::boneStateClass() {
 
 json_t *boneStateClass::pack (bool seq) const {
 	json_t *output;
-	clock_gettime(CLOCK_REALTIME, &uTime);
 	output = json_pack("{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:f,s:f,s:f,s:b,s:o}",
 			   "uTime", packTimeSpec(uTime),
 			   "lastContact", packTimeSpec(lastContact),
@@ -168,7 +167,7 @@ int boneStateClass::faultCount (void) const {
 	int cnt = 0;
 	while (index != std::string::npos) {
 		cnt++;
-		index = faultString.find(':', index);
+		index = faultString.find(':', (index + 1));
 	}
 	return cnt;
 }
