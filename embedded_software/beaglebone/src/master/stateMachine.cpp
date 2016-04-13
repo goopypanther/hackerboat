@@ -226,7 +226,7 @@ stateMachineBase *boneWaypointState::execute (void) {
 		_ard->writeThrottle();
 		_ard->writeHeadingTarget();
 	} 
-	_nav.writeRecord();
+	_nav.appendRecord();
 	
 	// check waypoint distance
 	if (_wp.isValid()) {
@@ -320,7 +320,7 @@ stateMachineBase *boneReturnState::execute (void) {
 		_ard->writeThrottle();
 		_ard->writeHeadingTarget();
 	} 
-	_nav.writeRecord();
+	_nav.appendRecord();
 	
 	// check incoming commands
 	if (_state->command == boatModeEnum::ARMED) {

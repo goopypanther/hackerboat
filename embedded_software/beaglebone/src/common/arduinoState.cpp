@@ -393,7 +393,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 	port.write(cmd.str());
 	usleep(100);
 	ret = port.read();
-	if (ret == BlackLib::UART_READ_FAILED) {
+	if (ret.find(BlackLib::UART_READ_FAILED)) {
 		errLog->write("Arduino Serial", "Failed to read return value");
 		port.close();
 		return NULL;

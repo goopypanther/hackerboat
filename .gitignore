@@ -21,6 +21,10 @@
 *.i*86
 *.x86_64
 *.hex
+gpsParse
+hb.fcgi
+master
+nav
 
 # Eagle
 *.s#*
@@ -39,3 +43,5 @@
 *~
 *.orig
 *.rej
+*.log
+*.trs
