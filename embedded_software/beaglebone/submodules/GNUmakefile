@@ -1,5 +1,5 @@
 
-all:  lib/libjansson.a lib/libBlackLib.a
+all:  lib/libjansson.a lib/libBlackLib.a include/minmea.h
 .PHONY: all
 
 base:=$(shell git rev-parse --show-toplevel)
@@ -29,3 +29,6 @@ BLACK_DIR=BlackLib/v3_0
 CPPFLAGS+=-I$(BLACK_DIR)
 lib/libBlackLib.a: BlackLib/.git lib/libBlackLib.a($(addprefix $(BLACK_DIR)/,$(BLACK_SRCS:.cpp=.o))) 
 
+# Make minmea linkable
+include/minmea.h: minmea/.git minmea/minmea.h
+	cp minmea/minmea.h include/minmea.h
