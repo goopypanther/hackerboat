@@ -56,7 +56,10 @@ public:
 	 * This issues a <tt>CREATE TABLE IF NOT EXISTS</tt> query, so it is a no-op if the table already exists.
 	 */
 	void createTable();
+
 	void logError(void);
+	void logError(const std::string& sql);
+	void logError(shared_stmt& sql);
 
 	/** Gets an open connection to the database
 	 *
