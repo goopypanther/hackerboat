@@ -31,7 +31,7 @@ using namespace BlackLib;
 
 static logError *errLog = logError::instance();
 
-json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	// check if we've reached the end of URI...
 	if (currentToken < tokens.size()) {
 		// check for the token in the dispatch map
@@ -88,7 +88,7 @@ bool allDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	int count = _target->countRecords();
 	if (count >= 0) {
@@ -111,7 +111,7 @@ bool numberDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* numberDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* numberDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	size_t count;
 	int val = std::stoi(tokens[currentToken], &count);
@@ -132,7 +132,7 @@ bool countDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* countDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* countDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	json_int_t count;
 	json_t *out = json_object();
 	if (!_target) return NULL;
@@ -150,7 +150,7 @@ bool insertDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* insertDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* insertDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	json_error_t *errJSON;
 	int32_t insert;
 	// check that we have a target and we can open the file...
@@ -194,7 +194,7 @@ bool appendDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	json_error_t *errJSON;
 	// check that we have a target and we can open the file...
 	if (_target) {
@@ -214,15 +214,15 @@ json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentT
 	return _target->pack();
 }
 
-json_t* rootRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* rootRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	return NULL;
 }
 
-json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	return this->root(tokens, currentToken, query, method, body);
 }
 
-json_t* boneStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* boneStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -239,7 +239,7 @@ bool boneStateRESTClass::setTarget(boneStateClass* target) {
 	}
 }
 
-json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (tokens[currentToken] == "command") {
 		return command(body);
 	} else if (tokens[currentToken] == "waypointNext") {
@@ -462,7 +462,7 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	return NULL;
 }
 
-json_t* gpsRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* gpsRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -479,7 +479,7 @@ bool gpsRESTClass::setTarget(gpsFixClass* target) {
 	}
 }
 
-json_t* waypointRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* waypointRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -496,7 +496,7 @@ bool waypointRESTClass::setTarget(waypointClass* target) {
 	}
 }
 
-json_t* navRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* navRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -513,7 +513,7 @@ bool navRESTClass::setTarget(navClass* target) {
 	}
 }
 
-json_t* arduinoStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* arduinoStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -530,7 +530,7 @@ bool arduinoStateRESTClass::setTarget(arduinoStateClass* target) {
 	}
 }
 
-json_t* resetArduinoRest::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* resetArduinoRest::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	BlackGPIO	ardResetPin(ARDUINO_RESET_PIN, output, FastMode);
 	if (ardResetPin.setValue(low)) {
 		usleep(100000);	// sleep for 100 milliseconds
@@ -544,11 +544,11 @@ json_t* resetArduinoRest::root (std::vector<std::string> tokens, int currentToke
 	}
 }
 
-json_t* arduinoRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* arduinoRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	return this->defaultFunc(tokens, currentToken, query, method, body);
 }
 
-json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
+json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
 	json_t *in;
 	json_error_t *errIn;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
@@ -599,3 +599,34 @@ json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int curr
 		return NULL;
 	}
 }
+
+RESTdispatchClass::httpMethod RESTdispatchClass::methodFromString(const char *m)
+{
+	if (!m)
+		return httpMethod::UNKNOWN;
+	else if (0 == strcasecmp(m, "GET"))
+		return httpMethod::GET;
+	else if (0 == strcasecmp(m, "POST"))
+		return httpMethod::POST;
+	else if (0 == strcasecmp(m, "PUT"))
+		return httpMethod::PUT;
+	else if (0 == strcasecmp(m, "DELETE"))
+		return httpMethod::DELETE;
+	else
+		return httpMethod::UNKNOWN;
+}
+
+namespace std {
+	using httpMethod = RESTdispatchClass::httpMethod;
+	string to_string(httpMethod m)
+	{
+		switch (m) {
+		default: return "UNKNOWN";
+		case httpMethod::GET: return "GET";
+		case httpMethod::PUT: return "PUT";
+		case httpMethod::POST: return "POST";
+		case httpMethod::DELETE: return "DELETE";
+		}
+	}
+};
+

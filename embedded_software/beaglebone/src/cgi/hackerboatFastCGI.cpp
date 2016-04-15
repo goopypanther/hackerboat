@@ -43,7 +43,8 @@ int main (void) {
 	root = initRESTDispatch();
 	
 	while (FCGI_Accept() >= 0) {
-		std::string	uri, method, query, body;
+		RESTdispatchClass::httpMethod method;
+		std::string	uri, query, body;
 		std::vector<std::string> tokens;
 		size_t 		bodyLen;
 		size_t		tokenPos;
@@ -54,10 +55,7 @@ int main (void) {
 			uri.assign(ptr);
 		} else continue;
 
-		ptr = getenv("REQUEST_METHOD");
-		if (ptr) {
-			method.assign(ptr);
-		} else continue;
+		method = RESTdispatchClass::methodFromString(getenv("REQUEST_METHOD"));
 
 		ptr = getenv("QUERY_STRING");
 		if (ptr) {
@@ -135,7 +133,7 @@ int main (void) {
 		// log everything
 		log->open(REST_LOGFILE);
 		char *response = jsonFinal? json_dumps(jsonFinal, JSON_COMPACT) : NULL;
-		log->write(tokens, query, body, method, response);
+		log->write(tokens, query, body, to_string(method), response);
 		if (response)
 			::free(response);
 		log->close();
