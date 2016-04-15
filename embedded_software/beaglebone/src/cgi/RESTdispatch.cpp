@@ -35,21 +35,25 @@ json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int curren
 	// check if we've reached the end of URI...
 	if (currentToken < tokens.size()) {
 		// check for the token in the dispatch map
-		if (_dispatchTable->count(tokens[currentToken])) {
+		if (_dispatchTable != NULL && _dispatchTable->count(tokens[currentToken])) {
 			return (_dispatchTable->at(tokens[currentToken])).dispatch(tokens, (currentToken + 1), query, method, body);
 		}
 		 
-		// check if the token is a number; if not, call the default function
-		size_t idx = 0;
-		int num = 0;
-		try {
-			num = std::stoi(tokens[currentToken], &idx);
-			if (idx >= tokens[currentToken].size()) {
-				return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
-			} else return NULL;
-		} catch (const std::invalid_argument& ia) {
-			return this->defaultFunc(tokens, currentToken, query, method, body);
+		// check if the token is a number
+		if (_numberDispatch != NULL) {
+			size_t idx = 0;
+			int num = 0;
+			try {
+				num = std::stoi(tokens[currentToken], &idx);
+				if (idx == tokens[currentToken].size()) {
+					return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
+				} else return NULL;
+			} catch (const std::invalid_argument& ia) {
+			}
 		}
+
+		// If it's not in _dispatch or a number, call the default function
+		return this->defaultFunc(tokens, currentToken, query, method, body);
 	} else {
 		// if we've reached the end of the URI, call the root function of this object
 		return this->root(tokens, currentToken, query, method, body); 
@@ -85,10 +89,10 @@ bool allDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 }
 
 json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
-	json_t* out = json_array();
 	if (!_target) return NULL;
 	int count = _target->countRecords();
-	if (count > 0) {
+	if (count >= 0) {
+		json_t* out = json_array();
 		for (int i; i < count; i++) {
 			_target->getRecord(i);
 			json_array_append_new(out, _target->pack());
