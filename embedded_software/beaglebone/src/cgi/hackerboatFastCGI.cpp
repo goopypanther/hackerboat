@@ -38,7 +38,6 @@ int main (void) {
 	json_t		*responseJSON, *jsonFinal;
 	RESTdispatchClass*	root;
 	logREST*	log = logREST::instance();
-	logError*	err = logError::instance();
 	
 	// initialize the dispatch hierarchy
 	root = initRESTDispatch();
@@ -49,18 +48,25 @@ int main (void) {
 		size_t 		bodyLen;
 		size_t		tokenPos;
 		// read in the critical environment variables and go to next iteration if any fail
-		// Note that the assignment in if statements is deliberate to detect the null pointer
-		if (ptr = getenv("PATH_INFO")) {
+
+		ptr = getenv("PATH_INFO");
+		if (ptr) {
 			uri.assign(ptr);
 		} else continue;
-		if (ptr = getenv("REQUEST_METHOD")) {
+
+		ptr = getenv("REQUEST_METHOD");
+		if (ptr) {
 			method.assign(ptr);
 		} else continue;
-		if (ptr = getenv("QUERY_STRING")) {
+
+		ptr = getenv("QUERY_STRING");
+		if (ptr) {
 			query.assign(ptr);
 		} else continue;
-		if (ptr = getenv("CONTENT_LENGTH")) {
-		        bodyLen = ::atoi(ptr);
+
+		ptr = getenv("CONTENT_LENGTH");
+		if (ptr) {
+			bodyLen = ::atoi(ptr);
 		} else {
 	                 // For GET requests, etc., we don't get a CONTENT_LENGTH, which is OK.
 		         bodyLen = 0;

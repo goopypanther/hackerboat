@@ -93,7 +93,7 @@ json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToke
 	int count = _target->countRecords();
 	if (count >= 0) {
 		json_t* out = json_array();
-		for (int i; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			_target->getRecord(i);
 			json_array_append_new(out, _target->pack());
 		}
@@ -549,7 +549,7 @@ json_t* arduinoRESTClass::root (std::vector<std::string> tokens, int currentToke
 }
 
 json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body) {
-	json_t *out, *in;
+	json_t *in;
 	json_error_t *errIn;
 	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	std::string buf;
