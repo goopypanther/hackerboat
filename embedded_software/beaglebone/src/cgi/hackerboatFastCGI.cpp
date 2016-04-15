@@ -110,6 +110,12 @@ int main (void) {
 				free(demangled);
 			continue;
 		}
+
+		if (responseJSON == NULL) {
+			FCGI_printf("Status: 404\r\nContent-Type: text/plain\r\n\r\n"
+						"Dispatch method returned NULL.\r\n");
+			continue;
+		}
 		
 		// add some things to the JSON response...
 		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
