@@ -38,29 +38,33 @@ int main (void) {
 	json_t		*responseJSON, *jsonFinal;
 	RESTdispatchClass*	root;
 	logREST*	log = logREST::instance();
-	logError*	err = logError::instance();
 	
 	// initialize the dispatch hierarchy
 	root = initRESTDispatch();
 	
 	while (FCGI_Accept() >= 0) {
-		std::string	uri, method, query, body;
+		RESTdispatchClass::httpMethod method;
+		std::string	uri, query, body;
 		std::vector<std::string> tokens;
 		size_t 		bodyLen;
 		size_t		tokenPos;
 		// read in the critical environment variables and go to next iteration if any fail
-		// Note that the assignment in if statements is deliberate to detect the null pointer
-		if (ptr = getenv("PATH_INFO")) {
+
+		ptr = getenv("PATH_INFO");
+		if (ptr) {
 			uri.assign(ptr);
 		} else continue;
-		if (ptr = getenv("REQUEST_METHOD")) {
-			method.assign(ptr);
-		} else continue;
-		if (ptr = getenv("QUERY_STRING")) {
+
+		method = RESTdispatchClass::methodFromString(getenv("REQUEST_METHOD"));
+
+		ptr = getenv("QUERY_STRING");
+		if (ptr) {
 			query.assign(ptr);
 		} else continue;
-		if (ptr = getenv("CONTENT_LENGTH")) {
-		        bodyLen = ::atoi(ptr);
+
+		ptr = getenv("CONTENT_LENGTH");
+		if (ptr) {
+			bodyLen = ::atoi(ptr);
 		} else {
 	                 // For GET requests, etc., we don't get a CONTENT_LENGTH, which is OK.
 		         bodyLen = 0;
@@ -110,6 +114,12 @@ int main (void) {
 				free(demangled);
 			continue;
 		}
+
+		if (responseJSON == NULL) {
+			FCGI_printf("Status: 404\r\nContent-Type: text/plain\r\n\r\n"
+						"Dispatch method returned NULL.\r\n");
+			continue;
+		}
 		
 		// add some things to the JSON response...
 		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
@@ -123,7 +133,7 @@ int main (void) {
 		// log everything
 		log->open(REST_LOGFILE);
 		char *response = jsonFinal? json_dumps(jsonFinal, JSON_COMPACT) : NULL;
-		log->write(tokens, query, body, method, response);
+		log->write(tokens, query, body, to_string(method), response);
 		if (response)
 			::free(response);
 		log->close();

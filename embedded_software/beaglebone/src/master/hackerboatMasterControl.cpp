@@ -86,6 +86,6 @@ void inputBB (boneStateClass *state, arduinoStateClass *ard) {
 
 void outputBB (boneStateClass *state, arduinoStateClass *ard) {
 	ard->heartbeat();
-	ard->writeRecord();
-	state->writeRecord();
+	ard->appendRecord();
+	state->appendRecord();
 }

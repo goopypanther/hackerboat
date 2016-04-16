@@ -1,7 +1,7 @@
 # This file uses GNU make extensions.
 
 # Tweakable / overridable compilation options (debugging and optimization)
-OPTS = -gdwarf-4 -g3 -Os
+OPTS = -gdwarf-4 -g3 -Os -Wall
 
 # Paths
 GTEST_DIR=/usr/src/gtest
@@ -11,13 +11,12 @@ BLACKLIB=submodules/BlackLib/v3_0
 MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS) -std=gnu11 
-CXXFLAGS += $(OPTS) -std=gnu++11 -pthread
+CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++11 -pthread
 CPPFLAGS += -I submodules/include -I include -MMD -MT $@
 CPPFLAGS += -I $(BLACKLIB)
-CPPFLAGS += -I $(MINMEA)
 LDFLAGS  += -L submodules/lib
 
-LDLIBS += -ljansson -lsqlite3 -lBlackLib -lfcgi -lm -lrt
+LDLIBS += -ljansson -lsqlite3 -lBlackLib -lm -lrt
 
 export OPTS
 
@@ -33,8 +32,7 @@ svctree: submodules nav hb.fcgi master gpsParse
 	./setup/make-svctree.sh . $(SVCTREE)
 else
 svctree:
-	@echo "Error: You must define SVCTREE (e.g., \"$(MAKE) SVCTREE=/home/foo/svc $(MAKECMDGOALS)\")"
-	@false
+	$(error You must define SVCTREE (e.g., "$(MAKE) SVCTREE=/home/foo/svc $(MAKECMDGOALS)"))
 endif
 run: svctree
 	svscan $(SVCTREE)
@@ -69,7 +67,7 @@ src/cgi/RESTdispatch.o:  CPPFLAGS+= -I $(BLACKLIB)
 FCGI_OBJS=$(addprefix src/,$(FCGI_SRCS:.cpp=.o))
 ALL_OBJS+=$(FCGI_OBJS)
 hb.fcgi: $(FCGI_OBJS) libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ -lfcgi $(LDLIBS)
 
 MASTER_SRCS=master/hackerboatMasterControl.cpp master/stateMachine.cpp
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
@@ -108,10 +106,8 @@ clean:
 	rm -f libhackerboat.a
 	rm -f $(ALL_OBJS)
 	rm -f $(ALL_OBJS:.o=.d)
-	rm -f master
-	rm -f hb.fcgi
-	
+	rm -f master nav hb.fcgi gpsParse
+
 .PHONY: clean
 
 -include $(ALL_OBJS:.o=.d)
-

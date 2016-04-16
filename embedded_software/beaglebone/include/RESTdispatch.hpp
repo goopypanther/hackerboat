@@ -48,6 +48,11 @@ using string = std::string;
 
 class RESTdispatchClass {
 	public:
+		typedef enum class httpMethod {
+			UNKNOWN, GET, PUT, POST, DELETE
+		} httpMethod;
+		static httpMethod methodFromString(const char *);
+
 		RESTdispatchClass (void) = default;
 		/**
 		 * @brief Constructor for a dispatch object with given dispatch table
@@ -63,7 +68,7 @@ class RESTdispatchClass {
 		virtual json_t* dispatch (std::vector<std::string> tokens,	/**< Array of tokens from the URI request */
 									int currentToken, 				/**< Token to dispatch on */
 									std::string query, 				/**< Query string, if any, from the request */
-									std::string method, 			/**< Request method, generally either GET or POST */
+									httpMethod method,  			/**< Request method, generally either GET or POST */
 									std::string body); 				/**< POST request body, if any */
 		/**
 		 * @brief If there are no more tokens, dispatch() calls this method. Default implementation returns NULL.
@@ -71,7 +76,7 @@ class RESTdispatchClass {
 		virtual json_t* root 	(std::vector<std::string> tokens, 	/**< Array of tokens from the URI request */
 									int currentToken, 				/**< Token to dispatch on */
 									std::string query, 				/**< Query string, if any, from the request */
-									std::string method, 			/**< Request method, generally either GET or POST */
+									httpMethod method,  			/**< Request method, generally either GET or POST */
 									std::string body)				/**< POST request body, if any */
 									{return NULL;};		
 		/**
@@ -80,7 +85,7 @@ class RESTdispatchClass {
 		virtual json_t*	defaultFunc (std::vector<std::string> tokens,/**< Array of tokens from the URI request */
 									int currentToken,  				/**< Token to dispatch on */
 									std::string query, 				/**< Query string, if any, from the request */
-									std::string method, 			/**< Request method, generally either GET or POST */
+									httpMethod method,  			/**< Request method, generally either GET or POST */
 									std::string body) 				/**< POST request body, if any */
 									{return NULL;}; 
 		
@@ -104,7 +109,7 @@ class allDispatchClass : public RESTdispatchClass {
 		bool setTarget (hackerboatStateClassStorable* target);		/**< Set the target hackerboatStateClassStorable */
 		bool addEntry (std::string name, RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		
 	private:
 		hackerboatStateClassStorable* _target;
@@ -122,7 +127,7 @@ class numberDispatchClass : public RESTdispatchClass {
 		numberDispatchClass(hackerboatStateClassStorable* target) : _target(target) {};
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		
 	private:
 		hackerboatStateClassStorable* _target;
@@ -134,7 +139,7 @@ class countDispatchClass : public RESTdispatchClass {
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (std::string name, RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
@@ -145,7 +150,7 @@ class insertDispatchClass : public RESTdispatchClass {
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (std::string name, RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
@@ -156,7 +161,7 @@ class appendDispatchClass : public RESTdispatchClass {
 		bool setTarget (hackerboatStateClassStorable* target);
 		bool addEntry (std::string name, RESTdispatchClass *entry) {return false;};
 		bool addNumber (RESTdispatchClass *entry) {return false;};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 	private:
 		hackerboatStateClassStorable* _target;
 };
@@ -165,16 +170,16 @@ class rootRESTClass : public RESTdispatchClass {
 	public:
 		rootRESTClass (void) = default;
 		rootRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
-		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 };
 
 class boneStateRESTClass : public RESTdispatchClass {
 	public:
 		boneStateRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		bool setTarget (boneStateClass* target);
-		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 											
 	private:
 		json_t*	command (std::string body);
@@ -189,7 +194,7 @@ class boneStateRESTClass : public RESTdispatchClass {
 class gpsRESTClass : public RESTdispatchClass {
 	public:
 		gpsRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		bool setTarget (gpsFixClass* target);
 	private:
 		gpsFixClass* _target;
@@ -198,7 +203,7 @@ class gpsRESTClass : public RESTdispatchClass {
 class waypointRESTClass : public RESTdispatchClass {
 	public:
 		waypointRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		bool setTarget (waypointClass* target);
 	private:
 		waypointClass* _target;
@@ -207,7 +212,7 @@ class waypointRESTClass : public RESTdispatchClass {
 class navRESTClass : public RESTdispatchClass {
 	public:
 		navRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		bool setTarget (navClass* target);
 	private:
 		navClass* _target;
@@ -217,7 +222,7 @@ class arduinoStateRESTClass : public RESTdispatchClass {
 	public:
 		arduinoStateRESTClass (void) = default;
 		arduinoStateRESTClass (std::map<string,RESTdispatchClass&>* table) : RESTdispatchClass(table) {};
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 		bool setTarget (arduinoStateClass* target);
 	private:
 		arduinoStateClass* _target;
@@ -225,13 +230,17 @@ class arduinoStateRESTClass : public RESTdispatchClass {
 
 class resetArduinoRest : public RESTdispatchClass {
 	public:
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
 };
 
 class arduinoRESTClass : public RESTdispatchClass {
 	public:
-		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
-		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, std::string method, std::string body);
+		json_t* root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
+		json_t*	defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body);
+};
+
+namespace std {
+	string to_string(RESTdispatchClass::httpMethod);
 };
 
 #endif 
