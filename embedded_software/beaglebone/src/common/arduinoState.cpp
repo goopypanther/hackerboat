@@ -25,7 +25,10 @@
 #include "gps.hpp"
 #include "sqliteStorage.hpp"
 #include "json_utilities.hpp"
-#include <BlackUART/BlackUART.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
+//#include <BlackUART/BlackUART.h>
 
 static logError *errLog = logError::instance();
 
@@ -365,53 +368,78 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 }
 
 json_t *arduinoStateClass::write(std::string func, std::string params) {
-	std::string ret;
+	std::string ret = "";
+	ssize_t retSize = 0;
 	json_t *result;
 	json_error_t err;
-	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
+	char buf[LOCAL_BUF_LEN];
+	// BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
 	
 	// attempt to open the serial port
 	while (cnt < UART_TIMEOUT) {
-		if (port.open(ReadWrite|NonBlock)) break;
+		if (openArduinoSerial() != -1) break;	// if the serial port opened, leave. 
 		usleep(1);
 		cnt++;
 	}
 	
 	// if we timed out, return an empty string
 	if (cnt >= UART_TIMEOUT) {
-		port.close();
 		errLog->write("Arduino Serial", "Failed to open serial port for write");
 		return NULL;
 	}
 	
-	port.setReadBufferSize(LOCAL_BUF_LEN);
-
+	// build the query string and write to the serial port
 	std::ostringstream cmd;
 	cmd << func << "?params=" << params << "\r\n" << std::endl;
-
-	port.write(cmd.str());
+	write(cmd.c_str(), cmd.size());
 	usleep(100);
-	ret = port.read();
-	if (ret.find(BlackLib::UART_READ_FAILED)) {
-		errLog->write("Arduino Serial", "Failed to read return value");
-		port.close();
-		return NULL;
-	}
+	
+	// read the response from the serial port
 	cnt = 0;
 	while (ret.find("\r\n\r\n") == std::string::npos) {
-		ret += port.read();
-		usleep(100);
+		retSize += read(ard_fd, buf, LOCAL_BUF_LEN);
+		if (retSize > 0) {
+			ret += std::string(buf);
+		}
+		usleep(10);
 		cnt++;
 		if (cnt >= UART_TIMEOUT) {
 			errLog->write("Arduino Serial", "Failed to read return value");
-			port.close();
+			closeArduinoSerial();
 			return NULL;
 		}
+		memset(buf, 0, LOCAL_BUF_LEN);
 	}
-	port.close();
+	tcdrain(ard_fd);
+	
+	closeArduinoSerial();
 	result = json_loads(ret.c_str(), JSON_DECODE_ANY, &err);
 	clock_gettime(CLOCK_REALTIME, &uTime);
 	return result;
 }
 	
+int arduinoStateClass::openArduinoSerial (void) {
+	struct termios ard)attrib;
+	
+	ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
+	if (ard_fd == -1) return ard_fd;	
+	if (tcgetattr(ard_fd, &ard_attrib) < 0) {
+		closeArduinoSerial();
+		return ard_fd;
+	}
+	cfsetospeed(&ard_attrib,ARDUINO_BPS);       
+    cfsetispeed(&ard_attrib,ARDUINO_BPS); 
+	ard_attrib.c_cflag = CS8|CREAD|CLOCAL;  
+	if (tcsetattr(ard_fd, TCSANOW, &ard_attrib) < 0) {
+		closeArduinoSerial();
+		return ard_fd;
+	}
+	
+	return ard_fd;
+}
+
+void arduinoStateClass::closeArduinoSerial (void) {
+	close(ard_fd);
+	ard_fd = -1;
+}

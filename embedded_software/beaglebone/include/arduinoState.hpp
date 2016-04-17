@@ -97,11 +97,17 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		virtual bool parse (json_t *input, bool seq);
 		virtual json_t *pack (bool seq = true) const;
 		virtual bool isValid (void) const;
+		
 	private:
 		bool 	setMode (arduinoModeEnum s);
 		bool 	setBoatMode (boatModeEnum s);
 		json_t	*write(std::string func, std::string query);		/**< Write to a function on the Arduino */
-
+		int 	openArduinoSerial (void);
+		void 	closeArduinoSerial (void);
+		
+		int ard_fd = -1;
+		
+		
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
