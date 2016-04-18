@@ -31,7 +31,7 @@ using namespace BlackLib;
 
 static logError *errLog = logError::instance();
 
-json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	// check if we've reached the end of URI...
 	if (currentToken < tokens.size()) {
 		// check for the token in the dispatch map
@@ -42,9 +42,8 @@ json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, int curren
 		// check if the token is a number
 		if (_numberDispatch != NULL) {
 			size_t idx = 0;
-			int num = 0;
 			try {
-				num = std::stoi(tokens[currentToken], &idx);
+				std::stoi(tokens[currentToken], &idx);
 				if (idx == tokens[currentToken].size()) {
 					return this->_numberDispatch->dispatch(tokens, currentToken, query, method, body);
 				} else return NULL;
@@ -88,7 +87,7 @@ bool allDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* allDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* allDispatchClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	int count = _target->countRecords();
 	if (count >= 0) {
@@ -111,7 +110,7 @@ bool numberDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* numberDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* numberDispatchClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	size_t count;
 	int val = std::stoi(tokens[currentToken], &count);
@@ -132,7 +131,7 @@ bool countDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* countDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* countDispatchClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	json_int_t count;
 	json_t *out = json_object();
 	if (!_target) return NULL;
@@ -150,13 +149,13 @@ bool insertDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* insertDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
-	json_error_t *errJSON;
+json_t* insertDispatchClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
+	json_error_t errJSON;
 	int32_t insert;
 	// check that we have a target and we can open the file...
 	if (_target) {
 		// populate from the body...
-		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON), false)) {
+		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON), false)) {
 			if (!_target->isValid()) {
 				return NULL;
 			}
@@ -194,12 +193,12 @@ bool appendDispatchClass::setTarget (hackerboatStateClassStorable* target) {
 	}
 }
 
-json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
-	json_error_t *errJSON;
+json_t* appendDispatchClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
+	json_error_t errJSON;
 	// check that we have a target and we can open the file...
 	if (_target) {
 		// populate from the body...
-		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON), false)) {
+		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON), false)) {
 			if (_target->isValid()) {
 				if (!_target->appendRecord()) {
 					return NULL;
@@ -214,15 +213,15 @@ json_t* appendDispatchClass::root (std::vector<std::string> tokens, int currentT
 	return _target->pack();
 }
 
-json_t* rootRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* rootRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	return NULL;
 }
 
-json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	return this->root(tokens, currentToken, query, method, body);
 }
 
-json_t* boneStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* boneStateRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -239,7 +238,7 @@ bool boneStateRESTClass::setTarget(boneStateClass* target) {
 	}
 }
 
-json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (tokens[currentToken] == "command") {
 		return command(body);
 	} else if (tokens[currentToken] == "waypointNext") {
@@ -260,32 +259,28 @@ json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, int cu
 
 json_t* boneStateRESTClass::command(std::string body) {
 	std::string command;
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input; 
+	json_t obj;
+	json_error_t errJSON;
 	boatModeEnum cmd;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// check that the load went well, load in the the last state vector, 
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) || 
-		(json_unpack(input, "{s:o}", "command", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "command", &obj))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	if (!::parse(obj, &command)) {
-		free(obj);
+	if (!::parse(&obj, &command)) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	// parse the incoming state
 	if (boneStateClass::modeNames.get(command, &cmd)) {
@@ -298,30 +293,26 @@ json_t* boneStateRESTClass::command(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointNext(std::string body) {
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input;
+	json_t obj;
+	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointNext", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "waypointNext", &obj))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	if (!::parse(obj, &(_target->waypointNext))) {
-		free(obj);
+	if (!::parse(&obj, &(_target->waypointNext))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) return NULL;
@@ -331,30 +322,27 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointStrength(std::string body) {
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input;
+	json_t obj;
+	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointStrength", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "waypointStrength", &obj))) {
 		free(input);
-		free(errJSON);
+		
 		return NULL;
 	}
-	if (!::parse(obj, &(_target->waypointStrength))) {
-		free(obj);
+	if (!::parse(&obj, &(_target->waypointStrength))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) return NULL;
@@ -364,30 +352,26 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input;
+	json_t obj;
+	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointStrengthMax", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "waypointStrengthMax", &obj))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	if (!::parse(obj, &(_target->waypointStrengthMax))) {
-		free(obj);
+	if (!::parse(&obj, &(_target->waypointStrengthMax))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) return NULL;
@@ -397,30 +381,26 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input;
+	json_t obj;
+	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointAccuracy", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "waypointAccuracy", &obj))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	if (!::parse(obj, &(_target->waypointAccuracy))) {
-		free(obj);
+	if (!::parse(&obj, &(_target->waypointAccuracy))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) return NULL;
@@ -430,30 +410,26 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 }
 
 json_t* boneStateRESTClass::autonomous(std::string body) {
-	json_t *input, *obj;
-	json_error_t *errJSON;
+	json_t *input;
+	json_t obj;
+	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
 	if (!_target) return NULL;
 	// load in incoming request body
-	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, errJSON);
+	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "autonomous", obj))) {
-		free(obj);
+		(json_unpack(input, "{s:o}", "autonomous", &obj))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	if (!::parse(obj, &(_target->autonomous))) {
-		free(obj);
+	if (!::parse(&obj, &(_target->autonomous))) {
 		free(input);
-		free(errJSON);
 		return NULL;
 	}
-	free(obj);
 	free(input);
-	free(errJSON);
+	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) return NULL;
@@ -462,7 +438,7 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	return NULL;
 }
 
-json_t* gpsRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* gpsRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -479,7 +455,7 @@ bool gpsRESTClass::setTarget(gpsFixClass* target) {
 	}
 }
 
-json_t* waypointRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* waypointRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -496,7 +472,7 @@ bool waypointRESTClass::setTarget(waypointClass* target) {
 	}
 }
 
-json_t* navRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* navRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -513,7 +489,7 @@ bool navRESTClass::setTarget(navClass* target) {
 	}
 }
 
-json_t* arduinoStateRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* arduinoStateRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
 		return _target->pack();
@@ -530,7 +506,7 @@ bool arduinoStateRESTClass::setTarget(arduinoStateClass* target) {
 	}
 }
 
-json_t* resetArduinoRest::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* resetArduinoRest::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	BlackGPIO	ardResetPin(ARDUINO_RESET_PIN, output, FastMode);
 	if (ardResetPin.setValue(low)) {
 		usleep(100000);	// sleep for 100 milliseconds
@@ -544,60 +520,23 @@ json_t* resetArduinoRest::root (std::vector<std::string> tokens, int currentToke
 	}
 }
 
-json_t* arduinoRESTClass::root (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
+json_t* arduinoRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	return this->defaultFunc(tokens, currentToken, query, method, body);
 }
 
-json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, int currentToken, std::string query, httpMethod method, std::string body) {
-	json_t *in;
-	json_error_t *errIn;
-	BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
-	std::string buf;
-	uint32_t cnt = 0;
-	
-	// attempt to open the serial port
-	port.setReadBufferSize(LOCAL_BUF_LEN);
-	while (cnt < UART_TIMEOUT) {
-		if (port.open(ReadWrite)) break;
-		usleep(1);
-		cnt++;
-	}
-	
-	// if we timed out, return a NULL
-	if (cnt >= UART_TIMEOUT) {
-		errLog->write("REST Arduino Serial", "Failed to open serial port for write");
-		port.close();
-		return NULL;
-	}
-	
-	// write out the incoming URI to the Arduino
-
-	for (uint8_t i = (currentToken + 1); i < tokens.size(); i++) {
-		port.write("/");
-		port.write(tokens[i].c_str());
-	}
-	port.write("?");
-	port.write(query.c_str());
-	port.write("\r\n");
-	
-	// read the incoming buffer
-	port >> buf;
-	port.close();
-	if (buf != BlackLib::UART_READ_FAILED) {
-		in = json_loadb(buf.c_str(), buf.length(), JSON_DECODE_ANY, errIn);
-		if (in) {
-			free(errIn);
-			return in;
-		} else {
-			json_decref(in);
-			free(errIn);
-			errLog->write("REST Arduino Serial", "Failed to parse incoming json from Arduino");
-			return NULL;
-		}
+bool arduinoRESTClass::setTarget(arduinoStateClass* target) {
+	if (target) {
+		_target = target;
+		return true;
 	} else {
-		errLog->write("REST Arduino Serial", "Failed to read return value");
-		return NULL;
+		return false;
 	}
+}
+
+json_t* arduinoRESTClass::defaultFunc (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
+		
+	// write out the incoming URI to the Arduino & read the response
+	return _target->writeArduino(tokens[currentToken], query);
 }
 
 RESTdispatchClass::httpMethod RESTdispatchClass::methodFromString(const char *m)

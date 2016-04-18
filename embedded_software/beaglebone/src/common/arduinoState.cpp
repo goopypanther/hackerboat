@@ -16,6 +16,7 @@
 #include <time.h>
 #include <math.h>
 #include <string>
+#include <cstring>
 #include "config.h"
 #include "location.hpp"
 #include "logs.hpp"
@@ -32,7 +33,7 @@
 
 static logError *errLog = logError::instance();
 
-using namespace BlackLib;
+// using namespace BlackLib;
 
 const enumerationNameTable<arduinoModeEnum> arduinoStateClass::modeNames = {
 	"PowerUp", 
@@ -240,7 +241,7 @@ bool arduinoStateClass::setCommand (arduinoModeEnum c) {
 
 bool arduinoStateClass::writeBoatMode(boatModeEnum m) {
 	if (setBoatMode(m)) {
-		json_t *ret = write("writeBoatMode", boneStateClass::modeNames.get(m));
+		json_t *ret = writeArduino("writeBoatMode", boneStateClass::modeNames.get(m));
 		if (!ret)
 			return false;
 		json_decref(ret);
@@ -250,7 +251,7 @@ bool arduinoStateClass::writeBoatMode(boatModeEnum m) {
 
 bool arduinoStateClass::writeCommand(void) {
 	bool retVal = false;
-	json_t *ret = write("writeCommand", modeNames.get(command));
+	json_t *ret = writeArduino("writeCommand", modeNames.get(command));
 	if (ret) {
 		json_t *result = json_object_get(ret, "command");
 		if (result) {
@@ -280,7 +281,7 @@ int16_t arduinoStateClass::writeThrottle(int16_t t) {
 }
 
 int16_t arduinoStateClass::writeThrottle(void) {
-	json_t *ret = write("writeThrottle", std::to_string((int)throttle));
+	json_t *ret = writeArduino("writeThrottle", std::to_string((int)throttle));
 	if (ret) {
 		json_t *result = json_object_get(ret, "throttle");
 		if (result) {
@@ -292,7 +293,7 @@ int16_t arduinoStateClass::writeThrottle(void) {
 }
 
 double arduinoStateClass::writeHeadingTarget(void) {
-	json_t *ret = write("writeHeadingTarget", std::to_string(headingTarget));
+	json_t *ret = writeArduino("writeHeadingTarget", std::to_string(headingTarget));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
@@ -304,7 +305,7 @@ double arduinoStateClass::writeHeadingTarget(void) {
 }
 
 double arduinoStateClass::writeHeadingDelta(double delta) {
-	json_t *ret = write("writeHeadingDelta", std::to_string(delta));
+	json_t *ret = writeArduino("writeHeadingDelta", std::to_string(delta));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
@@ -316,28 +317,28 @@ double arduinoStateClass::writeHeadingDelta(double delta) {
 }
 
 bool arduinoStateClass::heartbeat(void) {
-	write("boneHeartBeat", "");
+	writeArduino("boneHeartBeat", "");
 	return true;
 }
 
 bool arduinoStateClass::populate(void) {
 	bool result;
 	clock_gettime(CLOCK_REALTIME, &uTime);
-	json_t *in = write("dumpCoreState", "");
+	json_t *in = writeArduino("dumpCoreState", "");
 
-	json_t *other = write("dumpOrientationState", "");
+	json_t *other = writeArduino("dumpOrientationState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = write("dumpInputState", "");
+	other = writeArduino("dumpInputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = write("dumpRawInputState", "");
+	other = writeArduino("dumpRawInputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = write("dumpOutputState", "");
+	other = writeArduino("dumpOutputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 	
@@ -367,7 +368,7 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 	return true;
 }
 
-json_t *arduinoStateClass::write(std::string func, std::string params) {
+json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	std::string ret = "";
 	ssize_t retSize = 0;
 	json_t *result;
@@ -392,7 +393,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 	// build the query string and write to the serial port
 	std::ostringstream cmd;
 	cmd << func << "?params=" << params << "\r\n" << std::endl;
-	write(cmd.c_str(), cmd.size());
+	write(ard_fd, cmd.str().c_str(), cmd.str().length());
 	usleep(100);
 	
 	// read the response from the serial port
@@ -420,7 +421,7 @@ json_t *arduinoStateClass::write(std::string func, std::string params) {
 }
 	
 int arduinoStateClass::openArduinoSerial (void) {
-	struct termios ard)attrib;
+	struct termios ard_attrib;
 	
 	ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
 	if (ard_fd == -1) return ard_fd;	
