@@ -140,6 +140,7 @@ bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
 	gpsHeading = row.double_field(4);
 	gpsSpeed = row.double_field(5);
 	fixValid = row.bool_field(6);
+	return fixValid;
 }
 
 bool gpsFixClass::readSentence (std::string sentence) {
@@ -207,5 +208,6 @@ bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 		this->fixValid = true;
 		this->longitude = minmea_tofloat(&(frame->longitude));
 		this->latitude = minmea_tofloat(&(frame->latitude));
+		return true;
 	} else return false;
 }

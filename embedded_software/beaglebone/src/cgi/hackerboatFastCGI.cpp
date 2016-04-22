@@ -205,6 +205,7 @@ RESTdispatchClass *initRESTDispatch (void) {
 	waypointREST->setTarget(waypoint);
 	navREST->setTarget(nav);
 	arduinoREST->setTarget(arduinoState);
+	arduino->setTarget(arduinoState);
 	
 	return root;
 }

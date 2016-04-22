@@ -55,7 +55,7 @@ navVectorClass navVectorClass::add (const navVectorClass& a) const {
 	double r1sq, r2sq, r1r2;
 	deltaBearing = locationClass::deg2rad(a._bearing - this->_bearing);
 	r1sq = pow(this->_strength, 2);
-	r1sq = pow(a._strength, 2);
+	r2sq = pow(a._strength, 2);
 	r1r2 = a._strength * this->_strength;
 	out._strength = sqrt(r1sq + r2sq + (2 * r1r2 * cos(deltaBearing)));
 	out._bearing = this->_bearing + locationClass::rad2deg(acos((this->_strength + (a._strength * cos(deltaBearing)))/out._strength)); 
@@ -198,8 +198,7 @@ bool navClass::readFromRow(sqliteRowReference row, sequence assignedId)
 		success = false;
 	json_decref(repr);
 
-	sequence foo = row.int64_field(1);
-#warning Wim - implement simple foreign key support, or change class interface
+	targetWaypoint = row.int64_field(1);
 
 	repr = row.json_field(2);
 	if (!total.parse(repr))
