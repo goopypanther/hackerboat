@@ -370,6 +370,7 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 
 json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	std::string ret = "";
+	std::string sent = "";
 	ssize_t retSize = 0;
 	json_t *result;
 	json_error_t err;
@@ -392,8 +393,12 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	
 	// build the query string and write to the serial port
 	std::ostringstream cmd;
-	cmd << func << "?params=" << params << "\r\n" << std::endl;
-	write(ard_fd, cmd.str().c_str(), cmd.str().length());
+	cmd << "/" << func << "?params=" << params << "\r\n" << std::endl;
+	sent = cmd.str();
+	if (write(ard_fd, sent.c_str(), sent.length()) < (int)sent.length()) {
+		errLog->write("Arduino Serial", "Write failed");
+		return NULL;
+	}
 	usleep(100);
 	
 	// read the response from the serial port
@@ -426,14 +431,24 @@ int arduinoStateClass::openArduinoSerial (void) {
 	ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
 	if (ard_fd == -1) return ard_fd;	
 	if (tcgetattr(ard_fd, &ard_attrib) < 0) {
+		errLog->write("Arduino Serial", "Unable to get serial properties");
 		closeArduinoSerial();
 		return ard_fd;
 	}
-	cfsetospeed(&ard_attrib,ARDUINO_BPS);       
-    cfsetispeed(&ard_attrib,ARDUINO_BPS); 
-	ard_attrib.c_cflag = CS8|CREAD|CLOCAL;  
+	cfsetspeed(&ard_attrib, B115200);
+//	cfmakeraw(&ard_attrib);
+//	cfsetospeed(&ard_attrib, B115200);       
+//	cfsetispeed(&ard_attrib, B115200); 
+//	ard_attrib.c_cflag &= ~(PARENB | CSTOPB | CSIZE);		// no parity, one stop bit
+//	ard_attrib.c_cflag |= (CLOCAL | CREAD | CS8);			// ignore modem status lines, enable receiver, 8 bits per byte
+//	ard_attrib.c_iflag &= ~(IXON | IXOFF | IXANY);			// turn off all flow control
+//	ard_attrib.c_iflag &= ~(ICRNL);							// turn off line ending translation					
+//	ard_attrib.c_oflag &= ~(OPOST);							// turn off post processing of output
+//	ard_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
+//	ard_attrib.c_cc[VTIME] = 0;
 	if (tcsetattr(ard_fd, TCSANOW, &ard_attrib) < 0) {
 		closeArduinoSerial();
+		errLog->write("Arduino Serial", "Unable to set serial properties");
 		return ard_fd;
 	}
 	
