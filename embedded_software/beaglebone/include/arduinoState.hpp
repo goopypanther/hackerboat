@@ -32,6 +32,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		static const enumerationNameTable<arduinoModeEnum> modeNames;
 
 		bool populate (void);	/**< Populate the object from the named interface */
+		bool corePopulate (void);	/**< Populate core data only from named interface */
 		bool setCommand (arduinoModeEnum c);
 
 		// Command functions...

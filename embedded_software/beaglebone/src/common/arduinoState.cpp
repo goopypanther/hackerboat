@@ -354,6 +354,23 @@ bool arduinoStateClass::populate(void) {
 	return result;
 }
 
+bool arduinoStateClass::corePopulate(void) {
+	bool result;
+	clock_gettime(CLOCK_REALTIME, &uTime);
+	json_t *in = writeArduino("f_dumpCoreState", "");
+
+	if (in) {
+		this->parse(in, false);
+		result = this->isValid();
+	} else {
+		result = false;
+		errLog->write("Arduino Serial", "Failed to parse incoming json from Arduino");
+	}
+
+	json_decref(in);
+	return result;
+}
+
 bool arduinoStateClass::setMode(arduinoModeEnum m) {
 	if (!modeNames.valid(m))
 		return false;
@@ -418,13 +435,14 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 		if (bytesRead > 0) {
 			ret += buf;
 			cnt = 0;
+			printf("(%d)%s;", bytesRead, buf);
 			memset(buf, 0, LOCAL_BUF_LEN);
-			printf("%d,", bytesRead);
 		} else {
 			printf(".");
 		}
 		if (cnt >= UART_READ_TIMEOUT) {
 			errLog->write("Arduino Serial", "Failed to read return value");
+			printf("Exiting with timeout\n");
 			closeArduinoSerial();
 			return NULL;
 		}
@@ -432,7 +450,7 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 		cnt++;
 	}
 	printf("\n");
-	tcflush(ard_fd, TCIOFLUSH);
+	//tcflush(ard_fd, TCIOFLUSH);
 	//tcdrain(ard_fd);
 	
 	closeArduinoSerial();
@@ -454,7 +472,8 @@ int arduinoStateClass::openArduinoSerial (void) {
 		return ard_fd;
 	}
 	cfsetspeed(&ard_attrib, B115200);
-	//cfmakeraw(&ard_attrib);
+	//cfsetspeed(&ard_attrib, B230400);
+	cfmakeraw(&ard_attrib);
 	ard_attrib.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
 	ard_attrib.c_cflag &= ~(PARENB | CSTOPB | CSIZE);		// no parity, one stop bit
 	ard_attrib.c_cflag |= (CLOCAL | CREAD | CS8);			// ignore modem status lines, enable receiver, 8 bits per byte
@@ -473,6 +492,7 @@ int arduinoStateClass::openArduinoSerial (void) {
 }
 
 void arduinoStateClass::closeArduinoSerial (void) {
+	tcflush(ard_fd, TCIOFLUSH);
 	close(ard_fd);
 	ard_fd = -1;
 }

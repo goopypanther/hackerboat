@@ -32,12 +32,13 @@
 
 using namespace BlackLib;
 
-void inputBB (boneStateClass *state, arduinoStateClass *ard);
-void outputBB (boneStateClass *state, arduinoStateClass *ard);
+void inputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum);
+void outputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum);
 
 static logError *err = logError::instance();
 
 int main (void) {
+	long stepNum = 0;
 	BlackGPIO clockPin(gpioName::GPIO_38, direction::output, workingMode::FastMode);
 	stateMachineBase *thisState, *lastState;
 	boneStateClass myBoat;
@@ -58,11 +59,11 @@ int main (void) {
 	for (;;) {
 		clock_gettime(CLOCK_REALTIME, &startTime); 			// grab the time at the start of the frame
 		clockPin.setValue(digitalValue::high);				// mark the start of the frame for debug
-		inputBB(&myBoat, &myArduino);							// read all inputs
+		inputBB(&myBoat, &myArduino, stepNum);							// read all inputs
 		lastState = thisState;								// store a pointer to the old state
 		thisState = thisState->execute();					// run the current state
 		if (thisState != lastState) delete lastState;		// if we have a new state, delete the old state object
-		outputBB(&myBoat, &myArduino);						// write outputs
+		outputBB(&myBoat, &myArduino, stepNum);						// write outputs
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
 		clockPin.setValue(digitalValue::low);				// mark the end of the frame for debug
 		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
@@ -71,11 +72,16 @@ int main (void) {
 		} else {
 			logError::instance()->write("Master control", "Frame overrun");
 		}
+		stepNum++;
 	}
 }
 
-void inputBB (boneStateClass *state, arduinoStateClass *ard) {
-	ard->populate();
+void inputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
+	if (stepNum % 10) {
+		ard->corePopulate();
+	} else {
+		ard->populate();
+	}
 	state->getLastRecord();
 	clock_gettime(CLOCK_REALTIME, &(state->uTime));
 	if (!state->gps.getLastRecord()) {
@@ -84,7 +90,8 @@ void inputBB (boneStateClass *state, arduinoStateClass *ard) {
 	}
 }
 
-void outputBB (boneStateClass *state, arduinoStateClass *ard) {
+void outputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
+	ard->writeBoatMode(state->mode);
 	ard->heartbeat();
 	ard->appendRecord();
 	state->appendRecord();
