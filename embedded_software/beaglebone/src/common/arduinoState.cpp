@@ -435,7 +435,7 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 		if (bytesRead > 0) {
 			ret += buf;
 			cnt = 0;
-			printf("(%d)%s;", bytesRead, buf);
+			printf("(%zd)%s;", bytesRead, buf);
 			memset(buf, 0, LOCAL_BUF_LEN);
 		} else {
 			printf(".");
