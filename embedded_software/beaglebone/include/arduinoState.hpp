@@ -18,6 +18,8 @@
 #include "location.hpp"
 #include <jansson.h>
 
+#define USE_RESULT __attribute__((warn_unused_result))
+
 /**
  * @class arduinoStateClass
  *
@@ -31,8 +33,8 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		typedef arduinoModeEnum Mode;
 		static const enumerationNameTable<arduinoModeEnum> modeNames;
 
-		bool populate (void);	/**< Populate the object from the named interface */
-		bool corePopulate (void);	/**< Populate core data only from named interface */
+		bool populate (void) USE_RESULT;				/** Populate the object */
+		bool corePopulate (void) USE_RESULT;			/**< Populate core data only */
 		bool setCommand (arduinoModeEnum c);
 
 		// Command functions...
@@ -122,5 +124,7 @@ inline static bool fromString(std::string name, arduinoModeEnum *value) {
 inline static json_t *json(arduinoModeEnum num) {
 	return json(arduinoStateClass::modeNames.get(num));
 }
+
+#undef USE_RESULT
 
 #endif /* ARDUINOSTATE_H */
