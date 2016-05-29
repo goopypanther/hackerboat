@@ -31,6 +31,8 @@ class hackerboatStateStorage;
 class sqliteParameterSlice;
 class sqliteRowReference;
 
+#define USE_RESULT __attribute__((warn_unused_result))
+
 /**
  * @class hackerboatStateClass
  *
@@ -40,12 +42,21 @@ class sqliteRowReference;
 
 class hackerboatStateClass {
 	public:
-		virtual bool parse (json_t *input, bool seq) = 0;	/**< Populate the object from the given json object. If seq is true, a sequence number element is expected */
-		virtual json_t *pack (bool seq = true) const = 0;	/**< Pack the contents of the object into a json object and return a pointer to that object. If seq is true, a sequence number element will be included */
-		virtual bool isValid (void) const {return true;};	/**< Tests whether the current object is in a valid state */
+		/** Populate the object from the given json object.
+		 * If seq is true, a sequence number element is expected
+		 */
+		virtual bool parse (json_t *input, bool seq) USE_RESULT = 0;
+
+		/** Pack the contents of the object into a json object and return a pointer to that object.
+		 * If seq is true, a sequence number element will be included
+		 */
+		virtual json_t *pack (bool seq = true) const USE_RESULT = 0;
+
+		/** Tests whether the current object is in a valid state */
+		virtual bool isValid (void) const {return true;};
 
 		static json_t *packTimeSpec (timespec t);
-		static int parseTimeSpec (json_t *input, timespec *t);
+		static int parseTimeSpec (json_t *input, timespec *t) USE_RESULT;
 
 	protected:
 		hackerboatStateClass(void) {};
@@ -54,6 +65,7 @@ class hackerboatStateClass {
 inline json_t *json(timespec t) {
 	return hackerboatStateClass::packTimeSpec(t);
 }
+inline bool parse(json_t *input, timespec *t) USE_RESULT;
 inline bool parse(json_t *input, timespec *t) {
 	return hackerboatStateClass::parseTimeSpec(input, t) == 0;
 };
@@ -80,8 +92,8 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 
 		sequence countRecords (void);							/**< Return the number of records of the object's type in the open database file */
 		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
-		bool getRecord(sequence select);						/**< Populate the object from the open database file */
-		bool getLastRecord(void);								/**< Get the latest record */
+		bool getRecord(sequence select) USE_RESULT;				/**< Populate the object from the open database file */
+		bool getLastRecord(void) USE_RESULT;					/**< Get the latest record */
 		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
 		
 	protected:
@@ -112,7 +124,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		 * hackerboatStateClass::pack() and expects the database to
 		 * contain a single JSON column.
 		 */
-		virtual bool fillRow(sqliteParameterSlice) const;
+		virtual bool fillRow(sqliteParameterSlice) const USE_RESULT;
 
 		/** Populate the receiver from a database row.
 		 *
@@ -120,7 +132,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		 * containing JSON text which is deserialized and given to
 		 * hackerboatStateClass::parse().
 		 */
-		virtual bool readFromRow(sqliteRowReference, sequence);
+		virtual bool readFromRow(sqliteRowReference, sequence) USE_RESULT;
 };
 
 /**
@@ -141,7 +153,7 @@ class orientationClass {
 		double pitch 	= NAN;
 		double heading 	= NAN;
 
-		bool parse (json_t *);
+		bool parse (json_t *) USE_RESULT;
 		json_t *pack (void) const;
 		bool isValid (void) const;
 
@@ -178,7 +190,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		indexT			getNextIndex(void);										/**< Return the index of the next waypoint */
 
 		/* Concrete implementations of stateClassStorable */
-		bool parse (json_t *, bool);
+		bool parse (json_t *, bool) USE_RESULT;
 		json_t *pack (bool seq = true) const;
 		bool isValid (void) const;
 
@@ -197,7 +209,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		virtual bool readFromRow(sqliteRowReference, sequence);
 };
 const char *toString(waypointClass::action);
-bool fromString(const char *, waypointClass::action *);
+bool fromString(const char *, waypointClass::action *) USE_RESULT;
 
 /**
  * @enum arduinoModeEnum
@@ -233,5 +245,7 @@ enum class boatModeEnum {
 	ARMEDTEST	= 9,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
 	NONE		= 10		/**< State of the Beaglebone is currently unknown	*/
 };
+
+#undef USE_RESULT
 
 #endif /* STATESTRUCTTYPES_H */

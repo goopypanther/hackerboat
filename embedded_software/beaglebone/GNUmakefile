@@ -2,6 +2,7 @@
 
 # Tweakable / overridable compilation options (debugging and optimization)
 OPTS = -gdwarf-4 -g3 -Os -Wall
+# OPTS = -gdwarf-4 -g3 -Wall
 
 # Paths
 GTEST_DIR=/usr/src/gtest

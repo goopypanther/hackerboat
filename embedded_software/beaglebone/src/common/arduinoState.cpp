@@ -241,7 +241,7 @@ bool arduinoStateClass::setCommand (arduinoModeEnum c) {
 
 bool arduinoStateClass::writeBoatMode(boatModeEnum m) {
 	if (setBoatMode(m)) {
-		json_t *ret = writeArduino("writeBoatMode", boneStateClass::modeNames.get(m));
+		json_t *ret = writeArduino("f_writeBoatMode", boneStateClass::modeNames.get(m));
 		if (!ret)
 			return false;
 		json_decref(ret);
@@ -251,7 +251,7 @@ bool arduinoStateClass::writeBoatMode(boatModeEnum m) {
 
 bool arduinoStateClass::writeCommand(void) {
 	bool retVal = false;
-	json_t *ret = writeArduino("writeCommand", modeNames.get(command));
+	json_t *ret = writeArduino("f_writeCommand", modeNames.get(command));
 	if (ret) {
 		json_t *result = json_object_get(ret, "command");
 		if (result) {
@@ -281,7 +281,7 @@ int16_t arduinoStateClass::writeThrottle(int16_t t) {
 }
 
 int16_t arduinoStateClass::writeThrottle(void) {
-	json_t *ret = writeArduino("writeThrottle", std::to_string((int)throttle));
+	json_t *ret = writeArduino("f_writeThrottle", std::to_string((int)throttle));
 	if (ret) {
 		json_t *result = json_object_get(ret, "throttle");
 		if (result) {
@@ -293,7 +293,7 @@ int16_t arduinoStateClass::writeThrottle(void) {
 }
 
 double arduinoStateClass::writeHeadingTarget(void) {
-	json_t *ret = writeArduino("writeHeadingTarget", std::to_string(headingTarget));
+	json_t *ret = writeArduino("f_writeHeadingTarget", std::to_string(headingTarget));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
@@ -305,7 +305,7 @@ double arduinoStateClass::writeHeadingTarget(void) {
 }
 
 double arduinoStateClass::writeHeadingDelta(double delta) {
-	json_t *ret = writeArduino("writeHeadingDelta", std::to_string(delta));
+	json_t *ret = writeArduino("f_writeHeadingDelta", std::to_string(delta));
 	if (ret) {
 		json_t *result = json_object_get(ret, "headingTarget");
 		if (result) {
@@ -317,31 +317,48 @@ double arduinoStateClass::writeHeadingDelta(double delta) {
 }
 
 bool arduinoStateClass::heartbeat(void) {
-	writeArduino("boneHeartBeat", "");
+	writeArduino("f_boatHeartBeat", "");
 	return true;
 }
 
 bool arduinoStateClass::populate(void) {
 	bool result;
 	clock_gettime(CLOCK_REALTIME, &uTime);
-	json_t *in = writeArduino("dumpCoreState", "");
+	json_t *in = writeArduino("f_dumpCoreState", "");
 
-	json_t *other = writeArduino("dumpOrientationState", "");
+	json_t *other = writeArduino("f_dumpOrientationState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = writeArduino("dumpInputState", "");
+	other = writeArduino("f_dumpInputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = writeArduino("dumpRawInputState", "");
+	other = writeArduino("f_dumpRawInputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 
-	other = writeArduino("dumpOutputState", "");
+	other = writeArduino("f_dumpOutputState", "");
 	json_object_update(in, other);
 	json_decref(other);
 	
+	if (in) {
+		this->parse(in, false);
+		result = this->isValid();
+	} else {
+		result = false;
+		errLog->write("Arduino Serial", "Failed to parse incoming json from Arduino");
+	}
+
+	json_decref(in);
+	return result;
+}
+
+bool arduinoStateClass::corePopulate(void) {
+	bool result;
+	clock_gettime(CLOCK_REALTIME, &uTime);
+	json_t *in = writeArduino("f_dumpCoreState", "");
+
 	if (in) {
 		this->parse(in, false);
 		result = this->isValid();
@@ -370,12 +387,14 @@ bool arduinoStateClass::setBoatMode(boatModeEnum s) {
 
 json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	std::string ret = "";
-	ssize_t retSize = 0;
+	std::string sent = "";
 	json_t *result;
 	json_error_t err;
-	char buf[LOCAL_BUF_LEN];
+	//FILE * ser;
 	// BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
+	ssize_t bytesRead = 0;
+	char buf[LOCAL_BUF_LEN];
 	
 	// attempt to open the serial port
 	while (cnt < UART_TIMEOUT) {
@@ -388,33 +407,54 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	if (cnt >= UART_TIMEOUT) {
 		errLog->write("Arduino Serial", "Failed to open serial port for write");
 		return NULL;
-	}
+	// otherwise, make it a proper FILE structure
+	} //else {
+	//	ser = fdopen(ard_fd, "r+");
+	//}
 	
 	// build the query string and write to the serial port
 	std::ostringstream cmd;
-	cmd << func << "?params=" << params << "\r\n" << std::endl;
-	write(ard_fd, cmd.str().c_str(), cmd.str().length());
-	usleep(100);
+	if (params.size() > 0) {
+		cmd << func << "?params=" << params << "\r\n" << std::endl;
+	} else {
+		cmd << func << "\r\n" << std::endl;
+	}
+	sent = cmd.str();
+	errLog->write("Arduino Command", func);
+	errLog->write("Arduino Parameters", params);
+	if (write(ard_fd, sent.c_str(), sent.length()) < (int)sent.length()) {
+		errLog->write("Arduino Serial", "Write failed");
+		return NULL;
+	}
+	//usleep(10000);
 	
 	// read the response from the serial port
 	cnt = 0;
-	while (ret.find("\r\n\r\n") == std::string::npos) {
-		retSize += read(ard_fd, buf, LOCAL_BUF_LEN);
-		if (retSize > 0) {
-			ret += std::string(buf);
+	while (ret.find("\r") == std::string::npos) {
+		bytesRead = read(ard_fd, buf, LOCAL_BUF_LEN);
+		if (bytesRead > 0) {
+			ret += buf;
+			cnt = 0;
+			printf("(%zd)%s;", bytesRead, buf);
+			memset(buf, 0, LOCAL_BUF_LEN);
+		} else {
+			printf(".");
 		}
-		usleep(10);
-		cnt++;
-		if (cnt >= UART_TIMEOUT) {
+		if (cnt >= UART_READ_TIMEOUT) {
 			errLog->write("Arduino Serial", "Failed to read return value");
+			printf("Exiting with timeout\n");
 			closeArduinoSerial();
 			return NULL;
 		}
-		memset(buf, 0, LOCAL_BUF_LEN);
+		usleep(1000);
+		cnt++;
 	}
-	tcdrain(ard_fd);
+	printf("\n");
+	//tcflush(ard_fd, TCIOFLUSH);
+	//tcdrain(ard_fd);
 	
 	closeArduinoSerial();
+	errLog->write("Arduino Return Value", ret);
 	result = json_loads(ret.c_str(), JSON_DECODE_ANY, &err);
 	clock_gettime(CLOCK_REALTIME, &uTime);
 	return result;
@@ -424,16 +464,27 @@ int arduinoStateClass::openArduinoSerial (void) {
 	struct termios ard_attrib;
 	
 	ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
+	//ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NOCTTY);
 	if (ard_fd == -1) return ard_fd;	
 	if (tcgetattr(ard_fd, &ard_attrib) < 0) {
+		errLog->write("Arduino Serial", "Unable to get serial properties");
 		closeArduinoSerial();
 		return ard_fd;
 	}
-	cfsetospeed(&ard_attrib,ARDUINO_BPS);       
-    cfsetispeed(&ard_attrib,ARDUINO_BPS); 
-	ard_attrib.c_cflag = CS8|CREAD|CLOCAL;  
+	cfsetspeed(&ard_attrib, B115200);
+	//cfsetspeed(&ard_attrib, B230400);
+	cfmakeraw(&ard_attrib);
+	ard_attrib.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+	ard_attrib.c_cflag &= ~(PARENB | CSTOPB | CSIZE);		// no parity, one stop bit
+	ard_attrib.c_cflag |= (CLOCAL | CREAD | CS8);			// ignore modem status lines, enable receiver, 8 bits per byte
+	ard_attrib.c_iflag &= ~(IXON | IXOFF | IXANY);			// turn off all flow control
+	ard_attrib.c_iflag &= ~(ICRNL);							// turn off line ending translation					
+	ard_attrib.c_oflag &= ~(OPOST);							// turn off post processing of output
+	ard_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
+	ard_attrib.c_cc[VTIME] = 0;
 	if (tcsetattr(ard_fd, TCSANOW, &ard_attrib) < 0) {
 		closeArduinoSerial();
+		errLog->write("Arduino Serial", "Unable to set serial properties");
 		return ard_fd;
 	}
 	
@@ -441,6 +492,7 @@ int arduinoStateClass::openArduinoSerial (void) {
 }
 
 void arduinoStateClass::closeArduinoSerial (void) {
+	tcflush(ard_fd, TCIOFLUSH);
 	close(ard_fd);
 	ard_fd = -1;
 }
