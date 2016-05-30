@@ -12,10 +12,13 @@ void setup() {
 }
 
 void loop() {
-  //Serial.print(".");
+  static long last = millis();
   static arduinoMode thisMode = ARD_NONE;
   static arduinoMode lastMode = ARD_NONE;
-  input(&restInput, &boat);
+  while (millis() < (last + 100)) {
+   input(&restInput, &boat);
+  }
+  last = millis();
   if (thisMode != lastMode) {
     Serial.print(F("State change, origin state: "));
     Serial.print(lastMode); Serial.print(F(" current state: "));
