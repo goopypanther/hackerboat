@@ -35,12 +35,12 @@ do
 	echo -n "exec "
 	case "$daemon" in
 	    *.fcgi)
-		echo -n "spawn-fcgi -n -M 0666 -s '"`realpath "$2/$daemon/fcgi.s"`"' -- "
+		echo -n 'spawn-fcgi -n -M 0666 -s `realpath "$PWD"`/fcgi.s -- '
 		;;
 	    *)
 		;;
 	esac
-	realpath --no-symlinks "$1/$daemon" || exit 1
+	realpath  "$1/$daemon" || exit 1
     ) > "$2/$daemon/run"
     chmod +x "$2/$daemon/run" || exit 1
     rm -f "$2/$daemon/$daemon"
