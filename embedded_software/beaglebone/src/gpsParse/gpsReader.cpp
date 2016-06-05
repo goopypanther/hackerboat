@@ -37,7 +37,7 @@ int main (void) {
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	
 	// attempt to open the serial port
-	while (!port.open(ReadOnly | NonBlock)) {
+	while (!port.open(ReadOnly)) {
 		logError::instance()->write("GNSS", "Failed to open serial port");
 		usleep(500);
 	}
@@ -48,7 +48,7 @@ int main (void) {
 		size_t startPos = input.find_first_of("$", 0);
 		if (startPos != std::string::npos) {
 			// find the end of the sentence
-			size_t endPos = input.find_first_of("\n\r", 0);
+			size_t endPos = input.find_first_of("\n\r", startPos);
 			if (endPos != std::string::npos) {
 				// get the NMEA sentence as a substring
 				std::string sentence = input.substr(startPos, (endPos - startPos));
