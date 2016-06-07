@@ -74,7 +74,6 @@ void hackerboatStateStorage::prepare(shared_stmt& sth, const std::string& sql)
 
 void hackerboatStateStorage::logError(void)
 {
-#warning Wim - implement me
 	warnx("sqlite error (%p, %s): %s",
 	      dbh.get(), tableName.c_str(),
 	      sqlite3_errmsg(dbh.get()));
@@ -217,7 +216,7 @@ shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 
 	std::string path;
 
-	if (filename) {
+	if (filename && (filename[0] != '/')) {
 		const char *db_dir = ::getenv("DB_DIRECTORY");
 		if (!db_dir)
 			db_dir = DB_DIRECTORY;
@@ -240,7 +239,9 @@ shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 		      p? sqlite3_errmsg(p) : ::strerror(errno));
 		sqlite3_close(p /* NULL OK */);
 	} else {
-		// sqlite3_trace(p, log_trace, NULL);  // Uncomment to trace SQL to std::cerr
+		if (::getenv("SQL_TRACE") != NULL) {
+			sqlite3_trace(p, log_trace, NULL);  // Trace SQL to std::cerr
+		}
 		dbh.reset(p, dbh_deleter());
 		open_files.emplace(name, dbh);
 	}
