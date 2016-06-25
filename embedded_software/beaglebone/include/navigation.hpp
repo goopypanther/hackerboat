@@ -60,6 +60,7 @@ class navClass : public hackerboatStateClassStorable {
 		bool calc (double maxStrength);			/**< Calculate the course to the next waypoint and sum the navInfluences vectors */
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
 		bool isValid(void) const;
+		bool initRecord(void);
 		
 		locationClass	current;		/**< current location */
 		sequence		targetWaypoint;	/**< sequence number of the target waypoint */

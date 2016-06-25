@@ -22,6 +22,13 @@
 #include "sqliteStorage.hpp"
 
 gpsFixClass::gpsFixClass() {
+	clock_gettime(CLOCK_REALTIME, &(myFix.uTime));
+	myFix.gpsTime = myFix.uTime;
+	myFix.latitude = 47.560644;			// latitude of HBL
+	myFix.longtitude = -122.338816;		// longitude of HBL
+	myFix.gpsHeading = 0;
+	myFix.gpsSpeed = 0;
+	myFix.fixValid = false;
 }
 
 json_t *gpsFixClass::pack (bool seq) const {

@@ -37,14 +37,19 @@ using namespace BlackLib;
 int initNav(navigatorBase *nav);
 
 int main (void) {
-	BlackGPIO clockPin(gpioName::GPIO_39, direction::output, workingMode::FastMode);
 	navigatorBase *navInf;
+	navClass nav;
 	timespec startTime, endTime, waitTime, frametime, framerun;
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
-	int navCount = initNav(navInf);					// initialize the list of nav sources
-	clockPin.setValue(digitalValue::low);
 	
+	// initialize nav object & write some dummy stuff to the database if we fail
+	int navCount = initNav(navInf);				// initialize the list of nav sources
+	if (!nav.getLastRecord()) {
+		
+	}
+	
+
 	// initialize the frametime timespec
 	frametime.tv_sec = 0;
 	frametime.tv_nsec = FRAME_LEN_NS;
@@ -52,11 +57,10 @@ int main (void) {
 	
 	for (;;) {
 		clock_gettime(CLOCK_REALTIME, &startTime);
-		clockPin.setValue(digitalValue::high);
-		navClass nav;
+		
 		boneStateClass boat;
-		boat.getLastRecord();
-		if (nav.getLastRecord()) {
+		
+		if (nav.getLastRecord() && boat.getLastRecord()) {
 			if (nav.isValid() && boat.isValid()) {
 				nav.clearVectors();
 				for (uint16_t i = 0; i < navCount; i++) {
@@ -73,7 +77,6 @@ int main (void) {
 			logError::instance()->write("Navigation", "Failed to get last nav record");
 		}
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
-		clockPin.setValue(digitalValue::low);								// mark the end of the frame for debug
 		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
 		if (subtract_timespec(&frametime, &framerun, &waitTime)) {	// this returns false if the running frame time is longer than the specified frame time
 			nanosleep(&waitTime, &waitTime);
