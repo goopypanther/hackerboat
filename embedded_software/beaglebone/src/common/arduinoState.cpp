@@ -28,8 +28,9 @@
 #include "json_utilities.hpp"
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
-//#include <BlackUART/BlackUART.h>
+#include <sys/ioctl.h>
+#include <asm/termbits.h>
+//#include <asm/termios.h>
 
 static logError *errLog = logError::instance();
 
@@ -461,19 +462,23 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 }
 	
 int arduinoStateClass::openArduinoSerial (void) {
-	struct termios ard_attrib;
+	struct termios2 ard_attrib;
 	
 	ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
 	//ard_fd = open(ARDUINO_REST_TTY, O_RDWR | O_NOCTTY);
 	if (ard_fd == -1) return ard_fd;	
-	if (tcgetattr(ard_fd, &ard_attrib) < 0) {
+	if (ioctl(ard_fd, TCGETS2, &ard_attrib) < 0) {
 		errLog->write("Arduino Serial", "Unable to get serial properties");
 		closeArduinoSerial();
 		return ard_fd;
 	}
-	cfsetspeed(&ard_attrib, B115200);
+	//cfsetspeed(&ard_attrib, B115200);
 	//cfsetspeed(&ard_attrib, B230400);
-	cfmakeraw(&ard_attrib);
+	//cfmakeraw(&ard_attrib);
+	ard_attrib.c_cflag &= ~CBAUD;
+	ard_attrib.c_cflag |= BOTHER;
+	ard_attrib.c_ispeed = 1000000;
+	ard_attrib.c_ospeed = 1000000;
 	ard_attrib.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
 	ard_attrib.c_cflag &= ~(PARENB | CSTOPB | CSIZE);		// no parity, one stop bit
 	ard_attrib.c_cflag |= (CLOCAL | CREAD | CS8);			// ignore modem status lines, enable receiver, 8 bits per byte
@@ -482,7 +487,7 @@ int arduinoStateClass::openArduinoSerial (void) {
 	ard_attrib.c_oflag &= ~(OPOST);							// turn off post processing of output
 	ard_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
 	ard_attrib.c_cc[VTIME] = 0;
-	if (tcsetattr(ard_fd, TCSANOW, &ard_attrib) < 0) {
+	if (ioctl(ard_fd, TCSETS2, &ard_attrib) < 0) {
 		closeArduinoSerial();
 		errLog->write("Arduino Serial", "Unable to set serial properties");
 		return ard_fd;
@@ -492,7 +497,7 @@ int arduinoStateClass::openArduinoSerial (void) {
 }
 
 void arduinoStateClass::closeArduinoSerial (void) {
-	tcflush(ard_fd, TCIOFLUSH);
+	//tcflush(ard_fd, TCIOFLUSH);
 	close(ard_fd);
 	ard_fd = -1;
 }

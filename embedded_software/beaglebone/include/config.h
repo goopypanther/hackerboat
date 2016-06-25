@@ -11,8 +11,8 @@
 #define HASHSEED			0xdeadbeef
 #define GNSS_TTY			"/dev/ttyS4"
 #define GNSS_UART			UART4
-#define GNSS_BPS			B57600
-#define GNSS_BAUD			Baud57600
+#define GNSS_BPS			B9600
+#define GNSS_BAUD			Baud9600
 #define GNSS_TIMEOUT		(180)
 #define ARDUINO_TIMEOUT		(60)
 #define ARDUINO_REST_TTY	"/dev/ttyS2"		
