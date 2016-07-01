@@ -23,6 +23,7 @@ BEGIN {
 	lonOut = (lonDeg + lonDec);
 	if (lonSign == "W") {lonOut = -lonOut;}
 	speed = $8;
+	if (speed > maxSpeed) maxSpeed = speed;
 	course = $9;
 	DateRaw = $10;
 	DateDay = int(DateRaw/10000);
@@ -30,4 +31,8 @@ BEGIN {
 	DateYear = 2000 + int(DateRaw - ((DateDay*10000) + (DateMon*100)));
 	printf "%d/%d/%d,%d:%d:%d,", DateMon, DateDay, DateYear, UTChrs, UTCmins, UTCsec;
 	printf "%8.5f,%8.5f,%4.2f,%3.2f\n", latOut, lonOut, course, speed;
+}
+
+END {
+	printf "Max speed is %3.2f knots\n", maxSpeed;
 }
