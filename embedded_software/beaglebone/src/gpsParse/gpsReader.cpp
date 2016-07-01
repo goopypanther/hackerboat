@@ -36,11 +36,6 @@ int main (void) {
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	
-	// check and see if there are any records in the database -- if not, create a dummy
-	if (!myFix.getLastRecord()) {
-		myFix.appendRecord();	// puts the defaults in if there is nothing in the DB
-	}
-	
 	// attempt to open the serial port
 	while (!port.open(ReadOnly)) {
 		logError::instance()->write("GNSS", "Failed to open serial port");
@@ -61,8 +56,9 @@ int main (void) {
 				// drop the sentence from the input buffer
 				input = input.substr(endPos);
 				if (minmea_check(sentence.c_str(), true)) {
-					if (myFix.getLastRecord() && myFix.readSentence(sentence)) {
-						myFix.appendRecord();
+					myFix.getLastRecord();					// get the last record -- if there's nothing in the DB, this will fail silently, leaving a blank record to populate
+					if (myFix.readSentence(sentence)) {		// parse the sentence; if the result is valid...
+						myFix.appendRecord();				// write it to the database
 					}
 				} else {
 					logError::instance()->write("GNSS", "Received bad NMEA sentence");
