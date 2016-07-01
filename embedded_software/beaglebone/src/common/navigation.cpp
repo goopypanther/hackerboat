@@ -275,3 +275,6 @@ bool navClass::isValid (void) const {
 
 	return true;
 }
+
+bool navClass::initRecord(void) {
+}

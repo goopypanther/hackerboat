@@ -36,6 +36,11 @@ int main (void) {
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
 	
+	// check and see if there are any records in the database -- if not, create a dummy
+	if (!myFix.getLastRecord()) {
+		myFix.appendRecord();	// puts the defaults in if there is nothing in the DB
+	}
+	
 	// attempt to open the serial port
 	while (!port.open(ReadOnly)) {
 		logError::instance()->write("GNSS", "Failed to open serial port");
@@ -43,6 +48,7 @@ int main (void) {
 	}
 	
 	for (;;) {
+		
 		input += port.read();
 		// find the start of an NMEA sentences
 		size_t startPos = input.find_first_of("$", 0);

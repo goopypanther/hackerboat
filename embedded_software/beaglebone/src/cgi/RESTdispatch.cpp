@@ -93,8 +93,9 @@ json_t* allDispatchClass::root (std::vector<std::string> tokens, uint32_t curren
 	if (count >= 0) {
 		json_t* out = json_array();
 		for (int i = 0; i < count; i++) {
-			_target->getRecord(i);
-			json_array_append_new(out, _target->pack());
+			if (_target->getRecord(i) {
+				json_array_append_new(out, _target->pack());
+			}
 		}
 		return out;
 	} 
