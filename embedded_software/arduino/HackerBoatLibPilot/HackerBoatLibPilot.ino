@@ -9,6 +9,8 @@ void setup() {
   initIO();
   initREST(&restInput, &boat);
   initBoat(&boat);
+  Serial.print(F("Time,Mode,Heading Target,Heading,Throttle,Rudder (Raw),"));
+  Serial.println(F("Internal Voltage (Raw),Motor Voltage (Raw), Motor Current (Raw)"));
 }
 
 void loop() {
@@ -20,9 +22,9 @@ void loop() {
   }
   last = millis();
   if (thisMode != lastMode) {
-    Serial.print(F("State change, origin state: "));
-    Serial.print(lastMode); Serial.print(F(" current state: "));
-    Serial.println(lastMode);  
+    //Serial.print(F("State change, origin state: "));
+    //Serial.print(lastMode); Serial.print(F(" current state: "));
+    //Serial.println(lastMode);  
   }
   switch(boat.mode) {
     case ARD_POWERUP:
