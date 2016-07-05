@@ -10,8 +10,6 @@
  ******************************************************************************/
  
 #include "RESTdispatch.hpp"
-#include <BlackUART/BlackUART.h>
-#include <BlackGPIO/BlackGPIO.h>
 #include <unistd.h>
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
@@ -27,7 +25,7 @@
 #include <vector>
 #include <map>
 
-using namespace BlackLib;
+//using namespace BlackLib;
 
 static logError *errLog = logError::instance();
 
@@ -508,17 +506,10 @@ bool arduinoStateRESTClass::setTarget(arduinoStateClass* target) {
 }
 
 json_t* resetArduinoRest::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
-	BlackGPIO	ardResetPin(ARDUINO_RESET_PIN, output, FastMode);
-	if (ardResetPin.setValue(low)) {
-		usleep(100000);	// sleep for 100 milliseconds
-		if (ardResetPin.setValue(high)) {
-			return json_pack("{sb}", "success", true);
-		} else {
-			return json_pack("{sb}", "success", false);
-		}
-	} else {
-		return json_pack("{sb}", "success", false);
-	}
+	system("config-pin P9.15 low");		// set the Arduino reset pin low
+	usleep(100000);						// sleep for 100 milliseconds
+	system("config pin P9.15 high");	// set the Arduino reset pin high
+	return json_pack("{sb}", "success", true);
 }
 
 json_t* arduinoRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {

@@ -30,7 +30,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <asm/termbits.h>
-//#include <asm/termios.h>
 
 static logError *errLog = logError::instance();
 
