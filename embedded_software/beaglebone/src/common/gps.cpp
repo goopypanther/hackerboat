@@ -16,7 +16,10 @@
 #include "minmea.h"
 
 #include <string>
-
+#include <errno.h>
+#include <fcntl.h> 
+#include <termios.h>
+#include <unistd.h>
 #include "gps.hpp"
 #include "config.h"
 #include "sqliteStorage.hpp"
@@ -217,4 +220,41 @@ bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 		this->latitude = minmea_tofloat(&(frame->latitude));
 		return true;
 	} else return false;
+}
+
+int openGPSserial (void) {
+	struct termios gps_attrib;
+	
+	gps_fd = open(GNSS_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
+	if (gps_fd == -1) return gps_fd;	
+	if (ioctl(gps_fd, TCGETS2, &gps_attrib) < 0) {
+		errLog->write("GNSS", "Unable to get serial properties");
+		closeGPSserial();
+		return gps_fd;
+	}
+	cfsetospeed(&gps_attrib, GNSS_BPS);
+	cfsetospeed(&gps_attrib, GNSS_BPS);
+	
+	gps_attrib.c_cflag = (gps_attrib.c_cflag & ~CSIZE) | CS8;
+	gps_attrib.c_cflag |= (CLOCAL | CREAD);
+	gps_attrib.c_cflag &= ~(PARENB | PARODD);
+	gps_attrib.c_cflag |= parity;
+	gps_attrib.c_cflag &= ~CSTOPB;
+	gps_attrib.c_cflag &= ~CRTSCTS;
+	gps_attrib.c_lflag = 0;
+	gps_attrib.c_oflag = 0;
+	gps_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
+	gps_attrib.c_cc[VTIME] = 1;
+	
+	if (tcsetattr (gps_fd, TCSANOW, &gps_attrib) != 0) {
+		closeGPSserial();
+        errLog->write("GNSS", "Unable to get configure serial");
+    }
+	
+	return gps_fd;
+}
+
+void closeGPSserial (void) {
+	close(gps_fd);
+	ard_fd = -1;
 }

@@ -33,6 +33,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		gpsFixClass (std::string sentence);			/**< Create a GPS fix from an incoming sentence string */
 		
 		bool readSentence (std::string sentence);	/**< Populate class from incoming sentence string */
+		int getFD (void) {return gps_fd;};
 		
 		timespec	uTime;					/**< Beaglebone time of last fix */
 		timespec	gpsTime;				/**< GPS time of last fix */
@@ -70,6 +71,8 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		bool packGSA (struct minmea_sentence_gsa *frame);
 		bool packGSV (struct minmea_sentence_gsv *frame);
 		bool packGGA (struct minmea_sentence_gga *frame);
+		int openGPSserial (void);
+		void closeGPSserial (void);
 		void clearStrings (void) {
 			GGA.clear();
 			GSA.clear();

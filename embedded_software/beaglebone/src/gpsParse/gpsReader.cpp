@@ -25,26 +25,28 @@
 #include "boneState.hpp"
 #include "sqliteStorage.hpp"
 #include <minmea.h>
-#include <BlackUART/BlackUART.h>
-
-using namespace BlackLib;
 
 int main (void) {
 	gpsFixClass myFix;
-	BlackUART port(GNSS_UART, GNSS_BAUD, ParityNo, StopOne, Char8);
 	std::string input;
+	uint32_t cnt = 0;
+	char buf[1024];
 	
-	logError::instance()->open(NAV_LOGFILE);	// open up the logfile
+	logError::instance()->open(NAV_LOGFILE);	// open up the error logfile
 	
 	// attempt to open the serial port
-	while (!port.open(ReadOnly)) {
+	while (1) {
+		if (myFix.openGPSserial() != -1) break;	// if the serial port opened, leave. 
 		logError::instance()->write("GNSS", "Failed to open serial port");
 		usleep(500);
+		cnt++;
 	}
 	
 	for (;;) {
 		
-		input += port.read();
+		memset (&buf, '\0', sizeof buf);
+		ssize_t n = read(myFix.getFD(), buf, sizeof(buf));
+		input.apped(buf, n);
 		// find the start of an NMEA sentences
 		size_t startPos = input.find_first_of("$", 0);
 		if (startPos != std::string::npos) {
@@ -68,5 +70,5 @@ int main (void) {
 		} else input.clear();
 		usleep(10000);
 	}
-	port.close();	
+	myFix.closeGPSserial()	
 }
