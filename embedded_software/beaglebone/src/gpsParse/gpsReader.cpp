@@ -17,6 +17,8 @@
 #include <jansson.h>
 #include <time.h>
 #include <limits>
+#include <iostream>
+#include <fstream>
 #include "stateStructTypes.hpp"
 #include "config.h"
 #include "logs.hpp"
@@ -26,11 +28,14 @@
 #include "sqliteStorage.hpp"
 #include <minmea.h>
 
+#define GNSS_BUF_SIZE	(1024)
+
 int main (void) {
 	gpsFixClass myFix;
 	std::string input;
+	std::ofstream gpsLog;
 	uint32_t cnt = 0;
-	char buf[1024];
+	char buf[GNSS_BUF_SIZE] = {'/0'};
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the error logfile
 	
@@ -42,9 +47,17 @@ int main (void) {
 		cnt++;
 	}
 	
+	// create the GPS log file
+	clock_gettime(CLOCK_REALTIME, &(myFix.uTime));	// get the start time of the GPS log
+	strftime(buf, GNSS_BUF_SIZE, "gpsLog%Y%b%d-%H:%M.log", gmtime(&(myFix.uTime.tv_sec))); 
+	gpsLog.open(buf, std::ofstream::out | std::ofstream::app);
+	if (!gpsLog.is_open()) {
+		logError::instance()->write("GNSS", "Failed to create GPS log file");
+	}
+	
 	for (;;) {
 		
-		memset (&buf, '\0', sizeof buf);
+		memset (&buf, '\0', sizeof(buf));
 		ssize_t n = read(myFix.getFD(), buf, sizeof(buf));
 		input.apped(buf, n);
 		// find the start of an NMEA sentences
@@ -55,6 +68,8 @@ int main (void) {
 			if (endPos != std::string::npos) {
 				// get the NMEA sentence as a substring
 				std::string sentence = input.substr(startPos, (endPos - startPos));
+				// write the string to the GPS log
+				gpsLog << sentence;
 				// drop the sentence from the input buffer
 				input = input.substr(endPos);
 				if (minmea_check(sentence.c_str(), true)) {
