@@ -25,13 +25,13 @@
 #include "sqliteStorage.hpp"
 
 gpsFixClass::gpsFixClass() {
-	clock_gettime(CLOCK_REALTIME, &(myFix.uTime));
-	myFix.gpsTime = myFix.uTime;
-	myFix.latitude = 47.560644;			// latitude of HBL
-	myFix.longtitude = -122.338816;		// longitude of HBL
-	myFix.gpsHeading = 0;
-	myFix.gpsSpeed = 0;
-	myFix.fixValid = false;
+	clock_gettime(CLOCK_REALTIME, &(uTime));
+	gpsTime = uTime;
+	latitude = 47.560644;			// latitude of HBL
+	longitude = -122.338816;		// longitude of HBL
+	gpsHeading = 0;
+	gpsSpeed = 0;
+	fixValid = false;
 }
 
 json_t *gpsFixClass::pack (bool seq) const {
@@ -222,13 +222,12 @@ bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 	} else return false;
 }
 
-int openGPSserial (void) {
+int gpsFixClass::openGPSserial (void) {
 	struct termios gps_attrib;
 	
 	gps_fd = open(GNSS_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
 	if (gps_fd == -1) return gps_fd;	
-	if (ioctl(gps_fd, TCGETS2, &gps_attrib) < 0) {
-		errLog->write("GNSS", "Unable to get serial properties");
+	if (tcgetattr(gps_fd, &gps_attrib) < 0) {
 		closeGPSserial();
 		return gps_fd;
 	}
@@ -238,7 +237,6 @@ int openGPSserial (void) {
 	gps_attrib.c_cflag = (gps_attrib.c_cflag & ~CSIZE) | CS8;
 	gps_attrib.c_cflag |= (CLOCAL | CREAD);
 	gps_attrib.c_cflag &= ~(PARENB | PARODD);
-	gps_attrib.c_cflag |= parity;
 	gps_attrib.c_cflag &= ~CSTOPB;
 	gps_attrib.c_cflag &= ~CRTSCTS;
 	gps_attrib.c_lflag = 0;
@@ -246,15 +244,14 @@ int openGPSserial (void) {
 	gps_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
 	gps_attrib.c_cc[VTIME] = 1;
 	
-	if (tcsetattr (gps_fd, TCSANOW, &gps_attrib) != 0) {
+	if (tcsetattr(gps_fd, TCSANOW, &gps_attrib) != 0) {
 		closeGPSserial();
-        errLog->write("GNSS", "Unable to get configure serial");
     }
 	
 	return gps_fd;
 }
 
-void closeGPSserial (void) {
+void gpsFixClass::closeGPSserial (void) {
 	close(gps_fd);
-	ard_fd = -1;
+	gps_fd = -1;
 }

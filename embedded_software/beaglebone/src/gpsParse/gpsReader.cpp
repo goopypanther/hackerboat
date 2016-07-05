@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <jansson.h>
+#include <unistd.h>
 #include <time.h>
 #include <limits>
 #include <iostream>
@@ -35,7 +36,7 @@ int main (void) {
 	std::string input;
 	std::ofstream gpsLog;
 	uint32_t cnt = 0;
-	char buf[GNSS_BUF_SIZE] = {'/0'};
+	char buf[GNSS_BUF_SIZE] = {'\0'};
 	
 	logError::instance()->open(NAV_LOGFILE);	// open up the error logfile
 	
@@ -59,7 +60,7 @@ int main (void) {
 		
 		memset (&buf, '\0', sizeof(buf));
 		ssize_t n = read(myFix.getFD(), buf, sizeof(buf));
-		input.apped(buf, n);
+		input.append(buf, n);
 		// find the start of an NMEA sentences
 		size_t startPos = input.find_first_of("$", 0);
 		if (startPos != std::string::npos) {
@@ -85,5 +86,5 @@ int main (void) {
 		} else input.clear();
 		usleep(10000);
 	}
-	myFix.closeGPSserial()	
+	myFix.closeGPSserial();	
 }

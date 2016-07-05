@@ -25,8 +25,6 @@
 #include <vector>
 #include <map>
 
-//using namespace BlackLib;
-
 static logError *errLog = logError::instance();
 
 json_t* RESTdispatchClass::dispatch (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
@@ -91,7 +89,7 @@ json_t* allDispatchClass::root (std::vector<std::string> tokens, uint32_t curren
 	if (count >= 0) {
 		json_t* out = json_array();
 		for (int i = 0; i < count; i++) {
-			if (_target->getRecord(i) {
+			if (_target->getRecord(i)) {
 				json_array_append_new(out, _target->pack());
 			}
 		}
