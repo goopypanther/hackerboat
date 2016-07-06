@@ -51,73 +51,59 @@ const enumerationNameTable<arduinoModeEnum> arduinoStateClass::modeNames = {
 
 json_t *arduinoStateClass::pack (bool seq) const {
 	json_t *output = json_object();
+	int packResult = 0;
 	if (seq) json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
-	if (json_object_add(output, "ooooioo ffff oo IIII o fiiifi fff fff fff fff o oooooo o IIo",
-			    "popStatus", json(popStatus),
-			    "uTime", json(uTime),
-			    "mode", json(mode),
-			    "command", json(command),
-			    "throttle", (int)throttle,
-			    "boat", json(boat),
-			    "orientation", orientation.pack(),
-
-			    "headingTarget", double(headingTarget),
-			    "internalVoltage", double(internalVoltage),
-			    "batteryVoltage", double(batteryVoltage),
-			    "motorVoltage", double(motorVoltage),
-
-			    "enbButton", json_boolean(enbButton),
-			    "stopButton", json_boolean(stopButton),
-
-			    "timeSinceLastPacket", json_int_t(timeSinceLastPacket),
-			    "timeOfLastPacket", json_int_t(timeOfLastPacket),
-			    "timeOfLastBoneHB", json_int_t(timeOfLastBoneHB),
-			    "timeOfLastShoreHB", json_int_t(timeOfLastShoreHB),
-
-			    "faultString", json(faultString),
-
-			    "rudder", double(rudder),
-			    "rudderRaw", int(rudderRaw),
-			    "internalVoltageRaw", int(internalVoltageRaw),
-			    "motorVoltageRaw", int(motorVoltageRaw),
-			    "motorCurrent", double(motorCurrent),
-			    "motorCurrentRaw", int(motorCurrentRaw),
-
-			    "Kp", double(Kp),
-			    "Ki", double(Ki),
-			    "Kd", double(Kd),
-
-			    "magX", double(magX),
-			    "magY", double(magY),
-			    "magZ", double(magZ),
-
-			    "accX", double(accX),
-			    "accY", double(accY),
-			    "accZ", double(accZ),
-
-			    "gyroX", double(gyroX),
-			    "gyroY", double(gyroY),
-			    "gyroZ", double(gyroZ),
-
-			    "horn", json(horn),
-
-			    "motorDirRly", json(motorDirRly),
-			    "motorWhtRly", json(motorWhtRly),
-			    "motorYlwRly", json(motorYlwRly),
-			    "motorRedRly", json(motorRedRly),
-			    "motorRedWhtRly", json(motorRedWhtRly),
-			    "motorRedYlwRly", json(motorRedYlwRly),
-
-			    "servoPower", json(servoPower),
-
-			    "startStopTime", json_int_t(startStopTime),
-			    "startModeTime", json_int_t(startModeTime),
-			    "originMode", json(originMode)) != 0) {
+	packResult += json_object_set_new(output, "popStatus", json(popStatus));
+	packResult += json_object_set_new(output, "uTime", json(uTime));
+	packResult += json_object_set_new(output, "mode", json(mode));
+	packResult += json_object_set_new(output, "command", json(command));
+	packResult += json_object_set_new(output, "throttle", json_integer((int)throttle));
+	packResult += json_object_set_new(output, "boat", json(boat));
+	packResult += json_object_set_new(output, "orientation", orientation.pack());
+	packResult += json_object_set_new(output, "headingTarget", json_real(headingTarget));
+	packResult += json_object_set_new(output, "internalVoltage", json_real(internalVoltage));
+	packResult += json_object_set_new(output, "batteryVoltage", json_real(batteryVoltage));
+	packResult += json_object_set_new(output, "motorVoltage", json_real(motorVoltage));
+	packResult += json_object_set_new(output, "enbButton", json_boolean(enbButton));
+	packResult += json_object_set_new(output, "stopButton", json_boolean(stopButton));
+	packResult += json_object_set_new(output, "timeSinceLastPacket", json_integer(timeSinceLastPacket));
+	packResult += json_object_set_new(output, "timeOfLastPacket", json_integer(timeOfLastPacket));
+	packResult += json_object_set_new(output, "timeOfLastBoneHB", json_integer(timeOfLastBoneHB));
+	packResult += json_object_set_new(output, "timeOfLastShoreHB", json_integer(timeOfLastShoreHB));
+	packResult += json_object_set_new(output, "faultString", json(faultString));
+	packResult += json_object_set_new(output, "rudder", json_real(rudder));
+	packResult += json_object_set_new(output, "rudderRaw", json_integer(rudderRaw));
+	packResult += json_object_set_new(output, "internalVoltageRaw", json_integer(internalVoltageRaw));
+	packResult += json_object_set_new(output, "motorVoltageRaw", json_integer(motorVoltageRaw));
+	packResult += json_object_set_new(output, "motorCurrent", json_real(motorCurrent));
+	packResult += json_object_set_new(output, "motorCurrentRaw", json_integer(motorCurrentRaw));
+	packResult += json_object_set_new(output, "Kp", json_real(Kp));
+	packResult += json_object_set_new(output, "Ki", json_real(Ki));
+	packResult += json_object_set_new(output, "Kd", json_real(Kd));
+	packResult += json_object_set_new(output, "magX", json_real(magX));
+	packResult += json_object_set_new(output, "magY", json_real(magY));
+	packResult += json_object_set_new(output, "magZ", json_real(magZ));
+	packResult += json_object_set_new(output, "accX", json_real(accX));
+	packResult += json_object_set_new(output, "accY", json_real(accY));
+	packResult += json_object_set_new(output, "accZ", json_real(accZ));
+	packResult += json_object_set_new(output, "gyroX", json_real(gyroX));
+	packResult += json_object_set_new(output, "gyroY", json_real(gyroY));
+	packResult += json_object_set_new(output, "gyroZ", json_real(gyroZ));
+	packResult += json_object_set_new(output, "horn", json(horn));
+	packResult += json_object_set_new(output, "motorDirRly", json(motorDirRly));
+	packResult += json_object_set_new(output, "motorWhtRly", json(motorWhtRly));
+	packResult += json_object_set_new(output, "motorYlwRly", json(motorYlwRly));
+	packResult += json_object_set_new(output, "motorRedRly", json(motorRedRly));
+	packResult += json_object_set_new(output, "motorRedWhtRly", json(motorRedWhtRly));
+	packResult += json_object_set_new(output, "motorRedYlwRly", json(motorRedYlwRly));
+	packResult += json_object_set_new(output, "servoPower", json(servoPower));
+	packResult += json_object_set_new(output, "startStopTime", json_integer(startStopTime));
+	packResult += json_object_set_new(output, "startModeTime", json_integer(startModeTime));
+	packResult += json_object_set_new(output, "originMode", json(originMode));
+	if (packResult != 0) {
 		json_decref(output);
 		return NULL;
-	}
-
-	return output;
+	} else return output;
 }
 
 bool arduinoStateClass::parse (json_t *input, bool seq = true) {

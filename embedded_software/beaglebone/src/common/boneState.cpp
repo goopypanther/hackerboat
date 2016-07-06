@@ -52,11 +52,11 @@ json_t *boneStateClass::pack (bool seq) const {
 			   "ardMode", json(ardMode),
 			   "faultString", json(faultString),
 			   "gps", gps.pack(seq),
-			   "waypointNext", waypointNext,
-			   "waypointStrength", waypointStrength,
-			   "waypointAccuracy", waypointAccuracy,
-			   "waypointStrengthMax", waypointStrengthMax,
-			   "autonomous", autonomous,
+			   "waypointNext", int(waypointNext),
+			   "waypointStrength", double(waypointStrength),
+			   "waypointAccuracy", double(waypointAccuracy),
+			   "waypointStrengthMax", double(waypointStrengthMax),
+			   "autonomous", json(autonomous),
 			   "launchPoint", launchPoint.pack());
 	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
 	return output;
