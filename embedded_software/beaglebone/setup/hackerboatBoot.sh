@@ -7,6 +7,7 @@
 
 config-pin P9.11 uart
 config-pin P9.13 uart
+stty -F /dev/ttyS4 9600 -echo
 
 # enable UART1 (Log)
 

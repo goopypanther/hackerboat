@@ -101,7 +101,7 @@ bool gpsFixClass::isValid (void) const {
 	if ((gpsHeading < minHeading) || (gpsHeading > maxHeading)) return false;
 	if ((longitude < minLongitude) || (longitude > maxLongitude)) return false;
 	if ((latitude < minLatitude) || (latitude > maxLatitude)) return false;
-	return fixValid;
+	return true;
 }
 
 hackerboatStateStorage &gpsFixClass::storage() {
@@ -196,12 +196,12 @@ bool gpsFixClass::readSentence (std::string sentence) {
 
 bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
 	if (frame->valid) {
-		this->fixValid = true;
 		this->longitude = minmea_tofloat(&(frame->longitude));
 		this->latitude = minmea_tofloat(&(frame->latitude));
 		this->gpsHeading = minmea_tofloat(&(frame->course));
 		this->gpsSpeed = minmea_tofloat(&(frame->speed));
 		minmea_gettime(&gpsTime, &(frame->date), &(frame->time));
+		this->fixValid = this->isValid();
 	} return false;
 }
 
@@ -215,9 +215,9 @@ bool gpsFixClass::packGSV (struct minmea_sentence_gsv *frame) {
 
 bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
-		this->fixValid = true;
 		this->longitude = minmea_tofloat(&(frame->longitude));
 		this->latitude = minmea_tofloat(&(frame->latitude));
+		this->fixValid = this->isValid();
 		return true;
 	} else return false;
 }
@@ -233,16 +233,6 @@ int gpsFixClass::openGPSserial (void) {
 	}
 	cfsetospeed(&gps_attrib, GNSS_BPS);
 	cfsetospeed(&gps_attrib, GNSS_BPS);
-	
-	gps_attrib.c_cflag = (gps_attrib.c_cflag & ~CSIZE) | CS8;
-	gps_attrib.c_cflag |= (CLOCAL | CREAD);
-	gps_attrib.c_cflag &= ~(PARENB | PARODD);
-	gps_attrib.c_cflag &= ~CSTOPB;
-	gps_attrib.c_cflag &= ~CRTSCTS;
-	gps_attrib.c_lflag = 0;
-	gps_attrib.c_oflag = 0;
-	gps_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
-	gps_attrib.c_cc[VTIME] = 1;
 	
 	if (tcsetattr(gps_fd, TCSANOW, &gps_attrib) != 0) {
 		closeGPSserial();

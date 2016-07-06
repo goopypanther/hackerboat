@@ -60,7 +60,7 @@ int main (void) {
 		
 		memset (&buf, '\0', sizeof(buf));
 		ssize_t n = read(myFix.getFD(), buf, sizeof(buf));
-		input.append(buf, n);
+		if (n > 0) input.append(buf, n);
 		// find the start of an NMEA sentences
 		size_t startPos = input.find_first_of("$", 0);
 		if (startPos != std::string::npos) {
@@ -70,13 +70,13 @@ int main (void) {
 				// get the NMEA sentence as a substring
 				std::string sentence = input.substr(startPos, (endPos - startPos));
 				// write the string to the GPS log
-				gpsLog << sentence;
+				gpsLog << sentence << std::endl;
 				// drop the sentence from the input buffer
 				input = input.substr(endPos);
 				if (minmea_check(sentence.c_str(), true)) {
 					myFix.getLastRecord();					// get the last record -- if there's nothing in the DB, this will fail silently, leaving a blank record to populate
 					if (myFix.readSentence(sentence)) {		// parse the sentence; if the result is valid...
-						myFix.appendRecord();				// write it to the database
+						if (myFix.isValid()) {myFix.appendRecord();} // write it to the database
 					}
 				} else {
 					logError::instance()->write("GNSS", "Received bad NMEA sentence");
