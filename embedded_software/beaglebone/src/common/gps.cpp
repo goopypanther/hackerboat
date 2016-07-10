@@ -196,8 +196,8 @@ bool gpsFixClass::readSentence (std::string sentence) {
 
 bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
 	if (frame->valid) {
-		this->longitude = minmea_tofloat(&(frame->longitude));
-		this->latitude = minmea_tofloat(&(frame->latitude));
+		this->longitude = minmea_tocoord(&(frame->longitude));
+		this->latitude = minmea_tocoord(&(frame->latitude));
 		this->gpsHeading = minmea_tofloat(&(frame->course));
 		this->gpsSpeed = minmea_tofloat(&(frame->speed));
 		minmea_gettime(&gpsTime, &(frame->date), &(frame->time));
@@ -214,12 +214,15 @@ bool gpsFixClass::packGSV (struct minmea_sentence_gsv *frame) {
 }
 
 bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
+	this->fixValid = false;
 	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
-		this->longitude = minmea_tofloat(&(frame->longitude));
-		this->latitude = minmea_tofloat(&(frame->latitude));
-		this->fixValid = this->isValid();
-		return true;
-	} else return false;
+		this->longitude = minmea_tocoord(&(frame->longitude));
+		this->latitude = minmea_tocoord(&(frame->latitude));
+		if (this->isValid()) {
+			this->fixValid = true;
+		} else this->fixValid = false;
+	} 
+	return this->fixValid;
 }
 
 int gpsFixClass::openGPSserial (void) {

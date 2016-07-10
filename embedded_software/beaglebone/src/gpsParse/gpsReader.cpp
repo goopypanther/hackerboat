@@ -76,7 +76,9 @@ int main (void) {
 				if (minmea_check(sentence.c_str(), true)) {
 					myFix.getLastRecord();					// get the last record -- if there's nothing in the DB, this will fail silently, leaving a blank record to populate
 					if (myFix.readSentence(sentence)) {		// parse the sentence; if the result is valid...
-						if (myFix.isValid()) {myFix.appendRecord();} // write it to the database
+						if (myFix.isValid()) {
+							myFix.appendRecord(); // write it to the database
+						}
 					}
 				} else {
 					logError::instance()->write("GNSS", "Received bad NMEA sentence");
