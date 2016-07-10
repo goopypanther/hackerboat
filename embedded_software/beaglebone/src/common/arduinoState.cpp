@@ -31,9 +31,9 @@
 #include <sys/ioctl.h>
 #include <asm/termbits.h>
 
-static logError *errLog = logError::instance();
+#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
-// using namespace BlackLib;
+static logError *errLog = logError::instance();
 
 const enumerationNameTable<arduinoModeEnum> arduinoStateClass::modeNames = {
 	"PowerUp", 
@@ -115,19 +115,16 @@ bool arduinoStateClass::parse (json_t *input, bool seq = true) {
 		_sequenceNum = json_integer_value(tmp);
 	}
 
-	Mode tmp_command;
-	boneStateClass::Mode tmp_boat;
+	Mode tmp_command = arduinoModeEnum::NONE;
+	boneStateClass::Mode tmp_boat = boatModeEnum::NONE;
 	double tmp_float;
 
-	if (!::parse(json_object_get(input, "popStatus"), &popStatus) ||
-	    !::parse(json_object_get(input, "mode"), &mode) ||
-	    !::parse(json_object_get(input, "command"), &tmp_command) ||
-	    !::parse(json_object_get(input, "boat"), &tmp_boat))
-		return false;
+	::parse(json_object_get(input, "popStatus"), &popStatus);
+	::parse(json_object_get(input, "mode"), &mode);
+	::parse(json_object_get(input, "command"), &tmp_command);
+	::parse(json_object_get(input, "boat"), &tmp_boat);
 	setCommand(tmp_command);
 	setBoatMode(tmp_boat);
-
-#define GET_VAR(var) if(!::parse(json_object_get(input, #var), &var)) { return false; }
 
 	GET_VAR(uTime);
 

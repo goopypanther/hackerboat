@@ -52,10 +52,16 @@ bool hackerboatStateClassStorable::readFromRow(sqliteRowReference row, sequence 
 }
 
 json_t *orientationClass::pack () const {
-	json_t *output = json_pack("{s:f,s:f,s:f}",
-				   "roll", roll,
-				   "pitch", pitch,
-				   "yaw", heading);
+	json_t *output = json_object();
+	if (this->isValid()) {
+		json_object_set_new(output, "roll", json_real(roll));
+		json_object_set_new(output, "pitch", json_real(pitch));
+		json_object_set_new(output, "yaw", json_real(heading));
+	} else {
+		json_object_set_new(output, "roll", json_real(0));
+		json_object_set_new(output, "pitch", json_real(0));
+		json_object_set_new(output, "yaw", json_real(0));
+	}
 	return output;
 }
 

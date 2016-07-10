@@ -75,12 +75,13 @@ int main (void) {
 }
 
 void inputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
+	ard->getLastRecord();
+	state->getLastRecord();
 	if (stepNum % 10) {
 		ard->corePopulate();
 	} else {
 		ard->populate();
 	}
-	state->getLastRecord();
 	clock_gettime(CLOCK_REALTIME, &(state->uTime));
 	if (!state->gps.getLastRecord()) {
 		state->insertFault("No GNSS");

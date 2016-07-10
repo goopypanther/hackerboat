@@ -23,6 +23,8 @@
 #include "arduinoState.hpp"
 #include "sqliteStorage.hpp"
 
+#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
+
 using string = std::string;
 
 const enumerationNameTable<boatModeEnum> boneStateClass::modeNames = {
@@ -43,23 +45,26 @@ boneStateClass::boneStateClass() {
 }
 
 json_t *boneStateClass::pack (bool seq) const {
-	json_t *output;
-	output = json_pack("{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:f,s:f,s:f,s:b,s:o}",
-			   "uTime", packTimeSpec(uTime),
-			   "lastContact", packTimeSpec(lastContact),
-			   "mode", json(mode),
-			   "command", json(command),
-			   "ardMode", json(ardMode),
-			   "faultString", json(faultString),
-			   "gps", gps.pack(seq),
-			   "waypointNext", int(waypointNext),
-			   "waypointStrength", double(waypointStrength),
-			   "waypointAccuracy", double(waypointAccuracy),
-			   "waypointStrengthMax", double(waypointStrengthMax),
-			   "autonomous", json(autonomous),
-			   "launchPoint", launchPoint.pack());
-	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
-	return output;
+	json_t *output = json_object();
+	int packResult = 0;
+	if (seq) json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
+	packResult += json_object_set_new(output, "uTime", packTimeSpec(uTime));
+	packResult += json_object_set_new(output, "lastContact", packTimeSpec(lastContact));
+	packResult += json_object_set_new(output, "mode", json(mode));
+	packResult += json_object_set_new(output, "command", json(command));
+	packResult += json_object_set_new(output, "ardMode", json(ardMode));
+	packResult += json_object_set_new(output, "faultString", json(faultString));
+	packResult += json_object_set_new(output, "gps", gps.pack(seq));
+	packResult += json_object_set_new(output, "waypointNext", json_integer(waypointNext));
+	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
+	packResult += json_object_set_new(output, "waypointAccuracy", json_real(waypointAccuracy));
+	packResult += json_object_set_new(output, "waypointStrengthMax", json_real(waypointStrengthMax));
+	packResult += json_object_set_new(output, "autonomous", json_boolean(autonomous));
+	packResult += json_object_set_new(output, "launchPoint", launchPoint.pack());
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	} else return output;
 }
 
 bool boneStateClass::parse (json_t *input, bool seq = true) {

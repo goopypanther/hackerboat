@@ -16,6 +16,7 @@
 #include <math.h>
 #include "location.hpp"
 #include "sqliteStorage.hpp"
+#include "json_utilities.hpp"
 
 /* The radius of Earth, in meters. (We're using a spherical-Earth approximation.) */
 #define R 6731000
@@ -29,14 +30,25 @@ bool locationClass::isValid(void) const {
 }
 
 bool locationClass::parse(json_t* input) {
-	if (json_unpack(input, "{s:F,s:F}", "latitude", &_lat, "longitude", &_lon)) {
-		return false;
-	}
+	::parse(json_object_get(input, "latitude"), &_lat);
+	::parse(json_object_get(input, "longitude"), &_lon);
 	return this->isValid();
 }
 
 json_t* locationClass::pack(void) const {
-	return json_pack("{s:f,s:f}", "latitude", _lat, "longitude", _lon);
+	json_t *output = json_object();
+	int packResult = 0;
+	if (this->isValid()) {
+		packResult += json_object_set_new(output, "latitude", json_real(_lat));
+		packResult += json_object_set_new(output, "longitude", json_real(_lon));
+	} else {
+		packResult += json_object_set_new(output, "latitude", json_real(0));
+		packResult += json_object_set_new(output, "longitude", json_real(0));
+	}
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	} else return output;
 }
 
 bool locationClass::fillRow(sqliteParameterSlice row) const {
