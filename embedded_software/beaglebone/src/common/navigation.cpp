@@ -19,6 +19,9 @@
 #include "location.hpp"
 #include "navigation.hpp"
 #include "sqliteStorage.hpp"
+#include "json_utilities.hpp"
+
+#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
 navVectorClass::navVectorClass (std::string src, double bearing, double strength)
   : _source(src), _bearing(bearing), _strength(strength)
@@ -64,7 +67,9 @@ navVectorClass navVectorClass::add (const navVectorClass& a) const {
 
 bool navVectorClass::parse(json_t *input) {
 	json_t *buf;
-	if (json_unpack(input, "{s:o,s:F,s:F}", "source", &buf, "bearing", &_bearing, "strength", &_strength)) {
+	buf = json_object_get(input, "source");
+	if (!::parse(json_object_get(input, "bearing"), &_bearing) ||
+		!::parse(json_object_get(input, "strength"), &_strength)) {
 		return false;
 	}
 	if (!json_is_string(buf))
@@ -87,16 +92,15 @@ json_t* navVectorClass::pack(void) const {
 
 bool navClass::parse(json_t *input, bool seq) {
 	json_t *navArrayIn, *currentIn, *targetIn, *targetVecIn, *totalIn;
-	if (json_unpack(input, "{s:o,s:o,s:F,s:F,s:o,s:o,s:o}",
-			"current", &currentIn,
-			"targetWaypoint", &targetIn,
-			"waypointStrength", &waypointStrength,
-			"magCorrection", &magCorrection,
-			"targetVec", &targetVecIn,
-			"total", &totalIn,
-			"navInfluences", &navArrayIn)) {
+	if (!::parse(json_object_get(input, "waypointStrength"), &waypointStrength) ||
+		!::parse(json_object_get(input, "magCorrection"), &magCorrection)) {
 		return false;
 	}
+	currentIn = json_object_get(input, "current");
+	targetIn = json_object_get(input, "targetWaypoint");
+	targetVecIn = json_object_get(input, "targetVec");
+	totalIn = json_object_get(input, "total");
+	navArrayIn = json_object_get(input,"navInfluences");
 	
 	if (seq) {
 		json_t *seqIn = json_object_get(input, "sequenceNum");
@@ -224,13 +228,10 @@ bool navClass::readFromRow(sqliteRowReference row, sequence assignedId)
 	json_decref(repr);
 
 	repr = row.json_field(3);
-	if (json_unpack(repr, "{s:F,s:F,s:o,s:o}",
-			"waypointStrength", &waypointStrength,
-			"magCorrection", &magCorrection,
-			"targetVec", &targetVecIn,
-			"navInfluences", &influences)) {
-		success = false;
-	}
+	::parse(json_object_get(repr, "waypointStrength"), &waypointStrength);
+	::parse(json_object_get(repr, "magCorrection"), &magCorrection);
+	targetVecIn = json_object_get(repr, "targetVec");
+	influences	= json_object_get(repr, "navInfluences");
 
 	if (!targetVec.parse(targetVecIn))
 		success = false;

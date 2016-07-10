@@ -69,22 +69,19 @@ json_t *boneStateClass::pack (bool seq) const {
 
 bool boneStateClass::parse (json_t *input, bool seq = true) {
 	json_t *inGNSS, *inUtime, *inLastContact, *inMode, *inCommand, *inArdMode, *inFaultString, *inLaunch;
-	if (json_unpack(input, "{s:o,s:o,s:o,s:o,s:o,s:o,s:o,s:i,s:F,s:F,s:F,s:b,s:o}",
-						"uTime", &inUtime,
-						"lastContact", &inLastContact,
-						"mode", &inMode,
-						"command", &inCommand,
-						"ardMode", &inArdMode,
-						"faultString", &inFaultString,
-						"gps", &inGNSS,
-						"waypointNext", &waypointNext,
-						"waypointStrength", &waypointStrength,
-						"waypointAccuracy", &waypointAccuracy,
-						"waypointStrengthMax", &waypointStrengthMax,
-						"autonomous", &autonomous,
-						"launchPoint", &inLaunch)) {
-		return false;
-	}
+	inUtime = json_object_get(input, "uTime");
+	inLastContact = json_object_get(input, "lastContact");
+	inMode = json_object_get(input, "mode");
+	inCommand = json_object_get(input, "command");
+	inArdMode = json_object_get(input, "ardMode");
+	inFaultString = json_object_get(input, "faultString");
+	inGNSS = json_object_get(input, "gps");
+	GET_VAR(waypointNext);
+	GET_VAR(waypointStrength);
+	GET_VAR(waypointAccuracy);
+	GET_VAR(waypointStrengthMax);
+	GET_VAR(autonomous);
+	inLaunch = json_object_get(input, "launchPoint");
 	if (seq) {
 		json_t *seqIn = json_object_get(input, "sequenceNum");
 		if (!json_is_integer(seqIn))

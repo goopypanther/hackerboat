@@ -25,6 +25,8 @@
 #include "sqliteStorage.hpp"
 #include "json_utilities.hpp"
 
+#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
+
 gpsFixClass::gpsFixClass() {
 	clock_gettime(CLOCK_REALTIME, &(uTime));
 	gpsTime = uTime;
@@ -64,17 +66,15 @@ json_t *gpsFixClass::pack (bool seq) const {
 
 bool gpsFixClass::parse (json_t *input, bool seq = true) {
 	json_t *inTime, *gpsInTime;
-	if (json_unpack(input, "{s:o,s:o,s:F,s:F,s:F,s:F,s:b}",
-			"uTime", &inTime,
-			"gpsTime", &gpsInTime,
-			"latitude", &latitude,
-			"longitude", &longitude,
-			"heading", &gpsHeading,
-			"speed", &gpsSpeed,
-			"fixValid", &fixValid)) {
-		return false;
-	}
-	if ((!::parse(inTime, &uTime)) || (!::parse(gpsInTime, &gpsTime))) {
+	inTime = json_object_get(input, "uTime");
+	gpsInTime = json_object_get(input, "gpsTime");
+	GET_VAR(latitude);
+	GET_VAR(longitude);
+	GET_VAR(fixValid);
+	
+	if ((!::parse(inTime, &uTime)) || (!::parse(gpsInTime, &gpsTime)) ||
+		!::parse(json_object_get(input, "heading"), &gpsHeading) ||
+		!::parse(json_object_get(input, "speed"), &gpsSpeed)) {
 		return false;
 	}
 

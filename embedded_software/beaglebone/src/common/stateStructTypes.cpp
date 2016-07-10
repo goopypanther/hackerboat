@@ -22,6 +22,7 @@
 #include "logs.hpp"
 #include "stateStructTypes.hpp"
 #include "sqliteStorage.hpp"
+#include "json_utilities.hpp"
 
 json_t *hackerboatStateClass::packTimeSpec (timespec t) {
 	json_t *output = json_object();
@@ -35,7 +36,10 @@ json_t *hackerboatStateClass::packTimeSpec (timespec t) {
 }
 
 int hackerboatStateClass::parseTimeSpec (json_t *input, timespec *t) {
-	return json_unpack(input, "{s:i,s:i}", "tv_sec", &(t->tv_sec), "tv_nsec", &(t->tv_nsec));
+	if (!::parse(json_object_get(input, "tv_sec"), &(t->tv_sec)) ||
+		!::parse(json_object_get(input, "tv_nsec"), &(t->tv_nsec))) {
+		return -1;
+	} else return 0;
 }
 
 bool hackerboatStateClassStorable::fillRow(sqliteParameterSlice row) const {
@@ -73,10 +77,9 @@ json_t *orientationClass::pack () const {
 }
 
 bool orientationClass::parse (json_t *input) {
-	if (json_unpack(input, "{s:F,s:F,s:F}",
-			"roll", &roll,
-			"pitch", &pitch,
-			"yaw", &heading)) {
+	if (!::parse(json_object_get(input, "roll"), &roll) ||
+		!::parse(json_object_get(input, "pitch"), &pitch) ||
+		!::parse(json_object_get(input, "yaw"), &heading)) {
 		return false;
 	}
 	return this->normalize();

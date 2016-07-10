@@ -256,8 +256,7 @@ json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, uint32
 
 json_t* boneStateRESTClass::command(std::string body) {
 	std::string command;
-	json_t *input; 
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	boatModeEnum cmd;
 	
@@ -267,13 +266,15 @@ json_t* boneStateRESTClass::command(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// check that the load went well, load in the the last state vector, 
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) || 
-		(json_unpack(input, "{s:o}", "command", &obj))) {
-		free(input);
+	val = json_object_get(input, "command");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &command)) {
-		free(input);
+	if (!::parse(val, &command)) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
 	free(input);
@@ -290,8 +291,7 @@ json_t* boneStateRESTClass::command(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointNext(std::string body) {
-	json_t *input;
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -299,13 +299,15 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 	// load in incoming request body
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointNext", &obj))) {
-		free(input);
+	val = json_object_get(input, "waypointNext");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &(_target->waypointNext))) {
-		free(input);
+	if (!::parse(val, &(_target->waypointNext))) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
 	free(input);
@@ -319,8 +321,7 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointStrength(std::string body) {
-	json_t *input;
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -328,14 +329,15 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 	// load in incoming request body
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointStrength", &obj))) {
-		free(input);
-		
+	val = json_object_get(input, "waypointStrength");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &(_target->waypointStrength))) {
-		free(input);
+	if (!::parse(val, &(_target->waypointStrength))) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
 	free(input);
@@ -349,8 +351,7 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
-	json_t *input;
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -358,13 +359,15 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 	// load in incoming request body
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointStrengthMax", &obj))) {
-		free(input);
+	val = json_object_get(input, "waypointStrengthMax");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &(_target->waypointStrengthMax))) {
-		free(input);
+	if (!::parse(val, &(_target->waypointStrengthMax))) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
 	free(input);
