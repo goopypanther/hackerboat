@@ -49,6 +49,7 @@ int main (void) {
 	frametime.tv_sec = 0;
 	frametime.tv_nsec = FRAME_LEN_NS;
 	norm_timespec(&frametime);
+	printf("Frametime is %ld.%ld\n", (long)frametime.tv_sec, frametime.tv_nsec);
 	
 	
 	for (;;) {
@@ -60,7 +61,11 @@ int main (void) {
 		outputBB(&myBoat, &myArduino, stepNum);						// write outputs
 		clock_gettime(CLOCK_REALTIME, &endTime);			// get the time at the end of the frame 
 		subtract_timespec(&endTime, &startTime, &framerun);	// calculate the duration of the frame 
+		//printf("Start time is %ld.%ld\n", (long)startTime.tv_sec, startTime.tv_nsec);
+		//printf("End time is %ld.%ld\n", (long)endTime.tv_sec, endTime.tv_nsec);
+		//printf("Frame run time is %ld.%ld\n", (long)framerun.tv_sec, framerun.tv_nsec);
 		if (subtract_timespec(&frametime, &framerun, &waitTime)) {	// this returns false if the running frame time is longer than the specified frame time
+			//printf("Sleep time is %ld.%ld\n", (long)waitTime.tv_sec, waitTime.tv_nsec);
 			nanosleep(&waitTime, &waitTime);
 		} else {
 			logError::instance()->write("Master control", "Frame overrun");

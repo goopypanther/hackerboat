@@ -22,7 +22,7 @@
 #define ARDUINO_BPS			B115200	
 #define ARDUINO_BAUD		Baud115200	
 #define ARDUINO_RESET_PIN	GPIO_48
-#define FRAME_LEN_NS		(100000000)		/// State machine execution frame length, in nanoseconds
+#define FRAME_LEN_NS		(500000000)		/// State machine execution frame length, in nanoseconds
 #define UART_TIMEOUT		(100)		/// UART contention timeout, in milliseconds
 #define UART_READ_TIMEOUT	(15)		/// UART read timeout, in milliseconds
 #define SELFTEST_DELAY		(30)

@@ -19,7 +19,7 @@ stty -F /dev/ttyS1 115200 -echo
 
 config-pin P9.21 uart
 config-pin P9.22 uart
-stty -F /dev/ttyS2 115200 -echo
+#stty -F /dev/ttyS2 115200 -echo
 
 # setup arduino reset pin and hold arduino in reset
 

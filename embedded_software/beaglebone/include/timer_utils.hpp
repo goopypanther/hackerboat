@@ -28,12 +28,14 @@ void norm_timespec (timespec* a) {
 	}
 }
 
+// result = a + b
 void add_timespec (timespec* a, timespec* b, timespec* result) {
 	result->tv_sec = a->tv_sec + b->tv_sec;
 	result->tv_nsec = a->tv_nsec + b->tv_nsec;
 	norm_timespec(result);
 }
 
+// result = a - b
 bool subtract_timespec (timespec* a, timespec* b, timespec* result) {
 	if (b->tv_sec > a->tv_sec) return false;	// This would result in a negative timespec, which is clearly forbidden by spec
 	if ((b->tv_sec == a->tv_sec) &&				// This would also result in a negative timespec

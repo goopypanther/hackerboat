@@ -432,7 +432,7 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 			closeArduinoSerial();
 			return NULL;
 		}
-		usleep(1000);
+		usleep(10000);
 		cnt++;
 	}
 	printf("\n");
@@ -471,7 +471,7 @@ int arduinoStateClass::openArduinoSerial (void) {
 	ard_attrib.c_iflag &= ~(ICRNL);							// turn off line ending translation					
 	ard_attrib.c_oflag &= ~(OPOST);							// turn off post processing of output
 	ard_attrib.c_cc[VMIN] = 0;								// this sets the timeouts for the read() operation to minimum
-	ard_attrib.c_cc[VTIME] = 0;
+	ard_attrib.c_cc[VTIME] = 1;
 	if (ioctl(ard_fd, TCSETS2, &ard_attrib) < 0) {
 		closeArduinoSerial();
 		errLog->write("Arduino Serial", "Unable to set serial properties");
