@@ -20,7 +20,6 @@
 #include <signal.h>
 #include <time.h>
 #include <limits>
-#include <BlackGPIO/BlackGPIO.h>
 #include "stateStructTypes.hpp"
 #include "config.h"
 #include "logs.hpp"
@@ -31,8 +30,6 @@
 #include "timer_utils.hpp"
 
 #define CLOCKID CLOCK_REALTIME
-
-using namespace BlackLib;
 
 int initNav(navigatorBase *nav);
 
