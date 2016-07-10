@@ -378,8 +378,7 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 }
 
 json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
-	json_t *input;
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -387,16 +386,19 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 	// load in incoming request body
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "waypointAccuracy", &obj))) {
-		free(input);
+	val = json_object_get(input, "waypointAccuracy");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &(_target->waypointAccuracy))) {
-		free(input);
+	if (!::parse(val, &(_target->waypointAccuracy))) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	free(input);
+	json_decref(input);
+	json_decref(val);
 	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
@@ -407,8 +409,7 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 }
 
 json_t* boneStateRESTClass::autonomous(std::string body) {
-	json_t *input;
-	json_t obj;
+	json_t *input, *val;
 	json_error_t errJSON;
 	
 	// make sure that _target is non-NULL and we can open the target file
@@ -416,16 +417,18 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	// load in incoming request body
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
-	if ((!input) || (!_target->getLastRecord()) ||  
-		(json_unpack(input, "{s:o}", "autonomous", &obj))) {
-		free(input);
+	val = json_object_get(input, "autonomous");
+	if ((!input) || (!_target->getLastRecord()) || val) {
+		json_decref(input);
+		json_decref(val);
+	}
+	if (!::parse(val, &(_target->autonomous))) {
+		json_decref(input);
+		json_decref(val);
 		return NULL;
 	}
-	if (!::parse(&obj, &(_target->autonomous))) {
-		free(input);
-		return NULL;
-	}
-	free(input);
+	json_decref(input);
+	json_decref(val);
 	
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
@@ -504,10 +507,12 @@ bool arduinoStateRESTClass::setTarget(arduinoStateClass* target) {
 }
 
 json_t* resetArduinoRest::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
+	json_t *retval = json_object();
 	system("config-pin P9.15 low");		// set the Arduino reset pin low
 	usleep(100000);						// sleep for 100 milliseconds
 	system("config pin P9.15 high");	// set the Arduino reset pin high
-	return json_pack("{sb}", "success", true);
+	json_object_set_new(retval, "success", json_boolean(true));
+	return retval;
 }
 
 json_t* arduinoRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {

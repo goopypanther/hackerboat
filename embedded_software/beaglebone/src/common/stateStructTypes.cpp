@@ -24,7 +24,14 @@
 #include "sqliteStorage.hpp"
 
 json_t *hackerboatStateClass::packTimeSpec (timespec t) {
-	return json_pack("{s:i,s:i}", "tv_sec", t.tv_sec, "tv_nsec", t.tv_nsec);
+	json_t *output = json_object();
+	int packResult = 0;
+	packResult += json_object_set_new(output, "tv_sec", json_integer(t.tv_sec));
+	packResult += json_object_set_new(output, "tv_nsec", json_integer(t.tv_nsec));
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	} else return output;
 }
 
 int hackerboatStateClass::parseTimeSpec (json_t *input, timespec *t) {

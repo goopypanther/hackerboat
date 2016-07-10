@@ -373,8 +373,6 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 	std::string sent = "";
 	json_t *result;
 	json_error_t err;
-	//FILE * ser;
-	// BlackUART port(ARDUINO_REST_UART, ARDUINO_BAUD, ParityNo, StopOne, Char8);
 	uint32_t cnt = 0;
 	ssize_t bytesRead = 0;
 	char buf[LOCAL_BUF_LEN];

@@ -23,6 +23,7 @@
 #include "gps.hpp"
 #include "config.h"
 #include "sqliteStorage.hpp"
+#include "json_utilities.hpp"
 
 gpsFixClass::gpsFixClass() {
 	clock_gettime(CLOCK_REALTIME, &(uTime));
@@ -35,15 +36,15 @@ gpsFixClass::gpsFixClass() {
 }
 
 json_t *gpsFixClass::pack (bool seq) const {
-	json_t *output;
-	output = json_pack("{s:o,s:o,s:f,s:f,s:f,s:f,s:b}",
-			   "uTime", packTimeSpec(this->uTime),
-			   "gpsTime", packTimeSpec(this->gpsTime),
-			   "latitude", latitude,
-			   "longitude", longitude,
-			   "heading", gpsHeading,
-			   "speed", gpsSpeed,
-			   "fixValid", fixValid);
+	json_t *output = json_object();
+	int packResult = 0;
+	packResult += json_object_set_new(output, "uTime", packTimeSpec(this->uTime));
+	packResult += json_object_set_new(output, "gpsTime", packTimeSpec(this->gpsTime));
+	packResult += json_object_set_new(output, "latitude", json_real(latitude));
+	packResult += json_object_set_new(output, "longitude", json_real(longitude));
+	packResult += json_object_set_new(output, "heading", json_real(gpsHeading));
+	packResult += json_object_set_new(output, "speed", json_real(gpsSpeed));
+	packResult += json_object_set_new(output, "fixValid", json_boolean(fixValid));
 
 	if (!GGA.empty()) json_object_set_new(output, "GGA", json(GGA));
 	if (!GSA.empty()) json_object_set_new(output, "GSA", json(GSA));
@@ -52,8 +53,12 @@ json_t *gpsFixClass::pack (bool seq) const {
 	if (!RMC.empty()) json_object_set_new(output, "RMC", json(RMC));
 
 	if (seq && _sequenceNum >= 0)
-		json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
+		packResult += json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
 
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	}
 	return output;
 }
 

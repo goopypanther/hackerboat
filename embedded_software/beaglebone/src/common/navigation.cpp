@@ -74,7 +74,15 @@ bool navVectorClass::parse(json_t *input) {
 }
 
 json_t* navVectorClass::pack(void) const {
-	return json_pack("{s:s,s:f,s:f}", "source", _source.c_str(), "bearing", _bearing, "strength", _strength);
+	json_t *output = json_object();
+	int packResult = 0;
+	packResult += json_object_set_new(output, "source", json(_source));
+	packResult += json_object_set_new(output, "bearing", json_real(_bearing));
+	packResult += json_object_set_new(output, "strength", json_real(_strength));
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	} else return output;
 }
 
 bool navClass::parse(json_t *input, bool seq) {
@@ -112,16 +120,20 @@ bool navClass::parse(json_t *input, bool seq) {
 }
 
 json_t* navClass::pack (bool seq) const {
-	json_t *output = json_pack("{s:o,s:i,s:f,s:f,s:o,s:o,s:o}",
-				   "current", current.pack(),
-				   "targetWaypoint", (int)targetWaypoint,
-				   "waypointStrength", waypointStrength,
-				   "magCorrection", magCorrection,
-				   "targetVec", targetVec.pack(),
-				   "total", total.pack(),
-				   "navInfluences", packInfluences());
-	if (seq) json_object_set(output, "sequenceNum", json_integer(_sequenceNum));
-	return output;
+	json_t *output = json_object();
+	int packResult = 0;
+	if (seq) json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
+	packResult += json_object_set_new(output, "current", current.pack());
+	packResult += json_object_set_new(output, "targetWaypoint", json_integer(targetWaypoint));
+	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
+	packResult += json_object_set_new(output, "magCorrection", json_real(magCorrection));
+	packResult += json_object_set_new(output, "targetVec", targetVec.pack());
+	packResult += json_object_set_new(output, "total", total.pack());
+	packResult += json_object_set_new(output, "navInfluences", packInfluences());
+	if (packResult != 0) {
+		json_decref(output);
+		return NULL;
+	} else return output;
 }
 
 bool navClass::parseInfluences(json_t *navArrayIn) {
@@ -175,13 +187,19 @@ bool navClass::fillRow(sqliteParameterSlice row) const
 	for (typeof(navInfluences.size()) i = 0; i < navInfluences.size(); i++) {
 		json_array_append_new(array, navInfluences[i].pack());
 	}
-	row.bind_json_new(3, json_pack("{s:f,s:f,s:o,s:o}",
-				       "waypointStrength", waypointStrength,
-				       "magCorrection", magCorrection,
-				       "targetVec", targetVec.pack(),
-				       "navInfluences", array));
-
-	return true;
+	json_t *output = json_object();
+	int packResult = 0;
+	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
+	packResult += json_object_set_new(output, "magCorrection", json_real(magCorrection)); 
+	packResult += json_object_set_new(output, "targetVec", targetVec.pack());
+	packResult += json_object_set_new(output, "navInfluences", array);
+	if (packResult == 0) {
+		row.bind_json_new(3, output);
+		return true;
+	} else {
+		json_decref(output);
+		return false;
+	}
 }
 
 bool navClass::readFromRow(sqliteRowReference row, sequence assignedId)
@@ -277,4 +295,5 @@ bool navClass::isValid (void) const {
 }
 
 bool navClass::initRecord(void) {
+	return true;
 }

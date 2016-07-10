@@ -25,6 +25,7 @@
 #include "arduinoState.hpp"
 #include "navigation.hpp"
 #include "gps.hpp"
+#include "json_utilities.hpp"
 
 #include <string>
 #include <map>
@@ -122,10 +123,11 @@ int main (void) {
 		}
 		
 		// add some things to the JSON response...
-		jsonFinal = json_pack("{sOsissss}", "response", responseJSON, 
-								"id", REST_ID, 
-								"name", REST_NAME,
-								"connected", "true");
+		jsonFinal = json_object();
+		json_object_set(jsonFinal, "response", responseJSON);
+		json_object_set_new(jsonFinal, "id", json_integer(REST_ID));
+		json_object_set_new(jsonFinal, "name", json(std::string(REST_NAME)));
+		json_object_set_new(jsonFinal, "connected", json(true));
 		
 		// print the result back to the client
 		writeJSONResponse(jsonFinal, JSON_COMPACT);
