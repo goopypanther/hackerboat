@@ -1,13 +1,12 @@
 
-all:  lib/libjansson.a lib/libBlackLib.a include/minmea.h
+all:  lib/libjansson.a include/minmea.h
 .PHONY: all
 
 base:=$(shell git rev-parse --show-toplevel)
 tohere:=$(shell git rev-parse --show-prefix)
 
 # Submodules
-BlackLib/.git:
-	( cd $(base) && git submodule update --init -- $(tohere)/BlackLib )
+
 jansson/.git:
 	( cd $(base) && git submodule update --init -- $(tohere)/jansson )
 minmea/.git:
@@ -19,15 +18,6 @@ lib/libjansson.a include/jansson.a: jansson/.git
 	( cd jansson && autoreconf -vi && \
 	./configure --disable-shared --prefix "$(CURDIR)" \
         && make && make check && make install )
-
-# Build BlackLib
-# BlackLib doesn't currently have a makefile of its own, so we kludge one together here.
-CFLAGS   += $(OPTS)
-CXXFLAGS += $(OPTS) -std=gnu++11
-BLACK_SRCS=BlackCore.cpp BlackUART/BlackUART.cpp BlackGPIO/BlackGPIO.cpp
-BLACK_DIR=BlackLib/v3_0
-CPPFLAGS+=-I$(BLACK_DIR)
-lib/libBlackLib.a: BlackLib/.git lib/libBlackLib.a($(addprefix $(BLACK_DIR)/,$(BLACK_SRCS:.cpp=.o))) 
 
 # Make minmea linkable
 include/minmea.h: minmea/.git minmea/minmea.h

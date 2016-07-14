@@ -8,16 +8,14 @@ OPTS = -gdwarf-4 -g3 -Os -Wall
 GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
-BLACKLIB=submodules/BlackLib/v3_0
 MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS) -std=gnu11 
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++11 -pthread
 CPPFLAGS += -I submodules/include -I include -MMD -MT $@
-CPPFLAGS += -I $(BLACKLIB)
 LDFLAGS  += -L submodules/lib
 
-LDLIBS += -ljansson -lsqlite3 -lBlackLib -lm -lrt
+LDLIBS += -ljansson -lsqlite3 -lm -lrt
 
 export OPTS
 
@@ -64,7 +62,7 @@ nav: $(NAV_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 FCGI_SRCS= cgi/hackerboatFastCGI.cpp cgi/RESTdispatch.cpp
-src/cgi/RESTdispatch.o:  CPPFLAGS+= -I $(BLACKLIB)
+src/cgi/RESTdispatch.o:  
 FCGI_OBJS=$(addprefix src/,$(FCGI_SRCS:.cpp=.o))
 ALL_OBJS+=$(FCGI_OBJS)
 hb.fcgi: $(FCGI_OBJS) libhackerboat.a
