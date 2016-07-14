@@ -17,6 +17,7 @@
 #include <time.h>
 #include <string>
 #include "stateStructTypes.hpp"
+#include "sqliteStorage.hpp"
 
 /**
  * @class gpsFixClass 
@@ -37,6 +38,11 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		int openGPSserial (void);
 		void closeGPSserial (void);
 		
+		virtual void release(void) {
+			gpsStorage->closeDatabase();
+			delete gpsStorage;
+		}
+		
 		timespec	uTime;					/**< Beaglebone time of last fix */
 		timespec	gpsTime;				/**< GPS time of last fix */
 		double		latitude;				/**< Latitude of last fix */
@@ -54,6 +60,8 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		bool parse (json_t *, bool);
 		json_t *pack (bool seq = false) const;
 		bool isValid (void) const;
+		
+		~gpsFixClass (void) {release();}
 
 	protected:
 		/* Concrete implementations of stateClassStorable */
@@ -81,6 +89,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 			GSV.clear();
 			RMC.clear();
 		}
+		hackerboatStateStorage *gpsStorage;
 };
 
 #endif

@@ -25,6 +25,7 @@
 #include "config.h"
 #include "location.hpp"
 #include "json_utilities.hpp"
+#include "sqliteStorage.hpp"
 
 // forward declarations
 class hackerboatStateStorage;
@@ -95,6 +96,15 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		bool getRecord(sequence select) USE_RESULT;				/**< Populate the object from the open database file */
 		bool getLastRecord(void) USE_RESULT;					/**< Get the latest record */
 		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
+		
+		/** Releases the storage object for the instance
+		 * 
+		 * Release all locks on the current object's storage and (optionally) close it.
+		 * This must be implemented by concrete classes that implement this class. 
+		 *
+		 */
+		 
+		virtual void release(void) = 0;
 		
 	protected:
 		hackerboatStateClassStorable()			/**< Create a state object */
@@ -189,19 +199,29 @@ class waypointClass : public hackerboatStateClassStorable {
 		bool			setNextWaypoint(indexT index);							/**< As above, but set by current index; renumbering proceeds as above */
 		indexT			getNextIndex(void);										/**< Return the index of the next waypoint */
 
+		void release(void) {
+			waypointStorage->closeDatabase();
+			delete waypointStorage;
+		}
+		
 		/* Concrete implementations of stateClassStorable */
 		bool parse (json_t *, bool) USE_RESULT;
 		json_t *pack (bool seq = true) const;
 		bool isValid (void) const;
 
 		locationClass location;
+		
+		~waypointClass (void) {release();}
+		
 	private:
 		indexT			index = -1;					/**< Place of this waypoint in the waypoint list */ 
 		sequence		nextWaypoint = -1;			/**< _sequenceNum of the next waypoint */
 		action			_act;						/**< Action to perform when reaching a location */	
 		static const int8_t minActionEnum = 0;
 		static const int8_t maxActionEnum = 3;
+		hackerboatStateStorage *waypointStorage;
 
+		
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();

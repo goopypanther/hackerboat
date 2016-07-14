@@ -74,8 +74,9 @@ void hackerboatStateStorage::prepare(shared_stmt& sth, const std::string& sql)
 
 void hackerboatStateStorage::logError(void)
 {
-	warnx("sqlite error (%p, %s): %s",
+	warnx("sqlite error (%p, %s): (%d) %s",
 	      dbh.get(), tableName.c_str(),
+	      sqlite3_extended_errcode(dbh.get()),
 	      sqlite3_errmsg(dbh.get()));
 }
 
@@ -269,6 +270,11 @@ void hackerboatStateStorage::createTable()
 		logError(sql.str());
 		abort();
 	}
+}
+
+void hackerboatStateStorage::closeDatabase (void)
+{
+	sqlite3_close_v2(dbh.get());
 }
 
 //******************************************************************************

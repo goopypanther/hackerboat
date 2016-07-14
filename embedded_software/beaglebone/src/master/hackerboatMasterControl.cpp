@@ -49,7 +49,7 @@ int main (void) {
 	frametime.tv_sec = 0;
 	frametime.tv_nsec = FRAME_LEN_NS;
 	norm_timespec(&frametime);
-	printf("Frametime is %ld.%ld\n", (long)frametime.tv_sec, frametime.tv_nsec);
+	//printf("Frametime is %ld.%ld\n", (long)frametime.tv_sec, frametime.tv_nsec);
 	
 	
 	for (;;) {

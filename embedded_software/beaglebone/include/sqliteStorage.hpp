@@ -69,6 +69,8 @@ public:
 	 * defined in config.h.
 	 */
 	static shared_dbh databaseConnection(const char *filename);
+	void closeDatabase (void);
+	
 protected:
 	class sth_deleter;
 	class stmt_deleter;

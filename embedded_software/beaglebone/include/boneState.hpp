@@ -17,6 +17,7 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include "gps.hpp"
+#include "sqliteStorage.hpp"
 
 /**
  * @class boneStateClass
@@ -41,6 +42,11 @@ class boneStateClass : public hackerboatStateClassStorable {
 		bool setCommand (boatModeEnum c);		/**< Set command to the given value */
 		bool setArduinoMode (arduinoModeEnum s);	/**< Set Arduino state to the given value */
 
+		void release(void) {
+			boneStorage->closeDatabase();
+			delete boneStorage;
+		}
+		
 		timespec 					uTime;			/**< Time the record was made */
 		timespec					lastContact;		/**< Time of the last contact from the shore station */
 		boatModeEnum				mode = Mode::NONE;	/**< current mode of the beaglebone */
@@ -55,6 +61,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		bool						autonomous;		/**< When set true, the boat will operate autonomously */
 		locationClass				launchPoint;		/**< Location from which the boat departed */
 
+		~boneStateClass (void) {release();}
 
 		/* Concrete implementations of stateClassStorable */
 		virtual bool parse (json_t *input, bool seq);
@@ -64,6 +71,9 @@ class boneStateClass : public hackerboatStateClassStorable {
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
+	
+	private:
+		hackerboatStateStorage *boneStorage;
 };
 
 static inline const std::string& toString(boatModeEnum num) {

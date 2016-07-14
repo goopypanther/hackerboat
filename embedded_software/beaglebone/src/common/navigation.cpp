@@ -167,7 +167,6 @@ json_t *navClass::packInfluences(void) const {
 }
 
 hackerboatStateStorage &navClass::storage() {
-	static hackerboatStateStorage *navStorage;
 
 	if (!navStorage) {
 		navStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(NAV_DB_FILE),

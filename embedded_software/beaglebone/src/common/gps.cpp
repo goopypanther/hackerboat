@@ -110,7 +110,6 @@ bool gpsFixClass::isValid (void) const {
 }
 
 hackerboatStateStorage &gpsFixClass::storage() {
-	static hackerboatStateStorage *gpsStorage;
 
 	if (!gpsStorage) {
 		gpsStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(GPS_DB_FILE),

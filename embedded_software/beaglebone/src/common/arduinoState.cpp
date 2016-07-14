@@ -203,7 +203,6 @@ bool arduinoStateClass::isValid (void) const {
 }
 
 hackerboatStateStorage &arduinoStateClass::storage() {
-	static hackerboatStateStorage *arduinoStorage;
 
 	if (!arduinoStorage) {
 		arduinoStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(ARD_LOG_DB_FILE),
@@ -416,21 +415,21 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 		if (bytesRead > 0) {
 			ret += buf;
 			cnt = 0;
-			printf("(%zd)%s;", bytesRead, buf);
+			//printf("(%zd)%s;", bytesRead, buf);
 			memset(buf, 0, LOCAL_BUF_LEN);
 		} else {
-			printf(".");
+			//printf(".");
 		}
 		if (cnt >= UART_READ_TIMEOUT) {
 			errLog->write("Arduino Serial", "Failed to read return value");
-			printf("Exiting with timeout\n");
+			//printf("Exiting with timeout\n");
 			closeArduinoSerial();
 			return NULL;
 		}
 		usleep(10000);
 		cnt++;
 	}
-	printf("\n");
+	//printf("\n");
 	//tcflush(ard_fd, TCIOFLUSH);
 	//tcdrain(ard_fd);
 	

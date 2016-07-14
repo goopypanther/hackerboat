@@ -19,6 +19,7 @@
 #include "config.h"
 #include "stateStructTypes.hpp"
 #include "location.hpp"
+#include "sqliteStorage.hpp"
 
 #include <string>
 #include <vector>
@@ -43,6 +44,7 @@ class navVectorClass {
 		std::string _source	= "";		/**< Name of the source of this vector. */
 		double 	_bearing 	= NAN;		/**< Bearing of this vector in degrees, clockwise from true north. */
 		double	_strength 	= NAN;		/**< Relative strength of this vector */	
+	
 };
 
 /**
@@ -61,6 +63,11 @@ class navClass : public hackerboatStateClassStorable {
 		void clearVectors (void);				/**< Clear the contents of navInfluences */
 		bool isValid(void) const;
 		bool initRecord(void);
+		virtual void release(void) {
+			navStorage->closeDatabase();
+			delete navStorage;
+			navStorage = NULL;
+		}
 		
 		locationClass	current;		/**< current location */
 		sequence		targetWaypoint;	/**< sequence number of the target waypoint */
@@ -70,6 +77,8 @@ class navClass : public hackerboatStateClassStorable {
 		navVectorClass	targetVec;		/**< Vector to the target */
 		navVectorClass	total;			/**< Sum of target vector and all influences */
 
+		~navClass (void) {release();}
+		
 	protected:
 		/* Concrete implementations of stateClassStorable */
 		virtual hackerboatStateStorage& storage();
@@ -81,6 +90,7 @@ class navClass : public hackerboatStateClassStorable {
 
 		bool parseInfluences(json_t *);
 		json_t *packInfluences(void) const;
+		hackerboatStateStorage *navStorage;
 };
 
 /** 

@@ -131,7 +131,6 @@ bool boneStateClass::isValid (void) const {
 }
 
 hackerboatStateStorage &boneStateClass::storage() {
-	static hackerboatStateStorage *boneStorage;
 
 	if (!boneStorage) {
 		boneStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(BONE_LOG_DB_FILE),

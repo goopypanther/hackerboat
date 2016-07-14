@@ -17,6 +17,7 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include <jansson.h>
+#include "sqliteStorage.hpp"
 
 #define USE_RESULT __attribute__((warn_unused_result))
 
@@ -36,7 +37,11 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool populate (void) USE_RESULT;				/** Populate the object */
 		bool corePopulate (void) USE_RESULT;			/**< Populate core data only */
 		bool setCommand (arduinoModeEnum c);
-
+		virtual void release(void) {
+			arduinoStorage->closeDatabase();
+			delete arduinoStorage;
+		}
+		
 		// Command functions...
 		bool writeBoatMode(boatModeEnum s);
 		bool writeCommand(arduinoModeEnum s);
@@ -102,11 +107,14 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		virtual bool isValid (void) const;
 		json_t	*writeArduino(std::string func, std::string query);		/**< Write to a function on the Arduino */
 		
+		~arduinoStateClass (void) {release();}
+		
 	private:
 		bool 	setMode (arduinoModeEnum s);
 		bool 	setBoatMode (boatModeEnum s);
 		int 	openArduinoSerial (void);
 		void 	closeArduinoSerial (void);
+		hackerboatStateStorage *arduinoStorage;
 		
 		int ard_fd = -1;
 		

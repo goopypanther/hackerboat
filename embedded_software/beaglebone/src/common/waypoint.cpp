@@ -187,7 +187,6 @@ bool waypointClass::readFromRow(sqliteRowReference row, sequence id)
 }
 
 hackerboatStateStorage &waypointClass::storage() {
-	static hackerboatStateStorage *waypointStorage;
 
 	if (!waypointStorage) {
 		waypointStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(WP_DB_FILE),
