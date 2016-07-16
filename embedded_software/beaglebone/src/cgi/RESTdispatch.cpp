@@ -93,10 +93,8 @@ json_t* allDispatchClass::root (std::vector<std::string> tokens, uint32_t curren
 				json_array_append_new(out, _target->pack());
 			}
 		}
-		_target->release();
 		return out;
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -115,11 +113,9 @@ json_t* numberDispatchClass::root (std::vector<std::string> tokens, uint32_t cur
 	int val = std::stoi(tokens[currentToken], &count);
 	if (count > 0) {
 		if (_target->getRecord(val)) {
-			_target->release();
 			return _target->pack();
 		}
 	}
-	_target->release();
 	return NULL;
 }
 
@@ -138,7 +134,6 @@ json_t* countDispatchClass::root (std::vector<std::string> tokens, uint32_t curr
 	if (!_target) return NULL;
 	count = _target->countRecords();
 	json_object_set(out, "count", json_integer(count));
-	_target->release();
 	return out;
 }
 
@@ -168,16 +163,13 @@ json_t* insertDispatchClass::root (std::vector<std::string> tokens, uint32_t cur
 				if (insert < _target->countRecords()) {
 					if (true/*!_target->insert(count)*/) {
 						if (!_target->appendRecord()) {
-							_target->release();
 							return NULL;
 						}
 					}  
 				} else if (!_target->appendRecord()) {
-					_target->release();
 					return NULL;
 				}
 			} else if (!_target->appendRecord()) {
-				_target->release();
 				return NULL;
 			}
 		} else {
@@ -186,7 +178,6 @@ json_t* insertDispatchClass::root (std::vector<std::string> tokens, uint32_t cur
 	} else {
 		return NULL;
 	}
-	_target->release();
 	return _target->pack();
 }
 
@@ -207,7 +198,6 @@ json_t* appendDispatchClass::root (std::vector<std::string> tokens, uint32_t cur
 		if (_target->parse(json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON), false)) {
 			if (_target->isValid()) {
 				if (!_target->appendRecord()) {
-					_target->release();
 					return NULL;
 				}
 			} else {
@@ -217,7 +207,6 @@ json_t* appendDispatchClass::root (std::vector<std::string> tokens, uint32_t cur
 	} else {
 		return NULL;
 	}
-	_target->release();
 	return _target->pack();
 }
 
@@ -232,10 +221,8 @@ json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, uint32_t cu
 json_t* boneStateRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
-		_target->release();
 		return _target->pack();
 	}
-	_target->release();
 	return NULL;
 }
 
@@ -263,7 +250,6 @@ json_t* boneStateRESTClass::defaultFunc (std::vector<std::string> tokens, uint32
 		return autonomous(body);
 	} else {
 		_target->writeRecord();
-		_target->release();
 		return NULL;
 	}
 }	
@@ -284,13 +270,11 @@ json_t* boneStateRESTClass::command(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	if (!::parse(val, &command)) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	free(input);
@@ -300,14 +284,11 @@ json_t* boneStateRESTClass::command(std::string body) {
 	if (boneStateClass::modeNames.get(command, &cmd)) {
 		if(_target->setCommand(cmd)) {
 			if (!_target->writeRecord()) {
-				_target->release();
 				return NULL;
 			}
-			_target->release();
 			return _target->pack();
 		} 
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -324,13 +305,11 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	if (!::parse(val, &(_target->waypointNext))) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	free(input);
@@ -338,13 +317,10 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) {
-			_target->release();
 			return NULL;
 		}
-		_target->release();
 		return _target->pack();
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -361,13 +337,11 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	if (!::parse(val, &(_target->waypointStrength))) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	free(input);
@@ -375,13 +349,10 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) {
-			_target->release();
 			return NULL;
 		}
-		_target->release();
 		return _target->pack();
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -398,13 +369,11 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	if (!::parse(val, &(_target->waypointStrengthMax))) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	free(input);
@@ -412,13 +381,10 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) {
-			_target->release();
 			return NULL;
 		}
-		_target->release();
 		return _target->pack();
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -435,13 +401,11 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	if (!::parse(val, &(_target->waypointAccuracy))) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	json_decref(input);
@@ -450,13 +414,10 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) {
-			_target->release();
 			return NULL;
 		}
-		_target->release();
 		return _target->pack();
 	} 
-	_target->release();
 	return NULL;
 }
 
@@ -473,12 +434,10 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	if ((!input) || (!_target->getLastRecord()) || val) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 	}
 	if (!::parse(val, &(_target->autonomous))) {
 		json_decref(input);
 		json_decref(val);
-		_target->release();
 		return NULL;
 	}
 	json_decref(input);
@@ -487,23 +446,18 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	clock_gettime(CLOCK_REALTIME, &(_target->lastContact));
 	if (_target->isValid()) {
 		if (_target->writeRecord()) {
-			_target->release();
 			return NULL;
 		}
-		_target->release();
 		return _target->pack();
 	} 
-	_target->release();
 	return NULL;
 }
 
 json_t* gpsRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
-		_target->release();
 		return _target->pack();
 	}
-	_target->release();
 	return NULL;
 }
 
@@ -519,10 +473,8 @@ bool gpsRESTClass::setTarget(gpsFixClass* target) {
 json_t* waypointRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
-		_target->release();
 		return _target->pack();
 	}
-	_target->release();
 	return NULL;
 }
 
@@ -538,10 +490,8 @@ bool waypointRESTClass::setTarget(waypointClass* target) {
 json_t* navRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
-		_target->release();
 		return _target->pack();
 	}
-	_target->release();
 	return NULL;
 }
 
@@ -557,10 +507,8 @@ bool navRESTClass::setTarget(navClass* target) {
 json_t* arduinoStateRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
 	if (_target->getLastRecord()) {
-		_target->release();
 		return _target->pack();
 	}
-	_target->release();
 	return NULL;
 }
 

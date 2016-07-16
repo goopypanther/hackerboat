@@ -87,7 +87,6 @@ void inputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
 		state->insertFault("No GNSS");
 		state->setMode(boatModeEnum::FAULT);
 	}
-	state->gps.release();
 }
 
 void outputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
@@ -95,6 +94,4 @@ void outputBB (boneStateClass *state, arduinoStateClass *ard, long stepNum) {
 	ard->heartbeat();
 	ard->appendRecord();
 	state->appendRecord();
-	ard->release();
-	state->release();
 }

@@ -80,7 +80,6 @@ int main (void) {
 					if (myFix.readSentence(sentence)) {		// parse the sentence; if the result is valid...
 						if (myFix.isValid()) {
 							myFix.appendRecord(); // write it to the database
-							myFix.release();
 							if ((cnt % 150) == 0) {	// every 150 valid fixes, discipline the local clock and the arduino log
 								arduinoStateClass timeTarget;
 								std::stringstream timestr;

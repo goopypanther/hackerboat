@@ -44,9 +44,7 @@ int main (void) {
 	int navCount = initNav(navInf);				// initialize the list of nav sources
 	if (!nav.getLastRecord()) {
 		
-	}
-	nav.release();
-	
+	}	
 
 	// initialize the frametime timespec
 	frametime.tv_sec = 0;
@@ -71,8 +69,6 @@ int main (void) {
 			}
 			nav.calc(boat.waypointStrengthMax);
 			nav.writeRecord();
-			nav.release();
-			boat.release();
 		} else {
 			logError::instance()->write("Navigation", "Failed to get last nav record");
 		}
