@@ -2732,11 +2732,7 @@ Please make sure your boards conform to these design rules.</description>
 <signal name="GND">
 <contactref element="U$1" pad="91"/>
 <contactref element="U$1" pad="89"/>
-<contactref element="U$1" pad="92"/>
 <contactref element="U$1" pad="90"/>
-<contactref element="U$1" pad="2"/>
-<contactref element="U$1" pad="48"/>
-<contactref element="U$1" pad="80"/>
 <contactref element="IMU" pad="GND"/>
 <contactref element="H1" pad="B3,2"/>
 <contactref element="H2" pad="B3,2"/>
@@ -2770,11 +2766,7 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="C26" pad="2"/>
 <contactref element="C27" pad="2"/>
 <contactref element="R28" pad="1"/>
-<contactref element="U$2" pad="3"/>
 <contactref element="U$2" pad="4"/>
-<contactref element="U$2" pad="9"/>
-<contactref element="U$2" pad="25"/>
-<contactref element="U$3" pad="24"/>
 <contactref element="U$5" pad="4"/>
 <contactref element="J3" pad="2"/>
 <polygon width="0.254" layer="16">
@@ -2791,7 +2783,6 @@ Please make sure your boards conform to these design rules.</description>
 </polygon>
 <contactref element="U$1" pad="1"/>
 <contactref element="U$1" pad="47"/>
-<contactref element="GPS" pad="GND"/>
 <contactref element="U$4" pad="24"/>
 <contactref element="U$5" pad="25"/>
 <contactref element="U$5" pad="3"/>
@@ -2800,6 +2791,15 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="5V/1-STAT" pad="C"/>
 <contactref element="7V4-STAT" pad="C"/>
 <contactref element="H7" pad="B3,2"/>
+<contactref element="U$1" pad="92"/>
+<contactref element="U$1" pad="92"/>
+<contactref element="U$2" pad="3"/>
+<contactref element="U$1" pad="2"/>
+<contactref element="U$1" pad="48"/>
+<contactref element="U$2" pad="25"/>
+<contactref element="U$3" pad="24"/>
+<contactref element="U$1" pad="80"/>
+<contactref element="U$2" pad="9"/>
 <wire x1="114.3" y1="86.36" x2="144.78" y2="105.41" width="0" layer="19" extent="1-1"/>
 <wire x1="114.3" y1="68.58" x2="114.3" y2="86.36" width="0" layer="19" extent="1-1"/>
 <wire x1="91.44" y1="68.707" x2="114.3" y2="68.58" width="0" layer="19" extent="1-1"/>
@@ -2828,16 +2828,15 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="23.28" y1="57.785" x2="28.575" y2="56.3" width="0" layer="19" extent="1-1"/>
 <wire x1="22.73" y1="60.325" x2="23.28" y2="57.785" width="0" layer="19" extent="1-1"/>
 <wire x1="22.73" y1="63.5" x2="22.73" y2="60.325" width="0" layer="19" extent="1-1"/>
-<wire x1="38.1" y1="45.339" x2="38.605" y2="53.975" width="0" layer="19" extent="1-1"/>
-<wire x1="32.605" y1="38.735" x2="38.1" y2="45.339" width="0" layer="19" extent="1-1"/>
 <wire x1="48.39" y1="53.975" x2="38.605" y2="53.975" width="0" layer="19" extent="1-1"/>
 <wire x1="22.86" y1="74.5744" x2="22.73" y2="63.5" width="0" layer="19" extent="1-1"/>
+<wire x1="32.605" y1="38.735" x2="38.605" y2="53.975" width="0" layer="19" extent="1-1"/>
 <wire x1="15.367" y1="33.02" x2="32.605" y2="38.735" width="0" layer="19" extent="1-1"/>
 <wire x1="10.795" y1="33.02" x2="15.367" y2="33.02" width="0" layer="19" extent="1-1"/>
 <wire x1="8.255" y1="33.02" x2="10.795" y2="33.02" width="0" layer="19" extent="1-1"/>
 <wire x1="3.937" y1="33.02" x2="8.255" y2="33.02" width="0" layer="19" extent="1-1"/>
 <wire x1="4.445" y1="24.765" x2="3.937" y2="33.02" width="0" layer="19" extent="1-1"/>
-<wire x1="51.943" y1="33.02" x2="38.1" y2="45.339" width="0" layer="19" extent="1-1"/>
+<wire x1="51.943" y1="33.02" x2="32.605" y2="38.735" width="0" layer="19" extent="1-1"/>
 <wire x1="56.515" y1="33.02" x2="51.943" y2="33.02" width="0" layer="19" extent="1-1"/>
 <wire x1="59.055" y1="33.02" x2="56.515" y2="33.02" width="0" layer="19" extent="1-1"/>
 <wire x1="63.373" y1="33.02" x2="59.055" y2="33.02" width="0" layer="19" extent="1-1"/>
@@ -2879,23 +2878,27 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="51.943" y1="58.42" x2="56.515" y2="58.42" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GNSS_RX">
-<contactref element="GPS" pad="RX"/>
 <contactref element="U$1" pad="59"/>
 <contactref element="U$5" pad="19"/>
 <wire x1="59.055" y1="48.26" x2="63.373" y2="48.26" width="0" layer="19" extent="1-1"/>
-<wire x1="35.56" y1="45.085" x2="59.055" y2="48.26" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GNSS_TX">
-<contactref element="GPS" pad="TX"/>
 <contactref element="U$1" pad="57"/>
 <contactref element="U$5" pad="20"/>
 <wire x1="59.055" y1="45.72" x2="63.627" y2="45.72" width="0" layer="19" extent="1-1"/>
-<wire x1="33.02" y1="45.339" x2="59.055" y2="45.72" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="+3V3">
 <contactref element="R19" pad="2"/>
 <contactref element="R20" pad="2"/>
+<contactref element="U$1" pad="49"/>
+<contactref element="U$5" pad="24"/>
+<contactref element="U$1" pad="50"/>
+<contactref element="U$2" pad="24"/>
 <wire x1="90.59" y1="63.5" x2="99.91" y2="63.5" width="0" layer="19" extent="1-1"/>
+<wire x1="63.627" y1="35.56" x2="90.59" y2="63.5" width="0" layer="19" extent="1-1"/>
+<wire x1="59.055" y1="35.56" x2="63.627" y2="35.56" width="0" layer="19" extent="1-1"/>
+<wire x1="56.515" y1="35.56" x2="59.055" y2="35.56" width="0" layer="19" extent="1-1"/>
+<wire x1="52.197" y1="35.56" x2="56.515" y2="35.56" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="+5V">
 <contactref element="IMU" pad="VIN"/>
@@ -3098,11 +3101,6 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="U$1" pad="54"/>
 <contactref element="U$2" pad="22"/>
 <wire x1="52.197" y1="40.64" x2="56.515" y2="40.64" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$118">
-<contactref element="U$1" pad="50"/>
-<contactref element="U$2" pad="24"/>
-<wire x1="52.197" y1="35.56" x2="56.515" y2="35.56" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$119">
 <contactref element="U$1" pad="46"/>
@@ -3395,16 +3393,9 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="59.055" y1="43.18" x2="63.373" y2="43.18" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="SYS_5V">
-<contactref element="GPS" pad="VIN"/>
 <contactref element="U$1" pad="53"/>
 <contactref element="U$5" pad="22"/>
 <wire x1="59.055" y1="40.64" x2="63.627" y2="40.64" width="0" layer="19" extent="1-1"/>
-<wire x1="40.64" y1="45.085" x2="59.055" y2="40.64" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="N$71">
-<contactref element="U$1" pad="49"/>
-<contactref element="U$5" pad="24"/>
-<wire x1="59.055" y1="35.56" x2="63.627" y2="35.56" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$177">
 <contactref element="R24" pad="1"/>
