@@ -26,6 +26,7 @@
 #include "navigation.hpp"
 #include "location.hpp"
 #include "boneState.hpp"
+#include "arduinoState.hpp"
 #include "sqliteStorage.hpp"
 #include <minmea.h>
 
@@ -56,6 +57,7 @@ int main (void) {
 		logError::instance()->write("GNSS", "Failed to create GPS log file");
 	}
 	
+	cnt = 0;
 	for (;;) {
 		
 		memset (&buf, '\0', sizeof(buf));
@@ -78,6 +80,16 @@ int main (void) {
 					if (myFix.readSentence(sentence)) {		// parse the sentence; if the result is valid...
 						if (myFix.isValid()) {
 							myFix.appendRecord(); // write it to the database
+							myFix.release();
+							if ((cnt % 150) == 0) {	// every 150 valid fixes, discipline the local clock and the arduino log
+								arduinoStateClass timeTarget;
+								std::stringstream timestr;
+								cout << "Setting local clock to GPS time" << std::endl;
+								clock_settime(CLOCK_REALTIME, &(myFix.gpsTime));
+								timestr << myFix.gpsTime.tv_sec << "." << myFix.gpsTime.tv_nsec;
+								timeTarget.writeArduino("f_writeTime", timestr.str());
+							} 
+							cnt++;
 						}
 					}
 				} else {

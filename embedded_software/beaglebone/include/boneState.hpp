@@ -44,7 +44,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 
 		void release(void) {
 			boneStorage->closeDatabase();
-			delete boneStorage;
+			boneStorage = NULL;
 		}
 		
 		timespec 					uTime;			/**< Time the record was made */
@@ -73,7 +73,7 @@ class boneStateClass : public hackerboatStateClassStorable {
 		virtual hackerboatStateStorage& storage();
 	
 	private:
-		hackerboatStateStorage *boneStorage;
+		hackerboatStateStorage *boneStorage = NULL;;
 };
 
 static inline const std::string& toString(boatModeEnum num) {

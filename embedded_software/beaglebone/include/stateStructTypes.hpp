@@ -201,7 +201,7 @@ class waypointClass : public hackerboatStateClassStorable {
 
 		void release(void) {
 			waypointStorage->closeDatabase();
-			delete waypointStorage;
+			waypointStorage = NULL;
 		}
 		
 		/* Concrete implementations of stateClassStorable */
@@ -219,7 +219,7 @@ class waypointClass : public hackerboatStateClassStorable {
 		action			_act;						/**< Action to perform when reaching a location */	
 		static const int8_t minActionEnum = 0;
 		static const int8_t maxActionEnum = 3;
-		hackerboatStateStorage *waypointStorage;
+		hackerboatStateStorage *waypointStorage = NULL;
 
 		
 	protected:

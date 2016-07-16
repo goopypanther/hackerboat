@@ -64,9 +64,10 @@ class navClass : public hackerboatStateClassStorable {
 		bool isValid(void) const;
 		bool initRecord(void);
 		virtual void release(void) {
-			navStorage->closeDatabase();
-			delete navStorage;
-			navStorage = NULL;
+			if (navStorage) {
+				navStorage->closeDatabase();
+				navStorage = NULL;
+			}
 		}
 		
 		locationClass	current;		/**< current location */
@@ -90,7 +91,7 @@ class navClass : public hackerboatStateClassStorable {
 
 		bool parseInfluences(json_t *);
 		json_t *packInfluences(void) const;
-		hackerboatStateStorage *navStorage;
+		hackerboatStateStorage *navStorage = NULL;
 };
 
 /** 

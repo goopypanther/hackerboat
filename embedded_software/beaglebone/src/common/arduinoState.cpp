@@ -388,9 +388,9 @@ json_t *arduinoStateClass::writeArduino(std::string func, std::string params) {
 		errLog->write("Arduino Serial", "Failed to open serial port for write");
 		return NULL;
 	// otherwise, make it a proper FILE structure
-	} //else {
+	} else {
 	//	ser = fdopen(ard_fd, "r+");
-	//}
+	}
 	
 	// build the query string and write to the serial port
 	std::ostringstream cmd;

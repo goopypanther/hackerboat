@@ -38,8 +38,10 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool corePopulate (void) USE_RESULT;			/**< Populate core data only */
 		bool setCommand (arduinoModeEnum c);
 		virtual void release(void) {
-			arduinoStorage->closeDatabase();
-			delete arduinoStorage;
+			if (arduinoStorage) {
+				arduinoStorage->closeDatabase();
+				arduinoStorage = NULL;
+			}
 		}
 		
 		// Command functions...
@@ -105,6 +107,8 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		virtual bool parse (json_t *input, bool seq);
 		virtual json_t *pack (bool seq = true) const;
 		virtual bool isValid (void) const;
+		
+		/* generic Arduino writer */
 		json_t	*writeArduino(std::string func, std::string query);		/**< Write to a function on the Arduino */
 		
 		~arduinoStateClass (void) {release();}
@@ -114,7 +118,7 @@ class arduinoStateClass : public hackerboatStateClassStorable {
 		bool 	setBoatMode (boatModeEnum s);
 		int 	openArduinoSerial (void);
 		void 	closeArduinoSerial (void);
-		hackerboatStateStorage *arduinoStorage;
+		hackerboatStateStorage *arduinoStorage = NULL;;
 		
 		int ard_fd = -1;
 		

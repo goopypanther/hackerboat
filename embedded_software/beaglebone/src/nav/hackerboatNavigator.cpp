@@ -45,6 +45,7 @@ int main (void) {
 	if (!nav.getLastRecord()) {
 		
 	}
+	nav.release();
 	
 
 	// initialize the frametime timespec
@@ -70,6 +71,8 @@ int main (void) {
 			}
 			nav.calc(boat.waypointStrengthMax);
 			nav.writeRecord();
+			nav.release();
+			boat.release();
 		} else {
 			logError::instance()->write("Navigation", "Failed to get last nav record");
 		}

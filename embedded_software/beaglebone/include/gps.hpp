@@ -39,8 +39,10 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		void closeGPSserial (void);
 		
 		virtual void release(void) {
-			gpsStorage->closeDatabase();
-			delete gpsStorage;
+			if (gpsStorage) {
+				gpsStorage->closeDatabase();
+				gpsStorage = NULL;
+			}
 		}
 		
 		timespec	uTime;					/**< Beaglebone time of last fix */
@@ -89,7 +91,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 			GSV.clear();
 			RMC.clear();
 		}
-		hackerboatStateStorage *gpsStorage;
+		hackerboatStateStorage *gpsStorage = NULL;
 };
 
 #endif

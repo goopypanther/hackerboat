@@ -274,7 +274,7 @@ void hackerboatStateStorage::createTable()
 
 void hackerboatStateStorage::closeDatabase (void)
 {
-	sqlite3_close_v2(dbh.get());
+	if ((this) && (dbh.get())) {sqlite3_close(dbh.get());}
 }
 
 //******************************************************************************
