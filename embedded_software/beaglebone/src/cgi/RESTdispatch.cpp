@@ -220,9 +220,11 @@ json_t* rootRESTClass::defaultFunc (std::vector<std::string> tokens, uint32_t cu
 
 json_t* boneStateRESTClass::root (std::vector<std::string> tokens, uint32_t currentToken, std::string query, httpMethod method, std::string body) {
 	if (!_target) return NULL;
-	if (_target->getLastRecord()) {
-		return _target->pack();
-	}
+	_target->getLastRecord();
+	return _target->pack();
+	//if (_target->getLastRecord()) {
+	//	return _target->pack();
+	//}
 	return NULL;
 }
 

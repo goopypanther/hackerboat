@@ -305,17 +305,14 @@ bool hackerboatStateClassStorable::writeRecord(void)
 	int columnCount = db.columnCount();
 	assert(sqlite3_bind_parameter_count(sth.get()) == columnCount+1);
 	if (!fillRow(sqliteParameterSlice(sth, 1, columnCount))) {
-		//sqlite3_reset(sth.get());
 		return false;
 	}
 	sqlite3_bind_int64(sth.get(), columnCount+1, _sequenceNum);
 	int rc = step(sth);
 	if (rc == SQLITE_DONE) {
-		//sqlite3_reset(sth.get());
 		return true;
 	} else {
 		db.logError(sth);
-		//sqlite3_reset(sth.get());
 		return false;
 	}
 }
@@ -327,16 +324,13 @@ bool hackerboatStateClassStorable::appendRecord(void)
 	assert(sqlite3_bind_parameter_count(sth.get()) == db.columnCount());
 	sqliteParameterSlice parameters(sth, 1, db.columnCount());
 	if (!fillRow(parameters))
-		//sqlite3_reset(sth.get());
 		return false;
 	int rc = step(sth);
 	if (rc == SQLITE_DONE) {
 		_sequenceNum = sqlite3_last_insert_rowid(db.dbh.get());
-		//sqlite3_reset(sth.get());
 		return true;
 	} else {
 		db.logError(sth);
-		//sqlite3_reset(sth.get());
 		return false;
 	}
 }
