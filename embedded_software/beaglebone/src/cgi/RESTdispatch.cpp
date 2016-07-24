@@ -269,7 +269,7 @@ json_t* boneStateRESTClass::command(std::string body) {
 	// check that the load went well, load in the the last state vector, 
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "command");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
 		return NULL;
@@ -304,7 +304,7 @@ json_t* boneStateRESTClass::waypointNext(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "waypointNext");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
 		return NULL;
@@ -336,7 +336,7 @@ json_t* boneStateRESTClass::waypointStrength(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "waypointStrength");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
 		return NULL;
@@ -368,7 +368,7 @@ json_t* boneStateRESTClass::waypointStrengthMax(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "waypointStrengthMax");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
 		return NULL;
@@ -400,7 +400,7 @@ json_t* boneStateRESTClass::waypointAccuracy(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "waypointAccuracy");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
 		return NULL;
@@ -433,9 +433,10 @@ json_t* boneStateRESTClass::autonomous(std::string body) {
 	input = json_loadb(body.c_str(), body.length(), JSON_DECODE_ANY, &errJSON);
 	// and see if we got a correctly formatted JSON object... otherwise, return NULL 
 	val = json_object_get(input, "autonomous");
-	if ((!input) || (!_target->getLastRecord()) || val) {
+	if ((!input) || (!_target->getLastRecord()) || !val) {
 		json_decref(input);
 		json_decref(val);
+		return NULL;
 	}
 	if (!::parse(val, &(_target->autonomous))) {
 		json_decref(input);
