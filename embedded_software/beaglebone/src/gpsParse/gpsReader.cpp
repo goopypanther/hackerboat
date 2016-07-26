@@ -81,12 +81,12 @@ int main (void) {
 						if (myFix.isValid()) {
 							myFix.appendRecord(); // write it to the database
 							if ((cnt % 150) == 0) {	// every 150 valid fixes, discipline the local clock and the arduino log
-								arduinoStateClass timeTarget;
+								//arduinoStateClass timeTarget;
 								std::stringstream timestr;
 								cout << "Setting local clock to GPS time" << std::endl;
 								clock_settime(CLOCK_REALTIME, &(myFix.gpsTime));
 								timestr << myFix.gpsTime.tv_sec << "." << myFix.gpsTime.tv_nsec;
-								timeTarget.writeArduino("f_writeTime", timestr.str());
+								//timeTarget.writeArduino("f_writeTime", timestr.str());
 							} 
 							cnt++;
 						}

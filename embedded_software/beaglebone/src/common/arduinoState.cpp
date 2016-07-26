@@ -456,8 +456,10 @@ int arduinoStateClass::openArduinoSerial (void) {
 	//cfmakeraw(&ard_attrib);
 	ard_attrib.c_cflag &= ~CBAUD;
 	ard_attrib.c_cflag |= BOTHER;
-	ard_attrib.c_ispeed = 1000000;
-	ard_attrib.c_ospeed = 1000000;
+	//ard_attrib.c_ispeed = 1000000;
+	//ard_attrib.c_ospeed = 1000000;
+        ard_attrib.c_ispeed = 115200;
+        ard_attrib.c_ospeed = 115200;
 	ard_attrib.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
 	ard_attrib.c_cflag &= ~(PARENB | CSTOPB | CSIZE);		// no parity, one stop bit
 	ard_attrib.c_cflag |= (CLOCAL | CREAD | CS8);			// ignore modem status lines, enable receiver, 8 bits per byte
