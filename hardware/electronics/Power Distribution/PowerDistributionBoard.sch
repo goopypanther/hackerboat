@@ -10170,7 +10170,7 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED5" gate="G$1" x="248.92" y="149.86"/>
 <instance part="R17" gate="G$1" x="248.92" y="157.48" rot="R90"/>
 <instance part="P+11" gate="1" x="139.7" y="165.1" rot="R90"/>
-<instance part="GND14" gate="1" x="193.04" y="147.32"/>
+<instance part="GND14" gate="1" x="193.04" y="139.7"/>
 <instance part="LED6" gate="G$1" x="248.92" y="182.88"/>
 <instance part="R18" gate="G$1" x="248.92" y="190.5" rot="R90"/>
 <instance part="MOTOR-RELAY" gate="G$1" x="220.98" y="119.38"/>
@@ -10191,7 +10191,7 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED8" gate="G$1" x="177.8" y="182.88"/>
 <instance part="R20" gate="G$1" x="177.8" y="190.5" rot="R90"/>
 <instance part="P+12" gate="1" x="121.92" y="203.2"/>
-<instance part="GND15" gate="1" x="121.92" y="180.34"/>
+<instance part="GND15" gate="1" x="121.92" y="172.72"/>
 <instance part="P+13" gate="1" x="190.5" y="203.2"/>
 <instance part="GND16" gate="1" x="190.5" y="180.34"/>
 <instance part="PWR-IN" gate="-1" x="147.32" y="165.1" smashed="yes">
@@ -10228,25 +10228,55 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 </net>
 <net name="GND" class="0">
 <segment>
-<pinref part="MAIN" gate="-SW" pin="4"/>
 <pinref part="GND14" gate="1" pin="GND"/>
-<wire x1="200.66" y1="152.4" x2="193.04" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="193.04" y1="152.4" x2="193.04" y2="149.86" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="152.4" x2="195.58" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="152.4" x2="193.04" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="152.4" x2="193.04" y2="142.24" width="0.1524" layer="91"/>
 <pinref part="AUX-PWR" gate="G$1" pin="2"/>
 <wire x1="185.42" y1="152.4" x2="193.04" y2="152.4" width="0.1524" layer="91"/>
 <junction x="193.04" y="152.4"/>
+<pinref part="MAIN" gate="-SW" pin="6"/>
+<wire x1="200.66" y1="147.32" x2="198.12" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="147.32" x2="198.12" y2="152.4" width="0.1524" layer="91"/>
+<pinref part="MAIN" gate="-SW" pin="4"/>
+<wire x1="200.66" y1="152.4" x2="198.12" y2="152.4" width="0.1524" layer="91"/>
+<junction x="198.12" y="152.4"/>
+<pinref part="MAIN" gate="-SW" pin="1"/>
+<wire x1="200.66" y1="160.02" x2="195.58" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="160.02" x2="195.58" y2="152.4" width="0.1524" layer="91"/>
+<junction x="195.58" y="152.4"/>
 </segment>
 <segment>
 <pinref part="HORN" gate="-SW" pin="4"/>
 <pinref part="GND15" gate="1" pin="GND"/>
-<wire x1="129.54" y1="185.42" x2="121.92" y2="185.42" width="0.1524" layer="91"/>
-<wire x1="121.92" y1="185.42" x2="121.92" y2="182.88" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="185.42" x2="127" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="124.46" y1="185.42" x2="121.92" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="121.92" y1="185.42" x2="121.92" y2="175.26" width="0.1524" layer="91"/>
+<pinref part="HORN" gate="-SW" pin="3"/>
+<wire x1="129.54" y1="187.96" x2="124.46" y2="187.96" width="0.1524" layer="91"/>
+<wire x1="124.46" y1="187.96" x2="124.46" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="124.46" y1="185.42" x2="127" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="127" y1="185.42" x2="127" y2="180.34" width="0.1524" layer="91"/>
+<pinref part="HORN" gate="-SW" pin="6"/>
+<wire x1="127" y1="180.34" x2="129.54" y2="180.34" width="0.1524" layer="91"/>
+<junction x="124.46" y="185.42"/>
+<junction x="127" y="185.42"/>
 </segment>
 <segment>
 <pinref part="CONTROL" gate="-SW" pin="4"/>
-<wire x1="190.5" y1="185.42" x2="200.66" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="190.5" y1="185.42" x2="195.58" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="185.42" x2="198.12" y2="185.42" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="185.42" x2="200.66" y2="185.42" width="0.1524" layer="91"/>
 <wire x1="190.5" y1="182.88" x2="190.5" y2="185.42" width="0.1524" layer="91"/>
 <pinref part="GND16" gate="1" pin="GND"/>
+<pinref part="CONTROL" gate="-SW" pin="6"/>
+<wire x1="200.66" y1="180.34" x2="198.12" y2="180.34" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="180.34" x2="198.12" y2="185.42" width="0.1524" layer="91"/>
+<pinref part="CONTROL" gate="-SW" pin="3"/>
+<wire x1="200.66" y1="187.96" x2="195.58" y2="187.96" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="187.96" x2="195.58" y2="185.42" width="0.1524" layer="91"/>
+<junction x="198.12" y="185.42"/>
+<junction x="195.58" y="185.42"/>
 </segment>
 <segment>
 <pinref part="PWR-IN" gate="-2" pin="K"/>
@@ -10256,8 +10286,18 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <segment>
 <pinref part="MOTOR" gate="-SW" pin="4"/>
 <pinref part="GND18" gate="1" pin="GND"/>
-<wire x1="200.66" y1="119.38" x2="187.96" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="200.66" y1="119.38" x2="198.12" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="119.38" x2="195.58" y2="119.38" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="119.38" x2="187.96" y2="119.38" width="0.1524" layer="91"/>
 <wire x1="187.96" y1="119.38" x2="187.96" y2="116.84" width="0.1524" layer="91"/>
+<junction x="198.12" y="119.38"/>
+<junction x="195.58" y="119.38"/>
+<pinref part="MOTOR" gate="-SW" pin="3"/>
+<wire x1="200.66" y1="121.92" x2="198.12" y2="121.92" width="0.1524" layer="91"/>
+<wire x1="198.12" y1="121.92" x2="198.12" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="MOTOR" gate="-SW" pin="6"/>
+<wire x1="200.66" y1="114.3" x2="195.58" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="195.58" y1="114.3" x2="195.58" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="MOTOR" gate="G$5" pin="GND"/>
@@ -10500,11 +10540,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 </net>
 <net name="N$34" class="0">
 <segment>
-<pinref part="MAIN" gate="-SW" pin="1"/>
-<wire x1="200.66" y1="160.02" x2="193.04" y2="160.02" width="0.1524" layer="91"/>
-<wire x1="193.04" y1="160.02" x2="193.04" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="AUX-PWR" gate="G$1" pin="1"/>
-<wire x1="193.04" y1="154.94" x2="185.42" y2="154.94" width="0.1524" layer="91"/>
+<pinref part="MAIN" gate="-SW" pin="3"/>
+<wire x1="200.66" y1="154.94" x2="185.42" y2="154.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
