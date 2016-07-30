@@ -156,10 +156,14 @@
 </layers>
 <board>
 <plain>
-<wire x1="0" y1="0" x2="58.42" y2="0" width="0.254" layer="20"/>
-<wire x1="58.42" y1="0" x2="58.42" y2="53.34" width="0.254" layer="20"/>
-<wire x1="58.42" y1="53.34" x2="0" y2="53.34" width="0.254" layer="20"/>
-<wire x1="0" y1="53.34" x2="0" y2="0" width="0.254" layer="20"/>
+<wire x1="0" y1="50.8" x2="0" y2="2.54" width="0.254" layer="20"/>
+<wire x1="0" y1="2.54" x2="2.54" y2="0" width="0.254" layer="20" curve="90"/>
+<wire x1="2.54" y1="0" x2="55.88" y2="0" width="0.254" layer="20"/>
+<wire x1="55.88" y1="0" x2="58.42" y2="2.54" width="0.254" layer="20" curve="90"/>
+<wire x1="58.42" y1="2.54" x2="58.42" y2="50.8" width="0.254" layer="20"/>
+<wire x1="58.42" y1="50.8" x2="55.88" y2="53.34" width="0.254" layer="20" curve="90"/>
+<wire x1="55.88" y1="53.34" x2="2.54" y2="53.34" width="0.254" layer="20"/>
+<wire x1="2.54" y1="53.34" x2="0" y2="50.8" width="0.254" layer="20" curve="90"/>
 </plain>
 <libraries>
 <library name="adafruit">
@@ -1604,6 +1608,25 @@ chip</description>
 </package>
 </packages>
 </library>
+<library name="holes">
+<description>&lt;b&gt;Mounting Holes and Pads&lt;/b&gt;&lt;p&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+<package name="3,2-PAD">
+<description>&lt;b&gt;MOUNTING PAD&lt;/b&gt; 3.2 mm, round</description>
+<wire x1="-2.159" y1="0" x2="0" y2="-2.159" width="2.4892" layer="51" curve="90" cap="flat"/>
+<wire x1="0" y1="2.159" x2="2.159" y2="0" width="2.4892" layer="51" curve="-90" cap="flat"/>
+<circle x="0" y="0" radius="3.429" width="0.1524" layer="21"/>
+<circle x="0" y="0" radius="0.762" width="0.4572" layer="51"/>
+<circle x="0" y="0" radius="3.683" width="1.27" layer="39"/>
+<circle x="0" y="0" radius="3.683" width="1.27" layer="40"/>
+<circle x="0" y="0" radius="3.556" width="1.016" layer="43"/>
+<circle x="0" y="0" radius="1.7" width="0.1524" layer="21"/>
+<pad name="B3,2" x="0" y="0" drill="3.2" diameter="5.842"/>
+<text x="-1.27" y="-3.81" size="1.27" layer="48">3,2</text>
+</package>
+</packages>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -1786,18 +1809,45 @@ Please make sure your boards conform to these design rules for lowest Gold Phoen
 </pass>
 </autorouter>
 <elements>
-<element name="U1" library="adafruit" package="ARDUINOR3-BPLACE" value="ARDUINOR3-BPLACE" x="-10.16" y="0"/>
-<element name="U$1" library="SparkFun-DigitalIC" package="SO08" value="RS485SOIC" x="34.29" y="21.59" rot="R270"/>
-<element name="J1" library="SparkFun-Connectors" package="2X3" value="AVR_SPI_PRG_6PTH" x="21.59" y="11.43" rot="R90"/>
-<element name="U2" library="SparkFun-DigitalIC" package="TQFP32-08" value="ATMEGA328P_TQFP" x="17.78" y="27.94">
-<attribute name="PROD_ID" value="IC-09069" x="17.78" y="27.94" size="1.778" layer="27" display="off"/>
+<element name="U1" library="adafruit" package="ARDUINOR3-BPLACE" value="ARDUINOR3-BPLACE" x="-10.16" y="0" smashed="yes"/>
+<element name="U$1" library="SparkFun-DigitalIC" package="SO08" value="RS485SOIC" x="34.29" y="21.59" smashed="yes" rot="R270">
+<attribute name="VALUE" x="33.655" y="22.86" size="0.8128" layer="27" rot="R270"/>
+<attribute name="NAME" x="34.29" y="22.86" size="0.8128" layer="25" rot="R270"/>
 </element>
-<element name="U3" library="SparkFun-PowerIC" package="SOT223" value="V_REG_317SMD" x="34.29" y="12.7"/>
-<element name="C1" library="resistor" package="C0603" value="" x="34.29" y="25.4" rot="R180"/>
-<element name="C2" library="resistor" package="C0603" value="" x="11.43" y="27.94" rot="R270"/>
-<element name="C3" library="resistor" package="C1206" value="" x="29.21" y="12.7" rot="R270"/>
-<element name="C4" library="resistor" package="C1206" value="" x="39.37" y="12.7" rot="R270"/>
-<element name="X1" library="con-molex-c-grid-sl" package="70555-POS3" value="HEADER_POS3_70555" x="45.72" y="21.59" rot="R270"/>
+<element name="J1" library="SparkFun-Connectors" package="2X3" value="AVR_SPI_PRG_6PTH" x="21.59" y="11.43" smashed="yes" rot="R90">
+<attribute name="NAME" x="17.145" y="10.16" size="0.8128" layer="25" ratio="10" rot="R90"/>
+<attribute name="VALUE" x="24.765" y="10.16" size="0.8128" layer="27" rot="R90"/>
+</element>
+<element name="U2" library="SparkFun-DigitalIC" package="TQFP32-08" value="ATMEGA328P_TQFP" x="17.78" y="27.94" smashed="yes">
+<attribute name="PROD_ID" value="IC-09069" x="17.78" y="27.94" size="1.778" layer="27" display="off"/>
+<attribute name="NAME" x="14.605" y="33.02" size="0.8128" layer="25"/>
+<attribute name="VALUE" x="15.24" y="21.59" size="0.8128" layer="27"/>
+</element>
+<element name="U3" library="SparkFun-PowerIC" package="SOT223" value="V_REG_317SMD" x="34.29" y="12.7" smashed="yes">
+<attribute name="NAME" x="33.4645" y="17.2085" size="0.8128" layer="25"/>
+<attribute name="VALUE" x="33.2105" y="12.5095" size="0.8128" layer="27"/>
+</element>
+<element name="C1" library="resistor" package="C0603" value="" x="34.29" y="25.4" smashed="yes" rot="R180">
+<attribute name="NAME" x="35.179" y="24.638" size="0.8128" layer="25" rot="R180"/>
+<attribute name="VALUE" x="35.179" y="27.432" size="1.27" layer="27" rot="R180"/>
+</element>
+<element name="C2" library="resistor" package="C0603" value="" x="11.43" y="27.94" smashed="yes" rot="R270">
+<attribute name="NAME" x="12.192" y="28.829" size="0.8128" layer="25" rot="R270"/>
+<attribute name="VALUE" x="9.398" y="28.829" size="1.27" layer="27" rot="R270"/>
+</element>
+<element name="C3" library="resistor" package="C1206" value="" x="29.21" y="12.7" smashed="yes" rot="R270">
+<attribute name="NAME" x="30.353" y="13.97" size="0.8128" layer="25" rot="R270"/>
+<attribute name="VALUE" x="26.797" y="13.97" size="1.27" layer="27" rot="R270"/>
+</element>
+<element name="C4" library="resistor" package="C1206" value="" x="39.37" y="12.7" smashed="yes" rot="R270">
+<attribute name="NAME" x="40.513" y="13.97" size="0.8128" layer="25" rot="R270"/>
+<attribute name="VALUE" x="36.957" y="13.97" size="1.27" layer="27" rot="R270"/>
+</element>
+<element name="X1" library="con-molex-c-grid-sl" package="70555-POS3" value="HEADER_POS3_70555" x="45.72" y="21.59" smashed="yes" rot="R270"/>
+<element name="H1" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="3.81" y="2.54" smashed="yes"/>
+<element name="H2" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="55.88" y="7.62" smashed="yes"/>
+<element name="H3" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="55.88" y="35.56" smashed="yes"/>
+<element name="H4" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="5.08" y="50.8" smashed="yes"/>
 </elements>
 <signals>
 <signal name="GND">
@@ -1816,16 +1866,24 @@ Please make sure your boards conform to these design rules for lowest Gold Phoen
 <contactref element="X1" pad="P$3"/>
 <contactref element="C1" pad="2"/>
 <polygon width="0.254" layer="1" spacing="0.254">
-<vertex x="0" y="0"/>
-<vertex x="58.42" y="0"/>
-<vertex x="58.42" y="53.34"/>
-<vertex x="0" y="53.34"/>
+<vertex x="0" y="50.8"/>
+<vertex x="0" y="2.54" curve="90"/>
+<vertex x="2.54" y="0"/>
+<vertex x="55.88" y="0" curve="90"/>
+<vertex x="58.42" y="2.54"/>
+<vertex x="58.42" y="50.8" curve="90"/>
+<vertex x="55.88" y="53.34"/>
+<vertex x="2.54" y="53.34" curve="90"/>
 </polygon>
 <polygon width="0.254" layer="16" spacing="0.254">
-<vertex x="0" y="0"/>
-<vertex x="58.42" y="0"/>
-<vertex x="58.42" y="53.34"/>
-<vertex x="0" y="53.34"/>
+<vertex x="0" y="50.8"/>
+<vertex x="0" y="2.54" curve="90"/>
+<vertex x="2.54" y="0"/>
+<vertex x="55.88" y="0" curve="90"/>
+<vertex x="58.42" y="2.54"/>
+<vertex x="58.42" y="50.8" curve="90"/>
+<vertex x="55.88" y="53.34"/>
+<vertex x="2.54" y="53.34" curve="90"/>
 </polygon>
 </signal>
 <signal name="3V">
