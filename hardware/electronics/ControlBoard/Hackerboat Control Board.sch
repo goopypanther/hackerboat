@@ -19182,7 +19182,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="J1" library="SparkFun-Connectors" deviceset="M03" device="LOCK"/>
 <part name="J2" library="SparkFun-Connectors" deviceset="M03" device="LOCK"/>
 <part name="J3" library="SparkFun-Connectors" deviceset="M04" device="LOCK"/>
-<part name="J4" library="SparkFun-Connectors" deviceset="M05" device="LOCK"/>
+<part name="ENABLE/DISARM" library="SparkFun-Connectors" deviceset="M05" device="LOCK"/>
 <part name="J5" library="SparkFun-Connectors" deviceset="M09" device="LOCK"/>
 <part name="J6" library="SparkFun-Connectors" deviceset="M10" device="LOCK"/>
 <part name="POWER_INPUT" library="logos-headers" deviceset="3-1437664-0" device=""/>
@@ -19363,7 +19363,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+59" library="supply1" deviceset="+5V" device=""/>
 <part name="GND102" library="supply1" deviceset="GND" device=""/>
 <part name="AUX_GPIO" library="SparkFun-Connectors" deviceset="M06X2" device="PTH_FEMALE" value="2X6 FEMALE"/>
-<part name="U$6" library="SparkFun-DigitalIC" deviceset="RS485" device="SOIC"/>
+<part name="U28" library="SparkFun-DigitalIC" deviceset="RS485" device="SOIC"/>
 <part name="RS485" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555"/>
 <part name="J11" library="SparkFun-Connectors" deviceset="M03" device="LOCK"/>
 <part name="GND103" library="supply1" deviceset="GND" device=""/>
@@ -20989,7 +20989,7 @@ RELAY OUTPUT</text>
 <attribute name="NAME" x="154.178" y="24.13" size="1.778" layer="95" rot="R90"/>
 </instance>
 <instance part="GND47" gate="1" x="88.9" y="5.08" rot="MR0"/>
-<instance part="J4" gate="G$1" x="165.1" y="33.02" rot="R180"/>
+<instance part="ENABLE/DISARM" gate="G$1" x="165.1" y="33.02" rot="R180"/>
 <instance part="RLY0" gate="G$1" x="182.88" y="160.02"/>
 <instance part="R62" gate="G$1" x="182.88" y="167.64" rot="R90"/>
 <instance part="RLY1" gate="G$1" x="172.72" y="160.02"/>
@@ -21163,7 +21163,7 @@ RELAY OUTPUT</text>
 <wire x1="88.9" y1="12.7" x2="88.9" y2="10.16" width="0.1524" layer="91"/>
 <wire x1="88.9" y1="10.16" x2="88.9" y2="7.62" width="0.1524" layer="91"/>
 <wire x1="157.48" y1="33.02" x2="142.24" y2="33.02" width="0.1524" layer="91"/>
-<pinref part="J4" gate="G$1" pin="3"/>
+<pinref part="ENABLE/DISARM" gate="G$1" pin="3"/>
 <pinref part="ENABLE" gate="G$1" pin="C"/>
 <wire x1="78.74" y1="10.16" x2="88.9" y2="10.16" width="0.1524" layer="91"/>
 <pinref part="DISARM" gate="G$1" pin="C"/>
@@ -21504,7 +21504,7 @@ RELAY OUTPUT</text>
 <label x="45.72" y="30.48" size="1.778" layer="95" rot="R180" xref="yes"/>
 <wire x1="53.34" y1="30.48" x2="45.72" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="157.48" y1="30.48" x2="142.24" y2="30.48" width="0.1524" layer="91"/>
-<pinref part="J4" gate="G$1" pin="4"/>
+<pinref part="ENABLE/DISARM" gate="G$1" pin="4"/>
 <pinref part="R68" gate="G$1" pin="2"/>
 <wire x1="55.88" y1="20.32" x2="53.34" y2="20.32" width="0.1524" layer="91"/>
 <wire x1="53.34" y1="20.32" x2="53.34" y2="30.48" width="0.1524" layer="91"/>
@@ -21588,7 +21588,7 @@ RELAY OUTPUT</text>
 <net name="N$87" class="0">
 <segment>
 <pinref part="POWER_STATE" gate="G$1" pin="1"/>
-<pinref part="J4" gate="G$1" pin="1"/>
+<pinref part="ENABLE/DISARM" gate="G$1" pin="1"/>
 <wire x1="157.48" y1="38.1" x2="142.24" y2="38.1" width="0.1524" layer="91"/>
 <pinref part="R89" gate="G$1" pin="1"/>
 <wire x1="124.46" y1="38.1" x2="142.24" y2="38.1" width="0.1524" layer="91"/>
@@ -21597,7 +21597,7 @@ RELAY OUTPUT</text>
 <net name="N$88" class="0">
 <segment>
 <pinref part="POWER_STATE" gate="G$1" pin="2"/>
-<pinref part="J4" gate="G$1" pin="2"/>
+<pinref part="ENABLE/DISARM" gate="G$1" pin="2"/>
 <wire x1="157.48" y1="35.56" x2="142.24" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="R90" gate="G$1" pin="1"/>
 <wire x1="137.16" y1="35.56" x2="142.24" y2="35.56" width="0.1524" layer="91"/>
@@ -21634,7 +21634,7 @@ RELAY OUTPUT</text>
 <net name="N$95" class="0">
 <segment>
 <pinref part="POWER_STATE" gate="G$1" pin="5"/>
-<pinref part="J4" gate="G$1" pin="5"/>
+<pinref part="ENABLE/DISARM" gate="G$1" pin="5"/>
 <wire x1="157.48" y1="27.94" x2="142.24" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="142.24" y1="27.94" x2="134.62" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="SJ2" gate="1" pin="1"/>
@@ -21672,7 +21672,7 @@ RELAY OUTPUT</text>
 <instance part="GND75" gate="1" x="58.42" y="182.88" rot="R270"/>
 <instance part="C9" gate="G$1" x="111.76" y="147.32"/>
 <instance part="C10" gate="G$1" x="114.3" y="88.9"/>
-<instance part="U$6" gate="G$1" x="78.74" y="22.86"/>
+<instance part="U28" gate="G$1" x="78.74" y="22.86"/>
 <instance part="RS485" gate="G$1" x="134.62" y="20.32"/>
 <instance part="J11" gate="J$1" x="137.16" y="35.56" rot="R180"/>
 <instance part="GND103" gate="1" x="99.06" y="10.16"/>
@@ -21806,7 +21806,7 @@ RELAY OUTPUT</text>
 <wire x1="60.96" y1="182.88" x2="63.5" y2="182.88" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="U$6" gate="G$1" pin="GND"/>
+<pinref part="U28" gate="G$1" pin="GND"/>
 <pinref part="RS485" gate="G$1" pin="3"/>
 <wire x1="129.54" y1="17.78" x2="127" y2="17.78" width="0.1524" layer="91"/>
 <pinref part="J11" gate="J$1" pin="3"/>
@@ -21949,7 +21949,7 @@ RELAY OUTPUT</text>
 <junction x="86.36" y="182.88"/>
 </segment>
 <segment>
-<pinref part="U$6" gate="G$1" pin="VCC"/>
+<pinref part="U28" gate="G$1" pin="VCC"/>
 <wire x1="93.98" y1="25.4" x2="99.06" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="25.4" x2="99.06" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="P+60" gate="1" pin="+5V"/>
@@ -22122,7 +22122,7 @@ RELAY OUTPUT</text>
 </net>
 <net name="N$27" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="B"/>
+<pinref part="U28" gate="G$1" pin="B"/>
 <pinref part="RS485" gate="G$1" pin="1"/>
 <wire x1="129.54" y1="22.86" x2="121.92" y2="22.86" width="0.1524" layer="91"/>
 <pinref part="J11" gate="J$1" pin="1"/>
@@ -22134,7 +22134,7 @@ RELAY OUTPUT</text>
 </net>
 <net name="N$86" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="A"/>
+<pinref part="U28" gate="G$1" pin="A"/>
 <pinref part="RS485" gate="G$1" pin="2"/>
 <wire x1="129.54" y1="20.32" x2="124.46" y2="20.32" width="0.1524" layer="91"/>
 <pinref part="J11" gate="J$1" pin="2"/>
@@ -22146,9 +22146,9 @@ RELAY OUTPUT</text>
 </net>
 <net name="RS_485_DIR_SELECT_5V" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="/RE"/>
+<pinref part="U28" gate="G$1" pin="/RE"/>
 <wire x1="68.58" y1="22.86" x2="66.04" y2="22.86" width="0.1524" layer="91"/>
-<pinref part="U$6" gate="G$1" pin="DE"/>
+<pinref part="U28" gate="G$1" pin="DE"/>
 <wire x1="66.04" y1="22.86" x2="63.5" y2="22.86" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="20.32" x2="66.04" y2="20.32" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="20.32" x2="66.04" y2="22.86" width="0.1524" layer="91"/>
@@ -22158,14 +22158,14 @@ RELAY OUTPUT</text>
 </net>
 <net name="BBB_UART1_TX_5V" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="DI"/>
+<pinref part="U28" gate="G$1" pin="DI"/>
 <wire x1="68.58" y1="17.78" x2="63.5" y2="17.78" width="0.1524" layer="91"/>
 <label x="63.5" y="17.78" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="BBB_UART1_RX_5V" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="RO"/>
+<pinref part="U28" gate="G$1" pin="RO"/>
 <wire x1="68.58" y1="25.4" x2="66.04" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="25.4" x2="66.04" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="27.94" x2="63.5" y2="27.94" width="0.1524" layer="91"/>
