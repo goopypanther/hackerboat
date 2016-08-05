@@ -1,0 +1,14 @@
+Row {
+    Col {
+        CTRLBOARD
+        POWERDISTRO
+    }
+    Col {
+        CTRLBOARD
+        POWERDISTRO
+    }
+    Col {
+        CTRLBOARD
+        POWERDISTRO
+    }
+}
