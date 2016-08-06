@@ -18,6 +18,7 @@
 extern "C" {
 #include <err.h>
 #include <string.h>
+#include <unistd.h>
 #include <sqlite3.h>
 #include "jansson.h"
 }
@@ -206,6 +207,18 @@ static void log_trace(void *ctxt, const char *msg)
 	std::cerr << "SQL: " << msg << std::endl;
 }
 
+static int busy_sleep(void *ctxt, int count)
+{
+	if (count > 100) {
+		return 0;
+	}
+	if (count > 20) {
+		warnx("busy database: sleeping[%d]", count);
+	}
+	::usleep(count > 10 ? 50000 : 1000);
+	return 1;
+}
+
 shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 {
 	std::string name( filename? filename : ":memory:" );
@@ -243,6 +256,7 @@ shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 		if (::getenv("SQL_TRACE") != NULL) {
 			sqlite3_trace(p, log_trace, NULL);  // Trace SQL to std::cerr
 		}
+		sqlite3_busy_handler(p, busy_sleep, NULL);
 		dbh.reset(p, dbh_deleter());
 		open_files.emplace(name, dbh);
 	}
