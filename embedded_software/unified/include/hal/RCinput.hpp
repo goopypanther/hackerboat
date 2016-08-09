@@ -27,7 +27,7 @@
 		int getThrottle (void);			/**< Get the last throttle position from the RC input 				*/
 		int getRudder (void);			/**< Get the last rudder position from the RC input 				*/
 		rcModeEnum getMode (void);		/**< Get the last mode command from the RC input 					*/	
-		bool execute (void);			/**< Gather input from the RC S.BUS (meant to be called regularly)	*/
+		bool execute (void);			/**< Gather input from the RC S.BUS (meant to be called in a loop)	*/
 		~rcInputClass();				/**< Explicit destructor to make sure we close out the serial port.	*/
 		
 		timespec lastInput;				/**< Time that last input was processed 							*/

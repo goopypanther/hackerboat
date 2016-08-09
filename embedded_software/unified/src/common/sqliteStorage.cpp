@@ -7,7 +7,7 @@
  ******************************************************************************/
 
 #include "sqliteStorage.hpp"
-#include "stateStructTypes.hpp"
+#include "hackerboatRoot.hpp"
 #include "logs.hpp"
 #include "config.h"
 

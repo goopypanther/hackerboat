@@ -5,7 +5,7 @@
 extern "C" {
 #include <sqlite3.h>
 }
-#include "stateStructTypes.hpp"
+#include "hackerboatRoot.hpp"
 
 static bool table_exists(shared_dbh& dbh, const char *tablename)
 {

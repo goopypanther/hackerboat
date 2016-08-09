@@ -1,5 +1,7 @@
 
-#include "stateStructTypes.hpp"
+#include "hackerboatRoot.hpp"
+#include "orientation.hpp"
+#include "location.hpp"
 #include "navigation.hpp"
 #include "test_utilities.hpp"
 #include <gtest/gtest.h>

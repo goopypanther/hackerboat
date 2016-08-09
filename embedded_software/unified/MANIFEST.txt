@@ -9,10 +9,12 @@ cmake (to build jansson)
 automake  (at least version 1.10)
 libtool
 daemontools
+libcurl
 
 These are not available as packages, but are fetched and built by a script:
 
 https://github.com/akheron/jansson
+https://github.com/google/libkml
 
 These are useful for development and debugging:
 

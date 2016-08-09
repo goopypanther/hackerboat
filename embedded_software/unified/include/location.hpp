@@ -16,9 +16,7 @@
 #include "config.h"
 #include <math.h>
 #include <string>
-
-class sqliteParameterSlice;
-class sqliteRowReference;
+#include "hackerboatRoot.hpp"
 
 /**
  * @class locationClass
@@ -27,7 +25,7 @@ class sqliteRowReference;
  *
  */
 
-class locationClass {
+class locationClass : public hackerboatStateClass {
 	public:
 		enum courseType {
 			GreatCircle,
@@ -40,8 +38,6 @@ class locationClass {
 		  : _lat(lat), _lon(lon)
 		{ };
 		bool isValid (void) const;						/**< Check for validity */
-		bool parse (json_t *input);						/**< Populate the object from the given json object */
-		json_t *pack (void) const;						/**< Pack the contents of the object into a json object and return a pointer to that object*/
 		double bearing (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the bearing from the current location to the target */
 		double distance (const locationClass& dest, courseType type = GreatCircle) const;
 
@@ -51,8 +47,6 @@ class locationClass {
 		static double inline deg2rad (double deg) { return deg * ( M_PI / 180.0 ); }
 		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }
 
-		bool fillRow(sqliteParameterSlice) const;
-		bool readFromRow(sqliteRowReference);
 };
 
 #endif /* LOCATION_H */

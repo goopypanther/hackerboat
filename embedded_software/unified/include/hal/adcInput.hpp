@@ -1,6 +1,6 @@
 /******************************************************************************
- * Hackerboat orientation input module
- * hal/orientationInput.hpp
+ * Hackerboat ADC input module
+ * hal/adcInput.hpp
  * This module reads orientation data
  *
  * See the Hackerboat documentation for more details
@@ -10,22 +10,21 @@
  *
  ******************************************************************************/
 
-#ifndef ORIENTATIONINPUT_H
-#define ORIENTATIONINPUT_H
+#ifndef ADCINPUT_H
+#define ADCINPUT_H
 
 #include <string>
 #include <stdlib.h>
 #include <time.h>
-#include "orientation.hpp"
+#include <vector>
 #include "hal/config.h"
 
-class orientationInputClass {
-	orientationInputClass(void);			
-	orientation getOrientation(void);		/**< Get the last orientation recorded */
-	bool execute(void);						/**< Gather input from orientation sensor(s) (meant to be called in a loop)	*/
+class adcInputClass {
+	adcInputClass(void);			
+	vector<int> getvalues (void);			/**< Return the ADC values */
+	bool execute(void);						/**< Gather input from adc channels (meant to be called in a loop)	*/
 	
 	timespec lastInput;						/**< Time that last input was processed 							*/
 };
 
 #endif
- 
