@@ -97,12 +97,19 @@ The communication MAY also contain the following fields:
 				MotorRelay5I:<motor relay 5 current>,
 				HornRelayI:<horn relay current>,
 				StopRelayI:<stop relay current>,
-				EnbRelayI:<enable relay current>}
+				EnbRelayI:<enable relay current>,
+				ServoI:<servo power current>},
+	 LinkRSSI:<rssi>
 	}
 
 The variables are defined as follows:
 
-
+- **TargetWaypoint:** The target waypoint, counting the coordinate tuples from zero.
+- **TargetHeading:** The target heading, in degress clockwise from magnetic north. 
+- **BatteryData:** Data on the various main bus voltages and currents.
+- **OutputState:** The state of all outputs.
+- **HealthMon:** State of the various relay outputs and servo current
+- **LinkRSSI:** RSSI of the network link.
 
 The response from the server to the boat SHALL contain the following fields:
 
