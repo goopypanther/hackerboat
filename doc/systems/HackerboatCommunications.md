@@ -24,9 +24,7 @@ If the BoatName and BoatKey match, the server SHALL respond to the command as de
 The server SHALL provide the following endpoints:
 
 	<server name>/boat
-	<server name>/kml/get
-	<server name>/kml/put
-	<server name>/kml/git
+	<server name>/kml
 	<server name>/ais
 
 ## <server name\>/boat ##
@@ -39,7 +37,9 @@ A valid communication to this endpoint SHALL contain the following fields:
 	 NavMode:"<nav mode>",
 	 RCmode:"<rc mode>",
 	 FaultString:"<faults>",
-	 Pose:{location:{latitude:<lat>,
+	 Pose:{timestamp:{sec:<seconds>,
+					  nsec:<nanoseconds>},
+		   location:{latitude:<lat>,
 					 longitude:<long>},
 		   orientation:{heading:<heading>,
 						pitch:<pitch>,
@@ -57,7 +57,8 @@ The variables are defined as follows:
 - **NavMode:** The current mode of the navigation subsystem.
 - **RCmode:** The current mode of the RC subsystem.
 - **FaultString:** A string containing all the current faults.
-- **Pose:** The current location and orientation of the boat.
+- **Pose:** The current location and orientation of the boat. 
+	- **timestamp** The time at which this data was taken. 
 	- **location:** The current position of the boat.
 		- **latitude:** The current latitude of the boat, in decimal degrees north.
 		- **longitude:** The current longitude of the boat, in decimal degrees east.
@@ -72,20 +73,26 @@ The communication MAY also contain the following fields:
 
 	{TargetWaypoint:<waypoint number>,
 	 TargetHeading:<target heading>,
-	 BatteryData:{MainBatV:<main battery voltage>,
+	 BatteryData:{timestamp:{sec:<seconds>,
+					  		 nsec:<nanoseconds>},
+		   		  MainBatV:<main battery voltage>,
 				  MainBatI:<main battery current>,
 				  ChargeV:<charge voltage>,
 				  ChargeI:<charge current>,
 				  MotorV:<motor voltage>,
 				  MotorI:<motor current>,
 				  BatMon:<battery monitor>},
-	 OutputState:{RudderPosn:<rudder position>,
+	 OutputState:{timestamp:{sec:<seconds>,
+					  		 nsec:<nanoseconds>},
+		   		  RudderPosn:<rudder position>,
 				  RudderEnb:<rudder enable>,
 				  MotorRelayOutputs:<motor relay bit string>,
 				  HornRelay:<horn relay>,
 				  StopRelay:<stop relay>,
-				  EnableRelay:<enable relay>},
-	 HealthMon:{MotorRelayFault:<motor relay fault bit string>,
+				  EnbRelay:<enable relay>},
+	 HealthMon:{timestamp:{sec:<seconds>,
+					 	   nsec:<nanoseconds>},
+		   		MotorRelayFault:<motor relay fault bit string>,
 				HornRelayFault:<horn relay fault>,
 				StopRelayFault:<stop relay fault>,
 				EnbRelayFault:<enable relay fault>,
@@ -99,7 +106,8 @@ The communication MAY also contain the following fields:
 				StopRelayI:<stop relay current>,
 				EnbRelayI:<enable relay current>,
 				ServoI:<servo power current>},
-	 LinkRSSI:<rssi>
+	 LinkRSSI:<rssi>,
+	 RudderPID:{Kp:<Kp>,Ki:<Ki>,Kd:<Kd>} 
 	}
 
 The variables are defined as follows:
@@ -107,25 +115,45 @@ The variables are defined as follows:
 - **TargetWaypoint:** The target waypoint, counting the coordinate tuples from zero.
 - **TargetHeading:** The target heading, in degress clockwise from magnetic north. 
 - **BatteryData:** Data on the various main bus voltages and currents.
+	- **timestamp** The time at which this data was taken. 
 - **OutputState:** The state of all outputs.
+	- **timestamp** The time at which this data was taken. 
+	- **RudderPosn:** Rudder position, in microseconds.
+	- **RudderEnb:** Rudder enable signal, boolean.
+	- **MotorRelayOutpus:** A bit string representing the state of all motor relay outputs.
+	- **HornRelay:**
+	- **StopRelay:**
+	- **EnbRelay:**
 - **HealthMon:** State of the various relay outputs and servo current
+	- **timestamp** The time at which this data was taken. 
+	- **MotorRelayFault:** A bit string representing the faults for each of the motor relay channels. 1 is a fault, 0 is no fault.
+	- **HornRelayFault:** This is a boolean; true is faulted.
+	- **StopRelayFault:** This is a boolean; true is faulted.
+	- **EnbRelayFault:** This is a boolean; true is faulted.
+	- **MotorRelay0I:** The current flowing through motor relay 0, in amps.
+	- **MotorRelay1I:** The current flowing through motor relay 1, in amps.
+	- **MotorRelay2I:** The current flowing through motor relay 2, in amps.
+	- **MotorRelay3I:** The current flowing through motor relay 3, in amps.
+	- **MotorRelay4I:** The current flowing through motor relay 4, in amps.
+	- **MotorRelay5I:** The current flowing through motor relay 5, in amps.
 - **LinkRSSI:** RSSI of the network link.
+- **RudderPID:** PID constants for rudder control
 
 The response from the server to the boat SHALL contain the following fields:
 
 	{BoatName:"<name>",
 	 ServerKey:<server key>,
-	 Command:[{CommandString:<command>,
-			   <arg1 name>:<arg1 val>,
+	 Command:[{Command:<command>,
+			   Argument:{<arg object>}},
 						  .
 						  .
-			 }, . . . .]}
+			  . . . . .]}
 
 There MAY be any number of commands, and the boat SHALL execute them in the order presented, from first to last. The list of commands and their arguments is as follows:
 
-	
 	SetMode(mode)
 	SetNavMode(nav mode)
+	SetAutoMode(auto mode)
 	SetHome(optional: location)
 	ReverseShell(optional: endpoint)
 	SetWaypoint(number)
@@ -136,10 +164,14 @@ There MAY be any number of commands, and the boat SHALL execute them in the orde
 	DumpAIS
 	FetchWaypoints(optional: repository)
 	PushPath(optional: repository)
+	GetPID
+	SetPID(Kp, Ki, Kd)
 
-## <server name\>/kml/get/<target file\>.kml ##
+See Commands section, below, for details. 
 
-This endpoint SHALL serv one of the following three [KML](https://developers.google.com/kml/) files:
+## <server name\>/kml/<target file\>.kml ##
+
+This endpoint SHALL serve one of the following three [KML](https://developers.google.com/kml/) files:
 
 - waypoints.kml
 - obstacle.kml
@@ -151,18 +183,91 @@ The obstacle.kml file SHALL contain a polygon for every known obstacle and exclu
 
 The path.kml file SHALL contain an individual timestamped Placemark object for every time the boat checks in with the shore server, or as often as directed by compilation variables within the software.
 
-## <server name\>/kml/put ##
+This endpoint SHALL also accept file uploads of these three files with a POST request containing a JSON object of the following format:
 
-This endpoint SHALL accept a third JSON item, named for whichever of the three types of KML file is being uploaded and containing the full text of the KML file. Any path.kml upload SHALL replace the existing path.kml file, assuming the upload is well-formed. Any other upload SHALL be saved to a sandbox for inspection.
+	{BoatName:"<name>",
+     BoatKey:<boat key>, 
+	 <file name>:<file contents>}
 
-## <server name\>/kml/git ##
-
-This is a git server designed to allow the boat to maintain waypoint.kml, obstacle.kml, and path.kml files. 
+Upon receiving such a request, the server SHALL add a timestamp to the filename and store it for inspection.
 
 ## <server name\>/ais ##
 
-This endpoint SHALL accept a third JSON item named "AIS" and containing all of the current AIS targets in CSV format. 
+This endpoint SHALL accept a JSON object of the following format, and store it locally with an attached timestamp.
 
-## Variables ##
+	{BoatName:"<name>",
+     BoatKey:<boat key>, 
+	 location:{latitude:<lat>,
+			   longitude:<long>}
+	 AIS:<AIS data>}
+
+Where <AIS data\> is the current database of AIS targets in an array of JSON objects. 
 
 ## Commands ##
+
+### SetMode(mode) ###
+
+Set the boat mode to mode. Format of argument SHALL be {mode:"<mode name\>"}.
+
+### SetNavMode(nav_mode) ###
+
+Set the nav system mode to one of:
+
+	IDLE
+	AUTONOMOUS
+
+Format of argument shall be {mode:"<mode name\>"}
+
+### SetAutoMode(auto_mode) ###
+
+Set the nav system autonomous mode to one of:
+
+	ANCHOR
+	RTLS
+	WAYPOINT
+
+Format of argument shall be {mode:"<mode name\>"}
+
+### SetHome(optional: location) ###
+
+Set the boat's home point to either its current location or the optional location argument. Format of argument, if present, SHALL be {home:{latitude:<lat\>,longitude:<long\>}}.
+
+### ReverseShell(optional: endpoint) ###
+
+Open a reverse shell to the given endpoint. If present, the argument SHALL be of the form {endpoint:"<url\>"}.
+
+### SetWaypoint(number) ###
+
+Set the target waypoint to the ordinal number. Argument format SHALL be {waypoint:<number\>}.
+
+### SetWaypointAction(action) ###
+
+Set the action at the end of the waypoint list to one of:
+
+	IDLE
+	ANCHOR
+	RETURN
+	REPEAT
+
+Argument format SHALL be {action:"<action name\>"}
+
+### DumpPathKML(optional: endpoint) ###
+
+
+
+### DumpWaypointKML(optional: endpoint) ###
+### DumpObstacleKML(optional: endpoint) ###
+### DumpAIS(optional: endpoint) ###
+### PullWaypoints(optional: repository, key) ###
+
+Fetch waypoints.kml from github using internally stored repository and API key. A new respository and key MAY be specified with the argument format {repository:"<url\>",key:<API key\>.
+
+### PushPath(optional: repository, key) ###
+
+Push current path.kml to github using internally stored repository and API key. A new respository and key MAY be specified with the argument format {repository:"<url\>",key:<API key\>}.
+
+### GetPID ###
+
+Get the current steering PID constant values.
+
+### SetPID(Kp, Ki, Kd) ###

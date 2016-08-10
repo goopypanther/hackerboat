@@ -30,11 +30,11 @@ enum class boatModeEnum {
  * @brief Navigation mode, representing the state of the nav subsystem
  */
 enum class navigationModeEnum {
-	IDLE		= 0,  		/**< Navigation idle state							*/
-	FAULT		= 1,  		/**< Navigation faulted (boat goes to fault state)	*/
-	RC			= 2,  		/**< Boat is under R/C control						*/  
-	AUTONOMOUS	= 3,		/**< Boat is operating autonomously		       		*/ 
-	NONE		= 10		/**< State of the nav system is currently unknown	*/
+	IDLE		= 0,  		/**< Navigation idle state (or system not in nav mode)	*/
+	FAULT		= 1,  		/**< Navigation faulted (boat goes to fault state)		*/
+	RC			= 2,  		/**< Boat is under R/C control							*/  
+	AUTONOMOUS	= 3,		/**< Boat is operating autonomously			       		*/ 
+	NONE		= 10		/**< State of the nav system is currently unknown		*/
 };
 
 /**
@@ -56,6 +56,17 @@ enum class rcModeEnum {
 	RUDDER		= 1,  		/**< Boat is navigating along a list of waypoints.	*/
 	COURSE		= 2,  		/**< Return to launch site.							*/
 	NONE		= 10		/**< State of the nav system is currently unknown	*/
+};
+
+/**
+ * @brief Waypoint action, representing the action to take at the end of the waypoint list
+ */
+
+enum class waypointActionEnum {
+	IDLE,		/**< Do nothing -- navigation and autonomous mode both idle */
+	ANCHOR,		/**< Anchor at the last waypoint */
+	RETURN,		/**< Return to launch site */
+	REPEAT		/**< Go back to the first waypoint. */
 };
 
 #endif
