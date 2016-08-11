@@ -271,3 +271,5 @@ Push current path.kml to github using internally stored repository and API key. 
 Get the current steering PID constant values.
 
 ### SetPID(Kp, Ki, Kd) ###
+
+Set the current steering PID constants. Argument format SHALL be {Kp:<kp\>,Ki:<ki\>,Kd:<kd\>}. Omitted values SHALL be left unchanged. 
