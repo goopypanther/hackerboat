@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <atomic>
+#include <thread>
+#include <chrono>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "hal/config.h"
@@ -33,7 +35,7 @@
 			runFlag = true;
 			while (runFlag) {
 				this->execute();
-				usleep(1000);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 		}
 		void kill () {runFlag = false;}		/**< Kill the thread */
