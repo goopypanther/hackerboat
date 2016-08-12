@@ -22,29 +22,22 @@
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "hal/config.h"
+#include "hal/inputThread.hpp"
  
- class rcInputClass {
+ class rcInputClass : public inputThreadClass {
 	 public:
 		rcInputClass (std::string devpath);	/**< Create a rcInput reader attached to serial port devpath 		*/
 		rcInputClass (void);			/**< Create a rcInput reader attached to serial port defined in hal/config.h */
 		int getThrottle (void);			/**< Get the last throttle position from the RC input 				*/
 		int getRudder (void);			/**< Get the last rudder position from the RC input 				*/
 		rcModeEnum getMode (void);		/**< Get the last mode command from the RC input 					*/	
-		bool execute (void);			/**< Gather input from the RC S.BUS (meant to be called in a loop)	*/
-		void operator()() {			/**< Thread function */
-			runFlag = true;
-			while (runFlag) {
-				this->execute();
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		}
-		void kill () {runFlag = false;}		/**< Kill the thread */
+		
 		~rcInputClass();			/**< Explicit destructor to make sure we close out the serial port and kill the thread.	*/
-		
-		timespec lastInput;			/**< Time that last input was processed 							*/
-		
+				
 	private:
-		std::atomic_bool runFlag = false;	
+		int _throttle = 0;
+		int _rudder = 0;
+		rcModeEnum _mode = NONE;
  };
  
 #endif

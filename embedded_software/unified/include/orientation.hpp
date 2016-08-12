@@ -36,10 +36,6 @@ class orientationClass : public hackerboatStateClass {
 		double pitch 	= NAN;
 		double heading 	= NAN;
 
-		bool parse (json_t *) USE_RESULT;
-		json_t *pack (void) const;
-		bool isValid (void) const;
-
 	private:
 		static const double constexpr	maxVal = 180.0;
 		static const double constexpr	minVal = -180.0;

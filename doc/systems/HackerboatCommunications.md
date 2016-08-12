@@ -37,8 +37,7 @@ A valid communication to this endpoint SHALL contain the following fields:
 	 NavMode:"<nav mode>",
 	 RCmode:"<rc mode>",
 	 FaultString:"<faults>",
-	 Pose:{timestamp:{sec:<seconds>,
-					  nsec:<nanoseconds>},
+	 Pose:{timestamp:<decimal seconds>,
 		   location:{latitude:<lat>,
 					 longitude:<long>},
 		   orientation:{heading:<heading>,
@@ -73,8 +72,7 @@ The communication MAY also contain the following fields:
 
 	{TargetWaypoint:<waypoint number>,
 	 TargetHeading:<target heading>,
-	 BatteryData:{timestamp:{sec:<seconds>,
-					  		 nsec:<nanoseconds>},
+	 BatteryData:{timestamp:<decimal seconds>,
 		   		  MainBatV:<main battery voltage>,
 				  MainBatI:<main battery current>,
 				  ChargeV:<charge voltage>,
@@ -82,16 +80,14 @@ The communication MAY also contain the following fields:
 				  MotorV:<motor voltage>,
 				  MotorI:<motor current>,
 				  BatMon:<battery monitor>},
-	 OutputState:{timestamp:{sec:<seconds>,
-					  		 nsec:<nanoseconds>},
+	 OutputState:{timestamp:<decimal seconds>,
 		   		  RudderPosn:<rudder position>,
 				  RudderEnb:<rudder enable>,
 				  MotorRelayOutputs:<motor relay bit string>,
 				  HornRelay:<horn relay>,
 				  StopRelay:<stop relay>,
 				  EnbRelay:<enable relay>},
-	 HealthMon:{timestamp:{sec:<seconds>,
-					 	   nsec:<nanoseconds>},
+	 HealthMon:{timestamp:<decimal seconds>,
 		   		MotorRelayFault:<motor relay fault bit string>,
 				HornRelayFault:<horn relay fault>,
 				StopRelayFault:<stop relay fault>,
@@ -106,6 +102,7 @@ The communication MAY also contain the following fields:
 				StopRelayI:<stop relay current>,
 				EnbRelayI:<enable relay current>,
 				ServoI:<servo power current>},
+
 	 LinkRSSI:<rssi>,
 	 RudderPID:{Kp:<Kp>,Ki:<Ki>,Kd:<Kd>} 
 	}
@@ -197,6 +194,7 @@ This endpoint SHALL accept a JSON object of the following format, and store it l
 
 	{BoatName:"<name>",
      BoatKey:<boat key>, 
+	 timestamp:<decimal seconds>,
 	 location:{latitude:<lat>,
 			   longitude:<long>}
 	 AIS:<AIS data>}

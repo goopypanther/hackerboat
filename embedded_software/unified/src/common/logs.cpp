@@ -12,22 +12,24 @@
 #include "logs.hpp"
 #include <iostream>
 #include <fstream>
-#include <time.h>
+#include <chrono>
+#include <ctime>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
+using namespace std::chrono;
 
 std::string timeOutput (void) {
-	timespec 	logTime;
-	struct tm 	*thisTime;
-	char 		timebuf[LOCAL_BUF_LEN];
+	auto logTime = system_clock::now();
+	time_t logTimeT = system_clock::to_time_t(logTime)
+	char timebuf[LOCAL_BUF_LEN];
 	
-	clock_gettime(CLOCK_REALTIME, &logTime);
-	thisTime = localtime (&(logTime.tv_sec));
-	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:%S.", thisTime);
+	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:%S.", logTimeT);
 	std::string	ret(timebuf);
-	ret += std::to_string(logTime.tv_nsec);
+	// this needs to be replaced with the appropriate thing to give me decimal seconds, but I haven't figured that out yet
+	//ret += std::to_string(logTime.tv_nsec);
 	ret += "]:";
 	return ret;
 }

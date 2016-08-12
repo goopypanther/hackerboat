@@ -18,7 +18,7 @@
 #include <jansson.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <time.h>
+#include <chrono>
 #include <string>
 #include <memory>
 #include <vector>
@@ -55,19 +55,21 @@ class hackerboatStateClass {
 		/** Tests whether the current object is in a valid state */
 		virtual bool isValid (void) const {return true;};
 
-		static json_t *packTimeSpec (timespec t);
-		static int parseTimeSpec (json_t *input, timespec *t) USE_RESULT;
+		static json_t *packTime (std::chrono::time_point t);
+		static int parseTime (json_t *input, std::chrono::time_point *t) USE_RESULT;
+		
+		std::chrono::time_point<std::chrono::system_clock> recordTime;
 
 	protected:
 		hackerboatStateClass(void) {};
 };
 
-inline json_t *json(timespec t) {
-	return hackerboatStateClass::packTimeSpec(t);
+inline json_t *json(std::chrono::time_point t) {
+	return hackerboatStateClass::packTime(t);
 }
-inline bool parse(json_t *input, timespec *t) USE_RESULT;
-inline bool parse(json_t *input, timespec *t) {
-	return hackerboatStateClass::parseTimeSpec(input, t) == 0;
+inline bool parse(json_t *input, std::chrono::time_point *t) USE_RESULT;
+inline bool parse(json_t *input, std::chrono::time_point *t) {
+	return hackerboatStateClass::parseTime(input, t) == 0;
 };
 
 

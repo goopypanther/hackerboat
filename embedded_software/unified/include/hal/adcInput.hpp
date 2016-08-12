@@ -20,26 +20,22 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+#include <map>
 #include "hal/config.h"
+#include "hal/adc128d818.hpp"
 
-class adcInputClass {
+class adcInputClass : public inputThreadClass {
 	public:
-		adcInputClass(void);			
-		vector<int> getvalues (void);			/**< Return the ADC values */
-		bool execute(void);						/**< Gather input from adc channels (meant to be called in a loop)	*/
-		void operator()() {			/**< Thread function */
-			runFlag = true;
-			while (runFlag) {
-				this->execute();
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		}
-		void kill () {runFlag = false;}		/**< Kill the thread */
-	
-		timespec lastInput;						/**< Time that last input was processed 							*/							*/
+		adcInputClass(void);	
+		map<std::string, int> getRawValues (void);			/**< Return the ADC values */
+		map<std::string, double> getScaledValues (void);	/**< Return the ADC values */
 		
 	private:
-		std::atomic_bool runFlag = false;
+		adc128d818	upper(ADC_UPPER_ADDR, ADC_I2C_BUS);
+		adc128d818	lower(ADC_LOWER_ADDR, ADC_I2C_BUS);
+		map<std::string, int> _raw;
+		map<std::string, int> _offsets;
+		map<std::string, double> _scales;
 };
 
 #endif
