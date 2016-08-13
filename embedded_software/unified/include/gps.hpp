@@ -14,7 +14,7 @@
 
 #include <jansson.h>
 #include <stdlib.h>
-#include <time.h>
+#include <chrono>
 #include <string>
 #include "stateStructTypes.hpp"
 #include "sqliteStorage.hpp"
@@ -45,8 +45,8 @@ class gpsFixClass : public hackerboatStateClassStorable {
 			}
 		}
 		
-		timespec	uTime;					/**< Beaglebone time of last fix */
-		timespec	gpsTime;				/**< GPS time of last fix */
+		std::chrono::time_point<std::chrono::system_clock>	uTime;					/**< Beaglebone time of last fix */
+		std::chrono::time_point<std::chrono::system_clock>	gpsTime;				/**< GPS time of last fix */
 		double		latitude;				/**< Latitude of last fix */
 		double		longitude;				/**< Longitude of last fix */
 		double		gpsHeading;				/**< True heading, according to GPS */

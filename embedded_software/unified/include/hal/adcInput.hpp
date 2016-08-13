@@ -15,7 +15,6 @@
 
 #include <string>
 #include <stdlib.h>
-#include <time.h>
 #include <atomic>
 #include <thread>
 #include <chrono>
@@ -29,6 +28,10 @@ class adcInputClass : public inputThreadClass {
 		adcInputClass(void);	
 		map<std::string, int> getRawValues (void);			/**< Return the ADC values */
 		map<std::string, double> getScaledValues (void);	/**< Return the ADC values */
+		bool setOffsets (map<std::string, int> offsets);
+		bool setScales (map<std::string, double> scales);
+		map<std::string, int> getOffsets();
+		map<std::string, double> getScales();
 		
 	private:
 		adc128d818	upper(ADC_UPPER_ADDR, ADC_I2C_BUS);

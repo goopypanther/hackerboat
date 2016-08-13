@@ -11,10 +11,9 @@
 
 #include <jansson.h>
 #include <stdlib.h>
-#include <time.h>
+#include <chrono>
 #include <math.h>
 #include "minmea.h"
-
 #include <string>
 #include <errno.h>
 #include <fcntl.h> 
@@ -28,7 +27,7 @@
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
 gpsFixClass::gpsFixClass() {
-	clock_gettime(CLOCK_REALTIME, &(uTime));
+	std::chrono::system_clock::now();
 	gpsTime = uTime;
 	latitude = 47.560644;			// latitude of HBL
 	longitude = -122.338816;		// longitude of HBL
@@ -158,7 +157,7 @@ bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
 }
 
 bool gpsFixClass::readSentence (std::string sentence) {
-	clock_gettime(CLOCK_REALTIME, &uTime);
+	uTime = std::chrono::system_clock::now();
 	switch(minmea_sentence_id(sentence.c_str(), true)) {
 		case MINMEA_SENTENCE_RMC:
 			struct minmea_sentence_rmc frame_rmc;

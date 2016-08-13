@@ -15,10 +15,8 @@
 
 #include <string>
 #include <stdlib.h>
-#include <time.h>
 #include <atomic>
 #include <thread>
-#include <chrono>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "hal/config.h"

@@ -15,7 +15,6 @@
 
 #include <string>
 #include <stdlib.h>
-#include <time.h>
 #include <atomic>
 #include <thread>
 #include <chrono>

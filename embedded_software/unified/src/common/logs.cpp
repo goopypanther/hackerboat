@@ -23,13 +23,13 @@ using namespace std::chrono;
 
 std::string timeOutput (void) {
 	auto logTime = system_clock::now();
-	time_t logTimeT = system_clock::to_time_t(logTime)
+	auto minTime = time_point_cast<minutes>(logTime);
+	auto millis = duration_cast<milliseconds>(logTime - minTime);
 	char timebuf[LOCAL_BUF_LEN];
 	
-	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:%S.", logTimeT);
+	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:", system_clock::to_time_t(logTime));
 	std::string	ret(timebuf);
-	// this needs to be replaced with the appropriate thing to give me decimal seconds, but I haven't figured that out yet
-	//ret += std::to_string(logTime.tv_nsec);
+	ret += std::string(millis.count()/1000);
 	ret += "]:";
 	return ret;
 }
