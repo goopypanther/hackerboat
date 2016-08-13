@@ -20,8 +20,8 @@
 #include <chrono>
 #include "orientation.hpp"
 #include "hal/config.h"
-#include "hal/lsm303.hpp"
-#include "hal/l3gd20.hpp"
+#include "hal/drivers/lsm303.hpp"
+#include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
 
 class orientationInputClass : public inputThreadClass {

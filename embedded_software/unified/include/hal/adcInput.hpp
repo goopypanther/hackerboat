@@ -21,7 +21,7 @@
 #include <vector>
 #include <map>
 #include "hal/config.h"
-#include "hal/adc128d818.hpp"
+#include "hal/drivers/adc128d818.hpp"
 
 class adcInputClass : public inputThreadClass {
 	public:
