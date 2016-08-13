@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <atomic>
 #include <thread>
+#include <fstream>
+#include <iostream>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "hal/config.h"
@@ -36,6 +38,8 @@
 		int _throttle = 0;
 		int _rudder = 0;
 		rcModeEnum _mode = NONE;
+		std::string _path;
+		int devFD;
  };
  
 #endif
