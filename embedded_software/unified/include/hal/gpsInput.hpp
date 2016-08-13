@@ -27,7 +27,6 @@ class gpsInputClass : public inputThreadClass {
 	public:
 		gpsInputClass();
 		gpsInputClass(std::string host, int port);
-		bool readSentence (std::string sentence);	/**< Populate class from incoming sentence string */
 		gpsFixClass getFix();
 		
 	private:

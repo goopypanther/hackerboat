@@ -44,7 +44,7 @@ class aisClass : public hackerboatStateClassStorable {
 	private:
 		hackerboatStateStorage *aisStorage = NULL;
 	
-}
+};
 
 
 #endif

@@ -18,7 +18,6 @@
 #include <string>
 #include <inttypes.h>
 
-
 #define MIN_PULSE_WIDTH			1000     // the shortest pulse sent to a servo  
 #define MAX_PULSE_WIDTH      	2000     // the longest pulse sent to a servo 
 #define DEFAULT_PULSE_WIDTH  	1500     // default pulse width when servo is attached
@@ -47,6 +46,6 @@ class Servo {
 		unsigned int _max = 2000;
 		unsigned int _freq = 100;
 	
-}
+};
 
 #endif 

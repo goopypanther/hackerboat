@@ -36,5 +36,5 @@ class aisInputClass : public inputThreadClass {
 		std::string _host;
 		int _port;
 		vector<aisClass> data;
-}
+};
 #endif
