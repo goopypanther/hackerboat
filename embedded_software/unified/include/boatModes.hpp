@@ -20,26 +20,48 @@
 #include "enumdefs.hpp"
 #include "stateMachine.hpp"
 #include "boatState.hpp"
+#include "navModes.hpp"
 
 class boatModeBaseClass : public stateMachineBaseClass<boatModeEnum, boatStateClass> {
 };
 
 class boatStartMode : public boatModeBaseClass {
-	boatStartMode (boatStateClass& state) : _state(state),
-										   _thisMode(START),
-										   _lastMode(NONE) {);
-	boatStartMode (boatStateClass& state, boatModeEnum last) : _state(state),
-															   _thisMode(START),
-															   _lastMode(NONE) {);
+	public:
+		boatStartMode  (boatStateClass& state, boatModeEnum last = NONE) : 
+		_state(state), _thisMode(SELFTEST), _lastMode(last);
 };
 
 class boatSelfTestMode : public boatModeBaseClass {
-	boatSelfTestMode (boatStateClass& state) : _state(state),
-										       _thisMode(SELFTEST),
-										       _lastMode(NONE) {);
-	boatSelfTestMode (boatStateClass& state, boatModeEnum last) : _state(state),
-																  _thisMode(SELFTEST),
-																  _lastMode(last) {);
+	public:
+		boatSelfTestMode (boatStateClass& state, boatModeEnum last = NONE) : 
+			_state(state), _thisMode(SELFTEST), _lastMode(last);
+};
+
+class boatDisarmedMode : public boatModeBaseClass {
+	public:
+		boatDisarmedMode (boatStateClass& state, boatModeEnum last = NONE) : 
+			_state(state), _thisMode(DISARMED), _lastMode(last);
+};
+
+class boatFaultMode : public boatModeBaseClass {
+	public:
+		boatFaultMode (boatStateClass& state, boatModeEnum last = NONE) : 
+			_state(state), _thisMode(FAULT), _lastMode(last);
+};
+
+class boatNavigationMode : public boatModeBaseClass {
+	public:
+		boatNavigationMode (boatStateClass& state, navigationModeEnum = IDLE, boatModeEnum last = NONE) : 
+			_state(state), _thisMode(NAVIGATION), _lastMode(last);
+		navModeBaseClass& getNavMode () {return _navMode;};
+	private:
+		navModeBaseClass& _navMode;
+};
+
+class boatArmedTestMode : public boatModeBaseClass {
+	public:
+		boatArmedTestMode (boatStateClass& state, boatModeEnum last = NONE) : 
+			_state(state), _thisMode(ARMEDTEST), _lastMode(last);
 };
 
 #endif

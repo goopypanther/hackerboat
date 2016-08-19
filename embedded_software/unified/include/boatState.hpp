@@ -71,10 +71,10 @@ class boatStateClass : public hackerboatStateClassStorable {
 		
 	private:
 		std::string 	faultString;
-		boatModeEnu 	_boat;
-		navModeEnu 		_nav;
-		autoModeEnu 	_auto;
-		rcModeEnu 		_rc;
+		boatModeEnum 	_boat;
+		navModeEnum		_nav;
+		autoModeEnum 	_auto;
+		rcModeEnum 		_rc;
 	
 };
 #endif 

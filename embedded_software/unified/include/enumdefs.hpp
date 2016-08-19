@@ -43,7 +43,7 @@ enum class navigationModeEnum {
 enum class autoModeEnum {
 	IDLE		= 0,		/**< Nav system is not in autonomous mode 			*/
 	WAYPOINT	= 1,  		/**< Boat is navigating along a list of waypoints.	*/
-	RTLS		= 2,  		/**< Return to launch site.							*/
+	RETURN		= 2,  		/**< Return to launch site.							*/
 	ANCHOR		= 3,  		/**< Boat is holding position.						*/  
 	NONE		= 10		/**< State of the nav system is currently unknown	*/
 };
