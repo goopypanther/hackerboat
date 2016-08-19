@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <vector>
+#include "hal/drivers/i2c.hpp"
 
 #define ADC128D818_INTERNAL_REF		2.5
 
@@ -81,9 +82,6 @@ class ADC128D818 {
 		operation_mode_t op_mode;
 		conv_mode_t conv_mode;
 
-		void setRegisterAddress(uint8_t reg_addr);
-		void setRegister(uint8_t reg_addr, uint8_t value);
-		uint8_t readCurrentRegister8();
 };
 
 

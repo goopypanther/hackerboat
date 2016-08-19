@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <map>
+#include "hal/drivers/i2c.hpp"
 
 /*=========================================================================
     I2C ADDRESS/BITS AND SETTINGS

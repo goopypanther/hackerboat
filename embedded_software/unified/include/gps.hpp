@@ -28,18 +28,37 @@
  * The actual text of each incoming sentence is stored for logging purposes as well. 
  *
  */
- 
+
+using std::chrono; 
+
+enum class nmeaModeEnum : int {
+	NONE 	= 0,
+	NOFIX 	= 1,
+	FIX2D	= 2,
+	FIX3D	= 3
+};
+
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
 		gpsFixClass ();
-		gpsFixClass (std::string sentence);			/**< Create a GPS fix from an incoming sentence string */
+		gpsFixClass (json_t *packet);	/**< Create a GPS fix from an incoming gpsd TPV */
+		bool parseGpsdPacket (json_t *packet);
 		
-		std::chrono::time_point<std::chrono::system_clock>	uTime;					/**< GPS time of last fix */
-		locationClass	fix;
-		double		gpsHeading;				/**< True heading, according to GPS */
-		double		gpsSpeed;				/**< Speed over the ground */
-		bool 		fixValid;				/**< Checks whether this fix is valid or not */				
-		bool parseGPDdPacket (json_t *packet);
+		time_point<system_clock>	uTime;		/**< System time of fix */
+		time_point<system_clock>	gpsTime;  	/**< GPS time of fix */
+		
+		nmeaModeEnum	mode;	/**< Mode of the fix */
+		std::string		device;	/**< Name of the device */
+		locationClass	fix;	/**< Location of the current fix */
+		double			track;	/**< Course over ground, in degrees from north */
+		double			speed;	/**< Speed over the ground in m/s */
+		double			epx;	/**< Longitude error, 95% confidence, meters */			
+		double			epy;	/**< Latitude error, 95% confidence, meters */
+		double 			epd;	/**< Track error, 95% confidence, degrees */	
+		double			eps;	/**< Speed error, 95% confidence, m/s */
+
+		bool 			fixValid;	/**< Checks whether this fix is valid or not */				
+		static const std::string msgClass = "TPV";
 		
 	private:
 		hackerboatStateStorage *gpsStorage = NULL;

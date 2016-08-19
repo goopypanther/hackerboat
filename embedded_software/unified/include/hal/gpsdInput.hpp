@@ -19,20 +19,30 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <tuple>
 #include "hal/config.h"
 #include "gps.hpp"
+#include "ais.hpp"
 #include "hal/inputThread.hpp"
 
-class gpsInputClass : public inputThreadClass {
+using std;
+
+class gpsdInputClass : public inputThreadClass {
 	public:
-		gpsInputClass();
-		gpsInputClass(std::string host, int port);
+		gpsdInputClass();
+		gpsdInputClass(string host, int port);
 		gpsFixClass getFix();
+		vector<tuple<int, aisBaseClass>> getData();
+		vector<tuple<int, aisBaseClass>> getData(aisShipType type);
+		aisBaseClass getData(int MMSI);
+		aisBaseClass getData(string name);
+		int pruneAIS();
 		
 	private:
-		std::string _host;
-		int 		_port;
-		gpsFixClass _lastFix;
+		string 								_host;
+		int 								_port;
+		gpsFixClass 						_lastFix;
+		vector<tuple<int, aisBaseClass>>	_aisTargets;
 		
-
 #endif

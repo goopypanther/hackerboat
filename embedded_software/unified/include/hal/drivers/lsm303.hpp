@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <map>
-
+#include "hal/drivers/i2c.hpp"
 
 
 /*=========================================================================
@@ -140,9 +140,12 @@ class lsm303 {
 		void setAccelScale (map<std::string, double>);
 
 	private:
-		map<std::string, int> _accelData;   
-		map<std::string, int>	_magData;
-		map<std::string, int>   _magGain;
+		map<std::string, int> 		_accelData;   
+		map<std::string, int>		_magData;
+		map<std::string, double>   	_magScale;
+		map<std::string, int>   	_magOffset;
+		map<std::string, double>   	_accelScale;
+		map<std::string, int>   	_accelOffset;
 
 };
 

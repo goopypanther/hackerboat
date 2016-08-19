@@ -29,7 +29,7 @@
 
 using std::chrono;
 
-class boneStateClass : public hackerboatStateClassStorable {
+class boatStateClass : public hackerboatStateClassStorable {
 	public:
 		static const enumerationNameTable<boatModeEnum> boatModeNames;
 		static const enumerationNameTable<boatModeEnum> navModeNames;
@@ -45,16 +45,16 @@ class boneStateClass : public hackerboatStateClassStorable {
 		std::string getFaultString() (return faultString;};	/**< Returns the entire fault string */
 		bool setBoatMode (boatModeEnum m) {_boat = m;};		/**< Set state to the given value */
 		bool setBoatMode (std::string mode);
-		boatModeEnu getBoatMode () {return _boat;};
+		boatModeEnum getBoatMode () {return _boat;};
 		bool setNavMode (navModeEnum m) {_nav = m;};
 		bool setNavMode (std::string mode);
-		navModeEnu getNavMode () {return _nav;};
+		navModeEnum getNavMode () {return _nav;};
 		bool setAutoMode (autoModeEnum m) {_auto = m;};
 		bool setAutoMode (std::string mode);
-		autoModeEnu getAutoMode () {return _auto;};
+		autoModeEnum getAutoMode () {return _auto;};
 		bool setRCmode (rcModeEnum m) {_rc = m;};
 		bool setRCmode (std::string mode);
-		rcModeEnu getRCMode () {return _rc;};
+		rcModeEnum getRCMode () {return _rc;};
 		
 		time_point<system_clock>	uTime;			/**< Time the record was made */
 		time_point<system_clock>	lastContact;	/**< Time of last shore contact */
@@ -64,6 +64,10 @@ class boneStateClass : public hackerboatStateClassStorable {
 		waypointListClass			waypoints;		/**< Waypoints to follow */
 		waypointActionEnum			action;			/**< Action to take at the last waypoint */
 		dodgeClass					diversion;		/**< Avoid obstacles! */
+		healthMonitorClass			health;			/**< Current state of the boat's health */
+		double						Kp;
+		double						Ki;
+		double						Kd;
 		
 	private:
 		std::string 	faultString;
@@ -71,8 +75,6 @@ class boneStateClass : public hackerboatStateClassStorable {
 		navModeEnu 		_nav;
 		autoModeEnu 	_auto;
 		rcModeEnu 		_rc;
-		
-		
-		
+	
 };
 #endif 
