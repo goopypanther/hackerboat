@@ -19,17 +19,20 @@
 
 class lightsClass {
 	public:
-		lightsClass();
-		void setBrightness(int bright);
-		void setMode(boatModeEnum boat, navigationModeEnum nav, autoModeEnum autonomy, rcModeEnum rc);
-		void clear();
+		lightsClass() = default;
+		void setBrightness(int bright);		/**< Set the brightness of the whole string *//
+		void setMode(boatModeEnum boat, 	/**< Set the lights as appropiate for the given modes */
+					navigationModeEnum nav, 
+					autoModeEnum autonomy, 
+					rcModeEnum rc);
+		void clear();						/**< Turn off all the lights */
 		
 	private:
-		Pixelbone_Pixel strip(LIGHTS_COUNT);
-		boatModeEnum _boat; 
-		navigationModeEnum _nav; 
-		autoModeEnum _auto; 
-		rcModeEnum _rc;
+		Pixelbone_Pixel 	strip(LIGHTS_COUNT);
+		boatModeEnum 		_boat; 
+		navigationModeEnum 	_nav; 
+		autoModeEnum 		_auto; 
+		rcModeEnum 			_rc;
 };
 
 #endif

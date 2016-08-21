@@ -21,14 +21,17 @@
 
 class throttleClass {
 	public:
-		throttleClass();
-		throttleClass(adcInputClass& adc);
-		bool setThrottle(int throttle);
-		int getThrottle();
-		double getMotorCurrent();
-		double getMotorVoltage();
-		bool setADCdevice(adcInputClass& adc);
+		throttleClass() = default;						
+		throttleClass(adcInputClass& adc);		/**< Create a motor device with a reference to an ADC input instance for motor current & voltage */
+		bool setThrottle(int throttle);			/**< Set throttle to the given value. Returns false if the value is outside of the range defined by getMaxThrottle() and getMinThrottle() */
+		int getThrottle();						/**< Get current throttle position */
+		double getMotorCurrent();				/**< Get the current motor current */
+		double getMotorVoltage();				/**< Get the current motor voltage */
+		bool setADCdevice(adcInputClass& adc);	/**< Set the ADC input thread */
+		int getMaxThrottle();					/**< Get the maximum throttle value */
+		int getMinThrottle();					/**< Get the minimum throttle value */
 	private:
+		int _throttle = 0;
 		adcInputClass& _adc;
 		static vector<std::string> throttleRelays = THROTTLE_RELAY_VECTOR;
 };

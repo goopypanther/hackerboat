@@ -48,35 +48,26 @@ enum class operation_mode_t {
 
 class ADC128D818 {
 	public:
-		ADC128D818(uint8_t address, std::string devpath);	/**< Create an ADC object for a sensor on bus devpath with address address */
+		ADC128D818(uint8_t address, int bus);			/**< Create an ADC object for a sensor on bus devpath with address address */
   
-		void setReference(double ref_voltage);				/**< Set the reference voltage for scaling purposes (external reference only) */
-		void setReferenceMode(reference_mode_t mode);		/**< Set the reference mode (either internal or external) */
-		void setOperationMode(operation_mode_t mode);		/**< Set the operation mode of the ADC */
-
-		void setDisabledMask(uint8_t disabled_mask);		/**< disable channels */
-
-		void setConversionMode(conv_mode_t mode);			/**< Set the conversion mode */
-
-		void begin();										/**< Initialize the sensor. ReferenceMode, OperationMode, and ConversionMode should already be set */
-
-		int16_t read(uint8_t channel);						/**< Read the given channel. Returns -1 if the channel is disabled. */
-		
-		vector<int16_t> readAll (void);						/**< Returns a vector with all channels. Disabled channels are set to -1 */
-
-		double readScaled(uint8_t channel);					/**< Reads data and scales it according to the reference voltage. Returns NAN if the channel is disabled. */
-		
-		vector<double> readScaled (void);					/**< Returns a vector with the scaled voltage of all channels. Disabled channels contain NAN. */
-
-		double readTemperatureScaled();						/**< Read the ADC temperature */
+		void setReference(double ref_voltage);			/**< Set the reference voltage for scaling purposes (external reference only) */
+		void setReferenceMode(reference_mode_t mode);	/**< Set the reference mode (either internal or external) */
+		void setOperationMode(operation_mode_t mode);	/**< Set the operation mode of the ADC */
+		void setDisabledMask(uint8_t disabled_mask);	/**< disable channels */
+		void setConversionMode(conv_mode_t mode);		/**< Set the conversion mode */
+		void begin();									/**< Initialize the sensor. ReferenceMode, OperationMode, and ConversionMode should already be set */
+		int16_t read(uint8_t channel);					/**< Read the given channel. Returns -1 if the channel is disabled. */
+		vector<int16_t> readAll (void);					/**< Returns a vector with all channels. Disabled channels are set to -1 */
+		double readScaled(uint8_t channel);				/**< Reads data and scales it according to the reference voltage. Returns NAN if the channel is disabled. */
+		vector<double> readScaled (void);				/**< Returns a vector with the scaled voltage of all channels. Disabled channels contain NAN. */
+		double readTemperatureScaled();					/**< Read the ADC temperature */
 
 	private:
-		std::string path;
-		int devhandle;
+		i2cClass	_bus;
 	
-		uint8_t addr;
-		uint8_t disabled_mask;
-		double ref_v;
+		uint8_t 	addr;
+		uint8_t 	disabled_mask;
+		double 		ref_v;
 
 		reference_mode_t ref_mode;
 		operation_mode_t op_mode;

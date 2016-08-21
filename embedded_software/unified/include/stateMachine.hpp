@@ -19,11 +19,15 @@
 #include "hal/config.h"
 #include "enumdefs.hpp"
 
+/**
+ * @brief A template for a state machine with the given mode enum T and state vector reference U&.
+ */
+
 template <typename T, typename U> class stateMachineBaseClass {
 	public:
-		virtual stateMachineBaseClass (U& state) = 0;
-		virtual stateMachineBaseClass (U& state, T last) = 0;
-		virtual stateMachineBaseClass& execute() = 0;
+		virtual stateMachineBaseClass (U& state) = 0;			/**< Create a state object with the given state vector and the default mode (typically NONE) */
+		virtual stateMachineBaseClass (U& state, T last) = 0;	/**< Create a state object with the given state vector and last mode. */
+		virtual stateMachineBaseClass& execute() = 0;			/**< Execute one step of the state machine */
 		U& getState() {return _state;}
 		T getMode() {return _thisMode;}
 		T getLastMode() {return _lastMode;}

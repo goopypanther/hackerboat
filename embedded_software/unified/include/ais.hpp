@@ -118,40 +118,41 @@ enum class aisEPFDType : int {
 
 class aisBaseClass : public hackerboatStateClassStorable {
 	public:
-		aisBaseClass ();
-		aisBaseClass (json_t *packet);
-		virtual bool prune ();		/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
+		aisBaseClass () = default;
+		aisBaseClass (json_t *packet);				/**< Create a new AIS object from the given packet. */
 		
-		time_point<system_clock> 	lastContact;
-		time_point<system_clock> 	lastTimestamp;
-		int 			mmsi = -1;
-		locationClass	fix;
-		static const std::string msgClass = "AIS";
-		std::string		device;	/**< Name of the device */
-}
+		virtual bool prune ();						/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
+		
+		time_point<system_clock> 	lastContact;	/**< Time of last contact */
+		time_point<system_clock> 	lastTimestamp;	/**< Time of last time stamp from the target transmitter. */
+		int 			mmsi = -1;					/**< MMSI of transmitter */
+		locationClass	fix;						/**< Location of last position transmission */
+		static const std::string msgClass = "AIS";	/**< Message class from gpsd */
+		std::string		device;						/**< Name of the device */
+};
 
 class aisShipClass : aisBaseClass {
 	public:
-		aisShipClass ();
-		aisShipClass (json_t *packet);
-		bool parseGpsdPacket (json_t *packet);
-		bool project ();	/**< Project the position of the current contact now. */
+		aisShipClass () = default;
+		aisShipClass (json_t *packet);				/**< Create a ship object from the given packet. */
+		bool parseGpsdPacket (json_t *packet);		/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
+		bool project ();							/**< Project the position of the current contact now. */
 		bool project (time_point<system_clock>);	/**< Project the position of this contact at time_point. */
 
-		aisNavStatus	status;
-		double			turn;
-		double			speed;
-		double			course;
-		double			heading;
-		int				imo;
-		std::string		callsign;
-		std::string		shipname;
-		aisShipType		shiptype;
-		int				to_bow;
-		int				to_stern;
-		int				to_port;
-		int				to_starboard;
-		aisEPFDType		epfd;
+		aisNavStatus	status;						/**< Navigation status of target */
+		double			turn;						/**< Rate of turn, degrees per minute. */
+		double			speed;						/**< Speed in knots. */
+		double			course;						/**< True course, degrees. */
+		double			heading;					/**< Magnet heading, degrees. */
+		int				imo;						/**< IMO number */
+		std::string		callsign;					/**< Ship's callsign. */
+		std::string		shipname;					/**< Name of ship. */
+		aisShipType		shiptype;					/**< Type of ship. */
+		int				to_bow;						/**< Distance from the GNSS receiver to the bow, in meters. */
+		int				to_stern;					/**< Distance from the GNSS receiver to the stern, in meters. */
+		int				to_port;					/**< Distance from the GNSS receiver to the port, in meters. */
+		int				to_starboard;				/**< Distance from the GNSS receiver to the starboard, in meters. */
+		aisEPFDType		epfd;						/**< Type of position locating device. */
 		
 	private:
 		hackerboatStateStorage *aisShipStorage = NULL;

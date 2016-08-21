@@ -34,12 +34,12 @@ class locationClass : public hackerboatStateClass {
 		locationClass (void)
 		  : _lat(NAN), _lon(NAN)
 		{ };
-		locationClass (double lat, double lon)					/**< Create a location object at the given latitude & longitude */
+		locationClass (double lat, double lon)			/**< Create a location object at the given latitude & longitude */
 		  : _lat(lat), _lon(lon)
 		{ };
 		bool isValid (void) const;						/**< Check for validity */
 		double bearing (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the bearing from the current location to the target */
-		double distance (const locationClass& dest, courseType type = GreatCircle) const;
+		double distance (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the distance from the current location to the target */
 
 		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
 		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		

@@ -18,32 +18,39 @@
 #include <thread>
 #include <chrono>
 
+/**
+ * @brief This class defines a common interface and routines for creating input threads.
+ */
+ 
+using std::chrono;
+
 class inputThreadClass {
 	public:
-		inputThreadClass();
-		virtual bool begin();
-		virtual bool lock();
-		virtual bool unlock();
-		virtual bool unlockWait(int ms);
-		virtual bool execute();				/**< Gather input	*/
-		void runThread() {					/**< Thread runner function */
+		inputThreadClass() = default;					
+		virtual bool begin();					/**< Start the input thread */
+		virtual bool lock(duration dur);		/**< Lock the thread's data for the given duration (for example, to read data) */
+		virtual bool unlock();					/**< Unlock the thread's data. */	
+		virtual bool unlockWait(duration dur);	/**< Wait for the given duration to unlock the data. */
+		virtual bool execute();					/**< Gather input	*/
+		void runThread() {						/**< Thread runner function */
 			runFlag = true;
 			if (!(this->begin())) return;
 			while (runFlag) {
 				this->execute();
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				std::this_thread::sleep_for(milliseconds(1));
 			}
 		}
-		void kill() {runFlag = false;}		/**< Kill the thread */
-		std::chrono::time_point<std::chrono::system_clock> getLastInputTime() {
+		void kill() {runFlag = false;}			/**< Kill the thread */
+		time_point<system_clock> getLastInputTime() {	/**< Get the time the last data arrived. */
 			return lastInput;
 		}
 		
 	protected:
-		std::chrono::time_point<std::chrono::system_clock> lastInput;	/**< Time that last input was processed */
-		virtual bool forceUnlock(int ms);
+		time_point<system_clock> lastInput;	/**< Time that last input was processed */
+		virtual bool forceUnlock();			/**< Force the data to unlock. */
 		
 	private:
+		atomic_bool lockFlag = false;
 		atomic_bool runFlag = false;
 	
 };

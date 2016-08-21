@@ -53,7 +53,7 @@ class boatNavigationMode : public boatModeBaseClass {
 	public:
 		boatNavigationMode (boatStateClass& state, navigationModeEnum = IDLE, boatModeEnum last = NONE) : 
 			_state(state), _thisMode(NAVIGATION), _lastMode(last);
-		navModeBaseClass& getNavMode () {return _navMode;};
+		navModeBaseClass& getNavMode () {return _navMode;};		/**< Get the current nav mode object */
 	private:
 		navModeBaseClass& _navMode;
 };

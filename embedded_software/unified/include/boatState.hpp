@@ -43,17 +43,17 @@ class boatStateClass : public hackerboatStateClassStorable {
 		int faultCount (void) const;						/**< Returns the current number of faults */
 		bool clearFaults () {faultString = "";};			/**< Remove all faults */
 		std::string getFaultString() (return faultString;};	/**< Returns the entire fault string */
-		bool setBoatMode (boatModeEnum m) {_boat = m;};		/**< Set state to the given value */
-		bool setBoatMode (std::string mode);
-		boatModeEnum getBoatMode () {return _boat;};
-		bool setNavMode (navModeEnum m) {_nav = m;};
-		bool setNavMode (std::string mode);
+		bool setBoatMode (boatModeEnum m) {_boat = m;};		/**< Set boat mode to the given value */
+		bool setBoatMode (std::string mode);				/**< Set boat mode to the given value */
+		boatModeEnum getBoatMode () {return _boat;};		/**< Return boat mode */
+		bool setNavMode (navModeEnum m) {_nav = m;};		/**< Set nav mode to the given value */
+		bool setNavMode (std::string mode);					/**< Set nav mode to the given value */
 		navModeEnum getNavMode () {return _nav;};
-		bool setAutoMode (autoModeEnum m) {_auto = m;};
-		bool setAutoMode (std::string mode);
+		bool setAutoMode (autoModeEnum m) {_auto = m;};		/**< Set autonomous mode to the given value */
+		bool setAutoMode (std::string mode);				/**< Set autonomous mode to the given value */
 		autoModeEnum getAutoMode () {return _auto;};
-		bool setRCmode (rcModeEnum m) {_rc = m;};
-		bool setRCmode (std::string mode);
+		bool setRCmode (rcModeEnum m) {_rc = m;};			/**< Set RC mode to the given value */
+		bool setRCmode (std::string mode);					/**< Set RC mode to the given value */
 		rcModeEnum getRCMode () {return _rc;};
 		
 		time_point<system_clock>	uTime;			/**< Time the record was made */
@@ -65,9 +65,7 @@ class boatStateClass : public hackerboatStateClassStorable {
 		waypointActionEnum			action;			/**< Action to take at the last waypoint */
 		dodgeClass					diversion;		/**< Avoid obstacles! */
 		healthMonitorClass			health;			/**< Current state of the boat's health */
-		double						Kp;
-		double						Ki;
-		double						Kd;
+		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:
 		std::string 	faultString;

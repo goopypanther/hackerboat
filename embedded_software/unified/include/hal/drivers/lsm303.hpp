@@ -116,36 +116,39 @@
 
 class lsm303 {
 	public:
-		lsm303(std::string devpath);
+		lsm303 () = default;
+		lsm303(int bus);												/**< Create an interface object for an LSM303 on the given I2C bus. */
 
-		bool begin(void);
-		bool readAll (void);
-		void enableAutoRange(bool enable);
-		void setMagGain(lsm303MagGain gain);
-		map<std::string, double> getMagData (void);
-		map<std::string, double> getAccelData (void);
-		map<std::string, int> getRawMagData (void);
-		map<std::string, int> getRawAccelData (void);
-		void setMagRegister(lsm303MagRegisters_t reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
-		uint8_t getMagRegister(lsm303MagRegisters_t reg);			/**< Read an arbitrary register on the chip. */
+		bool setBus (int bus);											/**< Set the I2C bus to use. */
+		bool begin(void);												/**< Initialize the LSM303. */
+		bool readAll (void);											/**< Read all accelerometer and magnetometer values */
+		void enableAutoRange(bool enable);								/**< Enable auto-ranging function (see data sheet). */
+		void setMagGain(lsm303MagGain gain);							/**< Set the magnetometer gain. */
+		map<char, double> getMagData (void);							/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
+		map<char, double> getAccelData (void);							/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
+		map<char, int> getRawMagData (void);							/**< Get raw magnetometer data. Field names as for scaled data. */
+		map<char, int> getRawAccelData (void);							/**< Get raw accelerometer data. Field names as for scaled data. */
+		void setMagRegister(lsm303MagRegisters_t reg, uint8_t val);		/**< Set an arbitrary register on the chip. */
+		uint8_t getMagRegister(lsm303MagRegisters_t reg);				/**< Read an arbitrary register on the chip. */
 		void setAccelRegister(lsm303AccelRegisters_t reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
 		uint8_t getAccelRegister(lsm303AccelRegisters_t reg);			/**< Read an arbitrary register on the chip. */
-		map<std::string, int> getMagOffset (void);
-		map<std::string, int> getAccelOffset (void);
-		map<std::string, double> getMagScale (void);
-		map<std::string, double> getAccelScale (void);
-		void setMagOffset (map<std::string, int>);
-		void setAccelOffset (map<std::string, int>);
-		void setMagScale (map<std::string, double>);
-		void setAccelScale (map<std::string, double>);
+		map<char, int> getMagOffset (void);								/**< Get the current offset for magnetometer data. Field names as for data. */
+		map<char, int> getAccelOffset (void);							/**< Get the current offset for accelerometer data. Field names as for data. */
+		map<char, double> getMagScale (void);							/**< Get the current scale factor for the magnetometer data. Field names as for data. */
+		map<char, double> getAccelScale (void);							/**< Get the current scale factor for the accelerometer data. Field names as for data. */
+		void setMagOffset (map<char, int>);								/**< Set magnetometer offsets. */
+		void setAccelOffset (map<char, int>);							/**< Set accelerometer offsets. */
+		void setMagScale (map<char, double>);							/**< Set magnetometer scale. */
+		void setAccelScale (map<char, double>);							/**< Set accelerometer scale. */
 
 	private:
-		map<std::string, int> 		_accelData;   
-		map<std::string, int>		_magData;
-		map<std::string, double>   	_magScale;
-		map<std::string, int>   	_magOffset;
-		map<std::string, double>   	_accelScale;
-		map<std::string, int>   	_accelOffset;
+		i2cClass			_bus;
+		map<char, int> 		_accelData;   
+		map<char, int>		_magData;
+		map<char, double>  	_magScale;
+		map<char, int>   	_magOffset;
+		map<char, double>  	_accelScale;
+		map<char int>   	_accelOffset;
 
 };
 

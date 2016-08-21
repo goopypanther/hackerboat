@@ -1,7 +1,8 @@
 /******************************************************************************
  * Hackerboat orientation input module
  * hal/orientationInput.hpp
- * This module reads orientation data
+ * This module reads orientation data. Its AHRS code is based on Adafruit's
+ * simple AHRS code. 
  *
  * See the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016

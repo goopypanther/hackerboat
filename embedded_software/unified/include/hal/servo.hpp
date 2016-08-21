@@ -26,21 +26,21 @@
 class Servo {
 	public:
 		Servo();
-		bool attach(std::string pinName, 
+		bool attach(std::string pinName, 				/**< Attach servo to named pin. Returns true if successful. */
 					int min = MIN_PULSE_WIDTH,
 					int max = MAX_PULSE_WIDTH,
-					int freq = DEFAULT_FREQUENCY);		/**< Attach servo to named pin. Returns true if successful. */
-		bool attach(int port, 
+					int freq = DEFAULT_FREQUENCY);		
+		bool attach(int port, 							/**< Attach servo to named pin. Returns true if successful. */
 					int min = MIN_PULSE_WIDTH,
 					int max = MAX_PULSE_WIDTH,
-					int freq = DEFAULT_FREQUENCY);		/**< Attach servo to named pin. Returns true if successful. */
-		void detach();
-		void write(int value);
-		void writeMicroseconds(unsigned int value);
-		bool setFrequency(unsigned int freq);
-		int read();
-		unsigned int readMicroseconds();
-		bool attached();
+					int freq = DEFAULT_FREQUENCY);		
+		void detach();									/**< Detach servo from the pin */
+		bool write(double value);						/**< Set the servo position, from -100.0 to +100.0. Returns true if successful, false is unsuccessful or out of range. */
+		bool writeMicroseconds(unsigned int value);		/**< Set the servo position in microseconds. Returns true if successful, false is unsuccessful or out of range. */
+		bool setFrequency(unsigned int freq);			/**< Set servo frequency. Returns true if successful. */
+		double read();									/**< Read the current servo value. */
+		unsigned int readMicroseconds();				/**< Read the current servo value, in microseconds. */
+		bool isAttached();								/**< Check if this object is attached to a pin. */	
 	private:
 		unsigned int _min = 1000;
 		unsigned int _max = 2000;

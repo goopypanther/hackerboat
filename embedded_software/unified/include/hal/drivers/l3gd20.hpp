@@ -110,7 +110,7 @@
 
 class l3gd20 {
 	public:
-		l3gd20(std::string devpath);						/**< Create a gyroscope object on the given I2C bus. */
+		l3gd20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
 
 		bool begin( gyroRange_t rng = GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
 		void enableAutoRange( bool enabled );				/**< Set autorange function (see datasheet) */
@@ -122,7 +122,7 @@ class l3gd20 {
 		gyroSpeed_t getSpeed(void);							/**< Get gyro update rate & bandwidth */
 
 	private:
-		std::string _path;
+		i2cClass	_bus;
 		gyroRange_t _range;
 		bool        _autoRangeEnabled;
 };

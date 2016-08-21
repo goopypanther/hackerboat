@@ -32,17 +32,17 @@
 using std::chrono; 
 
 enum class nmeaModeEnum : int {
-	NONE 	= 0,
-	NOFIX 	= 1,
-	FIX2D	= 2,
-	FIX3D	= 3
+	NONE 	= 0,	/**< No data */
+	NOFIX 	= 1,	/**< No valid fix */
+	FIX2D	= 2,	/**< 2D fix only */
+	FIX3D	= 3		/**< 3D fix */
 };
 
 class gpsFixClass : public hackerboatStateClassStorable {
 	public:
-		gpsFixClass ();
-		gpsFixClass (json_t *packet);	/**< Create a GPS fix from an incoming gpsd TPV */
-		bool parseGpsdPacket (json_t *packet);
+		gpsFixClass () = default;
+		gpsFixClass (json_t *packet);			/**< Create a GPS fix from an incoming gpsd TPV */
+		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming TSV into the current object. */
 		
 		time_point<system_clock>	uTime;		/**< System time of fix */
 		time_point<system_clock>	gpsTime;  	/**< GPS time of fix */

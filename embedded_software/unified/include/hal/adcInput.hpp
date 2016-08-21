@@ -26,12 +26,12 @@
 class adcInputClass : public inputThreadClass {
 	public:
 		adcInputClass(void);	
-		map<std::string, int> getRawValues (void);			/**< Return the ADC values */
-		map<std::string, double> getScaledValues (void);	/**< Return the ADC values */
-		bool setOffsets (map<std::string, int> offsets);
-		bool setScales (map<std::string, double> scales);
-		map<std::string, int> getOffsets();
-		map<std::string, double> getScales();
+		map<std::string, int> getRawValues (void);			/**< Return the raw ADC values */
+		map<std::string, double> getScaledValues (void);	/**< Return the scaled ADC values */
+		bool setOffsets (map<std::string, int> offsets);	/**< Set the offsets for all channels. */
+		bool setScales (map<std::string, double> scales);	/**< Set the scaling for all channels. */
+		map<std::string, int> getOffsets();					/**< Get the offsets for all channels. */
+		map<std::string, double> getScales();				/**< Get the scaling for all channels. */
 		
 	private:
 		adc128d818	upper(ADC_UPPER_ADDR, ADC_I2C_BUS);

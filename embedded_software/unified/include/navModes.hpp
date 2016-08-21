@@ -42,7 +42,7 @@ class navRCMode : public navModeBaseClass {
 	public:
 		navRCMode (boatStateClass& state, rcModeEnum _submode = IDLE, navigationModeEnum last = NONE) : 
 			_state(state), _thisMode(RC), _lastMode(last);
-		rcModeBaseClass& getRCMode () {return _rcMode;};
+		rcModeBaseClass& getRCMode () {return _rcMode;};				/**< Get the current RC mode object */
 	private:
 		rcModeBaseClass& _rcMode;
 };
@@ -51,7 +51,7 @@ class navAutoMode : public navModeBaseClass {
 	public:
 		navAutoMode (boatStateClass& state, autoModeEnum _submode = IDLE, navigationModeEnum last = NONE) : 
 			_state(state), _thisMode(AUTONOMOUS), _lastMode(last);
-		autoModeBaseClass& getAutoMode () {return _autoMode;};
+		autoModeBaseClass& getAutoMode () {return _autoMode;};			/**< Get the current autonomous mode object */
 	private:
 		autoModeBaseClass& _autoMode;
 };
