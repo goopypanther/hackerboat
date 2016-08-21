@@ -3,7 +3,7 @@ extern "C" {
 #include <jansson.h>
 #include <stdarg.h>
 }
-#include "stateStructTypes.hpp"
+#include "hackerboatRoot.hpp"
 
 int json_object_add(json_t *obj, const char *types, ...)
 {

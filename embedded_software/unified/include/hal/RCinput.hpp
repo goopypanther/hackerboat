@@ -24,8 +24,8 @@
 #include "hal/config.h"
 #include "hal/inputThread.hpp"
  
- class rcInputClass : public inputThreadClass {
-	 public:
+class rcInputClass : public inputThreadClass {
+	public:
 		rcInputClass (std::string devpath);	/**< Create a rcInput reader attached to serial port devpath 		*/
 		rcInputClass (void);				/**< Create a rcInput reader attached to serial port defined in hal/config.h */
 		int getThrottle (void);				/**< Get the last throttle position from the RC input 				*/
@@ -40,9 +40,9 @@
 	private:
 		int _throttle = 0;
 		double _rudder = 0;
-		rcModeEnum _mode = NONE;
+		rcModeEnum _mode = rcModeEnum::NONE;
 		std::string _path;
 		int devFD;
- };
+};
  
 #endif

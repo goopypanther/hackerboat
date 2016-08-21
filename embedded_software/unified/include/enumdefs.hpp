@@ -66,7 +66,8 @@ enum class waypointActionEnum {
 	IDLE,		/**< Do nothing -- navigation and autonomous mode both idle */
 	ANCHOR,		/**< Anchor at the last waypoint */
 	RETURN,		/**< Return to launch site */
-	REPEAT		/**< Go back to the first waypoint. */
+	REPEAT,		/**< Go back to the first waypoint. */
+	NONE		/**< No action specified */
 };
 
 #endif

@@ -17,41 +17,41 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include "hackerboatRoot.hpp"
 
 /**
  * @brief This class defines a common interface and routines for creating input threads.
  */
  
-using std::chrono;
-
 class inputThreadClass {
 	public:
-		inputThreadClass() = default;					
-		virtual bool begin();					/**< Start the input thread */
-		virtual bool lock(duration dur);		/**< Lock the thread's data for the given duration (for example, to read data) */
+		inputThreadClass() = default;	
+		
+		virtual bool begin() = 0;				/**< Start the input thread */
+		virtual bool lock(sysdur dur);		/**< Lock the thread's data for the given duration (for example, to read data) */
 		virtual bool unlock();					/**< Unlock the thread's data. */	
-		virtual bool unlockWait(duration dur);	/**< Wait for the given duration to unlock the data. */
-		virtual bool execute();					/**< Gather input	*/
+		virtual bool unlockWait(sysdur dur);	/**< Wait for the given duration to unlock the data. */
+		virtual bool execute() = 0;				/**< Gather input	*/
 		void runThread() {						/**< Thread runner function */
 			runFlag = true;
 			if (!(this->begin())) return;
 			while (runFlag) {
 				this->execute();
-				std::this_thread::sleep_for(milliseconds(1));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
-		}
-		void kill() {runFlag = false;}			/**< Kill the thread */
-		time_point<system_clock> getLastInputTime() {	/**< Get the time the last data arrived. */
+		};
+		void kill() {runFlag = false;};			/**< Kill the thread */
+		sysclock getLastInputTime() {	/**< Get the time the last data arrived. */
 			return lastInput;
-		}
+		};
 		
 	protected:
-		time_point<system_clock> lastInput;	/**< Time that last input was processed */
+		sysclock lastInput;	/**< Time that last input was processed */
 		virtual bool forceUnlock();			/**< Force the data to unlock. */
+		std::atomic_bool lockFlag { false };
 		
 	private:
-		atomic_bool lockFlag = false;
-		atomic_bool runFlag = false;
+		std::atomic_bool runFlag { false };
 	
 };
 

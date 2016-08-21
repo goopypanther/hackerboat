@@ -24,36 +24,47 @@
 #include "autoModes.hpp"
 
 class navModeBaseClass : public stateMachineBaseClass<navigationModeEnum, boatStateClass> {
+	public:
+		static navModeBaseClass* navModeFactory(boatStateClass& state, navigationModeEnum mode);	/**< Create a new object of the given mode */
+		virtual ~navModeBaseClass() {};
+	protected:
+		navModeBaseClass (boatStateClass& state, navigationModeEnum last, navigationModeEnum thisMode) :
+			stateMachineBaseClass<navigationModeEnum, boatStateClass> (state, last, thisMode) {};
+		
 };
 
 class navIdleMode : public navModeBaseClass {
 	public:
-		navIdleMode (boatStateClass& state, navigationModeEnum last = NONE) : 
-			_state(state), _thisMode(IDLE), _lastMode(last);
+		navIdleMode (boatStateClass& state, navigationModeEnum last = navigationModeEnum::NONE) : 
+			navModeBaseClass(state, last, navigationModeEnum::IDLE) {};
 };
 
 class navFaultMode : public navModeBaseClass {
 	public:
-		navFaultMode (boatStateClass& state, navigationModeEnum last = NONE) : 
-			_state(state), _thisMode(FAULT), _lastMode(last);
+		navFaultMode (boatStateClass& state, navigationModeEnum last = navigationModeEnum::NONE) : 
+			navModeBaseClass(state, last, navigationModeEnum::FAULT) {};
 };
 
 class navRCMode : public navModeBaseClass {
 	public:
-		navRCMode (boatStateClass& state, rcModeEnum _submode = IDLE, navigationModeEnum last = NONE) : 
-			_state(state), _thisMode(RC), _lastMode(last);
-		rcModeBaseClass& getRCMode () {return _rcMode;};				/**< Get the current RC mode object */
+		navRCMode (boatStateClass& state, navigationModeEnum last = navigationModeEnum::NONE, rcModeEnum submode = rcModeEnum::IDLE) : 
+			navModeBaseClass(state, last, navigationModeEnum::RC),
+			_rcMode(rcModeBaseClass::rcModeFactory(state, submode)) {};
+		rcModeBaseClass* getRCMode () {return _rcMode;};				/**< Get the current RC mode object */
+		~navRCMode () {delete _rcMode;};
 	private:
-		rcModeBaseClass& _rcMode;
+		rcModeBaseClass* _rcMode;
 };
 
 class navAutoMode : public navModeBaseClass {
 	public:
-		navAutoMode (boatStateClass& state, autoModeEnum _submode = IDLE, navigationModeEnum last = NONE) : 
-			_state(state), _thisMode(AUTONOMOUS), _lastMode(last);
-		autoModeBaseClass& getAutoMode () {return _autoMode;};			/**< Get the current autonomous mode object */
+		navAutoMode (boatStateClass& state, navigationModeEnum last = navigationModeEnum::NONE, autoModeEnum submode = autoModeEnum::IDLE) : 
+			navModeBaseClass(state, last, navigationModeEnum::AUTONOMOUS),
+			_autoMode(autoModeBaseClass::autoModeFactory(state, submode)) {};
+		autoModeBaseClass* getAutoMode () {return _autoMode;};			/**< Get the current autonomous mode object */
+		~navAutoMode () {delete _autoMode;};
 	private:
-		autoModeBaseClass& _autoMode;
+		autoModeBaseClass* _autoMode;
 };
 
 #endif

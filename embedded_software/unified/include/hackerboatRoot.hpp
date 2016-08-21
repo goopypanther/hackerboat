@@ -31,6 +31,11 @@ class hackerboatStateStorage;
 class sqliteParameterSlice;
 class sqliteRowReference;
 
+// type definitions for code sanity
+
+typedef std::chrono::time_point<std::chrono::system_clock> 	sysclock;
+typedef std::chrono::duration<std::chrono::system_clock>	sysdur;
+
 #define USE_RESULT __attribute__((warn_unused_result))
 
 /**
@@ -45,12 +50,12 @@ class hackerboatStateClass {
 		/** Populate the object from the given json object.
 		 * If seq is true, a sequence number element is expected
 		 */
-		virtual bool parse (json_t *input, bool seq) USE_RESULT = 0;
+		virtual bool parse (json_t *input) USE_RESULT = 0;
 
 		/** Pack the contents of the object into a json object and return a pointer to that object.
 		 * If seq is true, a sequence number element will be included
 		 */
-		virtual json_t *pack (bool seq = true) const USE_RESULT = 0;
+		virtual json_t *pack () const USE_RESULT = 0;
 
 		/** Tests whether the current object is in a valid state */
 		virtual bool isValid (void) const {
@@ -60,7 +65,7 @@ class hackerboatStateClass {
 		static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
 		static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
 		
-		std::chrono::time_point<std::chrono::system_clock> recordTime;
+		sysclock recordTime;
 
 	protected:
 		hackerboatStateClass(void) {};
@@ -99,15 +104,6 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		bool getRecord(sequence select) USE_RESULT;				/**< Populate the object from the open database file */
 		bool getLastRecord(void) USE_RESULT;					/**< Get the latest record */
 		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
-		
-		/** Releases the storage object for the instance
-		 * 
-		 * Release all locks on the current object's storage and (optionally) close it.
-		 * This must be implemented by concrete classes that implement this class. 
-		 *
-		 */
-		 
-		virtual void release(void) = 0;
 		
 	protected:
 		hackerboatStateClassStorable()			/**< Create a state object */

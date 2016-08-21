@@ -31,6 +31,15 @@
 #define RETURN_TIMEOUT		(180)
 #define LAUNCH_WAYPOINT		(0)
 
+// New hardware declarations
+
+#define ADC_UPPER_ADDR		(0x71)
+#define ADC_LOWER_ADDR		(0x70)
+#define ADC_I2C_BUS			(2)
+#define IMU_I2C_BUS			(1)
+#define THROTTLE_RELAY_VECTOR {"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT"}
+#define LIGHTS_COUNT		(144)
+
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
 #define GPS_DB_FILE			"gps.db"

@@ -112,7 +112,7 @@ class l3gd20 {
 	public:
 		l3gd20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
 
-		bool begin( gyroRange_t rng = GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
+		bool begin( gyroRange_t rng = gyroRange_t::GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
 		void enableAutoRange( bool enabled );				/**< Set autorange function (see datasheet) */
 		map<std::string, double> getScaledData(void);		/**< Get the scaled data for each axis. Axes are named 'x', 'y', and 'z' in the map */
 		map<std::string, int> getRawData(void);				/**< Get the raw data for each axis. Axes are named as for scaled data. */

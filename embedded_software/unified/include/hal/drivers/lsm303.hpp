@@ -148,7 +148,7 @@ class lsm303 {
 		map<char, double>  	_magScale;
 		map<char, int>   	_magOffset;
 		map<char, double>  	_accelScale;
-		map<char int>   	_accelOffset;
+		map<char, int>   	_accelOffset;
 
 };
 

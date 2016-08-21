@@ -40,9 +40,10 @@
 void inputBB (boatStateClass &state, long stepNum);
 void outputBB (boatStateClass &state, long stepNum);
 
-static logError *err = logError::instance();
+logError *err = logError::instance();
 
-int main (void) {
+int main () {
 	
 	return 0;
+	
 }

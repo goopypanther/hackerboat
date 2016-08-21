@@ -9,7 +9,7 @@
 #include "sqliteStorage.hpp"
 #include "hackerboatRoot.hpp"
 #include "logs.hpp"
-#include "config.h"
+#include "hal/config.h"
 
 #include <string>
 #include <sstream>

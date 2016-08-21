@@ -20,7 +20,7 @@
 class lightsClass {
 	public:
 		lightsClass() = default;
-		void setBrightness(int bright);		/**< Set the brightness of the whole string *//
+		void setBrightness(int bright);		/**< Set the brightness of the whole string */
 		void setMode(boatModeEnum boat, 	/**< Set the lights as appropiate for the given modes */
 					navigationModeEnum nav, 
 					autoModeEnum autonomy, 
@@ -28,7 +28,7 @@ class lightsClass {
 		void clear();						/**< Turn off all the lights */
 		
 	private:
-		Pixelbone_Pixel 	strip(LIGHTS_COUNT);
+		PixelBone_Pixel 	strip { LIGHTS_COUNT };
 		boatModeEnum 		_boat; 
 		navigationModeEnum 	_nav; 
 		autoModeEnum 		_auto; 

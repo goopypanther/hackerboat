@@ -26,8 +26,6 @@
 #include "ais.hpp"
 #include "hal/inputThread.hpp"
 
-using std;
-
 class gpsdInputClass : public inputThreadClass {
 	public:
 		gpsdInputClass() = default;					
@@ -37,9 +35,9 @@ class gpsdInputClass : public inputThreadClass {
 		bool connect ();								/**< Connect to the host */
 		bool disconnect ();								/**< Disconnect from the host. */
 		bool isConnected ();							/**< Returns true if connected. */
-		gpsFixClass getFix();							/**< Returns last GPS fix (TSV report, more or less) */
-		vector<tuple<int, aisBaseClass>> getData();		/**< Returns all AIS contacts */
-		vector<tuple<int, aisBaseClass>> getData(aisShipType type);	/**< Returns AIS contacts of a particular ship type */
+		gpsFixClass* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
+		std::vector<std::tuple<int, aisBaseClass>> getData();		/**< Returns all AIS contacts */
+		std::vector<std::tuple<int, aisBaseClass>> getData(aisShipType type);	/**< Returns AIS contacts of a particular ship type */
 		aisBaseClass& getData(int MMSI);				/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
 		aisBaseClass& getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
 		int pruneAIS();									/**< Call the prune() function of each AIS contact. */
@@ -49,5 +47,6 @@ class gpsdInputClass : public inputThreadClass {
 		int 								_port;
 		gpsFixClass 						_lastFix;
 		vector<tuple<int, aisBaseClass>>	_aisTargets;
+};
 		
 #endif

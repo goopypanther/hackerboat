@@ -28,9 +28,11 @@
 class orientationClass : public hackerboatStateClass {
 	public:
 		orientationClass() = default;
-		orientationClass(double r, double p, double y)
-		  : pitch(p), roll(r), heading(y)
-		{};
+		orientationClass(double r, double p, double y) :
+			pitch(p), roll(r), heading(y) {};
+		bool parse (json_t *input);
+		json_t *pack () const;
+		bool isValid ();
 		bool normalize (void);		/**< Normalize the roll/pitch/heading */
 		double roll 	= NAN;
 		double pitch 	= NAN;

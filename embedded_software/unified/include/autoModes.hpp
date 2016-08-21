@@ -1,7 +1,7 @@
 /******************************************************************************
- * Hackerboat Beaglebone RC modes module
- * rcModes.hpp
- * This is the RC sub-modes
+ * Hackerboat Beaglebone autonomous modes module
+ * autoModes.hpp
+ * This is the autonomous sub-modes
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016
  * 
@@ -9,8 +9,8 @@
  *
  ******************************************************************************/
  
-#ifndef RCMODES_H
-#define RCMODES_H 
+#ifndef AUTOMODES_H
+#define AUTOMODES_H 
  
 #include <jansson.h>
 #include <stdlib.h>
@@ -22,30 +22,36 @@
 #include "boatState.hpp"
 
 class autoModeBaseClass : public stateMachineBaseClass<autoModeEnum, boatStateClass> {
+	public:
+		static autoModeBaseClass* autoModeFactory(boatStateClass& state, autoModeEnum mode);	/**< Create a new object of the given mode */
+		virtual ~autoModeBaseClass () {};
+	protected:
+		autoModeBaseClass (boatStateClass& state, autoModeEnum last, autoModeEnum thisMode) :
+			stateMachineBaseClass<autoModeEnum, boatStateClass> (state, last, thisMode) {};
 };
 
 class autoIdleMode : public autoModeBaseClass {
 	public:
-		autoIdleMode (boatStateClass& state, autoModeEnum last = NONE) : 
-			_state(state), _thisMode(IDLE), _lastMode(last);
+		autoIdleMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
+			autoModeBaseClass(state, last, autoModeEnum::IDLE) {};
 };
 
 class autoWaypointMode : public autoModeBaseClass {
 	public:
-		autoWaypointMode (boatStateClass& state, autoModeEnum last = NONE) : 
-			_state(state), _thisMode(WAYPOINT), _lastMode(last);
+		autoWaypointMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
+			autoModeBaseClass(state, last, autoModeEnum::WAYPOINT) {}; 
 };
 
 class autoReturnMode : public autoModeBaseClass {
 	public:
-		autoReturnMode (boatStateClass& state, autoModeEnum last = NONE) : 
-			_state(state), _thisMode(RETURN), _lastMode(last);
+		autoReturnMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
+			autoModeBaseClass(state, last, autoModeEnum::RETURN) {}; 
 };
 
 class autoAnchorMode : public autoModeBaseClass {
 	public:
-		autoAnchorMode (boatStateClass& state, autoModeEnum last = NONE) : 
-			_state(state), _thisMode(ANCHOR), _lastMode(last);
+		autoAnchorMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
+			autoModeBaseClass(state, last, autoModeEnum::ANCHOR) {}; 
 };
 
 #endif

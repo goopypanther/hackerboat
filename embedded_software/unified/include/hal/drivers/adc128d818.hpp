@@ -75,5 +75,4 @@ class ADC128D818 {
 
 };
 
-
-#endif
+#endif /* ADC128D818_H */

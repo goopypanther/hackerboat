@@ -28,12 +28,12 @@
 class orientationInputClass : public inputThreadClass {
 	public:
 		orientationInputClass(void);			
-		orientation getOrientation(void);		/**< Get the last orientation recorded */
+		orientationClass* getOrientation() {return &_current;};	/**< Get the last orientation recorded */
 		
 	private:
-		lsm303	gyro(IMU_I2C_BUS);
-		l3gd20	compass(IMU_I2C_BUS);
-		orientation _current;
+		lsm303	gyro { IMU_I2C_BUS };
+		l3gd20	compass { IMU_I2C_BUS };
+		orientationClass _current;
 };
 
 #endif

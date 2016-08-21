@@ -33,7 +33,7 @@ class throttleClass {
 	private:
 		int _throttle = 0;
 		adcInputClass& _adc;
-		static vector<std::string> throttleRelays = THROTTLE_RELAY_VECTOR;
+		const vector<std::string> throttleRelays = THROTTLE_RELAY_VECTOR;
 };
 
 #endif

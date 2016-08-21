@@ -22,24 +22,30 @@
 #include "boatState.hpp"
 
 class rcModeBaseClass : public stateMachineBaseClass<rcModeEnum, boatStateClass> {
+	public:
+		static rcModeBaseClass* rcModeFactory(boatStateClass& state, rcModeEnum mode);	/**< Create a new object of the given mode */
+		virtual ~rcModeBaseClass () {};
+	protected:
+		rcModeBaseClass (boatStateClass& state, rcModeEnum last, rcModeEnum thisMode) :
+			stateMachineBaseClass<rcModeEnum, boatStateClass> (state, last, thisMode) {};
 };
 
 class rcIdleMode : public rcModeBaseClass {
 	public:
-		rcIdleMode (boatStateClass& state, rcModeEnum last = NONE) : 
-			_state(state), _thisMode(IDLE), _lastMode(last);
+		rcIdleMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
+			rcModeBaseClass(state, last, rcModeEnum::IDLE) {};
 };
 
 class rcRudderMode : public rcModeBaseClass {
 	public:
-		rcRudderMode (boatStateClass& state, rcModeEnum last = NONE) : 
-			_state(state), _thisMode(RUDDER), _lastMode(last);
+		rcRudderMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
+			rcModeBaseClass(state, last, rcModeEnum::RUDDER) {};
 };
 
 class rcCourseMode : public rcModeBaseClass {
 	public:
-		rcCourseMode (boatStateClass& state, rcModeEnum last = NONE) : 
-			_state(state), _thisMode(COURSE), _lastMode(last);
+		rcCourseMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
+			rcModeBaseClass(state, last, rcModeEnum::COURSE) {};
 };
 
 #endif

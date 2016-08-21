@@ -23,45 +23,50 @@
 #include "navModes.hpp"
 
 class boatModeBaseClass : public stateMachineBaseClass<boatModeEnum, boatStateClass> {
+	protected:
+		boatModeBaseClass (boatStateClass& state, boatModeEnum last, boatModeEnum thisMode) :
+			stateMachineBaseClass<boatModeEnum, boatStateClass> (state, last, thisMode) {};
 };
 
 class boatStartMode : public boatModeBaseClass {
 	public:
-		boatStartMode  (boatStateClass& state, boatModeEnum last = NONE) : 
-		_state(state), _thisMode(SELFTEST), _lastMode(last);
+		boatStartMode  (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE) : 
+			boatModeBaseClass(state, boatModeEnum::NONE, boatModeEnum::START) {}; 
 };
 
 class boatSelfTestMode : public boatModeBaseClass {
 	public:
-		boatSelfTestMode (boatStateClass& state, boatModeEnum last = NONE) : 
-			_state(state), _thisMode(SELFTEST), _lastMode(last);
+		boatSelfTestMode (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE) : 
+			boatModeBaseClass(state, last, boatModeEnum::SELFTEST) {};  
 };
 
 class boatDisarmedMode : public boatModeBaseClass {
 	public:
-		boatDisarmedMode (boatStateClass& state, boatModeEnum last = NONE) : 
-			_state(state), _thisMode(DISARMED), _lastMode(last);
+		boatDisarmedMode (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE) : 
+			boatModeBaseClass(state, last, boatModeEnum::DISARMED) {}; 
 };
 
 class boatFaultMode : public boatModeBaseClass {
 	public:
-		boatFaultMode (boatStateClass& state, boatModeEnum last = NONE) : 
-			_state(state), _thisMode(FAULT), _lastMode(last);
+		boatFaultMode (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE) : 
+			boatModeBaseClass(state, last, boatModeEnum::FAULT) {};
 };
 
 class boatNavigationMode : public boatModeBaseClass {
 	public:
-		boatNavigationMode (boatStateClass& state, navigationModeEnum = IDLE, boatModeEnum last = NONE) : 
-			_state(state), _thisMode(NAVIGATION), _lastMode(last);
-		navModeBaseClass& getNavMode () {return _navMode;};		/**< Get the current nav mode object */
+		boatNavigationMode (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE, navigationModeEnum submode = navigationModeEnum::IDLE) : 
+			boatModeBaseClass(state, last, boatModeEnum::NAVIGATION),
+			_navMode(navModeBaseClass::navModeFactory(state, submode)) {};
+		navModeBaseClass* getNavMode () {return _navMode;};		/**< Get the current nav mode object */
+		~boatNavigationMode () {delete _navMode;};
 	private:
-		navModeBaseClass& _navMode;
+		navModeBaseClass* _navMode;
 };
 
 class boatArmedTestMode : public boatModeBaseClass {
 	public:
-		boatArmedTestMode (boatStateClass& state, boatModeEnum last = NONE) : 
-			_state(state), _thisMode(ARMEDTEST), _lastMode(last);
+		boatArmedTestMode (boatStateClass& state, boatModeEnum last = boatModeEnum::NONE) : 
+			boatModeBaseClass(state, last, boatModeEnum::ARMEDTEST) {};
 };
 
 #endif

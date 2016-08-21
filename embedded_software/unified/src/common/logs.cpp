@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <sstream>
 
 using namespace std;
 using namespace std::chrono;
@@ -25,13 +26,17 @@ std::string timeOutput (void) {
 	auto logTime = system_clock::now();
 	auto minTime = time_point_cast<minutes>(logTime);
 	auto millis = duration_cast<milliseconds>(logTime - minTime);
+	struct tm * myUTCtime;
+	time_t myEpochTime;
 	char timebuf[LOCAL_BUF_LEN];
 	
-	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:", system_clock::to_time_t(logTime));
-	std::string	ret(timebuf);
-	ret += std::string(millis.count()/1000);
-	ret += "]:";
-	return ret;
+	myEpochTime = system_clock::to_time_t(logTime);
+	myUTCtime = gmtime(&myEpochTime);
+	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:", myUTCtime);
+	std::stringstream ret(timebuf);
+	ret << (millis.count()/1000) << "]:";
+	free(myUTCtime);
+	return ret.str();
 }
 
 bool logError::open(std::string path)
