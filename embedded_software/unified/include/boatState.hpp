@@ -23,11 +23,9 @@
 #include "hal/config.h"
 #include "logs.hpp"
 #include "enumdefs.hpp"
-#include "healthMonitor.hpp"
-#include "waypoints.h"
-#include "dodge.h"
-
-using std::chrono;
+//#include "healthMonitor.hpp"
+//#include "waypoints.h"
+//#include "dodge.h"
 
 class boatStateClass : public hackerboatStateClassStorable {
 	public:
@@ -42,7 +40,7 @@ class boatStateClass : public hackerboatStateClassStorable {
 		bool hasFault (const std::string fault) const;		/**< Returns true if given fault is present */
 		int faultCount (void) const;						/**< Returns the current number of faults */
 		bool clearFaults () {faultString = "";};			/**< Remove all faults */
-		std::string getFaultString() (return faultString;};	/**< Returns the entire fault string */
+		std::string getFaultString() {return faultString;};	/**< Returns the entire fault string */
 		bool setBoatMode (boatModeEnum m) {_boat = m;};		/**< Set boat mode to the given value */
 		bool setBoatMode (std::string mode);				/**< Set boat mode to the given value */
 		boatModeEnum getBoatMode () {return _boat;};		/**< Return boat mode */
@@ -56,15 +54,15 @@ class boatStateClass : public hackerboatStateClassStorable {
 		bool setRCmode (std::string mode);					/**< Set RC mode to the given value */
 		rcModeEnum getRCMode () {return _rc;};
 		
-		time_point<system_clock>	uTime;			/**< Time the record was made */
-		time_point<system_clock>	lastContact;	/**< Time of last shore contact */
-		time_point<system_clock>	lastRC;			/**< Time of the last signal from the RC input */
+		std::chrono::time_point<std::chrono::system_clock>	uTime;			/**< Time the record was made */
+		std::chrono::time_point<std::chrono::system_clock>	lastContact;	/**< Time of last shore contact */
+		std::chrono::time_point<std::chrono::system_clock>	lastRC;			/**< Time of the last signal from the RC input */
 		locationClass				lastFix;		/**< Location of the last GPS fix */
 		locationClass				launchPoint;	/**< Location of the launch point */
-		waypointListClass			waypoints;		/**< Waypoints to follow */
+//		waypointListClass			waypoints;		/**< Waypoints to follow */
 		waypointActionEnum			action;			/**< Action to take at the last waypoint */
-		dodgeClass					diversion;		/**< Avoid obstacles! */
-		healthMonitorClass			health;			/**< Current state of the boat's health */
+//		dodgeClass					diversion;		/**< Avoid obstacles! */
+//		healthMonitorClass			health;			/**< Current state of the boat's health */
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:

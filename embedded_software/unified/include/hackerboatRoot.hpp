@@ -22,7 +22,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "config.h"
+#include "hal/config.h"
 #include "json_utilities.hpp"
 #include "sqliteStorage.hpp"
 
@@ -53,10 +53,12 @@ class hackerboatStateClass {
 		virtual json_t *pack (bool seq = true) const USE_RESULT = 0;
 
 		/** Tests whether the current object is in a valid state */
-		virtual bool isValid (void) const {return true;};
+		virtual bool isValid (void) const {
+			return true;
+		};
 
-		static json_t *packTime (std::chrono::time_point t);
-		static int parseTime (json_t *input, std::chrono::time_point *t) USE_RESULT;
+		static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
+		static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
 		
 		std::chrono::time_point<std::chrono::system_clock> recordTime;
 
@@ -64,11 +66,11 @@ class hackerboatStateClass {
 		hackerboatStateClass(void) {};
 };
 
-inline json_t *json(std::chrono::time_point t) {
+inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
 	return hackerboatStateClass::packTime(t);
 }
-inline bool parse(json_t *input, std::chrono::time_point *t) USE_RESULT;
-inline bool parse(json_t *input, std::chrono::time_point *t) {
+inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
+inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) {
 	return hackerboatStateClass::parseTime(input, t) == 0;
 };
 

@@ -13,7 +13,7 @@
 #define AIS_H
  
 #include <jansson.h>
-#include "config.h"
+#include "hal/config.h"
 #include <math.h>
 #include <string>
 #include <chrono>

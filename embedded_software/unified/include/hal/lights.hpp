@@ -13,8 +13,8 @@
 #ifndef LIGHTS_H
 #define LIGHTS_H
 
-#include "config.h"
-#include "enumdefs.h"
+#include "hal/config.h"
+#include "enumdefs.hpp"
 #include "pixel.hpp"
 
 class lightsClass {

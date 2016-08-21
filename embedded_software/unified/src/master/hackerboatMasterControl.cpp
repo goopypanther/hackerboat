@@ -28,7 +28,6 @@
 #include "orientation.hpp"
 #include "pid.hpp"
 
-#include "hal/aisInput.hpp"
 #include "hal/adcInput.hpp"
 #include "hal/gpsdInput.hpp"
 #include "hal/lights.hpp"

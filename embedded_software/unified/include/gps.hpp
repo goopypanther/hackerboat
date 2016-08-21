@@ -29,8 +29,6 @@
  *
  */
 
-using std::chrono; 
-
 enum class nmeaModeEnum : int {
 	NONE 	= 0,	/**< No data */
 	NOFIX 	= 1,	/**< No valid fix */
@@ -44,8 +42,8 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		gpsFixClass (json_t *packet);			/**< Create a GPS fix from an incoming gpsd TPV */
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming TSV into the current object. */
 		
-		time_point<system_clock>	uTime;		/**< System time of fix */
-		time_point<system_clock>	gpsTime;  	/**< GPS time of fix */
+		std::chrono::time_point<std::chrono::system_clock>	uTime;		/**< System time of fix */
+		std::chrono::time_point<std::chrono::system_clock>	gpsTime;  	/**< GPS time of fix */
 		
 		nmeaModeEnum	mode;	/**< Mode of the fix */
 		std::string		device;	/**< Name of the device */
@@ -58,7 +56,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		double			eps;	/**< Speed error, 95% confidence, m/s */
 
 		bool 			fixValid;	/**< Checks whether this fix is valid or not */				
-		static const std::string msgClass = "TPV";
+		const std::string msgClass = "TPV";
 		
 	private:
 		hackerboatStateStorage *gpsStorage = NULL;

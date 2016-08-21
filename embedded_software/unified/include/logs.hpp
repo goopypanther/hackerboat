@@ -13,7 +13,7 @@
 #ifndef LOGS_H
 #define LOGS_H 
  
-#include "config.h" 
+#include "hal/config.h" 
 
 #include <string>
 #include <iostream>

@@ -13,7 +13,7 @@
 #define LOCATION_H
  
 #include <jansson.h>
-#include "config.h"
+#include "hal/config.h"
 #include <math.h>
 #include <string>
 #include "hackerboatRoot.hpp"
@@ -37,6 +37,8 @@ class locationClass : public hackerboatStateClass {
 		locationClass (double lat, double lon)			/**< Create a location object at the given latitude & longitude */
 		  : _lat(lat), _lon(lon)
 		{ };
+		bool parse (json_t *input, bool seq);
+		json_t *pack (bool seq = true) const USE_RESULT;
 		bool isValid (void) const;						/**< Check for validity */
 		double bearing (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the bearing from the current location to the target */
 		double distance (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the distance from the current location to the target */

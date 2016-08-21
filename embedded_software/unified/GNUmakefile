@@ -10,9 +10,9 @@ GTEST_INC=/usr/include/gtest
 
 MINMEA=submodules/minmea
 
-CFLAGS   += $(OPTS) -std=gnu11 
+CFLAGS   += $(OPTS) -std=gnu14
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++11 -pthread
-CPPFLAGS += -I submodules/include -I include -MMD -MT $@
+CPPFLAGS += -I submodules/include -I include -I submodules/PixelBone -MMD -MT $@
 LDFLAGS  += -L submodules/lib
 
 LDLIBS += -ljansson -lsqlite3 -lm -lrt

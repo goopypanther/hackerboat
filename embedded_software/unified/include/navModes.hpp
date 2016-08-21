@@ -20,8 +20,8 @@
 #include "enumdefs.hpp"
 #include "stateMachine.hpp"
 #include "boatState.hpp"
-#include "rcMode.hpp"
-#include "autoMode.hpp"
+#include "rcModes.hpp"
+#include "autoModes.hpp"
 
 class navModeBaseClass : public stateMachineBaseClass<navigationModeEnum, boatStateClass> {
 };
