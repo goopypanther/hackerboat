@@ -1,12 +1,3 @@
-[submodule "embedded_software/arduino/HackerBoatLib"]
-	path = embedded_software/arduino/HackerBoatLib
-	url = https://github.com/logos-electromechanical/HackerBoatLib.git
-[submodule "embedded_software/beaglebone/submodules/jansson"]
-	path = embedded_software/unified/submodules/jansson
-	url = https://github.com/akheron/jansson
-[submodule "embedded_software/beaglebone/submodules/minmea"]
-	path = embedded_software/unified/submodules/minmea
-	url = https://github.com/logos-electromechanical/minmea.git
 [submodule "embedded_software/unified/submodules/jansson"]
 	path = embedded_software/unified/submodules/jansson
 	url = https://github.com/logos-electromechanical/jansson.git
