@@ -23,6 +23,7 @@ class throttleClass {
 	public:
 		throttleClass() = default;						
 		throttleClass(adcInputClass& adc);		/**< Create a motor device with a reference to an ADC input instance for motor current & voltage */
+			
 		bool setThrottle(int throttle);			/**< Set throttle to the given value. Returns false if the value is outside of the range defined by getMaxThrottle() and getMinThrottle() */
 		int getThrottle();						/**< Get current throttle position */
 		double getMotorCurrent();				/**< Get the current motor current */
