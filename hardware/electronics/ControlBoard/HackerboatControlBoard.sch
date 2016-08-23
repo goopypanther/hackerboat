@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -18979,27 +18979,31 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <parts>
 <part name="U$1" library="adafruit" deviceset="BEAGLEBONE_OUTLINE" device="">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="FRAME1" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="FRAME3" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="IMU" library="adafruit-sensor-boards" deviceset="9-DOF-BREAKOUT" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="BCS-110-L-S-TE"/>
 </part>
 <part name="GPS" library="adafruit-sensor-boards" deviceset="ULTIMATE-GPS" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="BCS-109-L-S-TE"/>
 </part>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="P+3" library="supply1" deviceset="+5V" device=""/>
 <part name="H1" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="H3" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="H4" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
 <part name="FRAME6" library="frames" deviceset="FRAME_A_L" device=""/>
@@ -19009,32 +19013,32 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="UMK325BJ106MM"/>
 </part>
 <part name="U15" library="logos-power" deviceset="TPS54331" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TPS54331DR"/>
 </part>
 <part name="C30" library="resistor" deviceset="C-EU" device="C0603" value="10n">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CL10B103KB8NCNC"/>
 </part>
 <part name="P+14" library="supply1" deviceset="+12V" device=""/>
 <part name="GND16" library="supply1" deviceset="GND" device=""/>
 <part name="C31" library="resistor" deviceset="C-EU" device="C0603" value="8n2">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CL10B822KB8SFNC"/>
 </part>
 <part name="GND17" library="supply1" deviceset="GND" device=""/>
 <part name="C32" library="resistor" deviceset="C-EU" device="C0603" value="100n">
 <attribute name="PARTNO" value="CC0603KRX7R9BB104"/>
 </part>
-<part name="C33" library="resistor" deviceset="C-EU" device="C0603" value="7u5">
-<attribute name="PARTNO" value="*"/>
+<part name="C33" library="resistor" deviceset="C-EU" device="C0603" value="7p5">
+<attribute name="PARTNO" value="CL10C7R5DB8NNNC"/>
 </part>
 <part name="C34" library="resistor" deviceset="C-EU" device="C0603" value="220p">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CL10B221KC8WPNC"/>
 </part>
 <part name="R26" library="resistor" deviceset="R-EU_" device="R0603" value="11K5">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-0711K5L"/>
 </part>
 <part name="GND18" library="supply1" deviceset="GND" device=""/>
 <part name="D36" library="ARD-SRG-MOT8-1a" deviceset="SPARKFUN_DIODE" device="SMA">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SK310A-LTP"/>
 </part>
 <part name="C28" library="resistor" deviceset="C-EU" device="C1210" value="10u">
 <attribute name="PARTNO" value="UMK325BJ106MM"/>
@@ -19043,65 +19047,70 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="UMK325BJ106MM"/>
 </part>
 <part name="C26" library="resistor" deviceset="C-EU" device="C1210" value="4u7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="UMK325F475ZH"/>
 </part>
 <part name="C27" library="resistor" deviceset="C-EU" device="C1210" value="4u7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="UMK325F475ZH"/>
 </part>
 <part name="R27" library="resistor" deviceset="R-EU_" device="R0603" value="10K2">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-0710K2L"/>
 </part>
 <part name="R28" library="resistor" deviceset="R-EU_" device="R0603" value="1K24">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-071K24L"/>
 </part>
 <part name="GND19" library="supply1" deviceset="GND" device=""/>
 <part name="L2" library="logos-inductors" deviceset="NR60" device="45" value="22u">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="NR6045T220M"/>
 </part>
 <part name="U$2" library="SparkFun-Connectors" deviceset="M24" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="U$3" library="SparkFun-Connectors" deviceset="M24" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="U$4" library="SparkFun-Connectors" deviceset="M24" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="U$5" library="SparkFun-Connectors" deviceset="M24" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="R19" library="resistor" deviceset="R-EU_" device="R0603" value="4K7'">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="R20" library="resistor" deviceset="R-EU_" device="R0603" value="4K7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
 <part name="H7" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="GND25" library="supply1" deviceset="GND" device=""/>
 <part name="R24" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="PWR" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="REV" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R38" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="5V-STAT" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="GND29" library="supply1" deviceset="GND" device=""/>
 <part name="R39" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="7V4-STAT" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="P+2" library="supply1" deviceset="+5V" device=""/>
 <part name="FRAME2" library="frames" deviceset="FRAME_A_L" device=""/>
@@ -19109,10 +19118,10 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="+3V3" library="supply1" deviceset="+3V3" device=""/>
 <part name="FRAME4" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="U1" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="MOTOR-CTRL-RELAYS" library="SparkFun-Connectors" deviceset="DB9" device="FEMALE">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="1734354-1"/>
 </part>
 <part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19124,7 +19133,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R4" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+5" library="supply1" deviceset="+12V" device=""/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
@@ -19132,19 +19141,19 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="+3V4" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
 <part name="R5" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R6" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U9" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+6" library="supply1" deviceset="+5V" device=""/>
 <part name="P+7" library="supply1" deviceset="+5V" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="U2" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R7" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19156,26 +19165,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R10" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+8" library="supply1" deviceset="+12V" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="+3V5" library="supply1" deviceset="+3V3" device=""/>
 <part name="R11" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R12" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U3" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+9" library="supply1" deviceset="+5V" device=""/>
 <part name="P+10" library="supply1" deviceset="+5V" device=""/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="U4" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R13" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19187,26 +19196,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R16" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+11" library="supply1" deviceset="+12V" device=""/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="+3V6" library="supply1" deviceset="+3V3" device=""/>
 <part name="R17" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R18" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U5" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+12" library="supply1" deviceset="+5V" device=""/>
 <part name="P+15" library="supply1" deviceset="+5V" device=""/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
 <part name="U6" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R25" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19218,26 +19227,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R31" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+16" library="supply1" deviceset="+12V" device=""/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
 <part name="GND23" library="supply1" deviceset="GND" device=""/>
 <part name="+3V7" library="supply1" deviceset="+3V3" device=""/>
 <part name="R32" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R33" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U7" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+17" library="supply1" deviceset="+5V" device=""/>
 <part name="P+18" library="supply1" deviceset="+5V" device=""/>
 <part name="GND24" library="supply1" deviceset="GND" device=""/>
 <part name="U8" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R34" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19249,26 +19258,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R37" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+19" library="supply1" deviceset="+12V" device=""/>
 <part name="GND27" library="supply1" deviceset="GND" device=""/>
 <part name="GND30" library="supply1" deviceset="GND" device=""/>
 <part name="+3V8" library="supply1" deviceset="+3V3" device=""/>
 <part name="R40" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R41" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U10" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+20" library="supply1" deviceset="+5V" device=""/>
 <part name="P+21" library="supply1" deviceset="+5V" device=""/>
 <part name="GND31" library="supply1" deviceset="GND" device=""/>
 <part name="U11" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R42" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19280,20 +19289,20 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R45" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+22" library="supply1" deviceset="+12V" device=""/>
 <part name="GND32" library="supply1" deviceset="GND" device=""/>
 <part name="GND33" library="supply1" deviceset="GND" device=""/>
 <part name="+3V9" library="supply1" deviceset="+3V3" device=""/>
 <part name="R46" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R47" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U12" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+23" library="supply1" deviceset="+5V" device=""/>
 <part name="P+24" library="supply1" deviceset="+5V" device=""/>
@@ -19302,7 +19311,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+25" library="supply1" deviceset="+5V" device=""/>
 <part name="FRAME5" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="U13" library="adafruit" deviceset="TXB0108PWR" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TXB0108PWR"/>
 </part>
 <part name="P+26" library="supply1" deviceset="+5V" device=""/>
 <part name="+3V10" library="supply1" deviceset="+3V3" device=""/>
@@ -19316,7 +19325,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND37" library="supply1" deviceset="GND" device=""/>
 <part name="GND38" library="supply1" deviceset="GND" device=""/>
 <part name="U16" library="adafruit" deviceset="TXB0108PWR" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TXB0108PWR"/>
 </part>
 <part name="P+27" library="supply1" deviceset="+5V" device=""/>
 <part name="+3V11" library="supply1" deviceset="+3V3" device=""/>
@@ -19333,7 +19342,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="U17" library="adafruit" deviceset="TXB0108PWR" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TXB0108PWR"/>
 </part>
 <part name="P+28" library="supply1" deviceset="+5V" device=""/>
 <part name="+3V12" library="supply1" deviceset="+3V3" device=""/>
@@ -19347,23 +19356,23 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND43" library="supply1" deviceset="GND" device=""/>
 <part name="GND44" library="supply1" deviceset="GND" device=""/>
 <part name="BBB_CONSOLE" library="SparkFun-Connectors" deviceset="FTDI_BASIC" device="PTH">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="215299-6"/>
 </part>
 <part name="GND45" library="supply1" deviceset="GND" device=""/>
 <part name="SERIAL_CONSOLE" library="con-molex-c-grid-sl" deviceset="HEADER_POS4_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550038"/>
 </part>
 <part name="GND46" library="supply1" deviceset="GND" device=""/>
 <part name="STATUS_LIGHTS" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550037"/>
 </part>
 <part name="GND48" library="supply1" deviceset="GND" device=""/>
 <part name="STEERING" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550037"/>
 </part>
 <part name="GND49" library="supply1" deviceset="GND" device=""/>
 <part name="POWER_STATE" library="con-molex-c-grid-sl" deviceset="HEADER_POS5_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550039"/>
 </part>
 <part name="GND47" library="supply1" deviceset="GND" device=""/>
 <part name="POWER_MON" library="pinhead-1" deviceset="PINHD-2X6" device="_2.54">
@@ -19373,74 +19382,80 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+30" library="supply1" deviceset="+5V" device=""/>
 <part name="J1" library="SparkFun-Connectors" deviceset="M03" device="LOCK">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="J2" library="SparkFun-Connectors" deviceset="M03" device="LOCK">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="J3" library="SparkFun-Connectors" deviceset="M04" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="ENABLE/DISARM" library="SparkFun-Connectors" deviceset="M05" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="J5" library="SparkFun-Connectors" deviceset="M09" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="J6" library="SparkFun-Connectors" deviceset="M10" device="LOCK">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="POWER_INPUT" library="logos-headers" deviceset="3-1437664-0" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="NC6-P108-02"/>
 </part>
 <part name="CELL" library="adafruit-sensor-boards" deviceset="FONA" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="BCS-118-L-S-TE"/>
 </part>
 <part name="P+31" library="supply1" deviceset="+5V" device=""/>
 <part name="+3V13" library="supply1" deviceset="+3V3" device=""/>
 <part name="GND51" library="supply1" deviceset="GND" device=""/>
 <part name="R49" library="resistor" deviceset="R-EU_" device="R0603" value="110K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603JR-07110KL"/>
 </part>
 <part name="R50" library="resistor" deviceset="R-EU_" device="R0603" value="15K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603JR-0715KL"/>
 </part>
 <part name="P+32" library="supply1" deviceset="+12V" device=""/>
 <part name="GND52" library="supply1" deviceset="GND" device=""/>
 <part name="D1" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D2" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D3" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D4" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D5" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D6" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D7" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D8" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D9" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D10" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D11" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D12" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="GND53" library="supply1" deviceset="GND" device=""/>
 <part name="P+33" library="supply1" deviceset="+12V" device=""/>
@@ -19453,11 +19468,11 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND57" library="supply1" deviceset="GND" device=""/>
 <part name="GND58" library="supply1" deviceset="GND" device=""/>
 <part name="D13" library="adafruit" deviceset="DIODE" device="SOD-123" value="1V8">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="MMSZ4678-TP"/>
 </part>
 <part name="FRAME7" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="U20" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R69" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19469,26 +19484,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R72" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+40" library="supply1" deviceset="+12V" device=""/>
 <part name="GND61" library="supply1" deviceset="GND" device=""/>
 <part name="GND62" library="supply1" deviceset="GND" device=""/>
 <part name="+3V15" library="supply1" deviceset="+3V3" device=""/>
 <part name="R73" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R74" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U21" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+41" library="supply1" deviceset="+5V" device=""/>
 <part name="P+42" library="supply1" deviceset="+5V" device=""/>
 <part name="GND63" library="supply1" deviceset="GND" device=""/>
 <part name="U22" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R75" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19500,26 +19515,26 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R78" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+43" library="supply1" deviceset="+12V" device=""/>
 <part name="GND64" library="supply1" deviceset="GND" device=""/>
 <part name="GND65" library="supply1" deviceset="GND" device=""/>
 <part name="+3V16" library="supply1" deviceset="+3V3" device=""/>
 <part name="R79" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R80" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U23" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+44" library="supply1" deviceset="+5V" device=""/>
 <part name="P+45" library="supply1" deviceset="+5V" device=""/>
 <part name="GND66" library="supply1" deviceset="GND" device=""/>
 <part name="U24" library="hackerbot" deviceset="IPS6041" device="G">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="R81" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
@@ -19531,41 +19546,41 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="RNCP0603FTD10K0"/>
 </part>
 <part name="R84" library="resistor" deviceset="R-EU_" device="R0603" value="100K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CRCW0603100KFKEA"/>
 </part>
 <part name="P+46" library="supply1" deviceset="+12V" device=""/>
 <part name="GND67" library="supply1" deviceset="GND" device=""/>
 <part name="GND68" library="supply1" deviceset="GND" device=""/>
 <part name="+3V17" library="supply1" deviceset="+3V3" device=""/>
 <part name="R85" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R86" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U25" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+47" library="supply1" deviceset="+5V" device=""/>
 <part name="P+48" library="supply1" deviceset="+5V" device=""/>
 <part name="GND69" library="supply1" deviceset="GND" device=""/>
 <part name="D14" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D15" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D16" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D17" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D18" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="D19" library="adafruit" deviceset="DIODE" device="SOD-123">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CDBW140-G"/>
 </part>
 <part name="GND70" library="supply1" deviceset="GND" device=""/>
 <part name="P+49" library="supply1" deviceset="+12V" device=""/>
@@ -19573,13 +19588,13 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+50" library="supply1" deviceset="+12V" device=""/>
 <part name="GND72" library="supply1" deviceset="GND" device=""/>
 <part name="U18" library="ti-stuff" deviceset="ADC128D818" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ADC128D818CIMTX"/>
 </part>
 <part name="U19" library="ti-stuff" deviceset="ADC128D818" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ADC128D818CIMTX"/>
 </part>
 <part name="U26" library="adafruit" deviceset="TXS0102" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TXS0102DCURG4"/>
 </part>
 <part name="GND59" library="supply1" deviceset="GND" device=""/>
 <part name="GND60" library="supply1" deviceset="GND" device=""/>
@@ -19589,16 +19604,16 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+39" library="supply1" deviceset="+5V" device=""/>
 <part name="+3V14" library="supply1" deviceset="+3V3" device=""/>
 <part name="R51" library="resistor" deviceset="R-EU_" device="R0603" value="4K7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="R52" library="resistor" deviceset="R-EU_" device="R0603" value="4K7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="R53" library="resistor" deviceset="R-EU_" device="R0603" value="4K7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="R54" library="resistor" deviceset="R-EU_" device="R0603" value="4K7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC1608J472CS"/>
 </part>
 <part name="C7" library="resistor" deviceset="C-EU" device="C0603" value="100n">
 <attribute name="PARTNO" value="CC0603KRX7R9BB104"/>
@@ -19615,19 +19630,19 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="CC0603KRX7R9BB104"/>
 </part>
 <part name="R55" library="resistor" deviceset="R-EU_" device="R2512" value="0R05">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="PE2512FKE070R05L"/>
 </part>
 <part name="R56" library="resistor" deviceset="R-EU_" device="R0603" value="33K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF3302V"/>
 </part>
 <part name="U27" library="logos-power" deviceset="INA169" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="INA169NA/3K"/>
 </part>
 <part name="P+51" library="supply1" deviceset="+5V" device=""/>
 <part name="P+52" library="supply1" deviceset="+5V" device=""/>
 <part name="GND76" library="supply1" deviceset="GND" device=""/>
 <part name="IC1" library="74xx-little-us" deviceset="74*1G08" device="DBV" technology="AHC">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="MC74HC1G08DTT1G"/>
 </part>
 <part name="P+53" library="supply1" deviceset="+5V" device=""/>
 <part name="GND77" library="supply1" deviceset="GND" device=""/>
@@ -19675,13 +19690,14 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND86" library="supply1" deviceset="GND" device=""/>
 <part name="FRAME8" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="J7" library="SparkFun-Connectors" deviceset="M18" device="_">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="POE-LAN" library="SparkFun-Connectors" deviceset="RJ45-8" device="PTH" value="RJ45">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="615008137121"/>
 </part>
 <part name="POE-DEVICE" library="SparkFun-Connectors" deviceset="RJ45-8" device="PTH" value="RJ45">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="615008137121"/>
 </part>
 <part name="GND87" library="supply1" deviceset="GND" device=""/>
 <part name="ACC_POWER" library="pinhead-1" deviceset="PINHD-2X8" device="_2.54">
@@ -19695,57 +19711,59 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND90" library="supply1" deviceset="GND" device=""/>
 <part name="GND91" library="supply1" deviceset="GND" device=""/>
 <part name="HORN" library="con-molex-c-grid-sl" deviceset="HEADER_POS2_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550036"/>
 </part>
 <part name="J9" library="SparkFun-Connectors" deviceset="M02" device="LOCK">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="GND92" library="supply1" deviceset="GND" device=""/>
 <part name="U29" library="logos-power" deviceset="TPS61175" device="">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="TPS61175PWPR"/>
 </part>
 <part name="GND99" library="supply1" deviceset="GND" device=""/>
 <part name="P+56" library="supply1" deviceset="+12V" device=""/>
 <part name="C43" library="resistor" deviceset="C-EU" device="C1210" value="4u7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="UMK325F475ZH"/>
 </part>
 <part name="C44" library="resistor" deviceset="C-EU" device="C1210" value="4u7">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="UMK325F475ZH"/>
 </part>
 <part name="C45" library="resistor" deviceset="C-EU" device="C0603" value="47n">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="C1608X7R1H473M"/>
 </part>
 <part name="C46" library="resistor" deviceset="C-EU" device="C0603" value="68n">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="CL10C680JB8NNNC"/>
 </part>
 <part name="R58" library="resistor" deviceset="R-EU_" device="R0603" value="174K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-07174KL"/>
 </part>
 <part name="R59" library="resistor" deviceset="R-EU_" device="R0603" value="1K62">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-071K62L"/>
 </part>
 <part name="R60" library="resistor" deviceset="R-EU_" device="R0603" value="182K">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="ERJ-3EKF1823V"/>
 </part>
 <part name="R61" library="resistor" deviceset="R-EU_" device="R0603" value="16K2">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="RC0603FR-0716K2L"/>
 </part>
 <part name="D20" library="ARD-SRG-MOT8-1a" deviceset="SPARKFUN_DIODE" device="SMA">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SK310A-LTP"/>
 </part>
 <part name="L3" library="logos-inductors" deviceset="SRN8040" device="" value="22u">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SRN8040-220M"/>
 </part>
 <part name="BBB_RESET" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550037"/>
 </part>
 <part name="P+57" library="supply1" deviceset="+5V" device=""/>
 <part name="GND100" library="supply1" deviceset="GND" device=""/>
 <part name="J10" library="SparkFun-Connectors" deviceset="M03" device="LOCK">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="IC3" library="74xx-little-us" deviceset="74*1G04" device="DBV" technology="AHC">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="MC74HC1G04DTT1G"/>
 </part>
 <part name="P+58" library="supply1" deviceset="+5V" device=""/>
 <part name="GND101" library="supply1" deviceset="GND" device=""/>
@@ -19758,13 +19776,14 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="U28" library="SparkFun-DigitalIC" deviceset="RS485" device="SOIC">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SN75176BDR"/>
 </part>
 <part name="RS485" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705550037"/>
 </part>
 <part name="J11" library="SparkFun-Connectors" deviceset="M03" device="LOCK">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="GND103" library="supply1" deviceset="GND" device=""/>
 <part name="P+60" library="supply1" deviceset="+5V" device=""/>
@@ -19772,15 +19791,15 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="CC0603KRX7R9BB104"/>
 </part>
 <part name="SBUS-IN" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70545">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705450037"/>
 </part>
 <part name="SBUS-OUT" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70545">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="0705450037"/>
 </part>
 <part name="P+55" library="supply1" deviceset="+5V" device=""/>
 <part name="GND93" library="supply1" deviceset="GND" device=""/>
 <part name="IC2" library="74xx-little-us" deviceset="74*1G06" device="DBV" technology="AUC">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SN74LVC1G06DBVR"/>
 </part>
 <part name="C40" library="resistor" deviceset="C-EU" device="C0603" value="100n">
 <attribute name="PARTNO" value="CC0603KRX7R9BB104"/>
@@ -19791,85 +19810,86 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="+3V20" library="supply1" deviceset="+3V3" device=""/>
 <part name="SJ1" library="jumper" deviceset="SJ2W" device="">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="RLY0" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R62" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="RLY1" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R63" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="RLY2" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R64" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="RLY3" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R65" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="RLY4" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R66" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="RLY5" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R67" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="DISARM" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="AMB">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="HSMA-C170"/>
 </part>
 <part name="R68" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="ENABLE" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="GRN">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
 <part name="R87" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="D21" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D22" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D23" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="FRAME9" library="frames" deviceset="FRAME_A_L" device=""/>
 <part name="HORN-RLY" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R88" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="D24" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D25" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D26" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D27" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="D28" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="SMF5.0A"/>
 </part>
 <part name="R89" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
@@ -19905,8 +19925,10 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="GND95" library="supply1" deviceset="GND" device=""/>
 <part name="15V-ENB" library="jumper" deviceset="SJ" device="">
 <attribute name="BOM" value="EXCLUDE"/>
+<attribute name="PARTNO" value="?"/>
 </part>
 <part name="SJ2" library="jumper" deviceset="SJ" device="">
+<attribute name="BOM" value="EXCLUDE"/>
 <attribute name="PARTNO" value="*"/>
 </part>
 <part name="T1" library="SparkFun-DiscreteSemi" deviceset="MOSFET-PCHANNEL-SOIC8" device="SOIC8" value="AO4407A">
@@ -19919,61 +19941,61 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="MF-LSMF300/24X-2"/>
 </part>
 <part name="BLOWN" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R100" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_0" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R101" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_1" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R102" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_2" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R103" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_3" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R104" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_4" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R105" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_5" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R106" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_ENABLE" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R107" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_DISARM" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R108" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
 </part>
 <part name="FAULT_HORN" library="adafruit" deviceset="LED" device="CHIPLED_0805" value="RED">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="LH R974-LP-1"/>
 </part>
 <part name="R109" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
 <attribute name="PARTNO" value="RMCF0603FT1K00"/>
@@ -19981,34 +20003,38 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <part name="P+4" library="supply1" deviceset="+5V" device=""/>
 <part name="GND96" library="supply1" deviceset="GND" device=""/>
 <part name="GND97" library="supply1" deviceset="GND" device=""/>
-<part name="C41" library="res-cap-arrays" deviceset="4CAP" device="0805" value="1000p">
-<attribute name="PARTNO" value="*"/>
+<part name="C41" library="res-cap-arrays" deviceset="4CAP" device="0805" value="22n">
+<attribute name="PARTNO" value="CKCL44X5R1C223M085AA"/>
 </part>
-<part name="C42" library="res-cap-arrays" deviceset="4CAP" device="0805" value="1000p">
-<attribute name="PARTNO" value="*"/>
+<part name="C42" library="res-cap-arrays" deviceset="4CAP" device="0805" value="22n">
+<attribute name="PARTNO" value="CKCL44X5R1C223M085AA"/>
 </part>
-<part name="C49" library="res-cap-arrays" deviceset="4CAP" device="0805" value="1000p">
-<attribute name="PARTNO" value="*"/>
+<part name="C49" library="res-cap-arrays" deviceset="4CAP" device="0805" value="22n">
+<attribute name="PARTNO" value="CKCL44X5R1C223M085AA"/>
 </part>
-<part name="C50" library="res-cap-arrays" deviceset="4CAP" device="0805" value="1000p">
-<attribute name="PARTNO" value="*"/>
+<part name="C50" library="res-cap-arrays" deviceset="4CAP" device="0805" value="22n">
+<attribute name="PARTNO" value="CKCL44X5R1C223M085AA"/>
 </part>
-<part name="R110" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083">
-<attribute name="PARTNO" value="*"/>
+<part name="R110" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083" value="10K">
+<attribute name="PARTNO" value="742C083103JPTR"/>
 </part>
-<part name="R111" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083">
-<attribute name="PARTNO" value="*"/>
+<part name="R111" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083" value="10K">
+<attribute name="PARTNO" value="742C083103JPTR"/>
 </part>
-<part name="R112" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083">
-<attribute name="PARTNO" value="*"/>
+<part name="R112" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083" value="10K">
+<attribute name="PARTNO" value="742C083103JPTR"/>
 </part>
-<part name="R113" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083">
-<attribute name="PARTNO" value="*"/>
+<part name="R113" library="res-cap-arrays" deviceset="4R-N" device="CTS742C083" value="10K">
+<attribute name="PARTNO" value="742C083103JPTR"/>
 </part>
-<part name="IC4" library="linear" deviceset="78*" device="TV" technology="05" value="V7805"/>
-<part name="IC5" library="linear" deviceset="78*" device="TV" technology="05"/>
+<part name="IC4" library="linear" deviceset="78*" device="TV" technology="05" value="V7805-2000">
+<attribute name="PARTNO" value="V7805-2000"/>
+</part>
+<part name="IC5" library="linear" deviceset="78*" device="TV" technology="05" value="V7805-2000">
+<attribute name="PARTNO" value="V7805-2000"/>
+</part>
 <part name="C18" library="resistor" deviceset="C-EU" device="C1210" value="22u">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="GRM32ER61E226KE15K"/>
 </part>
 <part name="P+61" library="supply1" deviceset="+5V" device=""/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
@@ -20016,10 +20042,10 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <attribute name="PARTNO" value="UMK325BJ106MM"/>
 </part>
 <part name="C20" library="resistor" deviceset="C-EU" device="C1210" value="22u">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="GRM32ER61E226KE15K"/>
 </part>
 <part name="F2" library="fuses" deviceset="PTC" device="-2920">
-<attribute name="PARTNO" value="*"/>
+<attribute name="PARTNO" value="MF-LSMF300/24X-2"/>
 </part>
 <part name="P+1" library="supply1" deviceset="+12V" device=""/>
 </parts>
@@ -20031,6 +20057,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instances>
 <instance part="U$1" gate="G$1" x="104.14" y="121.92">
 <attribute name="BOM" x="104.14" y="121.92" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="104.14" y="121.92" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
 <instance part="FRAME1" gate="G$2" x="172.72" y="0"/>
@@ -20038,15 +20065,19 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instance part="GND2" gate="1" x="137.16" y="50.8"/>
 <instance part="U$2" gate="G$1" x="190.5" y="86.36" rot="MR0">
 <attribute name="PARTNO" x="190.5" y="86.36" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="190.5" y="86.36" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U$3" gate="G$1" x="190.5" y="154.94" rot="MR0">
 <attribute name="PARTNO" x="190.5" y="154.94" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="190.5" y="154.94" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U$4" gate="G$1" x="25.4" y="154.94">
 <attribute name="PARTNO" x="25.4" y="154.94" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="25.4" y="154.94" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U$5" gate="G$1" x="25.4" y="86.36">
 <attribute name="PARTNO" x="25.4" y="86.36" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="25.4" y="86.36" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="P+2" gate="1" x="68.58" y="200.66"/>
 <instance part="+3V1" gate="G$1" x="63.5" y="124.46"/>
@@ -20965,16 +20996,20 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instance part="GPS" gate="G$3" x="218.44" y="142.24"/>
 <instance part="H1" gate="G$1" x="228.6" y="172.72" rot="MR0">
 <attribute name="BOM" x="228.6" y="172.72" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="228.6" y="172.72" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="H3" gate="G$1" x="228.6" y="165.1" rot="MR0">
 <attribute name="BOM" x="228.6" y="165.1" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="228.6" y="165.1" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="H4" gate="G$1" x="228.6" y="157.48" rot="MR0">
 <attribute name="BOM" x="228.6" y="157.48" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="228.6" y="157.48" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="GND9" gate="1" x="236.22" y="119.38"/>
 <instance part="H7" gate="G$1" x="243.84" y="172.72">
 <attribute name="BOM" x="243.84" y="172.72" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="243.84" y="172.72" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="POWER_INPUT" gate="G$1" x="7.62" y="167.64" smashed="yes">
 <attribute name="NAME" x="6.35" y="173.482" size="1.778" layer="95"/>
@@ -21042,7 +21077,9 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <instance part="R100" gate="G$1" x="12.7" y="187.96" rot="R90">
 <attribute name="PARTNO" x="12.7" y="187.96" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="IC4" gate="A1" x="83.82" y="165.1"/>
+<instance part="IC4" gate="A1" x="83.82" y="165.1">
+<attribute name="PARTNO" x="83.82" y="165.1" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="C18" gate="G$1" x="104.14" y="160.02">
 <attribute name="PARTNO" x="104.14" y="160.02" size="1.778" layer="96" display="off"/>
 </instance>
@@ -21332,6 +21369,7 @@ http://www.fairchildsemi.com/ds/LM/LM7805.pdf</description>
 <wire x1="106.68" y1="55.88" x2="106.68" y2="45.72" width="0.1524" layer="91"/>
 <pinref part="R26" gate="G$1" pin="2"/>
 <wire x1="93.98" y1="53.34" x2="93.98" y2="55.88" width="0.1524" layer="91"/>
+<junction x="93.98" y="55.88"/>
 </segment>
 </net>
 <net name="N$82" class="0">
@@ -21656,6 +21694,7 @@ RELAY OUTPUT</text>
 <instance part="+3V20" gate="G$1" x="40.64" y="198.12"/>
 <instance part="SJ1" gate="G$1" x="33.02" y="172.72" rot="R180">
 <attribute name="BOM" x="33.02" y="172.72" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="33.02" y="172.72" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="MOTOR-CTRL-RELAYS" gate="G$1" x="200.66" y="180.34">
 <attribute name="PARTNO" x="200.66" y="180.34" size="1.778" layer="96" display="off"/>
@@ -21675,6 +21714,7 @@ RELAY OUTPUT</text>
 <instance part="GND47" gate="1" x="88.9" y="5.08" rot="MR0"/>
 <instance part="ENABLE/DISARM" gate="G$1" x="165.1" y="33.02" rot="R180">
 <attribute name="PARTNO" x="165.1" y="33.02" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="165.1" y="33.02" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="RLY0" gate="G$1" x="182.88" y="160.02">
 <attribute name="PARTNO" x="182.88" y="160.02" size="1.778" layer="96" display="off"/>
@@ -21744,9 +21784,11 @@ RELAY OUTPUT</text>
 </instance>
 <instance part="15V-ENB" gate="1" x="33.02" y="104.14">
 <attribute name="BOM" x="33.02" y="104.14" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="33.02" y="104.14" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="SJ2" gate="1" x="129.54" y="27.94" rot="R180">
 <attribute name="PARTNO" x="129.54" y="27.94" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="129.54" y="27.94" size="1.778" layer="96" display="off"/>
 </instance>
 </instances>
 <busses>
@@ -22436,6 +22478,7 @@ RELAY OUTPUT</text>
 </instance>
 <instance part="J11" gate="J$1" x="137.16" y="35.56" rot="R180">
 <attribute name="BOM" x="137.16" y="35.56" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="137.16" y="35.56" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="GND103" gate="1" x="99.06" y="10.16"/>
 <instance part="P+60" gate="1" x="99.06" y="40.64"/>
@@ -24430,6 +24473,7 @@ RELAY OUTPUT</text>
 </instance>
 <instance part="J9" gate="G$1" x="256.54" y="121.92" rot="R180">
 <attribute name="BOM" x="256.54" y="121.92" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="256.54" y="121.92" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="GND92" gate="1" x="246.38" y="93.98"/>
 <instance part="HORN-RLY" gate="G$1" x="269.24" y="91.44">
@@ -25544,9 +25588,11 @@ RELAY OUTPUT</text>
 <instance part="P+30" gate="1" x="116.84" y="193.04"/>
 <instance part="J1" gate="J$1" x="20.32" y="127" rot="MR180">
 <attribute name="BOM" x="20.32" y="127" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="20.32" y="127" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="J3" gate="G$1" x="22.86" y="99.06" rot="MR180">
 <attribute name="PARTNO" x="22.86" y="99.06" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="22.86" y="99.06" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="POE-LAN" gate="JP1" x="162.56" y="91.44">
 <attribute name="PARTNO" x="162.56" y="91.44" size="1.778" layer="96" display="off"/>
@@ -25573,6 +25619,7 @@ RELAY OUTPUT</text>
 <instance part="GND100" gate="1" x="45.72" y="15.24"/>
 <instance part="J10" gate="J$1" x="20.32" y="30.48" rot="MR180">
 <attribute name="BOM" x="20.32" y="30.48" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="20.32" y="30.48" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="IC3" gate="A" x="81.28" y="30.48">
 <attribute name="PARTNO" x="81.28" y="30.48" size="1.778" layer="96" display="off"/>
@@ -26241,9 +26288,11 @@ RELAY OUTPUT</text>
 <instance part="P+25" gate="1" x="43.18" y="71.12"/>
 <instance part="J5" gate="G$1" x="86.36" y="55.88" rot="R180">
 <attribute name="PARTNO" x="86.36" y="55.88" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="86.36" y="55.88" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="J6" gate="G$1" x="86.36" y="83.82" rot="R180">
 <attribute name="PARTNO" x="86.36" y="83.82" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="86.36" y="83.82" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="CELL" gate="G$1" x="200.66" y="111.76"/>
 <instance part="P+31" gate="1" x="210.82" y="147.32"/>
@@ -26251,6 +26300,7 @@ RELAY OUTPUT</text>
 <instance part="GND51" gate="1" x="213.36" y="81.28"/>
 <instance part="J7" gate="G$1" x="185.42" y="111.76">
 <attribute name="PARTNO" x="185.42" y="111.76" size="1.778" layer="96" display="off"/>
+<attribute name="BOM" x="185.42" y="111.76" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="STATUS_LIGHTS" gate="G$1" x="60.96" y="162.56" smashed="yes" rot="MR0">
 <attribute name="NAME" x="54.102" y="153.67" size="1.778" layer="95" rot="MR90"/>
@@ -26259,6 +26309,7 @@ RELAY OUTPUT</text>
 <instance part="GND48" gate="1" x="68.58" y="147.32"/>
 <instance part="J2" gate="J$1" x="43.18" y="162.56" rot="MR180">
 <attribute name="BOM" x="43.18" y="162.56" size="1.778" layer="96" display="off"/>
+<attribute name="PARTNO" x="43.18" y="162.56" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="D27" gate="G$1" x="81.28" y="157.48" rot="R90">
 <attribute name="PARTNO" x="81.28" y="157.48" size="1.778" layer="96" display="off"/>
@@ -26266,7 +26317,9 @@ RELAY OUTPUT</text>
 <instance part="R95" gate="G$1" x="73.66" y="162.56">
 <attribute name="PARTNO" x="73.66" y="162.56" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="IC5" gate="A1" x="114.3" y="167.64" rot="MR0"/>
+<instance part="IC5" gate="A1" x="114.3" y="167.64" rot="MR0">
+<attribute name="PARTNO" x="114.3" y="167.64" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND13" gate="1" x="129.54" y="147.32" rot="MR0"/>
 <instance part="C19" gate="G$1" x="129.54" y="160.02" rot="MR0">
 <attribute name="PARTNO" x="129.54" y="160.02" size="1.778" layer="96" display="off"/>
