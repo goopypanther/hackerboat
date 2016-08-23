@@ -24,32 +24,9 @@
 #include "hackerboatRoot.hpp"
 #include "hal/gpsdInput.hpp"
 #include "hal/config.h"
+#include "twovector.hpp"
 
 using namespace std;
-
-/**
- * @brief The bearingVector class provides operations for working with vectors expressed as a bearing and a strength.
- */
-class bearingVector : public hackerboatStateClass {
-	public:
-		bearingVector () {};
-		bearingVector (double bearing, double strength) :
-			_b(bearing), _s(strength) {};
-		bool parse (json_t *input);
-		json_t *pack () const;
-		bool isValid ();
-		
-		static bearingVector sumVectors (bearingVector a, bearingVector b);
-		void bearing (double b) {_b = b;};
-		double bearing () {return _b;};
-		void strength (double s) {_s = s;};
-		double strength () {return _s;};
-		
-	private:
-		double _b;
-		double _s;
-	
-};
 
 /**
  * @brief The dodge class provides a mechanism for determining the diversion required by nearby vessels.

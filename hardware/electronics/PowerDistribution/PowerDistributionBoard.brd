@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -1978,6 +1978,7 @@ design rules under a new name.
 <element name="C1" library="resistor" package="C0603" value="10n" x="34.29" y="31.75" smashed="yes" rot="R180">
 <attribute name="NAME" x="32.639" y="32.258" size="0.8128" layer="25" rot="R180"/>
 <attribute name="VALUE" x="35.179" y="33.782" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="CL10B103KB8NCNC" x="34.29" y="31.75" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="C2" library="resistor" package="C0603" value="" x="34.29" y="36.83" smashed="yes" rot="R180">
 <attribute name="NAME" x="32.639" y="37.338" size="0.8128" layer="25" rot="R180"/>
@@ -1986,8 +1987,11 @@ design rules under a new name.
 <element name="C3" library="resistor" package="C0603" value="10n" x="49.53" y="31.75" smashed="yes" rot="R180">
 <attribute name="NAME" x="51.181" y="31.242" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="50.419" y="33.782" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="CL10B103KB8NCNC" x="49.53" y="31.75" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="ARM-BUTTON" library="con-molex-c-grid-sl" package="70555-POS3" value="NORMALLY HIGH" x="36.83" y="13.97" smashed="yes" rot="R180"/>
+<element name="ARM-BUTTON" library="con-molex-c-grid-sl" package="70555-POS3" value="NORMALLY HIGH" x="36.83" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550037" x="36.83" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="C4" library="resistor" package="C0603" value="" x="49.53" y="36.83" smashed="yes" rot="R180">
 <attribute name="NAME" x="51.181" y="36.322" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="50.419" y="38.862" size="1.27" layer="27" rot="R180"/>
@@ -1996,7 +2000,9 @@ design rules under a new name.
 <attribute name="NAME" x="51.181" y="33.909" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="48.641" y="32.258" size="1.27" layer="27"/>
 </element>
-<element name="STOP-BUTTON" library="con-molex-c-grid-sl" package="70555-POS3" value="NORMALLY HIGH" x="53.34" y="13.97" smashed="yes" rot="R180"/>
+<element name="STOP-BUTTON" library="con-molex-c-grid-sl" package="70555-POS3" value="NORMALLY HIGH" x="53.34" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550037" x="53.34" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="R3" library="resistor" package="R0603" value="" x="49.53" y="29.21" smashed="yes">
 <attribute name="NAME" x="51.181" y="28.829" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="48.641" y="27.178" size="1.27" layer="27"/>
@@ -2008,10 +2014,12 @@ design rules under a new name.
 <element name="U1" library="hackerbot" package="SO08" value="IPS6041G" x="24.13" y="40.64" smashed="yes" rot="R90">
 <attribute name="NAME" x="23.495" y="40.64" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="26.035" y="45.085" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="IPS6041GPBF" x="24.13" y="40.64" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="U2" library="hackerbot" package="SO08" value="IPS6041G" x="41.91" y="40.64" smashed="yes" rot="R90">
 <attribute name="NAME" x="41.275" y="40.64" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="43.815" y="45.085" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="IPS6041GPBF" x="41.91" y="40.64" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="R5" library="resistor" package="R0603" value="" x="34.29" y="26.67" smashed="yes">
 <attribute name="NAME" x="32.639" y="27.051" size="0.8128" layer="25" rot="R180"/>
@@ -2037,7 +2045,9 @@ design rules under a new name.
 <attribute name="NAME" x="53.721" y="42.291" size="0.8128" layer="25" rot="R90"/>
 <attribute name="VALUE" x="51.308" y="41.529" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="PWR-STATE" library="con-molex-c-grid-sl" package="70555-POS5" value="HEADER_POS5_70555" x="16.51" y="13.97" smashed="yes" rot="R180"/>
+<element name="PWR-STATE" library="con-molex-c-grid-sl" package="70555-POS5" value="HEADER_POS5_70555" x="16.51" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550039" x="16.51" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="D1" library="adafruit" package="SOD-123" value="" x="2.54" y="35.56" smashed="yes" rot="R270">
 <attribute name="NAME" x="2.81" y="38.27" size="0.8128" layer="25" rot="R90"/>
 <attribute name="VALUE" x="1.256" y="36.66" size="0.4064" layer="27" rot="R270"/>
@@ -2118,10 +2128,12 @@ design rules under a new name.
 <element name="LED1" library="adafruit" package="CHIP-LED0805" value="" x="22.86" y="26.67" smashed="yes" rot="R270">
 <attribute name="NAME" x="21.59" y="27.94" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="21.59" y="24.13" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="22.86" y="26.67" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="LED2" library="adafruit" package="CHIP-LED0805" value="" x="22.86" y="34.29" smashed="yes" rot="R270">
 <attribute name="NAME" x="21.59" y="35.56" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="21.59" y="31.75" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="22.86" y="34.29" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R13" library="resistor" package="R0603" value="" x="19.05" y="26.67" smashed="yes" rot="R180">
 <attribute name="NAME" x="17.399" y="27.051" size="0.8128" layer="25" rot="R180"/>
@@ -2134,6 +2146,7 @@ design rules under a new name.
 <element name="LED3" library="adafruit" package="CHIP-LED0805" value="" x="22.86" y="29.21" smashed="yes" rot="R270">
 <attribute name="NAME" x="21.59" y="30.48" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="21.59" y="26.67" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="22.86" y="29.21" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R15" library="resistor" package="R0603" value="" x="19.05" y="29.21" smashed="yes" rot="R180">
 <attribute name="NAME" x="17.399" y="29.591" size="0.8128" layer="25" rot="R180"/>
@@ -2142,6 +2155,7 @@ design rules under a new name.
 <element name="LED4" library="adafruit" package="CHIP-LED0805" value="" x="22.86" y="31.75" smashed="yes" rot="R270">
 <attribute name="NAME" x="21.59" y="33.02" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="21.59" y="29.21" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="22.86" y="31.75" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R16" library="resistor" package="R0603" value="" x="19.05" y="31.75" smashed="yes" rot="R180">
 <attribute name="NAME" x="17.399" y="32.131" size="0.8128" layer="25" rot="R180"/>
@@ -2159,10 +2173,13 @@ design rules under a new name.
 <attribute name="NAME" x="55.245" y="48.133" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="53.467" y="46.99" size="1.27" layer="27" rot="R270"/>
 </element>
-<element name="MAIN-RELAY" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="67.945" y="13.97" smashed="yes" rot="R180"/>
+<element name="MAIN-RELAY" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="67.945" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550036" x="67.945" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="LED5" library="adafruit" package="CHIP-LED0805" value="" x="63.5" y="19.685" smashed="yes" rot="R270">
 <attribute name="NAME" x="62.23" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="62.23" y="17.145" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="63.5" y="19.685" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R17" library="resistor" package="R0603" value="" x="63.5" y="17.145" smashed="yes">
 <attribute name="NAME" x="62.611" y="18.034" size="0.8128" layer="25"/>
@@ -2171,12 +2188,15 @@ design rules under a new name.
 <element name="LED6" library="adafruit" package="CHIP-LED0805" value="" x="74.295" y="19.685" smashed="yes" rot="R270">
 <attribute name="NAME" x="73.025" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="73.025" y="17.145" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="74.295" y="19.685" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R18" library="resistor" package="R0603" value="" x="74.295" y="17.145" smashed="yes">
 <attribute name="NAME" x="73.406" y="18.034" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="73.406" y="15.113" size="1.27" layer="27"/>
 </element>
-<element name="MOTOR-RELAY" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="94.615" y="13.97" smashed="yes" rot="R180"/>
+<element name="MOTOR-RELAY" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="94.615" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550036" x="94.615" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="R19" library="resistor" package="R0603" value="" x="95.885" y="17.145" smashed="yes">
 <attribute name="NAME" x="94.996" y="18.034" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="94.996" y="15.113" size="1.27" layer="27"/>
@@ -2184,6 +2204,7 @@ design rules under a new name.
 <element name="LED7" library="adafruit" package="CHIP-LED0805" value="" x="95.885" y="19.685" smashed="yes" rot="R270">
 <attribute name="NAME" x="94.615" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="94.615" y="17.145" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="95.885" y="19.685" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="CTL-PWR" library="con-phoenix-350" package="1751248" value="1751248" x="74.295" y="45.72" smashed="yes" rot="R180">
 <attribute name="OC_NEWARK" value="unknown" x="74.295" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
@@ -2192,6 +2213,7 @@ design rules under a new name.
 <attribute name="OC_FARNELL" value="unknown" x="74.295" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="78.4" y="48.5775" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="76.3475" y="41.5925" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="1751248" x="74.295" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="HORN-PWR" library="con-phoenix-350" package="1751248" value="1751248" x="85.09" y="45.72" smashed="yes" rot="R180">
 <attribute name="OC_NEWARK" value="unknown" x="85.09" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
@@ -2200,10 +2222,12 @@ design rules under a new name.
 <attribute name="OC_FARNELL" value="unknown" x="85.09" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="89.195" y="48.5775" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="87.1425" y="41.5925" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="1751248" x="85.09" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="LED8" library="adafruit" package="CHIP-LED0805" value="" x="85.09" y="19.685" smashed="yes" rot="R270">
 <attribute name="NAME" x="83.82" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="83.82" y="17.145" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="85.09" y="19.685" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R20" library="resistor" package="R0603" value="" x="85.09" y="17.145" smashed="yes">
 <attribute name="NAME" x="84.201" y="18.034" size="0.8128" layer="25"/>
@@ -2216,8 +2240,11 @@ design rules under a new name.
 <attribute name="OC_FARNELL" value="unknown" x="95.885" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="NAME" x="99.99" y="48.5775" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="97.9375" y="41.5925" size="0.8128" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="1751248" x="95.885" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="AUX-PWR" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="81.28" y="13.97" smashed="yes" rot="R180"/>
+<element name="AUX-PWR" library="con-molex-c-grid-sl" package="70555-POS2" value="HEADER_POS2_70555" x="81.28" y="13.97" smashed="yes" rot="R180">
+<attribute name="PARTNO" value="0705550036" x="81.28" y="13.97" size="1.778" layer="27" rot="R180" display="off"/>
+</element>
 <element name="H1" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="3.81" y="46.99" smashed="yes"/>
 <element name="H2" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="3.81" y="3.81" smashed="yes"/>
 <element name="H3" library="holes" package="3,2-PAD" value="MOUNT-PAD-ROUND3.2" x="118.745" y="46.99" smashed="yes"/>
@@ -2225,28 +2252,34 @@ design rules under a new name.
 <element name="HORN" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="85.09" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="78.74" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="91.44" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="85.09" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="CTRL" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="74.295" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="67.945" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="80.645" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="74.295" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="MAIN" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="63.5" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="57.15" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="69.85" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="63.5" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="MOTOR" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="95.885" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="89.535" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="102.235" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="95.885" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="AUX1-PWR" library="con-phoenix-350" package="1751248" value="1751248" x="106.68" y="45.72" rot="R180">
 <attribute name="OC_NEWARK" value="unknown" x="106.68" y="27.94" size="0.8128" layer="27" ratio="1" rot="R180" display="off"/>
 <attribute name="MPN" value="" x="106.68" y="27.94" size="0.8128" layer="27" ratio="1" rot="R180" display="off"/>
 <attribute name="MF" value="" x="106.68" y="27.94" size="0.8128" layer="27" ratio="1" rot="R180" display="off"/>
 <attribute name="OC_FARNELL" value="unknown" x="106.68" y="27.94" size="0.8128" layer="27" ratio="1" rot="R180" display="off"/>
+<attribute name="PARTNO" value="1751248" x="106.68" y="45.72" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
 <element name="LED9" library="adafruit" package="CHIP-LED0805" value="" x="106.68" y="19.685" smashed="yes" rot="R270">
 <attribute name="NAME" x="105.41" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="105.41" y="17.145" size="1.27" layer="27"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="106.68" y="19.685" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="R21" library="resistor" package="R0603" value="" x="106.68" y="17.145" smashed="yes">
 <attribute name="NAME" x="105.791" y="18.034" size="0.8128" layer="25"/>
@@ -2255,16 +2288,19 @@ design rules under a new name.
 <element name="AUX1" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="106.68" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="100.33" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="113.03" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="106.68" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="AUX2-PWR" library="con-phoenix-350" package="1751248" value="1751248" x="106.045" y="5.08">
 <attribute name="OC_NEWARK" value="unknown" x="106.045" y="22.86" size="0.8128" layer="27" ratio="1" display="off"/>
 <attribute name="MPN" value="" x="106.045" y="22.86" size="0.8128" layer="27" ratio="1" display="off"/>
 <attribute name="MF" value="" x="106.045" y="22.86" size="0.8128" layer="27" ratio="1" display="off"/>
 <attribute name="OC_FARNELL" value="unknown" x="106.045" y="22.86" size="0.8128" layer="27" ratio="1" display="off"/>
+<attribute name="PARTNO" value="1751248" x="106.045" y="5.08" size="1.778" layer="27" display="off"/>
 </element>
 <element name="LED10" library="adafruit" package="CHIP-LED0805" value="" x="117.475" y="19.685" smashed="yes" rot="R90">
 <attribute name="NAME" x="116.205" y="20.955" size="0.8128" layer="25"/>
 <attribute name="VALUE" x="118.745" y="22.225" size="1.27" layer="27" rot="R180"/>
+<attribute name="PARTNO" value="LG R971-KN-1" x="117.475" y="19.685" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="R22" library="resistor" package="R0603" value="" x="117.475" y="17.145" smashed="yes" rot="R180">
 <attribute name="NAME" x="116.586" y="18.034" size="0.8128" layer="25"/>
@@ -2273,6 +2309,7 @@ design rules under a new name.
 <element name="AUX2" library="logos-switch" package="M20-SPDT" value="M20-SPDT" x="117.475" y="29.21" smashed="yes" rot="R90">
 <attribute name="NAME" x="111.125" y="35.56" size="1.27" layer="25" rot="R270"/>
 <attribute name="VALUE" x="123.825" y="22.86" size="1.27" layer="27" rot="R90"/>
+<attribute name="PARTNO" value="M2012LL1W01" x="117.475" y="29.21" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 </elements>
 <signals>
