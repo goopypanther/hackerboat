@@ -22,10 +22,9 @@
 #include "hal/config.h"
 #include "hal/adcInput.hpp"
 #include "logs.hpp"
+#include "hal/relay.hpp"
 
 using namespace std;
-
-typedef tuple<double, bool, bool> relayTuple;
 
 class healthMonitorClass : public hackerboatStateClassStorable {
 	public:
@@ -38,7 +37,7 @@ class healthMonitorClass : public hackerboatStateClassStorable {
 		hackerboatStateStorage& storage();
 		bool setADCdevice(adcInputClass& adc);	/**< Set the ADC input thread */
 		
-		map<string, relayTuple>	relays;			/**< State of the relays. Each tuple is current, state, and fault state */
+		map<string, RelayTuple>	relays;			/**< State of the relays. Each tuple is current, state, and fault state */
 		double					servoCurrent;	/**< Current supplied to the servo */
 		double					batteryMon;
 		double					mainVoltage;
