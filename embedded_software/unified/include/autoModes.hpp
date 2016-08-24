@@ -21,37 +21,37 @@
 #include "stateMachine.hpp"
 #include "boatState.hpp"
 
-class autoModeBaseClass : public stateMachineBaseClass<autoModeEnum, boatStateClass> {
+class AutoModeBase : public StateMachineBase<AutoModeEnum, BoatState> {
 	public:
-		static autoModeBaseClass* autoModeFactory(boatStateClass& state, autoModeEnum mode);	/**< Create a new object of the given mode */
-		virtual ~autoModeBaseClass () {};
+		static AutoModeBase* factory(BoatState& state, AutoModeEnum mode);	/**< Create a new object of the given mode */
+		virtual ~AutoModeBase () {};
 	protected:
-		autoModeBaseClass (boatStateClass& state, autoModeEnum last, autoModeEnum thisMode) :
-			stateMachineBaseClass<autoModeEnum, boatStateClass> (state, last, thisMode) {};
+		AutoModeBase (BoatState& state, AutoModeEnum last, AutoModeEnum thisMode) :
+			StateMachineBase<AutoModeEnum, BoatState> (state, last, thisMode) {};
 };
 
-class autoIdleMode : public autoModeBaseClass {
+class AutoIdleMode : public AutoModeBase {
 	public:
-		autoIdleMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
-			autoModeBaseClass(state, last, autoModeEnum::IDLE) {};
+		AutoIdleMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
+			AutoModeBase(state, last, AutoModeEnum::IDLE) {};
 };
 
-class autoWaypointMode : public autoModeBaseClass {
+class AutoWaypointMode : public AutoModeBase {
 	public:
-		autoWaypointMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
-			autoModeBaseClass(state, last, autoModeEnum::WAYPOINT) {}; 
+		AutoWaypointMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
+			AutoModeBase(state, last, AutoModeEnum::WAYPOINT) {}; 
 };
 
-class autoReturnMode : public autoModeBaseClass {
+class AutoReturnMode : public AutoModeBase {
 	public:
-		autoReturnMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
-			autoModeBaseClass(state, last, autoModeEnum::RETURN) {}; 
+		AutoReturnMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
+			AutoModeBase(state, last, AutoModeEnum::RETURN) {}; 
 };
 
-class autoAnchorMode : public autoModeBaseClass {
+class AutoAnchorMode : public AutoModeBase {
 	public:
-		autoAnchorMode (boatStateClass& state, autoModeEnum last = autoModeEnum::NONE) : 
-			autoModeBaseClass(state, last, autoModeEnum::ANCHOR) {}; 
+		AutoAnchorMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
+			AutoModeBase(state, last, AutoModeEnum::ANCHOR) {}; 
 };
 
 #endif

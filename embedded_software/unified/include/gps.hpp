@@ -21,7 +21,7 @@
 #include "location.hpp"
 
 /**
- * @class gpsFixClass 
+ * @class GPSFix 
  * 
  * @brief A GPS fix of some type
  *
@@ -29,29 +29,29 @@
  *
  */
 
-enum class nmeaModeEnum : int {
+enum class NMEAModeEnum : int {
 	NONE 	= 0,	/**< No data */
 	NOFIX 	= 1,	/**< No valid fix */
 	FIX2D	= 2,	/**< 2D fix only */
 	FIX3D	= 3		/**< 3D fix */
 };
 
-class gpsFixClass : public hackerboatStateClassStorable {
+class GPSFix : public HackerboatStateStorable {
 	public:
-		gpsFixClass () = default;
-		gpsFixClass (json_t *packet);			/**< Create a GPS fix from an incoming gpsd TPV */
+		GPSFix () = default;
+		GPSFix (json_t *packet);			/**< Create a GPS fix from an incoming gpsd TPV */
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming TSV into the current object. */
 		bool parse (json_t *input);
 		json_t *pack () const;
 		bool isValid ();
-		hackerboatStateStorage& storage();
+		HackerboatStateStorage& storage();
 		
 		sysclock		uTime;		/**< System time of fix */
 		sysclock		gpsTime;	/**< GPS time of fix */
 		
-		nmeaModeEnum	mode;		/**< Mode of the fix */
+		NMEAModeEnum	mode;		/**< Mode of the fix */
 		std::string		device;		/**< Name of the device */
-		locationClass	fix;		/**< Location of the current fix */
+		Location		fix;		/**< Location of the current fix */
 		double			track;		/**< Course over ground, in degrees from north */
 		double			speed;		/**< Speed over the ground in m/s */
 		double			epx;		/**< Longitude error, 95% confidence, meters */			
@@ -63,7 +63,7 @@ class gpsFixClass : public hackerboatStateClassStorable {
 		const std::string msgClass = "TPV";
 		
 	private:
-		hackerboatStateStorage *gpsStorage = NULL;
+		HackerboatStateStorage *gpsStorage = NULL;
 };
 
 #endif

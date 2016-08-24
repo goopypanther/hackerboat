@@ -25,9 +25,9 @@
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 
-class adcInputClass : public inputThreadClass {
+class ADCInput : public InputThread {
 	public:
-		adcInputClass(void);	
+		ADCInput(void);	
 		
 		map<std::string, int> 		getRawValues (void);							/**< Return the raw ADC values */
 		map<std::string, double> 	getScaledValues (void);							/**< Return the scaled ADC values */

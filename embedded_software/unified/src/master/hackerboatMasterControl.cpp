@@ -37,10 +37,10 @@
 #include "hal/throttle.hpp"
 
 
-void inputBB (boatStateClass &state, long stepNum);
-void outputBB (boatStateClass &state, long stepNum);
+void inputBB (BoatState &state, long stepNum);
+void outputBB (BoatState &state, long stepNum);
 
-logError *err = logError::instance();
+LogError *err = LogError::instance();
 
 int main () {
 	

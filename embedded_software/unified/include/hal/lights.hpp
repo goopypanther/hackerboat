@@ -17,22 +17,22 @@
 #include "enumdefs.hpp"
 #include "pixel.hpp"
 
-class lightsClass {
+class Lights {
 	public:
-		lightsClass() = default;
+		Lights() = default;
 		void setBrightness(int bright);		/**< Set the brightness of the whole string */
-		void setMode(boatModeEnum boat, 	/**< Set the lights as appropiate for the given modes */
-					navigationModeEnum nav, 
-					autoModeEnum autonomy, 
-					rcModeEnum rc);
+		void setMode(BoatModeEnum boat, 	/**< Set the lights as appropiate for the given modes */
+					NavModeEnum nav, 
+					AutoModeEnum autonomy, 
+					RCModeEnum rc);
 		void clear();						/**< Turn off all the lights */
 		
 	private:
 		PixelBone_Pixel 	strip { LIGHTS_COUNT };
-		boatModeEnum 		_boat; 
-		navigationModeEnum 	_nav; 
-		autoModeEnum 		_auto; 
-		rcModeEnum 			_rc;
+		BoatModeEnum 		_boat; 
+		NavModeEnum 	_nav; 
+		AutoModeEnum 		_auto; 
+		RCModeEnum 			_rc;
 };
 
 #endif

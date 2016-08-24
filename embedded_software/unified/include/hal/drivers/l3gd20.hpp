@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat Beaglebone L3GD20 module
- * hal/l3gd20.hpp
+ * hal/L3GD20.hpp
  * This module provides an interface to the L3GD20 gyroscope
  * see the Hackerboat documentation for more details
  * Code is derived from the Adafruit L3GD20 and Adafruit Sensor libraries
@@ -42,7 +42,7 @@
 /*=========================================================================
     REGISTERS
     -----------------------------------------------------------------------*/
-    enum class gyroRegisters_t
+    enum class GyroRegistersEnum
     {                                             // DEFAULT    TYPE
       GYRO_REGISTER_WHO_AM_I            = 0x0F,   // 11010100   r
       GYRO_REGISTER_CTRL_REG1           = 0x20,   // 00000111   rw
@@ -76,7 +76,7 @@
 /*=========================================================================
     DATA RATE & BANDWIDTH
     -----------------------------------------------------------------------*/
-    enum class gyroSpeed_t
+    enum class GyroSpeedEnum
     {
 	  GYRO_SPEED_95_12_5_HZ				= 0x00, 	// 95 Hz update rate, 12.5 Hz bandwidth
 	  GYRO_SPEED_95_25_HZ				= 0x01, 	// 95 Hz update rate, 25 Hz bandwidth
@@ -100,7 +100,7 @@
 /*=========================================================================
     OPTIONAL SPEED SETTINGS
     -----------------------------------------------------------------------*/
-    enum class gyroRange_t
+    enum class GyroRangeEnum
     {
       GYRO_RANGE_250DPS  = 250,
       GYRO_RANGE_500DPS  = 500,
@@ -108,22 +108,22 @@
     };
 /*=========================================================================*/
 
-class l3gd20 {
+class L3GD20 {
 	public:
-		l3gd20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
+		L3GD20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
 
-		bool begin( gyroRange_t rng = gyroRange_t::GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
+		bool begin( GyroRangeEnum rng = GyroRangeEnum::GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
 		void enableAutoRange( bool enabled );				/**< Set autorange function (see datasheet) */
 		map<std::string, double> getScaledData(void);		/**< Get the scaled data for each axis. Axes are named 'x', 'y', and 'z' in the map */
 		map<std::string, int> getRawData(void);				/**< Get the raw data for each axis. Axes are named as for scaled data. */
-		void setRegister(gyroRegisters_t reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
-		uint8_t getRegister(gyroRegisters_t reg);			/**< Read an arbitrary register on the chip. */
-		void setSpeed(gyroSpeed_t speed);					/**< Set gyro update rate & bandwidth */
-		gyroSpeed_t getSpeed(void);							/**< Get gyro update rate & bandwidth */
+		void setRegister(GyroRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
+		uint8_t getRegister(GyroRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
+		void setSpeed(GyroSpeedEnum speed);					/**< Set gyro update rate & bandwidth */
+		GyroSpeedEnum getSpeed(void);							/**< Get gyro update rate & bandwidth */
 
 	private:
-		i2cClass	_bus;
-		gyroRange_t _range;
+		I2CDriver	_bus;
+		GyroRangeEnum _range;
 		bool        _autoRangeEnabled;
 };
 

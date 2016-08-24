@@ -23,9 +23,9 @@
  * @brief This class defines a common interface and routines for creating input threads.
  */
  
-class inputThreadClass {
+class InputThread {
 	public:
-		inputThreadClass() = default;	
+		InputThread() = default;	
 		
 		virtual bool begin() = 0;				/**< Start the input thread */
 		virtual bool lock(sysdur dur);		/**< Lock the thread's data for the given duration (for example, to read data) */

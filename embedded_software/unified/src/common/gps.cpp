@@ -26,7 +26,7 @@
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
-gpsFixClass::gpsFixClass() {
+GPSFix::GPSFix() {
 	std::chrono::system_clock::now();
 	gpsTime = uTime;
 	latitude = 47.560644;			// latitude of HBL
@@ -36,7 +36,7 @@ gpsFixClass::gpsFixClass() {
 	fixValid = false;
 }
 
-json_t *gpsFixClass::pack (bool seq) const {
+json_t *GPSFix::pack (bool seq) const {
 	json_t *output = json_object();
 	int packResult = 0;
 	packResult += json_object_set_new(output, "uTime", packTimeSpec(this->uTime));
@@ -63,7 +63,7 @@ json_t *gpsFixClass::pack (bool seq) const {
 	return output;
 }
 
-bool gpsFixClass::parse (json_t *input, bool seq = true) {
+bool GPSFix::parse (json_t *input, bool seq = true) {
 	json_t *inTime, *gpsInTime;
 	inTime = json_object_get(input, "uTime");
 	gpsInTime = json_object_get(input, "gpsTime");
@@ -97,7 +97,7 @@ bool gpsFixClass::parse (json_t *input, bool seq = true) {
 	return this->isValid();
 }
 
-bool gpsFixClass::isValid (void) const {
+bool GPSFix::isValid (void) const {
 	if ((GGA.length() == 0) && (GSA.length() == 0) && (GSV.length()) &&
 	    (VTG.length() == 0) && (RMC.length() == 0))
 		return false;
@@ -108,10 +108,10 @@ bool gpsFixClass::isValid (void) const {
 	return true;
 }
 
-hackerboatStateStorage &gpsFixClass::storage() {
+HackerboatStateStorage &GPSFix::storage() {
 
 	if (!gpsStorage) {
-		gpsStorage = new hackerboatStateStorage(hackerboatStateStorage::databaseConnection(GPS_DB_FILE),
+		gpsStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
 							{ { "time", "REAL" },
 							  { "gpsTime", "REAL"},
@@ -126,7 +126,7 @@ hackerboatStateStorage &gpsFixClass::storage() {
 	return *gpsStorage;
 }
 
-bool gpsFixClass::fillRow(sqliteParameterSlice row) const {
+bool GPSFix::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(7);
 	row.bind(0, (double)uTime.tv_sec + 1e-9 * uTime.tv_nsec);
 	row.bind(1, (double)gpsTime.tv_sec + 1e-9 * gpsTime.tv_nsec);
@@ -139,7 +139,7 @@ bool gpsFixClass::fillRow(sqliteParameterSlice row) const {
 	return true;
 }
 
-bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
+bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
 	_sequenceNum = seq;
 	row.assertWidth(7);
 	double timestamp = row.double_field(0);
@@ -156,7 +156,7 @@ bool gpsFixClass::readFromRow(sqliteRowReference row, sequence seq) {
 	return fixValid;
 }
 
-bool gpsFixClass::readSentence (std::string sentence) {
+bool GPSFix::readSentence (std::string sentence) {
 	uTime = std::chrono::system_clock::now();
 	switch(minmea_sentence_id(sentence.c_str(), true)) {
 		case MINMEA_SENTENCE_RMC:
@@ -197,7 +197,7 @@ bool gpsFixClass::readSentence (std::string sentence) {
 	return false;
 }
 
-bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
+bool GPSFix::packRMC (struct minmea_sentence_rmc *frame) {
 	if (frame->valid) {
 		this->longitude = minmea_tocoord(&(frame->longitude));
 		this->latitude = minmea_tocoord(&(frame->latitude));
@@ -208,15 +208,15 @@ bool gpsFixClass::packRMC (struct minmea_sentence_rmc *frame) {
 	} return false;
 }
 
-bool gpsFixClass::packGSA (struct minmea_sentence_gsa *frame) {
+bool GPSFix::packGSA (struct minmea_sentence_gsa *frame) {
 	return true;
 }
 
-bool gpsFixClass::packGSV (struct minmea_sentence_gsv *frame) {
+bool GPSFix::packGSV (struct minmea_sentence_gsv *frame) {
 	return true;
 }
 
-bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
+bool GPSFix::packGGA (struct minmea_sentence_gga *frame) {
 	this->fixValid = false;
 	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
 		this->longitude = minmea_tocoord(&(frame->longitude));
@@ -228,7 +228,7 @@ bool gpsFixClass::packGGA (struct minmea_sentence_gga *frame) {
 	return this->fixValid;
 }
 
-int gpsFixClass::openGPSserial (void) {
+int GPSFix::openGPSserial (void) {
 	struct termios gps_attrib;
 	
 	gps_fd = open(GNSS_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
@@ -247,7 +247,7 @@ int gpsFixClass::openGPSserial (void) {
 	return gps_fd;
 }
 
-void gpsFixClass::closeGPSserial (void) {
+void GPSFix::closeGPSserial (void) {
 	close(gps_fd);
 	gps_fd = -1;
 }

@@ -19,16 +19,16 @@
 #include "hackerboatRoot.hpp"
 
 /**
- * @class orientationClass
+ * @class Orientation
  *
  * @brief An orientation calculated from data received from the IMU
  *
  */
 
-class orientationClass : public hackerboatStateClass {
+class Orientation : public HackerboatState {
 	public:
-		orientationClass() = default;
-		orientationClass(double r, double p, double y) :
+		Orientation() = default;
+		Orientation(double r, double p, double y) :
 			pitch(p), roll(r), heading(y) {};
 		bool parse (json_t *input);
 		json_t *pack () const;

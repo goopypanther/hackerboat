@@ -17,37 +17,36 @@
 #include <math.h>
 #include <string>
 #include "hackerboatRoot.hpp"
+#include "twovector.hpp"
 
 /**
- * @class locationClass
+ * @class Location
  *
  * @brief Class for storing a location 
  *
  */
 
-class locationClass : public hackerboatStateClass {
+class Location : public HackerboatState {
 	public:
-		enum courseType {
+		enum CourseTypeEnum {
 			GreatCircle,
 			RhumbLine
 		};
-		locationClass (void)
+		Location (void)
 		  : _lat(NAN), _lon(NAN)
 		{ };
-		locationClass (double lat, double lon)			/**< Create a location object at the given latitude & longitude */
+		Location (double lat, double lon)			/**< Create a location object at the given latitude & longitude */
 		  : _lat(lat), _lon(lon)
 		{ };
 		bool parse (json_t *input);
 		json_t *pack () const USE_RESULT;
 		bool isValid (void) const;						/**< Check for validity */
-		double bearing (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the bearing from the current location to the target */
-		double distance (const locationClass& dest, courseType type = GreatCircle) const;	/**< Get the distance from the current location to the target */
-
+		double bearing (const Location& dest, CourseTypeEnum type = GreatCircle) const;		/**< Get the bearing from the current location to the target */
+		double distance (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the distance from the current location to the target */
+		TwoVector target (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector object */
+		
 		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
 		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
-	
-		static double inline deg2rad (double deg) { return deg * ( M_PI / 180.0 ); }
-		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }
 
 };
 

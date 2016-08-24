@@ -11,7 +11,7 @@ TEST(Serialization, Orientation) {
 	json_t *sample = json_loads("{ \"roll\": 0.0, \"pitch\": -1, \"yaw\": 144.5 }", 0, NULL);
 	ASSERT_TRUE(sample);
 
-	orientationClass o(3,4,5);
+	Orientation o(3,4,5);
 	ASSERT_TRUE(o.parse(sample));
 
 	ASSERT_EQ(o.roll, 0);
@@ -51,7 +51,7 @@ TEST(Serialization, NavVector) {
 }
 
 TEST(Serialization, Location) {
-	locationClass loc;
+	Location loc;
 	EXPECT_FALSE(loc.isValid());
 
 	json_t *sample = json_loads("{ \"latitude\": 47.58, \"longitude\": -122.05 }", 0, NULL);

@@ -12,8 +12,8 @@
  *
  ******************************************************************************/
  
-#ifndef DODGE_H
-#define DODGE_H
+#ifndef WAYPOINT_H
+#define WAYPOINT_H
 
 #include <chrono>
 #include <vector>
@@ -28,3 +28,4 @@
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"
 
+#endif /* WAYPOINT_H */

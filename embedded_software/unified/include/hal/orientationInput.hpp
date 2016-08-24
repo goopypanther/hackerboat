@@ -25,15 +25,15 @@
 #include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
 
-class orientationInputClass : public inputThreadClass {
+class OrientationInput : public InputThread {
 	public:
-		orientationInputClass(void);			
-		orientationClass* getOrientation() {return &_current;};	/**< Get the last orientation recorded */
+		OrientationInput(void);			
+		Orientation* getOrientation() {return &_current;};	/**< Get the last orientation recorded */
 		
 	private:
-		lsm303	gyro { IMU_I2C_BUS };
-		l3gd20	compass { IMU_I2C_BUS };
-		orientationClass _current;
+		LSM303	gyro { IMU_I2C_BUS };
+		L3GD20	compass { IMU_I2C_BUS };
+		Orientation _current;
 };
 
 #endif

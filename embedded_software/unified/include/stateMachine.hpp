@@ -24,16 +24,16 @@
  * @brief A template for a state machine with the given mode enum T and state vector reference U&.
  */
 
-template <typename T, typename U> class stateMachineBaseClass {
+template <typename T, typename U> class StateMachineBase {
 	public:
-		stateMachineBaseClass (U& state, T last, T thisMode) :	/**< Create a state object with the given state vector and last mode. */
+		StateMachineBase (U& state, T last, T thisMode) :	/**< Create a state object with the given state vector and last mode. */
 			_state(state), _lastMode(last), _thisMode(thisMode),
 			start(std::chrono::system_clock::now()) {};
-		virtual stateMachineBaseClass* execute() = 0;			/**< Execute one step of the state machine */
+		virtual StateMachineBase* execute() = 0;			/**< Execute one step of the state machine */
 		U& getState() {return _state;}
 		T getMode() {return _thisMode;}
 		T getLastMode() {return _lastMode;}
-		virtual ~stateMachineBaseClass () {};
+		virtual ~StateMachineBase () {};
 		
 	protected:
 		const U& _state;

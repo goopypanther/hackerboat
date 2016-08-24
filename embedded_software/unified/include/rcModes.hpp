@@ -21,31 +21,31 @@
 #include "stateMachine.hpp"
 #include "boatState.hpp"
 
-class rcModeBaseClass : public stateMachineBaseClass<rcModeEnum, boatStateClass> {
+class RCModeBase : public StateMachineBase<RCModeEnum, BoatState> {
 	public:
-		static rcModeBaseClass* rcModeFactory(boatStateClass& state, rcModeEnum mode);	/**< Create a new object of the given mode */
-		virtual ~rcModeBaseClass () {};
+		static RCModeBase* factory(BoatState& state, RCModeEnum mode);	/**< Create a new object of the given mode */
+		virtual ~RCModeBase () {};
 	protected:
-		rcModeBaseClass (boatStateClass& state, rcModeEnum last, rcModeEnum thisMode) :
-			stateMachineBaseClass<rcModeEnum, boatStateClass> (state, last, thisMode) {};
+		RCModeBase (BoatState& state, RCModeEnum last, RCModeEnum thisMode) :
+			StateMachineBase<RCModeEnum, BoatState> (state, last, thisMode) {};
 };
 
-class rcIdleMode : public rcModeBaseClass {
+class RCIdleMode : public RCModeBase {
 	public:
-		rcIdleMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
-			rcModeBaseClass(state, last, rcModeEnum::IDLE) {};
+		RCIdleMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :
+			RCModeBase(state, last, RCModeEnum::IDLE) {};
 };
 
-class rcRudderMode : public rcModeBaseClass {
+class RCRudderMode : public RCModeBase {
 	public:
-		rcRudderMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
-			rcModeBaseClass(state, last, rcModeEnum::RUDDER) {};
+		RCRudderMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :
+			RCModeBase(state, last, RCModeEnum::RUDDER) {};
 };
 
-class rcCourseMode : public rcModeBaseClass {
+class RCCourseMode : public RCModeBase {
 	public:
-		rcCourseMode (boatStateClass& state, rcModeEnum last = rcModeEnum::NONE) :
-			rcModeBaseClass(state, last, rcModeEnum::COURSE) {};
+		RCCourseMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :
+			RCModeBase(state, last, RCModeEnum::COURSE) {};
 };
 
 #endif

@@ -11,8 +11,8 @@
  *
  ******************************************************************************/
 
-#ifndef GPIO_H
-#define GPIO_H
+#ifndef RELAY_H
+#define RELAY_H
 
 #include <string>
 #include <stdlib.h>
@@ -27,12 +27,12 @@
 #include "hackerboatRoot.hpp"
 #include "adcInput.hpp"
 
-typedef std::string tuple<double, bool, bool> RelayTuple;
+typedef tuple<double, bool, bool> RelayTuple;
 
-class Relay : public hackerboatStateClass {
+class Relay : public HackerboatState {
 	public:
 		Relay () = default;
-		Relay (std:string name, Pin output, Pin fault, adcInputClass& adc, bool state = false) :
+		Relay (std::string name, Pin output, Pin fault, ADCInput& adc, bool state = false) :
 			_name(name), _drive(output), _fault(fault), _adc(adc), _state(state) {
 				this->init();
 			};
@@ -42,20 +42,22 @@ class Relay : public hackerboatStateClass {
 		bool isValid () {return true;};
 		
 		bool init();
-		bool set();
-		bool clear();
-		bool isFaulted();
+		bool set() {return _drive.set();};
+		bool clear() {return _drive.clear();};
+		bool isFaulted() {return _fault.get();};
 		double current();
 		RelayTuple getState();
 		std::string& name() {return _name;};
-		Pin& output() {return _output;};
+		Pin& output() {return _drive;};
 		Pin& fault() {return _fault;};
-		adcInputClass&& adc() {return _adc;};
+		ADCInput& adc() {return _adc;};
 		
 	private:
 		std::string _name;
 		Pin _drive;
 		Pin _fault;
 		bool _state;
-		adcInputClass& _adc;
-}
+		ADCInput& _adc;
+};
+
+#endif

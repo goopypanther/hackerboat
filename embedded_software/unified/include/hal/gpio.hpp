@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include "hal/config.h"
 
-typdef tuple<int, int, bool> pinDef;	/**< Pin port, pin, and direction, respectively */
+//typedef tuple<int, int, bool> pinDef;	/**< Pin port, pin, and direction, respectively */
 
 class Pin {
 	public:
@@ -39,7 +39,7 @@ class Pin {
 		void writePin (bool state) {
 			(state)?(this->set()):(this->clear());
 		};
-		bool readPin () {this->get();};
+		bool readPin () {return this->get();};
 		bool set();
 		bool clear();
 		bool get();
@@ -50,6 +50,6 @@ class Pin {
 		int _pin;
 		bool _dir;
 		bool _state;
-}
+};
 
 #endif

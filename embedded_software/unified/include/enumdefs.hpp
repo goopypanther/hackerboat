@@ -16,7 +16,7 @@
 /**
  * @brief Beaglebone controller mode, representing the overall system mode of the boat
  */
-enum class boatModeEnum {
+enum class BoatModeEnum {
 	START		= 0,  		/**< Initial starting state         	*/
 	SELFTEST	= 1,  		/**< Initial self-test            		*/
 	DISARMED	= 2,  		/**< Disarmed wait state          		*/  
@@ -29,7 +29,7 @@ enum class boatModeEnum {
 /**
  * @brief Navigation mode, representing the state of the nav subsystem
  */
-enum class navigationModeEnum {
+enum class NavModeEnum {
 	IDLE		= 0,  		/**< Navigation idle state (or system not in nav mode)	*/
 	FAULT		= 1,  		/**< Navigation faulted (boat goes to fault state)		*/
 	RC			= 2,  		/**< Boat is under R/C control							*/  
@@ -40,7 +40,7 @@ enum class navigationModeEnum {
 /**
  * @brief Autonomous mode, representing the state of the nav subsystem
  */
-enum class autoModeEnum {
+enum class AutoModeEnum {
 	IDLE		= 0,		/**< Nav system is not in autonomous mode 			*/
 	WAYPOINT	= 1,  		/**< Boat is navigating along a list of waypoints.	*/
 	RETURN		= 2,  		/**< Return to launch site.							*/
@@ -51,7 +51,7 @@ enum class autoModeEnum {
 /**
  * @brief RC mode, representing the state of the nav subsystem
  */
-enum class rcModeEnum {
+enum class RCModeEnum {
 	IDLE		= 0,		/**< RC system is deactivated 						*/
 	RUDDER		= 1,  		/**< Boat is navigating along a list of waypoints.	*/
 	COURSE		= 2,  		/**< Return to launch site.							*/
@@ -62,7 +62,7 @@ enum class rcModeEnum {
  * @brief Waypoint action, representing the action to take at the end of the waypoint list
  */
 
-enum class waypointActionEnum {
+enum class WaypointActionEnum {
 	IDLE,		/**< Do nothing -- navigation and autonomous mode both idle */
 	ANCHOR,		/**< Anchor at the last waypoint */
 	RETURN,		/**< Return to launch site */

@@ -29,17 +29,18 @@ typedef std::shared_ptr<sqlite3_stmt> shared_stmt;
  * information about the table schema to create queries and to create
  * the initial empty table in the database.
  *
- * This is used by hackerboatStateClassStorable to write objects to
+ * This is used by HackerboatStateStorable to write objects to
  * persistent storage.
  */
-class hackerboatStateStorage {
+ 
+class HackerboatStateStorage {
 public:
 	struct column {
 		const char *name;
 		const char *type;
 	};
 
-	hackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns);
+	HackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns);
 
 	shared_dbh dbh;
 	const std::string tableName;
@@ -57,9 +58,9 @@ public:
 	 */
 	void createTable();
 
-	void logError(void);
-	void logError(const std::string& sql);
-	void logError(shared_stmt& sql);
+	void LogError(void);
+	void LogError(const std::string& sql);
+	void LogError(shared_stmt& sql);
 
 	/** Gets an open connection to the database
 	 *
@@ -83,25 +84,25 @@ private:
 /**
  * Encapsulates a statement handle and an offset-and-range into its parameter list
  */
-class sqliteParameterSlice {
+class SQLiteParameterSlice {
 protected:
 	const int offset;
 	sqlite3_stmt * const sth;
 
-	sqliteParameterSlice(sqlite3_stmt *sth, int offset, int count)
+	SQLiteParameterSlice(sqlite3_stmt *sth, int offset, int count)
 		: sth(sth), offset(offset), count(count)
 	{};
 
 public:
 	const int count;
 
-	sqliteParameterSlice(shared_stmt sth, int offset, int count)
+	SQLiteParameterSlice(shared_stmt sth, int offset, int count)
 		: sth(sth.get()), offset(offset), count(count)
 	{};
 
 	/** Return a sub-slice */
-	sqliteParameterSlice slice(int sliceOffset, int sliceCount) {
-		return sqliteParameterSlice(sth, offset + sliceOffset, sliceCount);
+	SQLiteParameterSlice slice(int sliceOffset, int sliceCount) {
+		return SQLiteParameterSlice(sth, offset + sliceOffset, sliceCount);
 	}
 
 	void assertWidth(int width) {
@@ -144,7 +145,7 @@ public:
 /**
  * Encapsulates a statement (result) handle and an offset-and-range into its column list
  */
-class sqliteRowReference {
+class SQLiteRowReference {
 protected:
 	const int offset;
 #ifndef NDEBUG
@@ -152,7 +153,7 @@ protected:
 #endif
 	sqlite3_stmt * const sth;
 
-	sqliteRowReference(sqlite3_stmt *sth, int offset, int count)
+	SQLiteRowReference(sqlite3_stmt *sth, int offset, int count)
 		: sth(sth), offset(offset)
 #ifndef NDEBUG
 		, count(count)
@@ -160,15 +161,15 @@ protected:
 	{};
 
 public:
-	sqliteRowReference(shared_stmt sth, int offset, int count)
+	SQLiteRowReference(shared_stmt sth, int offset, int count)
 		: sth(sth.get()), offset(offset)
 #ifndef NDEBUG
 		, count(count)
 #endif
 	{};
 	
-	sqliteRowReference slice(int sliceOffset, int sliceCount) const {
-		return sqliteRowReference(sth, offset + sliceOffset, sliceCount);
+	SQLiteRowReference slice(int sliceOffset, int sliceCount) const {
+		return SQLiteRowReference(sth, offset + sliceOffset, sliceCount);
 	}
 
 	void assertWidth(int width) {
