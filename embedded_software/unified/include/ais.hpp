@@ -117,9 +117,8 @@ enum class AISEPFDType : int {
 class AISBase : public HackerboatStateStorable {
 	public:
 		AISBase () = default;
-		AISBase (json_t *packet);		/**< Create a new AIS object from the given packet. */
 		
-		virtual bool prune ();				/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
+		virtual bool prune (Location& current);	/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
 		
 		sysclock 		lastContact;		/**< Time of last contact */
 		sysclock 		lastTimestamp;		/**< Time of last time stamp from the target transmitter. */
@@ -135,8 +134,15 @@ class AISShip : AISBase {
 		AISShip (json_t *packet);				/**< Create a ship object from the given packet. */
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
 		bool project ();						/**< Project the position of the current contact now. */
-		bool project (sysclock);				/**< Project the position of this contact at time_point. */
-
+		bool project (sysclock time);			/**< Project the position of this contact at time_point. */
+		bool prune (Location& current);
+		bool parse (json_t *input);
+		json_t *pack () const;
+		bool isValid () const;
+		HackerboatStateStorage& storage();
+		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
+		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		
 		AISNavStatus	status;					/**< Navigation status of target */
 		double			turn;					/**< Rate of turn, degrees per minute. */
 		double			speed;					/**< Speed in knots. */
@@ -153,6 +159,8 @@ class AISShip : AISBase {
 		AISEPFDType		epfd;					/**< Type of position locating device. */
 		
 	private:
+		bool coreParse (json_t* input);			/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */
+		bool removeEntry ();					/**< Remove this entry from the database. Called only from prune() */
 		HackerboatStateStorage *aisShipStorage = NULL;
 	
 };

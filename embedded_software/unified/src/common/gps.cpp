@@ -1,7 +1,7 @@
 /******************************************************************************
  * Hackerboat Beaglebone GPS module
  * gps.cpp
- * This module houses the GPS module
+ * This module houses the GPSFix type
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Mar 2016
  *
@@ -14,10 +14,6 @@
 #include <chrono>
 #include <math.h>
 #include <string>
-#include <errno.h>
-#include <fcntl.h> 
-#include <termios.h>
-#include <unistd.h>
 #include "gps.hpp"
 #include "hal/config.h"
 #include "sqliteStorage.hpp"
