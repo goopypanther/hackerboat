@@ -7,3 +7,6 @@
 [submodule "embedded_software/unified/submodules/PixelBone"]
 	path = embedded_software/unified/submodules/PixelBone
 	url = https://github.com/logos-electromechanical/PixelBone.git
+[submodule "embedded_software/unified/submodules/date"]
+	path = embedded_software/unified/submodules/date
+	url = https://github.com/logos-electromechanical/date.git
