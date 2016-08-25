@@ -28,4 +28,28 @@
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"
 
+class Waypoints {
+	public:
+		Waypoints ();
+		Waypoints (std::string kmlFile);
+		bool loadKML ();
+		bool loadKML (std::string kmlFile);
+		bool fetchKML (std::string url);
+		Location getWaypoint (int waypoint);
+		Location getWaypoint ();
+		void setCurrent (int waypoint);
+		bool increment ();
+		bool decrement ();
+		int count ();
+		int current ();
+		WaypointActionEnum getAction ();
+		void setAction (WaypointActionEnum act);
+		
+	private:
+		std::string 		kmlPath;
+		WaypointActionEnum 	action;
+		vector<Location>	waypoints;
+		int					current;
+}
+
 #endif /* WAYPOINT_H */

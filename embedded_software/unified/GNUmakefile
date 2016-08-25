@@ -39,7 +39,7 @@ run: svctree
 LIBHACKERBOAT_SRCS= logs.cpp 
 LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp 
-#LIBHACKERBOAT_SRCS+= gps.cpp 
+LIBHACKERBOAT_SRCS+= gps.cpp 
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 

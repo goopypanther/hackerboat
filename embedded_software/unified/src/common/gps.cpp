@@ -13,48 +13,58 @@
 #include <stdlib.h>
 #include <chrono>
 #include <math.h>
-#include "minmea.h"
 #include <string>
 #include <errno.h>
 #include <fcntl.h> 
 #include <termios.h>
 #include <unistd.h>
 #include "gps.hpp"
-#include "config.h"
+#include "hal/config.h"
 #include "sqliteStorage.hpp"
 #include "json_utilities.hpp"
+#include "hackerboatRoot.hpp"
+#include "enumtable.hpp"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
+const EnumNameTable<NMEAModeEnum> GPSFix::NMEAModeNames = {
+	"None", 
+	"NoFix", 
+	"Fix2D", 
+	"Fix3D"
+};
+
 GPSFix::GPSFix() {
-	std::chrono::system_clock::now();
-	gpsTime = uTime;
-	latitude = 47.560644;			// latitude of HBL
-	longitude = -122.338816;		// longitude of HBL
-	gpsHeading = 0;
-	gpsSpeed = 0;
+	recordTime = std::chrono::system_clock::now();
+	gpsTime = recordTime;
+	fix = Location(47.560644, -122.338816);	// location of HBL
 	fixValid = false;
 }
 
-json_t *GPSFix::pack (bool seq) const {
+GPSFix::GPSFix(json_t *packet) {
+	fixValid = this->parseGpsdPacket(packet); 
+}
+
+json_t *GPSFix::pack () const {
 	json_t *output = json_object();
 	int packResult = 0;
-	packResult += json_object_set_new(output, "uTime", packTimeSpec(this->uTime));
-	packResult += json_object_set_new(output, "gpsTime", packTimeSpec(this->gpsTime));
-	packResult += json_object_set_new(output, "latitude", json_real(latitude));
-	packResult += json_object_set_new(output, "longitude", json_real(longitude));
-	packResult += json_object_set_new(output, "heading", json_real(gpsHeading));
-	packResult += json_object_set_new(output, "speed", json_real(gpsSpeed));
+	packResult += json_object_set_new(output, "recordTime", json(packTime(this->recordTime)));
+	packResult += json_object_set_new(output, "gpsTime", json(packTime(this->gpsTime)));
+	packResult += json_object_set_new(output, "mode", json(NMEAModeNames.get(mode)));
+	packResult += json_object_set_new(output, "device", json(device));
+	packResult += json_object_set_new(output, "fix", this->fix.pack());
+	packResult += json_object_set_new(output, "track", json_real(track));
+	packResult += json_object_set_new(output, "speed", json_real(speed));
+	packResult += json_object_set_new(output, "alt", json_real(track));
+	packResult += json_object_set_new(output, "climb", json_real(speed));
+	packResult += json_object_set_new(output, "epx", json_real(epx));
+	packResult += json_object_set_new(output, "epy", json_real(epy));
+	packResult += json_object_set_new(output, "epd", json_real(epd));
+	packResult += json_object_set_new(output, "eps", json_real(eps));
+	packResult += json_object_set_new(output, "ept", json_real(epy));
+	packResult += json_object_set_new(output, "epv", json_real(epd));
+	packResult += json_object_set_new(output, "epc", json_real(eps));
 	packResult += json_object_set_new(output, "fixValid", json_boolean(fixValid));
-
-	if (!GGA.empty()) json_object_set_new(output, "GGA", json(GGA));
-	if (!GSA.empty()) json_object_set_new(output, "GSA", json(GSA));
-	if (!GSV.empty()) json_object_set_new(output, "GSV", json(GSV));
-	if (!VTG.empty()) json_object_set_new(output, "VTG", json(VTG));
-	if (!RMC.empty()) json_object_set_new(output, "RMC", json(RMC));
-
-	if (seq && _sequenceNum >= 0)
-		packResult += json_object_set_new(output, "sequenceNum", json_integer(_sequenceNum));
 
 	if (packResult != 0) {
 		json_decref(output);
@@ -63,49 +73,75 @@ json_t *GPSFix::pack (bool seq) const {
 	return output;
 }
 
-bool GPSFix::parse (json_t *input, bool seq = true) {
-	json_t *inTime, *gpsInTime;
-	inTime = json_object_get(input, "uTime");
-	gpsInTime = json_object_get(input, "gpsTime");
-	GET_VAR(latitude);
-	GET_VAR(longitude);
-	GET_VAR(fixValid);
+bool GPSFix::coreParse (json_t *input) {
+	return (GET_VAR(track) & 
+			GET_VAR(speed) & 
+			GET_VAR(alt) & 
+			GET_VAR(climb) & 
+			GET_VAR(ept) & 
+			GET_VAR(epx) & 
+			GET_VAR(epy) & 
+			GET_VAR(epv) & 
+			GET_VAR(epd) & 
+			GET_VAR(eps) & 
+			GET_VAR(epc) &
+			GET_VAR(device));
+}
+
+bool GPSFix::parseGpsdPacket (json_t *input) {
+	json_t* gpsMode;
+	bool result = true;
+	int tmp;
+	std::string time;
+	double lat, lon;
 	
-	if ((!::parse(inTime, &uTime)) || (!::parse(gpsInTime, &gpsTime)) ||
-		!::parse(json_object_get(input, "heading"), &gpsHeading) ||
-		!::parse(json_object_get(input, "speed"), &gpsSpeed)) {
-		return false;
+	result &= coreParse(input);
+	result &= GET_VAR(time);
+	result &= parseTime(time, this->gpsTime);
+	result &= GET_VAR(lat);
+	result &= GET_VAR(lon);
+	gpsMode = json_object_get(input, "mode");
+	result &= ::parse(gpsMode, &tmp);
+	if (NMEAModeNames.valid(tmp)) {
+		this->mode = static_cast<NMEAModeEnum>(tmp);
+	} else {
+		this->mode = NMEAModeEnum::NONE;
+		result = false;
 	}
+	parseTime(time, gpsTime);
+	this->fix.lat = lat;
+	this->fix.lon = lon;
+	this->recordTime = std::chrono::system_clock::now();
+	
+	if (result) return this->isValid();
+	return false;
+}
 
-	json_t *tmp;
+bool GPSFix::parse (json_t *input) {
+	json_t *inFix;
+	bool result = true;
+	std::string inTime, gpsInTime, tmp;
+	
+	inFix = json_object_get(input, "fix");
+	result &= ::parse(json_object_get(input, "recordTime"), &inTime);
+	result &= ::parse(json_object_get(input, "gpsTime"), &gpsInTime);
+	result &= parseTime(inTime, this->recordTime);
+	result &= parseTime(gpsInTime, this->gpsTime);
+	result &= this->coreParse(input);
+	result &= GET_VAR(fixValid);
+	result &= fix.parse(inFix);
+	result &= ::parse(json_object_get(input, "mode"), &tmp);
+	result &= NMEAModeNames.get(tmp, &mode);
 
-#define GET_OPTIONAL(var) if( (tmp = json_object_get(input, #var )) != NULL ) { if (!::parse(tmp, &var)) return false; } else { var.clear(); }
-	GET_OPTIONAL(GGA);
-	GET_OPTIONAL(GSA);
-	GET_OPTIONAL(GSV);
-	GET_OPTIONAL(VTG);
-	GET_OPTIONAL(RMC);
-#undef GET_OPTIONAL
-
-	if (seq) {
-		tmp = json_object_get(input, "sequenceNum");
-		if (!json_is_integer(tmp))
-			return false;
-		_sequenceNum = json_integer_value(tmp);
-	}
-
-	return this->isValid();
+	if (result) return this->isValid();
+	return false;
 }
 
 bool GPSFix::isValid (void) const {
-	if ((GGA.length() == 0) && (GSA.length() == 0) && (GSV.length()) &&
-	    (VTG.length() == 0) && (RMC.length() == 0))
-		return false;
-	if (gpsSpeed < minSpeed) return false;
-	if ((gpsHeading < minHeading) || (gpsHeading > maxHeading)) return false;
-	if ((longitude < minLongitude) || (longitude > maxLongitude)) return false;
-	if ((latitude < minLatitude) || (latitude > maxLatitude)) return false;
-	return true;
+
+	if (speed < 0) return false;
+	if ((track < -180) || (track > 360)) return false;
+	return this->fix.isValid();
 }
 
 HackerboatStateStorage &GPSFix::storage() {
@@ -113,12 +149,22 @@ HackerboatStateStorage &GPSFix::storage() {
 	if (!gpsStorage) {
 		gpsStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
-							{ { "time", "REAL" },
-							  { "gpsTime", "REAL"},
-							  { "latitude", "REAL" },
-							  { "longitude", "REAL" },
-							  { "heading", "REAL" },
+							{ { "recordTime", "TEXT" },
+							  { "gpsTime", "TEXT"},
+							  { "lat", "REAL" },
+							  { "lon", "REAL" },
+							  { "track", "REAL" },
 							  { "speed", "REAL" },
+							  { "alt", "REAL" },
+							  { "climb", "REAL" },
+							  { "ept", "REAL" },
+							  { "epx", "REAL" },
+							  { "epy", "REAL" },
+							  { "epv", "REAL" },
+							  { "epd", "REAL" },
+							  { "eps", "REAL" },
+							  { "epc", "REAL" },
+							  { "device", "TEXT" },
 							  { "fixValid", "INTEGER" } });
 		gpsStorage->createTable();
 	}
@@ -127,127 +173,53 @@ HackerboatStateStorage &GPSFix::storage() {
 }
 
 bool GPSFix::fillRow(SQLiteParameterSlice row) const {
-	row.assertWidth(7);
-	row.bind(0, (double)uTime.tv_sec + 1e-9 * uTime.tv_nsec);
-	row.bind(1, (double)gpsTime.tv_sec + 1e-9 * gpsTime.tv_nsec);
-	row.bind(2, latitude);
-	row.bind(3, longitude);
-	row.bind(4, gpsHeading);
-	row.bind(5, gpsSpeed);
-	row.bind(6, fixValid);
+	row.assertWidth(17);
+	row.bind(0, packTime(recordTime));
+	row.bind(1, packTime(gpsTime));
+	row.bind(2, fix.lat);
+	row.bind(3, fix.lon);
+	row.bind(4, track);
+	row.bind(5, speed);
+	row.bind(6, alt);
+	row.bind(7, climb);
+	row.bind(8, ept);
+	row.bind(9, epx);
+	row.bind(10, epy);
+	row.bind(11, epv);
+	row.bind(12, epd);
+	row.bind(13, eps);
+	row.bind(14, epc);
+	row.bind(15, device);
+	row.bind(16, fixValid);
 
 	return true;
 }
 
 bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
+	bool result = true;
 	_sequenceNum = seq;
-	row.assertWidth(7);
-	double timestamp = row.double_field(0);
-	uTime.tv_sec = floor(timestamp);
-	uTime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
-	timestamp = row.double_field(1);
-	gpsTime.tv_sec = floor(timestamp);
-	gpsTime.tv_nsec = ( timestamp - floor(timestamp) ) * 1e9;
-	latitude = row.double_field(2);
-	longitude = row.double_field(3);
-	gpsHeading = row.double_field(4);
-	gpsSpeed = row.double_field(5);
-	fixValid = row.bool_field(6);
-	return fixValid;
-}
-
-bool GPSFix::readSentence (std::string sentence) {
-	uTime = std::chrono::system_clock::now();
-	switch(minmea_sentence_id(sentence.c_str(), true)) {
-		case MINMEA_SENTENCE_RMC:
-			struct minmea_sentence_rmc frame_rmc;
-			if (minmea_parse_rmc(&frame_rmc, sentence.c_str())) {
-				clearStrings();
-				RMC = sentence;
-				return packRMC(&frame_rmc);
-			}
-			break;
-		case MINMEA_SENTENCE_GGA:
-			struct minmea_sentence_gga frame_gga;
-			if (minmea_parse_gga(&frame_gga, sentence.c_str())) {
-				clearStrings();
-				GGA = sentence;
-				return packGGA(&frame_gga);
-			}
-			break;
-		case MINMEA_SENTENCE_GSA:
-			struct minmea_sentence_gsa frame_gsa;
-			if (minmea_parse_gsa(&frame_gsa, sentence.c_str())) {
-				clearStrings();
-				GSA = sentence;
-				return packGSA(&frame_gsa);
-			}
-			break;
-		case MINMEA_SENTENCE_GSV:
-			struct minmea_sentence_gsv frame_gsv;
-			if (minmea_parse_gsv(&frame_gsv, sentence.c_str())) {
-				clearStrings();
-				GSV = sentence;
-				return packGSV(&frame_gsv);
-			}
-			break;
-		default:
-			break;
-	}
+	row.assertWidth(17);
+	
+	std::string recordTimeStr = row.string_field(0);
+	result &= parseTime(recordTimeStr, this->recordTime);
+	std::string gpsTimeStr = row.string_field(1);
+	result &= parseTime(gpsTimeStr, this->gpsTime);
+	this->fix.lat = row.double_field(2);
+	this->fix.lon = row.double_field(3);
+	this->track = row.double_field(4);
+	this->speed = row.double_field(5);
+	this->alt = row.double_field(6);
+	this->climb = row.double_field(7);
+	this->ept = row.double_field(8);
+	this->epx = row.double_field(9);
+	this->epy = row.double_field(10);
+	this->epv = row.double_field(11);
+	this->epd = row.double_field(12);
+	this->eps = row.double_field(13);
+	this->epc = row.double_field(14);
+	this->device = row.string_field(15);
+	this->fixValid = row.bool_field(16);
+	
+	if (fixValid && result) return this->isValid();
 	return false;
-}
-
-bool GPSFix::packRMC (struct minmea_sentence_rmc *frame) {
-	if (frame->valid) {
-		this->longitude = minmea_tocoord(&(frame->longitude));
-		this->latitude = minmea_tocoord(&(frame->latitude));
-		this->gpsHeading = minmea_tofloat(&(frame->course));
-		this->gpsSpeed = minmea_tofloat(&(frame->speed));
-		minmea_gettime(&gpsTime, &(frame->date), &(frame->time));
-		this->fixValid = this->isValid();
-	} return false;
-}
-
-bool GPSFix::packGSA (struct minmea_sentence_gsa *frame) {
-	return true;
-}
-
-bool GPSFix::packGSV (struct minmea_sentence_gsv *frame) {
-	return true;
-}
-
-bool GPSFix::packGGA (struct minmea_sentence_gga *frame) {
-	this->fixValid = false;
-	if ((frame->fix_quality > 0) && (frame->fix_quality < 4)) {
-		this->longitude = minmea_tocoord(&(frame->longitude));
-		this->latitude = minmea_tocoord(&(frame->latitude));
-		if (this->isValid()) {
-			this->fixValid = true;
-		} else this->fixValid = false;
-	} 
-	return this->fixValid;
-}
-
-int GPSFix::openGPSserial (void) {
-	struct termios gps_attrib;
-	
-	gps_fd = open(GNSS_TTY, O_RDWR | O_NONBLOCK | O_NOCTTY);
-	if (gps_fd == -1) return gps_fd;	
-	if (tcgetattr(gps_fd, &gps_attrib) < 0) {
-		closeGPSserial();
-		return gps_fd;
-	}
-	cfsetospeed(&gps_attrib, GNSS_BPS);
-	cfsetospeed(&gps_attrib, GNSS_BPS);
-	
-	if (tcsetattr(gps_fd, TCSANOW, &gps_attrib) != 0) {
-		closeGPSserial();
-    }
-	
-	return gps_fd;
-}
-
-void GPSFix::closeGPSserial (void) {
-	close(gps_fd);
-	gps_fd = -1;
 }

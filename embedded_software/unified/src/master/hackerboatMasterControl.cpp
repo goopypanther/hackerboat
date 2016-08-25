@@ -35,6 +35,7 @@
 #include "hal/RCinput.hpp"
 #include "hal/servo.hpp"
 #include "hal/throttle.hpp"
+#include "waypoint.hpp"
 
 
 void inputBB (BoatState &state, long stepNum);

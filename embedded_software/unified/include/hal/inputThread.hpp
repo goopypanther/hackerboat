@@ -28,7 +28,7 @@ class InputThread {
 		InputThread() = default;	
 		
 		virtual bool begin() = 0;				/**< Start the input thread */
-		virtual bool lock(sysdur dur);		/**< Lock the thread's data for the given duration (for example, to read data) */
+		virtual bool lock(sysdur dur);			/**< Lock the thread's data for the given duration (for example, to read data) */
 		virtual bool unlock();					/**< Unlock the thread's data. */	
 		virtual bool unlockWait(sysdur dur);	/**< Wait for the given duration to unlock the data. */
 		virtual bool execute() = 0;				/**< Gather input	*/

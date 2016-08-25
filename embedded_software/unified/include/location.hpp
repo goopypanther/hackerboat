@@ -33,10 +33,10 @@ class Location : public HackerboatState {
 			RhumbLine
 		};
 		Location (void)
-		  : _lat(NAN), _lon(NAN)
+		  : lat(NAN), lon(NAN)
 		{ };
-		Location (double lat, double lon)			/**< Create a location object at the given latitude & longitude */
-		  : _lat(lat), _lon(lon)
+		Location (double _lat, double _lon)			/**< Create a location object at the given latitude & longitude */
+		  : lat(_lat), lon(_lon)
 		{ };
 		bool parse (json_t *input);
 		json_t *pack () const USE_RESULT;
@@ -45,8 +45,8 @@ class Location : public HackerboatState {
 		double distance (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the distance from the current location to the target */
 		TwoVector target (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector object */
 		
-		double _lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
-		double _lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
+		double lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
+		double lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
 
 };
 

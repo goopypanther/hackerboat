@@ -16,53 +16,53 @@
 /**
  * @brief Beaglebone controller mode, representing the overall system mode of the boat
  */
-enum class BoatModeEnum {
+enum class BoatModeEnum : int {
 	START		= 0,  		/**< Initial starting state         	*/
 	SELFTEST	= 1,  		/**< Initial self-test            		*/
 	DISARMED	= 2,  		/**< Disarmed wait state          		*/  
 	FAULT		= 3,		/**< Beaglebone faulted           		*/ 
 	NAVIGATION	= 5,		/**< Beaglebone armed & navigating		*/ 
 	ARMEDTEST	= 6,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
-	NONE		= 10		/**< State of the Beaglebone is currently unknown	*/
+	NONE		= 7			/**< State of the Beaglebone is currently unknown	*/
 };
 
 /**
  * @brief Navigation mode, representing the state of the nav subsystem
  */
-enum class NavModeEnum {
+enum class NavModeEnum : int  {
 	IDLE		= 0,  		/**< Navigation idle state (or system not in nav mode)	*/
 	FAULT		= 1,  		/**< Navigation faulted (boat goes to fault state)		*/
 	RC			= 2,  		/**< Boat is under R/C control							*/  
 	AUTONOMOUS	= 3,		/**< Boat is operating autonomously			       		*/ 
-	NONE		= 10		/**< State of the nav system is currently unknown		*/
+	NONE		= 4			/**< State of the nav system is currently unknown		*/
 };
 
 /**
  * @brief Autonomous mode, representing the state of the nav subsystem
  */
-enum class AutoModeEnum {
+enum class AutoModeEnum : int  {
 	IDLE		= 0,		/**< Nav system is not in autonomous mode 			*/
 	WAYPOINT	= 1,  		/**< Boat is navigating along a list of waypoints.	*/
 	RETURN		= 2,  		/**< Return to launch site.							*/
 	ANCHOR		= 3,  		/**< Boat is holding position.						*/  
-	NONE		= 10		/**< State of the nav system is currently unknown	*/
+	NONE		= 4			/**< State of the nav system is currently unknown	*/
 };
 
 /**
  * @brief RC mode, representing the state of the nav subsystem
  */
-enum class RCModeEnum {
+enum class RCModeEnum : int  {
 	IDLE		= 0,		/**< RC system is deactivated 						*/
 	RUDDER		= 1,  		/**< Boat is navigating along a list of waypoints.	*/
 	COURSE		= 2,  		/**< Return to launch site.							*/
-	NONE		= 10		/**< State of the nav system is currently unknown	*/
+	NONE		= 3			/**< State of the nav system is currently unknown	*/
 };
 
 /**
  * @brief Waypoint action, representing the action to take at the end of the waypoint list
  */
 
-enum class WaypointActionEnum {
+enum class WaypointActionEnum : int {
 	IDLE,		/**< Do nothing -- navigation and autonomous mode both idle */
 	ANCHOR,		/**< Anchor at the last waypoint */
 	RETURN,		/**< Return to launch site */

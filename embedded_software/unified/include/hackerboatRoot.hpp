@@ -62,8 +62,8 @@ class HackerboatState {
 			return true;
 		};
 
-		static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
-		static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
+		//static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
+		//static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
 		
 		sysclock recordTime;
 
@@ -71,13 +71,12 @@ class HackerboatState {
 		HackerboatState(void) {};
 };
 
-inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
-	return HackerboatState::packTime(t);
-}
-inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
-inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) {
-	return HackerboatState::parseTime(input, t) == 0;
-};
+//inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
+//	return HackerboatState::packTime(t);
+//}
+//inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> &t) {
+//	return HackerboatState::parseTime(input, t) == 0;
+//};
 
 
 /**
@@ -143,5 +142,25 @@ class HackerboatStateStorable : public HackerboatState {
 		 */
 		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 };
+
+/**
+ * @function packTime
+ *
+ * @brief Function for packing sysclock objects into ISO 8601 date/time strings
+ * @param t The time to pack
+ * @return The time in ISO 8601, UTC, with millisecond precision 
+ */
+std::string packTime (sysclock t);
+
+/**
+ * @function parseTime
+ *
+ * @brief Function for extracting a sysclock object from an ISO8601 date/time string
+ * @param in The input string
+ * @param t A reference to a sysclock object where the incoming time will be stored
+ * @return True is parsing is successful, false otherwise
+ */
+ 
+bool parseTime (std::string in, sysclock& t);
 
 #endif
