@@ -49,7 +49,7 @@ class Waypoints {
 		std::string 		kmlPath;
 		WaypointActionEnum 	action;
 		vector<Location>	waypoints;
-		int					current;
-}
+		int					_c;
+};
 
 #endif /* WAYPOINT_H */

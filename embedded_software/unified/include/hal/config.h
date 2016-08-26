@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <chrono>
+
 #define ARDUINO_BUF_LEN 	4096
 #define LOCAL_BUF_LEN		32768
 #define MAX_URI_TOKENS		8
@@ -39,10 +41,13 @@
 #define IMU_I2C_BUS			(1)
 #define THROTTLE_RELAY_VECTOR {"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT"}
 #define LIGHTS_COUNT		(144)
+#define AIS_MAX_TIME		600s
+#define AIS_MAX_DISTANCE	(10)
 
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
 #define GPS_DB_FILE			"gps.db"
+#define AIS_DB_FILE			"ais.db"
 #define NAV_DB_FILE			"nav.db"
 #define BONE_LOG_DB_FILE	"boatstate.db"
 #define ARD_LOG_DB_FILE  	"boatstate.db"

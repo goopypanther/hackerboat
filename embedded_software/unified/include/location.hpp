@@ -2,6 +2,8 @@
  * Hackerboat Beaglebone location module
  * locations.hpp
  * This module stores locations and functions for manipulating them
+ * Navigation formulas from Ed Williams' Aviation Formulary
+ * http://williams.best.vwh.net/avform.htm
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Feb 2016
  * 
@@ -44,6 +46,7 @@ class Location : public HackerboatState {
 		double bearing (const Location& dest, CourseTypeEnum type = GreatCircle) const;		/**< Get the bearing from the current location to the target */
 		double distance (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the distance from the current location to the target */
 		TwoVector target (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector object */
+		Location projectm (const TwoVector& projection);									/**< Get the Location at the given meter-valued TwoVector from the current location */
 		
 		double lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
 		double lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		

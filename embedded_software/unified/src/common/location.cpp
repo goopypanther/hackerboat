@@ -2,7 +2,9 @@
  * Hackerboat Beaglebone location module
  * location.cpp
  * This module stores locations and functions for manipulating them
- * Bearing and distance formulas from http://www.movable-type.co.uk/scripts/latlong.html
+ * Navigation formulas from Ed Williams' Aviation Formulary
+ * http://williams.best.vwh.net/avform.htm via
+ * http://www.movable-type.co.uk/scripts/latlong.html
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Feb 2016
  * 

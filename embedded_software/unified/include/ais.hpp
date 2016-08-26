@@ -2,6 +2,8 @@
  * Hackerboat Beaglebone AIS module
  * ais.hpp
  * This module stores AIS data 
+ * Navigation formulas from Ed Williams' Aviation Formulary
+ * http://williams.best.vwh.net/avform.htm
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016
  * 
@@ -120,8 +122,7 @@ class AISBase : public HackerboatStateStorable {
 		
 		virtual bool prune (Location& current);	/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
 		
-		sysclock 		lastContact;		/**< Time of last contact */
-		sysclock 		lastTimestamp;		/**< Time of last time stamp from the target transmitter. */
+		sysclock 		lastTimeStamp;		/**< Time of last time stamp from the target transmitter. */
 		int 			mmsi = -1;			/**< MMSI of transmitter */
 		Location		fix;				/**< Location of last position transmission */
 		const std::string msgClass = "AIS";	/**< Message class from gpsd */
@@ -133,15 +134,15 @@ class AISShip : AISBase {
 		AISShip () = default;
 		AISShip (json_t *packet);				/**< Create a ship object from the given packet. */
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
-		bool project ();						/**< Project the position of the current contact now. */
-		bool project (sysclock time);			/**< Project the position of this contact at time_point. */
+		Location project ();					/**< Project the position of the current contact now. */
+		Location project (sysclock t);			/**< Project the position of this contact at time_point. */
 		bool prune (Location& current);
 		bool parse (json_t *input);
 		json_t *pack () const;
 		bool isValid () const;
 		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
+		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
 		
 		AISNavStatus	status;					/**< Navigation status of target */
 		double			turn;					/**< Rate of turn, degrees per minute. */
