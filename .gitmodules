@@ -10,3 +10,6 @@
 [submodule "embedded_software/unified/submodules/date"]
 	path = embedded_software/unified/submodules/date
 	url = https://github.com/logos-electromechanical/date.git
+[submodule "date"]
+	path = date
+	url = https://github.com/logos-electromechanical/date.git
