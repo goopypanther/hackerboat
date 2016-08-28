@@ -31,20 +31,20 @@ using namespace std;
 /**
  * @brief The dodge class provides a mechanism for determining the diversion required by nearby vessels.
  */
-class dodgeClass {
+class Dodge {
 	public:
-		dodgeClass (gpsdInputClass* input) : _in(input) {};
+		Dodge (GPSdInput& input) : _in(input) {};
 		
-		bearingVector calcDodge ();		/**< calculates the dodge vector and returns it*/
-		bearingVector getDodge ();		/**< Returns the dodge vector. Values are bearing in degrees from magnetic north and relative strength */
+		TwoVector calcDodge ();		/**< calculates the dodge vector and returns it*/
+		TwoVector getDodge ();		/**< Returns the dodge vector. Values are bearing in degrees from magnetic north and relative strength */
 		
 		sysclock lastCalc;
 		
 	private:
-		bearingVector singleDodge (const locationClass me, const locationClass them, const aisShipType theirType);
-		bearingVector lastDodge;
-		gpsdInputClass* 							_in;
-		map<aisShipType, tuple<double, double>>		dodge;	/**< Strength of dodge and minimum distance in meters (respectively) for each ship type. */ 
+		TwoVector singleDodge (const Location me, const Location them, const AISShipType theirType);
+		TwoVector lastDodge;
+		GPSdInput& 	_in;
+		map<AISShipType, tuple<double, double>>		dodge;	/**< Strength of dodge and minimum distance in meters (respectively) for each ship type. */ 
 };
 
 #endif /* DODGE_H */

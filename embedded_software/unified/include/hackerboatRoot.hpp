@@ -27,9 +27,9 @@
 #include "sqliteStorage.hpp"
 
 // forward declarations
-class hackerboatStateStorage;
-class sqliteParameterSlice;
-class sqliteRowReference;
+class HackerboatStateStorage;
+class SQLiteParameterSlice;
+class SQLiteRowReference;
 
 // type definitions for code sanity
 
@@ -39,13 +39,13 @@ typedef std::chrono::duration<std::chrono::system_clock>	sysdur;
 #define USE_RESULT __attribute__((warn_unused_result))
 
 /**
- * @class hackerboatStateClass
+ * @class HackerboatState
  *
  * @brief Base class for holding various types of object used by the core functions of the Hackerboat
  *
  */
 
-class hackerboatStateClass {
+class HackerboatState {
 	public:
 		/** Populate the object from the given json object.
 		 * If seq is true, a sequence number element is expected
@@ -62,26 +62,25 @@ class hackerboatStateClass {
 			return true;
 		};
 
-		static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
-		static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
+		//static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
+		//static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
 		
 		sysclock recordTime;
 
 	protected:
-		hackerboatStateClass(void) {};
+		HackerboatState(void) {};
 };
 
-inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
-	return hackerboatStateClass::packTime(t);
-}
-inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
-inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) {
-	return hackerboatStateClass::parseTime(input, t) == 0;
-};
+//inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
+//	return HackerboatState::packTime(t);
+//}
+//inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> &t) {
+//	return HackerboatState::parseTime(input, t) == 0;
+//};
 
 
 /**
- * @class hackerboatStateClassStorable
+ * @class HackerboatStateStorable
  *
  * @brief Base class for holding various types of object used by the core functions of the Hackerboat
  *
@@ -89,7 +88,7 @@ inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clo
  *
  */
 
-class hackerboatStateClassStorable : public hackerboatStateClass {
+class HackerboatStateStorable : public HackerboatState {
 	public:
 		typedef int64_t sequence;			/**< The type of sequence numbers / OIDs in persistent storage. Negative numbers indicate invalid / missing data */
 
@@ -106,7 +105,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
 		
 	protected:
-		hackerboatStateClassStorable()			/**< Create a state object */
+		HackerboatStateStorable()			/**< Create a state object */
 			: _sequenceNum(-1)
 		{};
 
@@ -115,7 +114,7 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		/** Returns a sqlite storage object for this instance.
 		 *
 		 * Concrete classes must implement this to return a
-		 * hackerboatStateStorage object representing the database,
+		 * HackerboatStateStorage object representing the database,
 		 * table name, and columns of the place this instance is
 		 * stored. Typically this returns a single shared storage
 		 * instance for all instances of a given class, but that's not
@@ -125,23 +124,43 @@ class hackerboatStateClassStorable : public hackerboatStateClass {
 		 * match whatever this class's fillRow() and readFromRow()
 		 * implementations expect.
 		 */
-		virtual hackerboatStateStorage& storage() = 0;
+		virtual HackerboatStateStorage& storage() = 0;
 
 		/** Write the receiver's state into a set of sqlite columns.
 		 *
 		 * The default implementation calls
-		 * hackerboatStateClass::pack() and expects the database to
+		 * HackerboatState::pack() and expects the database to
 		 * contain a single JSON column.
 		 */
-		virtual bool fillRow(sqliteParameterSlice) const USE_RESULT;
+		virtual bool fillRow(SQLiteParameterSlice) const USE_RESULT;
 
 		/** Populate the receiver from a database row.
 		 *
 		 * The default implementation expects a single column
 		 * containing JSON text which is deserialized and given to
-		 * hackerboatStateClass::parse().
+		 * HackerboatState::parse().
 		 */
-		virtual bool readFromRow(sqliteRowReference, sequence) USE_RESULT;
+		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 };
+
+/**
+ * @function packTime
+ *
+ * @brief Function for packing sysclock objects into ISO 8601 date/time strings
+ * @param t The time to pack
+ * @return The time in ISO 8601, UTC, with millisecond precision 
+ */
+std::string packTime (sysclock t);
+
+/**
+ * @function parseTime
+ *
+ * @brief Function for extracting a sysclock object from an ISO8601 date/time string
+ * @param in The input string
+ * @param t A reference to a sysclock object where the incoming time will be stored
+ * @return True is parsing is successful, false otherwise
+ */
+ 
+bool parseTime (std::string in, sysclock& t);
 
 #endif

@@ -11,7 +11,7 @@ GTEST_INC=/usr/include/gtest
 MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS) -std=gnu14
-CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++11 -pthread
+CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread
 CPPFLAGS += -I submodules/include -I include -I submodules/PixelBone -MMD -MT $@
 LDFLAGS  += -L submodules/lib
 
@@ -39,8 +39,9 @@ run: svctree
 LIBHACKERBOAT_SRCS= logs.cpp 
 LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp 
-#LIBHACKERBOAT_SRCS+= gps.cpp 
+LIBHACKERBOAT_SRCS+= gps.cpp 
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
+LIBHACKERBOAT_SRCS+= ais.cpp  
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp

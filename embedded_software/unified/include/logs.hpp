@@ -22,32 +22,17 @@
 
 using namespace std;
 
-class logREST {
+class LogError {
 	public:
-		static logREST* instance(void) { return &_instance; }
-		bool open(std::string logfile);
-		//bool write(char** tokens, int tokenCount, char *query, char *body, int bodyLen, char *method, char *response);
-		bool write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response);
-		bool close(void);
-	private:
-		logREST(void) = default;
-		logREST(logREST const&) = delete;
-		logREST& operator=(logREST const&) = delete;
-		static logREST _instance;
-		ofstream log;
-};
-
-class logError {
-	public:
-		static logError* instance(void) { return &_instance; }
+		static LogError* instance(void) { return &_instance; }
 		bool open(std::string logfile);
 		bool write(const std::string source, const std::string message);
 		bool close(void);
 	private:
-		logError(void) = default;
-		logError(logError const&) = delete;
-		logError& operator=(logError const&) = delete;
-		static logError _instance;
+		LogError(void) = default;
+		LogError(LogError const&) = delete;
+		LogError& operator=(LogError const&) = delete;
+		static LogError _instance;
 		ofstream log;
 };
 

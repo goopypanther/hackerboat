@@ -2,6 +2,8 @@
  * Hackerboat Beaglebone AIS module
  * ais.hpp
  * This module stores AIS data 
+ * Navigation formulas from Ed Williams' Aviation Formulary
+ * http://williams.best.vwh.net/avform.htm
  * see the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016
  * 
@@ -20,7 +22,7 @@
 #include "hackerboatRoot.hpp"
 #include "location.hpp"
 
-enum class aisMsgType : int {
+enum class AISMsgType : int {
 	UNDEFINED		= 0,
 	POSN_REPORT_A1	= 1,
 	POSN_REPORT_A2	= 2,
@@ -31,7 +33,7 @@ enum class aisMsgType : int {
 	STATIC_DATA_B	= 24
 };
 
-enum class aisNavStatus : int {
+enum class AISNavStatus : int {
 	ENGINE				= 0,
 	ANCHORED			= 1,
 	NOT_UNDER_CMD		= 2,
@@ -47,7 +49,7 @@ enum class aisNavStatus : int {
 	UNDEFINED			= 15
 };
 
-enum class aisShipType : int {
+enum class AISShipType : int {
 	UNAVAILABLE			= 0,	/**< Default value */
 	WIG_ALL				= 20,	/**< Ekranoplans */
 	WIG_HAZ_A			= 21,	/**< And another ekranoplan... */
@@ -102,7 +104,7 @@ enum class aisShipType : int {
 	OTHER_NO_INFO		= 99,
 };
 
-enum class aisEPFDType : int {
+enum class AISEPFDType : int {
 	UNDEFINED	= 0,
 	GPS			= 1,
 	GLONASS		= 2,
@@ -114,30 +116,35 @@ enum class aisEPFDType : int {
 	GALILEO		= 8
 };
 
-class aisBaseClass : public hackerboatStateClassStorable {
+class AISBase : public HackerboatStateStorable {
 	public:
-		aisBaseClass () = default;
-		aisBaseClass (json_t *packet);		/**< Create a new AIS object from the given packet. */
+		AISBase () = default;
 		
-		virtual bool prune ();				/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
+		virtual bool prune (Location& current);	/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
 		
-		sysclock 		lastContact;		/**< Time of last contact */
-		sysclock 		lastTimestamp;		/**< Time of last time stamp from the target transmitter. */
+		sysclock 		lastTimeStamp;		/**< Time of last time stamp from the target transmitter. */
 		int 			mmsi = -1;			/**< MMSI of transmitter */
-		locationClass	fix;				/**< Location of last position transmission */
+		Location		fix;				/**< Location of last position transmission */
 		const std::string msgClass = "AIS";	/**< Message class from gpsd */
 		std::string		device;				/**< Name of the device */
 };
 
-class aisShipClass : aisBaseClass {
+class AISShip : AISBase {
 	public:
-		aisShipClass () = default;
-		aisShipClass (json_t *packet);			/**< Create a ship object from the given packet. */
+		AISShip () = default;
+		AISShip (json_t *packet);				/**< Create a ship object from the given packet. */
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
-		bool project ();						/**< Project the position of the current contact now. */
-		bool project (sysclock);				/**< Project the position of this contact at time_point. */
-
-		aisNavStatus	status;					/**< Navigation status of target */
+		Location project ();					/**< Project the position of the current contact now. */
+		Location project (sysclock t);			/**< Project the position of this contact at time_point. */
+		bool prune (Location& current);
+		bool parse (json_t *input);
+		json_t *pack () const;
+		bool isValid () const;
+		HackerboatStateStorage& storage();
+		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
+		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
+		
+		AISNavStatus	status;					/**< Navigation status of target */
 		double			turn;					/**< Rate of turn, degrees per minute. */
 		double			speed;					/**< Speed in knots. */
 		double			course;					/**< True course, degrees. */
@@ -145,15 +152,17 @@ class aisShipClass : aisBaseClass {
 		int				imo;					/**< IMO number */
 		std::string		callsign;				/**< Ship's callsign. */
 		std::string		shipname;				/**< Name of ship. */
-		aisShipType		shiptype;				/**< Type of ship. */
+		AISShipType		shiptype;				/**< Type of ship. */
 		int				to_bow;					/**< Distance from the GNSS receiver to the bow, in meters. */
 		int				to_stern;				/**< Distance from the GNSS receiver to the stern, in meters. */
 		int				to_port;				/**< Distance from the GNSS receiver to the port, in meters. */
 		int				to_starboard;			/**< Distance from the GNSS receiver to the starboard, in meters. */
-		aisEPFDType		epfd;					/**< Type of position locating device. */
+		AISEPFDType		epfd;					/**< Type of position locating device. */
 		
 	private:
-		hackerboatStateStorage *aisShipStorage = NULL;
+		bool coreParse (json_t* input);			/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */
+		bool removeEntry ();					/**< Remove this entry from the database. Called only from prune() */
+		HackerboatStateStorage *aisShipStorage = NULL;
 	
 };
 

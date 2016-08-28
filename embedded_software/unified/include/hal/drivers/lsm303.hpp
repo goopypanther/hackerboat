@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat Beaglebone LSM303 module
- * hal/lsm303.hpp
+ * hal/LSM303.hpp
  * This module provides an interface to the LSM303 accelerometer & compass 
  * see the Hackerboat documentation for more details
  * Code is derived from the Adafruit LSM303 and Adafruit Sensor libraries
@@ -39,7 +39,7 @@
 /*=========================================================================
     REGISTERS
     -----------------------------------------------------------------------*/
-    enum class lsm303AccelRegisters_t
+    enum class LSM303AccelRegistersEnum
     {                                                     // DEFAULT    TYPE
       LSM303_REGISTER_ACCEL_CTRL_REG1_A         = 0x20,   // 00000111   rw
       LSM303_REGISTER_ACCEL_CTRL_REG2_A         = 0x21,   // 00000000   rw
@@ -73,7 +73,7 @@
       LSM303_REGISTER_ACCEL_TIME_WINDOW_A       = 0x3D
     };
     
-    enum class lsm303MagRegisters_t
+    enum class LSM303MagRegistersEnum
     {
       LSM303_REGISTER_MAG_CRA_REG_M             = 0x00,
       LSM303_REGISTER_MAG_CRB_REG_M             = 0x01,
@@ -96,7 +96,7 @@
 /*=========================================================================
     MAGNETOMETER GAIN SETTINGS
     -----------------------------------------------------------------------*/
-    enum class lsm303MagGain
+    enum class LSM303MagGainEnum
     {
       LSM303_MAGGAIN_1_3                        = 0x20,  // +/- 1.3
       LSM303_MAGGAIN_1_9                        = 0x40,  // +/- 1.9
@@ -114,24 +114,24 @@
     #define LSM303_ID                     (0b11010100)
 /*=========================================================================*/
 
-class lsm303 {
+class LSM303 {
 	public:
-		lsm303 () = default;
-		lsm303(int bus);												/**< Create an interface object for an LSM303 on the given I2C bus. */
+		LSM303 () = default;
+		LSM303(int bus);												/**< Create an interface object for an LSM303 on the given I2C bus. */
 
 		bool setBus (int bus);											/**< Set the I2C bus to use. */
 		bool begin(void);												/**< Initialize the LSM303. */
 		bool readAll (void);											/**< Read all accelerometer and magnetometer values */
 		void enableAutoRange(bool enable);								/**< Enable auto-ranging function (see data sheet). */
-		void setMagGain(lsm303MagGain gain);							/**< Set the magnetometer gain. */
+		void setMagGain(LSM303MagGainEnum gain);							/**< Set the magnetometer gain. */
 		map<char, double> getMagData (void);							/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
 		map<char, double> getAccelData (void);							/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
 		map<char, int> getRawMagData (void);							/**< Get raw magnetometer data. Field names as for scaled data. */
 		map<char, int> getRawAccelData (void);							/**< Get raw accelerometer data. Field names as for scaled data. */
-		void setMagRegister(lsm303MagRegisters_t reg, uint8_t val);		/**< Set an arbitrary register on the chip. */
-		uint8_t getMagRegister(lsm303MagRegisters_t reg);				/**< Read an arbitrary register on the chip. */
-		void setAccelRegister(lsm303AccelRegisters_t reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
-		uint8_t getAccelRegister(lsm303AccelRegisters_t reg);			/**< Read an arbitrary register on the chip. */
+		void setMagRegister(LSM303MagRegistersEnum reg, uint8_t val);		/**< Set an arbitrary register on the chip. */
+		uint8_t getMagRegister(LSM303MagRegistersEnum reg);				/**< Read an arbitrary register on the chip. */
+		void setAccelRegister(LSM303AccelRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
+		uint8_t getAccelRegister(LSM303AccelRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
 		map<char, int> getMagOffset (void);								/**< Get the current offset for magnetometer data. Field names as for data. */
 		map<char, int> getAccelOffset (void);							/**< Get the current offset for accelerometer data. Field names as for data. */
 		map<char, double> getMagScale (void);							/**< Get the current scale factor for the magnetometer data. Field names as for data. */
@@ -142,7 +142,7 @@ class lsm303 {
 		void setAccelScale (map<char, double>);							/**< Set accelerometer scale. */
 
 	private:
-		i2cClass			_bus;
+		I2CDriver			_bus;
 		map<char, int> 		_accelData;   
 		map<char, int>		_magData;
 		map<char, double>  	_magScale;

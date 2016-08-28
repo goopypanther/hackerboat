@@ -35,12 +35,14 @@
 #include "hal/RCinput.hpp"
 #include "hal/servo.hpp"
 #include "hal/throttle.hpp"
+#include "waypoint.hpp"
+#include "hal/fetchURL.hpp"
 
 
-void inputBB (boatStateClass &state, long stepNum);
-void outputBB (boatStateClass &state, long stepNum);
+void inputBB (BoatState &state, long stepNum);
+void outputBB (BoatState &state, long stepNum);
 
-logError *err = logError::instance();
+LogError *err = LogError::instance();
 
 int main () {
 	

@@ -30,7 +30,7 @@ static bool table_exists(shared_dbh& dbh, const char *tablename)
 
 TEST(StorageTest, Creation) {
 
-	shared_dbh dbh = hackerboatStateStorage::databaseConnection("test0");
+	shared_dbh dbh = HackerBoatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
 
 	if (table_exists(dbh, "FOO")) {
@@ -39,7 +39,7 @@ TEST(StorageTest, Creation) {
 		EXPECT_FALSE(table_exists(dbh, "FOO"));
 	}
 
-	hackerboatStateStorage storage(dbh, "FOO", { { "thing", "INTEGER" },
+	HackerBoatStateStorage storage(dbh, "FOO", { { "thing", "INTEGER" },
 						     { "whatsit", "TEXT" } });
 
 	EXPECT_FALSE(table_exists(dbh, "FOO"));
@@ -47,7 +47,7 @@ TEST(StorageTest, Creation) {
 	EXPECT_TRUE(table_exists(dbh, "FOO"));
 }
 
-class simpleValues : public hackerboatStateClassStorable {
+class simpleValues : public HackerBoatStateStorable {
 
 public:
 	simpleValues(shared_dbh& dbh);
@@ -68,10 +68,10 @@ public:
 	}
 
 protected:
-	hackerboatStateStorage _storage;
-	hackerboatStateStorage& storage(void);
-	bool fillRow(sqliteParameterSlice) const;
-	bool readFromRow(sqliteRowReference, sequence);
+	HackerBoatStateStorage _storage;
+	HackerBoatStateStorage& storage(void);
+	bool fillRow(SQLiteParameterSlice) const;
+	bool readFromRow(SQLiteRowReference, sequence);
 };
 
 simpleValues::simpleValues(shared_dbh& dbh)
@@ -83,12 +83,12 @@ simpleValues::simpleValues(shared_dbh& dbh)
 	_storage.createTable();
 }
 
-hackerboatStateStorage& simpleValues::storage()
+HackerBoatStateStorage& simpleValues::storage()
 {
 	return _storage;
 }
 
-bool simpleValues::fillRow(sqliteParameterSlice row) const
+bool simpleValues::fillRow(SQLiteParameterSlice row) const
 {
 	row.bind(0, i);
 	row.bind(1, f);
@@ -96,7 +96,7 @@ bool simpleValues::fillRow(sqliteParameterSlice row) const
 	return true;
 }
 
-bool simpleValues::readFromRow(sqliteRowReference row, sequence seq)
+bool simpleValues::readFromRow(SQLiteRowReference row, sequence seq)
 {
 	_sequenceNum = seq;
 	i = row.int64_field(0);
@@ -106,7 +106,7 @@ bool simpleValues::readFromRow(sqliteRowReference row, sequence seq)
 }
 
 TEST(StorageTest, SimpleValues) {
-	shared_dbh dbh = hackerboatStateStorage::databaseConnection("test0");
+	shared_dbh dbh = HackerBoatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
 
 	simpleValues::sequence oid1, oid2;

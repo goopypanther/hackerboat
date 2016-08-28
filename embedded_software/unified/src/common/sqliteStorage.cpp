@@ -32,24 +32,24 @@ public:
 	}
 };
 
-class hackerboatStateStorage::sth_deleter {
+class HackerboatStateStorage::sth_deleter {
 public:
 	void operator() (sqlite3_stmt *sth) {
 		sqlite3_finalize(sth);
 	}
 };
 
-hackerboatStateStorage::hackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns)
+HackerboatStateStorage::HackerboatStateStorage(shared_dbh dbh, const char *tableName, std::initializer_list<column> columns)
 	: dbh(dbh), tableName(tableName), columns(columns.begin(), columns.end())
 {
 }
 
-int hackerboatStateStorage::columnCount() const
+int HackerboatStateStorage::columnCount() const
 {
 	return columns.size();
 }
 
-void hackerboatStateStorage::appendColumns(std::ostringstream& s, bool comma)
+void HackerboatStateStorage::appendColumns(std::ostringstream& s, bool comma)
 {
 	for(auto it = columns.cbegin(); it != columns.cend(); it ++) {
 		if (comma) {
@@ -61,19 +61,19 @@ void hackerboatStateStorage::appendColumns(std::ostringstream& s, bool comma)
 	}
 }
 
-void hackerboatStateStorage::prepare(shared_stmt& sth, const std::string& sql)
+void HackerboatStateStorage::prepare(shared_stmt& sth, const std::string& sql)
 {
 	sqlite3_stmt *prepared_stmt = NULL;
 	int err = sqlite3_prepare_v2(dbh.get(), sql.c_str(), sql.length(), &prepared_stmt, NULL);
 	if ((err != SQLITE_OK) && (err != SQLITE_BUSY)) {
-		logError(sql);
+		LogError(sql);
 		abort();
 	}
 
 	sth.reset(prepared_stmt, sth_deleter());
 }
 
-void hackerboatStateStorage::logError(void)
+void HackerboatStateStorage::LogError(void)
 {
 	warnx("sqlite error (%p, %s): (%d) %s",
 	      dbh.get(), tableName.c_str(),
@@ -81,17 +81,17 @@ void hackerboatStateStorage::logError(void)
 	      sqlite3_errmsg(dbh.get()));
 }
 
-void hackerboatStateStorage::logError(const std::string& sql)
+void HackerboatStateStorage::LogError(const std::string& sql)
 {
 	warnx("SQL: %s", sql.c_str());
-	logError();
+	LogError();
 }
 
-void hackerboatStateStorage::logError(shared_stmt& sth)
+void HackerboatStateStorage::LogError(shared_stmt& sth)
 {
 	const char *txt = sqlite3_sql(sth.get());
 	warnx("SQL: %s", txt);
-	logError();
+	LogError();
 }
 
 static inline int step(shared_stmt& sth)
@@ -102,7 +102,7 @@ static inline int step(shared_stmt& sth)
 //******************************************************************************
 // Helpers to assemble and prepare SQL statements for various operations.
 
-shared_stmt& hackerboatStateStorage::queryLastRecord()
+shared_stmt& HackerboatStateStorage::queryLastRecord()
 {
 	if (!sth_last) {
 		std::ostringstream sql;
@@ -118,7 +118,7 @@ shared_stmt& hackerboatStateStorage::queryLastRecord()
 	return sth_last;
 }
 
-shared_stmt& hackerboatStateStorage::queryRecord()
+shared_stmt& HackerboatStateStorage::queryRecord()
 {
 	if (!sth_byOid) {
 		std::ostringstream sql;
@@ -134,7 +134,7 @@ shared_stmt& hackerboatStateStorage::queryRecord()
 	return sth_byOid;
 }
 
-shared_stmt& hackerboatStateStorage::queryRecordCount()
+shared_stmt& HackerboatStateStorage::queryRecordCount()
 {
 	if (!sth_count) {
 		std::ostringstream sql;
@@ -147,7 +147,7 @@ shared_stmt& hackerboatStateStorage::queryRecordCount()
 	return sth_count;
 }
 
-shared_stmt& hackerboatStateStorage::insertRecord()
+shared_stmt& HackerboatStateStorage::insertRecord()
 {
 	if (!sth_insert) {
 		std::ostringstream sql;
@@ -173,7 +173,7 @@ shared_stmt& hackerboatStateStorage::insertRecord()
 	return sth_insert;
 }
 
-shared_stmt& hackerboatStateStorage::updateRecord()
+shared_stmt& HackerboatStateStorage::updateRecord()
 {
 	if (!sth_update) {
 		std::ostringstream sql;
@@ -219,7 +219,7 @@ static int busy_sleep(void *ctxt, int count)
 	return 1;
 }
 
-shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
+shared_dbh HackerboatStateStorage::databaseConnection(const char *filename)
 {
 	std::string name( filename? filename : ":memory:" );
 
@@ -264,7 +264,7 @@ shared_dbh hackerboatStateStorage::databaseConnection(const char *filename)
 	return dbh;
 }
 
-void hackerboatStateStorage::createTable()
+void HackerboatStateStorage::createTable()
 {
 	std::ostringstream sql;
 	sql << "CREATE TABLE IF NOT EXISTS \"" << tableName << "\" (";
@@ -281,44 +281,44 @@ void hackerboatStateStorage::createTable()
 			       NULL, NULL,
 			       NULL);
 	if ((err != SQLITE_OK) && (err != SQLITE_BUSY)) {
-		logError(sql.str());
+		LogError(sql.str());
 		abort();
 	}
 }
 
-void hackerboatStateStorage::closeDatabase (void)
+void HackerboatStateStorage::closeDatabase (void)
 {
 	if ((this) && (dbh.get())) {sqlite3_close(dbh.get());}
 }
 
 //******************************************************************************
-// Methods on storable objects to read and write from the class's hackerboatStateStorage
+// Methods on storable objects to read and write from the class's HackerboatStateStorage
 
-hackerboatStateClassStorable::sequence hackerboatStateClassStorable::countRecords(void)
+HackerboatStateStorable::sequence HackerboatStateStorable::countRecords(void)
 {
-	hackerboatStateStorage& db = storage();
+	HackerboatStateStorage& db = storage();
 	shared_stmt sth = db.queryRecordCount();
 	int rc = step(sth);
 	if (rc != SQLITE_ROW) {
-		db.logError(sth);
+		db.LogError(sth);
 		sqlite3_reset(sth.get());
 		return -1;
 	} else {
-		hackerboatStateClassStorable::sequence ret = sqlite3_column_int64(sth.get(), 0);
+		HackerboatStateStorable::sequence ret = sqlite3_column_int64(sth.get(), 0);
 		sqlite3_reset(sth.get());
 		return ret;
 	}
 }
 
-bool hackerboatStateClassStorable::writeRecord(void)
+bool HackerboatStateStorable::writeRecord(void)
 {
 	if (_sequenceNum < 0)
 		return false;
-	hackerboatStateStorage& db = storage();
+	HackerboatStateStorage& db = storage();
 	shared_stmt sth = db.updateRecord();
 	int columnCount = db.columnCount();
 	assert(sqlite3_bind_parameter_count(sth.get()) == columnCount+1);
-	if (!fillRow(sqliteParameterSlice(sth, 1, columnCount))) {
+	if (!fillRow(SQLiteParameterSlice(sth, 1, columnCount))) {
 		//sqlite3_reset(sth.get());
 		return false;
 	}
@@ -328,18 +328,18 @@ bool hackerboatStateClassStorable::writeRecord(void)
 		//sqlite3_reset(sth.get());
 		return true;
 	} else {
-		db.logError(sth);
+		db.LogError(sth);
 		//sqlite3_reset(sth.get());
 		return false;
 	}
 }
 
-bool hackerboatStateClassStorable::appendRecord(void)
+bool HackerboatStateStorable::appendRecord(void)
 {
-	hackerboatStateStorage& db = storage();
+	HackerboatStateStorage& db = storage();
 	shared_stmt sth = db.insertRecord();
 	assert(sqlite3_bind_parameter_count(sth.get()) == db.columnCount());
-	sqliteParameterSlice parameters(sth, 1, db.columnCount());
+	SQLiteParameterSlice parameters(sth, 1, db.columnCount());
 	if (!fillRow(parameters))
 		//sqlite3_reset(sth.get());
 		return false;
@@ -349,19 +349,19 @@ bool hackerboatStateClassStorable::appendRecord(void)
 		//sqlite3_reset(sth.get());
 		return true;
 	} else {
-		db.logError(sth);
+		db.LogError(sth);
 		//sqlite3_reset(sth.get());
 		return false;
 	}
 }
 
-bool hackerboatStateClassStorable::getLastRecord(void)
+bool HackerboatStateStorable::getLastRecord(void)
 {
-	hackerboatStateStorage& db = storage();
+	HackerboatStateStorage& db = storage();
 	shared_stmt sth = db.queryLastRecord();
 	int rc = step(sth);
 	if (rc == SQLITE_ROW) {
-		bool ret = readFromRow(sqliteRowReference(sth, 1, db.columnCount()),
+		bool ret = readFromRow(SQLiteRowReference(sth, 1, db.columnCount()),
 							sqlite3_column_int64(sth.get(), 0));
 		sqlite3_reset(sth.get());
 		return ret;
@@ -370,21 +370,21 @@ bool hackerboatStateClassStorable::getLastRecord(void)
 		sqlite3_reset(sth.get());
 		return false;
 	} else {
-		db.logError(sth);
+		db.LogError(sth);
 		sqlite3_reset(sth.get());
 		return false;
 	}
 }
 
-bool hackerboatStateClassStorable::getRecord(sequence oid)
+bool HackerboatStateStorable::getRecord(sequence oid)
 {
-	hackerboatStateStorage& db = storage();
+	HackerboatStateStorage& db = storage();
 	shared_stmt sth = db.queryRecord();
 	assert(sqlite3_column_count(sth.get()) == db.columnCount());
 	sqlite3_bind_int64(sth.get(), 1, oid);
 	int rc = step(sth);
 	if (rc == SQLITE_ROW) {
-		bool ret = readFromRow(sqliteRowReference(sth, 0, db.columnCount()), oid);
+		bool ret = readFromRow(SQLiteRowReference(sth, 0, db.columnCount()), oid);
 		sqlite3_reset(sth.get());
 		return ret;
 	} else if (rc == SQLITE_DONE) {
@@ -392,7 +392,7 @@ bool hackerboatStateClassStorable::getRecord(sequence oid)
 		sqlite3_reset(sth.get());
 		return false;
 	} else {
-		db.logError(sth);
+		db.LogError(sth);
 		sqlite3_reset(sth.get());
 		return false;
 	}
@@ -401,7 +401,7 @@ bool hackerboatStateClassStorable::getRecord(sequence oid)
 //******************************************************************************
 // C++-y helper classes for parameter and row slices
 
-void sqliteParameterSlice::bind_json_new(int column, json_t *j)
+void SQLiteParameterSlice::bind_json_new(int column, json_t *j)
 {
 	assert(column >= 0);
 	assert(column < count);
@@ -414,7 +414,7 @@ void sqliteParameterSlice::bind_json_new(int column, json_t *j)
 	json_decref(j);
 }
 
-json_t *sqliteRowReference::json_field(int column) const
+json_t *SQLiteRowReference::json_field(int column) const
 {
 	assert(column >= 0);
 	assert(column < count);
@@ -427,7 +427,7 @@ json_t *sqliteRowReference::json_field(int column) const
 	return json_loadb(reinterpret_cast<const char *>(contents), length, 0, NULL);
 }
 
-std::string sqliteRowReference::string_field(int column) const
+std::string SQLiteRowReference::string_field(int column) const
 {
 	assert(column >= 0);
 	assert(column < count);

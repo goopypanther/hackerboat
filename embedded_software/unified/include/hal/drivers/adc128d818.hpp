@@ -63,7 +63,7 @@ class ADC128D818 {
 		double readTemperatureScaled();					/**< Read the ADC temperature */
 
 	private:
-		i2cClass	_bus;
+		I2CDriver	_bus;
 	
 		uint8_t 	addr;
 		uint8_t 	disabled_mask;

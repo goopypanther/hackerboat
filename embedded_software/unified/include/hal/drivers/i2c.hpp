@@ -27,10 +27,10 @@
 #include <iostream>
 #include <sstream>
 
-class i2cClass {
+class I2CDriver {
 	public:
-		i2cClass () = default;							
-		i2cClass (int bus);						/**< Creates an i2cClass object pointed at the numbered I2C bus */ 
+		I2CDriver () = default;							
+		I2CDriver (int bus);						/**< Creates an I2CDriver object pointed at the numbered I2C bus */ 
 		bool setBus (int bus);					/**< Set the bus to the desired bus. Numbers other than 1, 2, or 3 are invalid and will return false. */
 		bool open (uint8_t address);			/**< Open a connection to the given address. Returns false if this fails. */
 		int write (std::ostringstream output);	/**< Write the given output stream to the open device. Returns the number of bytes written, or -1 on any error. */

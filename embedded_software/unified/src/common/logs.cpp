@@ -39,51 +39,22 @@ std::string timeOutput (void) {
 	return ret.str();
 }
 
-bool logError::open(std::string path)
+bool LogError::open(std::string path)
 {
 	log.open(path);
 	return log.is_open();
 }
 
-bool logError::close(void)
+bool LogError::close(void)
 {
 	log.close();
 	return !log.is_open();
 }
 
-bool logError::write(std::string source, std::string message)
+bool LogError::write(std::string source, std::string message)
 {
 	log << timeOutput() << source << ": " << message << std::endl;
 	return true;
 }
 
-logError logError::_instance;
-
-bool logREST::open(std::string path)
-{
-	log.open(path);
-	return log.is_open();
-}
-
-bool logREST::close(void)
-{
-	log.close();
-	return !log.is_open();
-}
-
-bool logREST::write(std::vector<std::string> tokens, std::string query, std::string method, std::string body, char *response) {
-	log << "==============================================================" << std::endl;
-	log << timeOutput() << std::endl;
-	log << "URI: ";
-	for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-		log << "/" << *it;
-	}
-	log << std::endl << "Query: " << query << std::endl;
-	log << "Method: " << method << std::endl;
-	log << "Body: " << body << std::endl;
-	log << "Response: " << std::string(response) << endl;
-	
-	return true;
-}
-
-logREST logREST::_instance;
+LogError LogError::_instance;

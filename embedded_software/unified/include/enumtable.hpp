@@ -21,10 +21,10 @@
  *
  * Provides a bidirectional mapping between integers 0..N and string names.
  */
-class integerNameTable {
+class IntNameTable {
 public:
 	/** Constructs an integer name table given a list of names */
-	integerNameTable(std::initializer_list<const char *> names);
+	IntNameTable(std::initializer_list<const char *> names);
 
 	/** Returns true if the integer is within the range of numbers in the table */
 	bool valid(int) const;
@@ -40,27 +40,27 @@ protected:
 
 	const std::unordered_map<std::string, int>::const_iterator find(const std::string& str) const;
 
-	integerNameTable(const std::pair<std::vector<std::string>, std::unordered_map<std::string, int> >&& values)
+	IntNameTable(const std::pair<std::vector<std::string>, std::unordered_map<std::string, int> >&& values)
 		: forward(values.first), backward(values.second)
 	{
 	};
 };
 
 /**
- * enumerationNameTable is a purely inline specialization of
- * integerNameTable which provides methods for strongly-typed enums
+ * EnumNameTable is a purely inline specialization of
+ * IntNameTable which provides methods for strongly-typed enums
  * ("enum class").
  *
  * \tparam T The enumeration type.
  */
 
 template<typename T>
-class enumerationNameTable : public integerNameTable {
+class EnumNameTable : public IntNameTable {
 public:
 	// Explicitly inherit our constructor
-	// using integerNameTable::integerNameTable; // Doesn't work until g++-4.8, unfortunately
-	enumerationNameTable(std::initializer_list<const char *> names)
-	  : integerNameTable(names)
+	// using IntNameTable::IntNameTable; // Doesn't work until g++-4.8, unfortunately
+	EnumNameTable(std::initializer_list<const char *> names)
+	  : IntNameTable(names)
 	{};
 	
 
@@ -71,7 +71,7 @@ public:
 	// to keep the enum-specialized versions of get/valid from
 	// hiding the unspecialized versions, we explicitly bring our
 	// parent's versions of those methods into scope here.
-	using integerNameTable::valid;
+	using IntNameTable::valid;
 
 	/** Retrieve the enumeration for a string name.
 	 *
@@ -93,7 +93,7 @@ public:
 	 * @throws std::out_of_range
 	 */
 	const std::string& get(T num) const {
-		return integerNameTable::get(static_cast<int>(num));
+		return IntNameTable::get(static_cast<int>(num));
 	}
 
 	bool valid(T num) const {

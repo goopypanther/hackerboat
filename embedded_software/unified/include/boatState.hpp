@@ -29,18 +29,18 @@
 
 using namespace std;
 
-class boatStateClass : public hackerboatStateClassStorable {
+class BoatState : public HackerboatStateStorable {
 	public:
-		static const enumerationNameTable<boatModeEnum> boatModeNames;
-		static const enumerationNameTable<navigationModeEnum> navModeNames;
-		static const enumerationNameTable<autoModeEnum> autoModeNames;
-		static const enumerationNameTable<rcModeEnum> rcModeNames;
+		static const EnumNameTable<BoatModeEnum> boatModeNames;
+		static const EnumNameTable<NavModeEnum> navModeNames;
+		static const EnumNameTable<AutoModeEnum> autoModeNames;
+		static const EnumNameTable<RCModeEnum> rcModeNames;
 		
-		boatStateClass ();
+		BoatState ();
 		bool parse (json_t *input);
 		json_t *pack () const;
 		bool isValid ();
-		hackerboatStateStorage& storage();
+		HackerboatStateStorage& storage();
 		
 		bool insertFault (const std::string fault);			/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const std::string fault);			/**< Remove the named fault from the fault string. Returns false if not present */
@@ -48,37 +48,37 @@ class boatStateClass : public hackerboatStateClassStorable {
 		int faultCount (void) const;						/**< Returns the current number of faults */
  		void clearFaults () {faultString = "";};			/**< Remove all faults */
 		std::string getFaultString() {return faultString;};	/**< Returns the entire fault string */
-		bool setBoatMode (boatModeEnum m) {_boat = m; return true;};		/**< Set boat mode to the given value */
+		bool setBoatMode (BoatModeEnum m) {_boat = m; return true;};/**< Set boat mode to the given value */
 		bool setBoatMode (std::string mode);				/**< Set boat mode to the given value */
-		boatModeEnum getBoatMode () {return _boat;};		/**< Return boat mode */
-		bool setNavMode (navigationModeEnum m) {_nav = m; return true;};		/**< Set nav mode to the given value */
+		BoatModeEnum getBoatMode () {return _boat;};		/**< Return boat mode */
+		bool setNavMode (NavModeEnum m) {_nav = m; return true;};	/**< Set nav mode to the given value */
 		bool setNavMode (std::string mode);					/**< Set nav mode to the given value */
-		navigationModeEnum getNavMode () {return _nav;};
-		bool setAutoMode (autoModeEnum m) {_auto = m; return true;};		/**< Set autonomous mode to the given value */
+		NavModeEnum getNavMode () {return _nav;};
+		bool setAutoMode (AutoModeEnum m) {_auto = m; return true;};/**< Set autonomous mode to the given value */
 		bool setAutoMode (std::string mode);				/**< Set autonomous mode to the given value */
-		autoModeEnum getAutoMode () {return _auto;};
-		bool setRCmode (rcModeEnum m) {_rc = m; return true;};			/**< Set RC mode to the given value */
+		AutoModeEnum getAutoMode () {return _auto;};
+		bool setRCmode (RCModeEnum m) {_rc = m; return true;};		/**< Set RC mode to the given value */
 		bool setRCmode (std::string mode);					/**< Set RC mode to the given value */
-		rcModeEnum getRCMode () {return _rc;};
+		RCModeEnum getRCMode () {return _rc;};
 			
-		int 						currentWaypoint; 	/**< The current waypoint */
-		double						waypointStrength;	/**< Relative strength of the waypoint */
-		sysclock					lastContact;	/**< Time of last shore contact */
-		sysclock					lastRC;			/**< Time of the last signal from the RC input */
-		locationClass				lastFix;		/**< Location of the last GPS fix */
-		locationClass				launchPoint;	/**< Location of the launch point */
-//		waypointListClass			waypoints;		/**< Waypoints to follow */
-		waypointActionEnum			action;			/**< Action to take at the last waypoint */
-		dodgeClass					diversion;		/**< Avoid obstacles! */
-		healthMonitorClass			health;			/**< Current state of the boat's health */
+		int 					currentWaypoint; 	/**< The current waypoint */
+		double					waypointStrength;	/**< Relative strength of the waypoint */
+		sysclock				lastContact;		/**< Time of last shore contact */
+		sysclock				lastRC;				/**< Time of the last signal from the RC input */
+		Location				lastFix;			/**< Location of the last GPS fix */
+		Location				launchPoint;		/**< Location of the launch point */
+//		WaypointList			waypoints;			/**< Waypoints to follow */
+		WaypointActionEnum		action;				/**< Action to take at the last waypoint */
+		Dodge					diversion;			/**< Avoid obstacles! */
+		HealthMonitor			health;				/**< Current state of the boat's health */
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:
 		std::string 	faultString;
-		boatModeEnum 	_boat;
-		navigationModeEnum		_nav;
-		autoModeEnum 	_auto;
-		rcModeEnum 		_rc;
+		BoatModeEnum 	_boat;
+		NavModeEnum		_nav;
+		AutoModeEnum 	_auto;
+		RCModeEnum 		_rc;
 	
 };
 #endif 

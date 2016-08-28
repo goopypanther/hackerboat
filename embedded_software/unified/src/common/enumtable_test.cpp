@@ -6,7 +6,7 @@
 
 enum class silly : short { ALPHA, BETA, GAMMA, DELTA };
 
-const enumerationNameTable<silly> staticTable = { "Alpha", "Beta", "Gamma", "Delta" };
+const EnumNameTable<silly> staticTable = { "Alpha", "Beta", "Gamma", "Delta" };
 
 
 TEST(Serialization, Enumerations) {

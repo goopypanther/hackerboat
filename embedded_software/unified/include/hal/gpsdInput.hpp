@@ -28,27 +28,27 @@
 
 using namespace std;
 
-class gpsdInputClass : public inputThreadClass {
+class GPSdInput : public InputThread {
 	public:
-		gpsdInputClass() = default;					
-		gpsdInputClass(string host, int port);			/**< Create a gpsd object pointing at the given host & port combination. */
-		bool setHost (string host);						/**< Point the input listener at the given host. */
-		bool setPort (int port);						/**< Point the input listener at the given port */
-		bool connect ();								/**< Connect to the host */
-		bool disconnect ();								/**< Disconnect from the host. */
-		bool isConnected ();							/**< Returns true if connected. */
-		gpsFixClass* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
-		vector<tuple<int, aisBaseClass>> getData();		/**< Returns all AIS contacts */
-		vector<tuple<int, aisBaseClass>> getData(aisShipType type);	/**< Returns AIS contacts of a particular ship type */
-		aisBaseClass& getData(int MMSI);				/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
-		aisBaseClass& getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
-		int pruneAIS();									/**< Call the prune() function of each AIS contact. */
+		GPSdInput() = default;					
+		GPSdInput(string host, int port);			/**< Create a gpsd object pointing at the given host & port combination. */
+		bool setHost (string host);					/**< Point the input listener at the given host. */
+		bool setPort (int port);					/**< Point the input listener at the given port */
+		bool connect ();							/**< Connect to the host */
+		bool disconnect ();							/**< Disconnect from the host. */
+		bool isConnected ();						/**< Returns true if connected. */
+		GPSFix* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
+		map<int, AISBase> getData();				/**< Returns all AIS contacts */
+		map<int, AISBase> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
+		AISBase& getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
+		AISBase& getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
+		int pruneAIS();								/**< Call the prune() function of each AIS contact. */
 		
 	private:
-		string 								_host;
-		int 								_port;
-		gpsFixClass 						_lastFix;
-		vector<tuple<int, aisBaseClass>>	_aisTargets;
+		string 				_host;
+		int 				_port;
+		GPSFix 				_lastFix;
+		map<int, AISBase>	_aisTargets;
 };
 		
 #endif

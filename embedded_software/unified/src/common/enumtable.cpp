@@ -13,11 +13,11 @@
 using namespace std;
 
 /* We jump through some hoops here so that we can ensure all the
- * members of integerNameTable are const, and that they share
+ * members of IntNameTable are const, and that they share
  * their std::string reps. The pair<> constructor gets inlined
  * into the initializer_list constructor, which, combined with RNVO,
  * eliminates a bunch of unnecessary temporary allocations when
- * constructing a integerNameTable.
+ * constructing a IntNameTable.
  */
 
 static const pair<vector<string>, unordered_map<string, int> > computeHashes(initializer_list<const char *> names)
@@ -41,22 +41,22 @@ static const pair<vector<string>, unordered_map<string, int> > computeHashes(ini
  * only one copy of it and everything it pulls in.  
  */
 
-integerNameTable::integerNameTable(std::initializer_list<const char *> names)
-	: integerNameTable(computeHashes(names))
+IntNameTable::IntNameTable(std::initializer_list<const char *> names)
+	: IntNameTable(computeHashes(names))
 {
 };
 
-bool integerNameTable::valid(int num) const
+bool IntNameTable::valid(int num) const
 {
 	return num >= 0 && (unsigned)num < forward.size();
 }
 
-const std::string& integerNameTable::get(int num) const
+const std::string& IntNameTable::get(int num) const
 {
 	return forward.at(num);
 }
 
-const std::unordered_map<std::string, int>::const_iterator integerNameTable::find(const std::string& str) const
+const std::unordered_map<std::string, int>::const_iterator IntNameTable::find(const std::string& str) const
 {
 	return backward.find(str);
 }
