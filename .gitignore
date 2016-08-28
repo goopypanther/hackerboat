@@ -24,13 +24,13 @@
 *.hex
 gpsParse
 hb.fcgi
-master
 nav
 
 # Eagle
 *.s#*
 *.b#*
-*.l#*
+*.l#
+*.scr
 
 # Excel files
 ~$*

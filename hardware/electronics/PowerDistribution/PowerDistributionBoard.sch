@@ -9259,14 +9259,24 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 </classes>
 <parts>
 <part name="FRAME1" library="frames" deviceset="FRAME_A_L" device=""/>
-<part name="IC1" library="linear" deviceset="*556" device="D" technology="LM"/>
-<part name="IC2" library="74xx-little-us" deviceset="74*1G02" device="DBV" technology="AHC"/>
-<part name="IC3" library="74xx-little-us" deviceset="74*1G02" device="DBV" technology="AHC"/>
-<part name="R1" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="IC1" library="linear" deviceset="*556" device="D" technology="LM">
+<attribute name="PARTNO" value="LM556CM"/>
+</part>
+<part name="IC2" library="74xx-little-us" deviceset="74*1G02" device="DBV" technology="AHC">
+<attribute name="PARTNO" value="SN74AHC1G02DBVR"/>
+</part>
+<part name="IC3" library="74xx-little-us" deviceset="74*1G02" device="DBV" technology="AHC">
+<attribute name="PARTNO" value="SN74AHC1G02DBVR"/>
+</part>
+<part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="470K">
+<attribute name="PARTNO" value="MCR03FZPEJ474"/>
+</part>
 <part name="C1" library="resistor" deviceset="C-EU" device="C0603" value="10n">
 <attribute name="PARTNO" value="CL10B103KB8NCNC"/>
 </part>
-<part name="C2" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="C2" library="resistor" deviceset="C-EU" device="C0603" value="10u">
+<attribute name="PARTNO" value="C1608JB1E106M080AC"/>
+</part>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="P+2" library="supply1" deviceset="+5V" device=""/>
 <part name="C3" library="resistor" deviceset="C-EU" device="C0603" value="10n">
@@ -9279,8 +9289,12 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="P+3" library="supply1" deviceset="+5V" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="P+4" library="supply1" deviceset="+5V" device=""/>
-<part name="C4" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="R2" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="C4" library="resistor" deviceset="C-EU" device="C0603" value="2u2">
+<attribute name="PARTNO" value="TMK107ABJ225KA-T"/>
+</part>
+<part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="470K">
+<attribute name="PARTNO" value="MCR03FZPEJ474"/>
+</part>
 <part name="P+5" library="supply1" deviceset="+5V" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="STOP-BUTTON" library="con-molex-c-grid-sl" deviceset="HEADER_POS3_?" device="70555" value="NORMALLY HIGH">
@@ -9288,53 +9302,105 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 </part>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="P+6" library="supply1" deviceset="+5V" device=""/>
-<part name="R3" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="R4" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="1M">
+<attribute name="PARTNO" value="MCT06030C1004FP500"/>
+</part>
+<part name="R4" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
+<attribute name="PARTNO" value="RMCF0603FT10K0"/>
+</part>
 <part name="U1" library="hackerbot" deviceset="IPS6041" device="G">
 <attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
 <part name="U2" library="hackerbot" deviceset="IPS6041" device="G">
 <attribute name="PARTNO" value="IPS6041GPBF"/>
 </part>
-<part name="R5" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="C5" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="R6" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="C6" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="R5" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
+<attribute name="PARTNO" value="RMCF0603FT10K0"/>
+</part>
+<part name="C5" library="resistor" deviceset="C-EU" device="C0603" value="1u">
+<attribute name="PARTNO" value="UMK107BJ105KA-T"/>
+</part>
+<part name="R6" library="resistor" deviceset="R-EU_" device="R0603" value="10K">
+<attribute name="PARTNO" value="RMCF0603FT10K0"/>
+</part>
+<part name="C6" library="resistor" deviceset="C-EU" device="C0603" value="1u">
+<attribute name="PARTNO" value="UMK107BJ105KA-T"/>
+</part>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
-<part name="R7" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="R8" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R7" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="R8" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
 <part name="P+1" library="supply1" deviceset="+12V" device=""/>
 <part name="PWR-STATE" library="con-molex-c-grid-sl" deviceset="HEADER_POS5_?" device="70555">
 <attribute name="PARTNO" value="0705550039"/>
 </part>
-<part name="D1" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D2" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D3" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D4" library="adafruit" deviceset="DIODE" device="SOD-123"/>
+<part name="D1" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D2" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D3" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D4" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
 <part name="K1" library="logos-relays" deviceset="EC2-12TNU" device="">
 <attribute name="PARTNO" value="EC2-12TNU"/>
 </part>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
-<part name="D5" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D6" library="adafruit" deviceset="DIODE" device="SOD-123"/>
+<part name="D5" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D6" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
-<part name="R9" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="R10" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="D7" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D8" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D9" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="D10" library="adafruit" deviceset="DIODE" device="SOD-123"/>
-<part name="R11" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="R12" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="C7" library="resistor" deviceset="C-EU" device="C0603"/>
-<part name="C8" library="resistor" deviceset="C-EU" device="C0603"/>
+<part name="R9" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="R10" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="D7" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D8" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D9" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="D10" library="adafruit" deviceset="DIODE" device="SOD-123">
+<attribute name="PARTNO" value="CDBW140-G"/>
+</part>
+<part name="R11" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="R12" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="C7" library="resistor" deviceset="C-EU" device="C0603" value="100n">
+<attribute name="PARTNO" value="CC0603ZRY5V9BB104"/>
+</part>
+<part name="C8" library="resistor" deviceset="C-EU" device="C0603" value="100n">
+<attribute name="PARTNO" value="CC0603ZRY5V9BB104"/>
+</part>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="P+8" library="supply1" deviceset="+5V" device=""/>
-<part name="D11" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V"/>
-<part name="D12" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V"/>
+<part name="D11" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
+<attribute name="PARTNO" value="SMF5.0A"/>
+</part>
+<part name="D12" library="adafruit" deviceset="DIODE" device="SOD-123" value="5V">
+<attribute name="PARTNO" value="SMF5.0A"/>
+</part>
 <part name="P+7" library="supply1" deviceset="+12V" device=""/>
 <part name="LED1" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
@@ -9342,20 +9408,34 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="LED2" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R13" library="resistor" deviceset="R-EU_" device="R0603"/>
-<part name="R14" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R13" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
+<part name="R14" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="LED3" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R15" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R15" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="LED4" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R16" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R16" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="FRAME2" library="frames" deviceset="FRAME_A_L" device=""/>
-<part name="U3" library="SparkFun-PowerIC" deviceset="V_REG_317" device="SMD"/>
-<part name="C9" library="resistor" deviceset="C-EU" device="C1206"/>
-<part name="C10" library="resistor" deviceset="C-EU" device="C1206"/>
+<part name="U3" library="SparkFun-PowerIC" deviceset="V_REG_317" device="SMD">
+<attribute name="PARTNO" value="NCP1117ST50T3G"/>
+</part>
+<part name="C9" library="resistor" deviceset="C-EU" device="C1206" value="10u">
+<attribute name="PARTNO" value="C3216X5R1E106M"/>
+</part>
+<part name="C10" library="resistor" deviceset="C-EU" device="C1206" value="10u">
+<attribute name="PARTNO" value="C3216X5R1E106M"/>
+</part>
 <part name="P+9" library="supply1" deviceset="+5V" device=""/>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="P+10" library="supply1" deviceset="+12V" device=""/>
@@ -9365,17 +9445,23 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="LED5" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R17" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R17" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="P+11" library="supply1" deviceset="+12V" device=""/>
 <part name="GND14" library="supply1" deviceset="GND" device=""/>
 <part name="LED6" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R18" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R18" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="MOTOR-RELAY" library="con-molex-c-grid-sl" deviceset="HEADER_POS2_?" device="70555">
 <attribute name="PARTNO" value="0705550036"/>
 </part>
-<part name="R19" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R19" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="LED7" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
@@ -9388,7 +9474,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="LED8" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R20" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R20" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="P+12" library="supply1" deviceset="+12V" device=""/>
 <part name="GND15" library="supply1" deviceset="GND" device=""/>
 <part name="P+13" library="supply1" deviceset="+12V" device=""/>
@@ -9402,10 +9490,18 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <attribute name="PARTNO" value="0705550036"/>
 </part>
 <part name="GND19" library="supply1" deviceset="GND" device=""/>
-<part name="H1" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2"/>
-<part name="H2" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2"/>
-<part name="H3" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2"/>
-<part name="H4" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2"/>
+<part name="H1" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
+<attribute name="BOM" value="EXCLUDE"/>
+</part>
+<part name="H2" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
+<attribute name="BOM" value="EXCLUDE"/>
+</part>
+<part name="H3" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
+<attribute name="BOM" value="EXCLUDE"/>
+</part>
+<part name="H4" library="holes" deviceset="MOUNT-PAD-ROUND" device="3.2">
+<attribute name="BOM" value="EXCLUDE"/>
+</part>
 <part name="GND20" library="supply1" deviceset="GND" device=""/>
 <part name="GND21" library="supply1" deviceset="GND" device=""/>
 <part name="GND22" library="supply1" deviceset="GND" device=""/>
@@ -9428,7 +9524,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="LED9" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R21" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R21" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="P+14" library="supply1" deviceset="+12V" device=""/>
 <part name="GND24" library="supply1" deviceset="GND" device=""/>
 <part name="GND25" library="supply1" deviceset="GND" device=""/>
@@ -9441,7 +9539,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <part name="LED10" library="adafruit" deviceset="LED" device="CHIP-LED0805">
 <attribute name="PARTNO" value="LG R971-KN-1"/>
 </part>
-<part name="R22" library="resistor" deviceset="R-EU_" device="R0603"/>
+<part name="R22" library="resistor" deviceset="R-EU_" device="R0603" value="1K">
+<attribute name="PARTNO" value="RMCF0603FT1K00"/>
+</part>
 <part name="P+15" library="supply1" deviceset="+12V" device=""/>
 <part name="GND26" library="supply1" deviceset="GND" device=""/>
 <part name="GND27" library="supply1" deviceset="GND" device=""/>
@@ -9456,15 +9556,25 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
 <instance part="FRAME1" gate="G$2" x="172.72" y="0"/>
-<instance part="IC1" gate="A" x="99.06" y="167.64" rot="MR180"/>
+<instance part="IC1" gate="A" x="99.06" y="167.64" rot="MR180">
+<attribute name="PARTNO" x="99.06" y="167.64" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="IC1" gate="B" x="99.06" y="119.38" rot="MR180"/>
-<instance part="IC2" gate="A" x="124.46" y="157.48"/>
-<instance part="IC3" gate="A" x="124.46" y="111.76"/>
-<instance part="R1" gate="G$1" x="116.84" y="177.8" rot="R90"/>
+<instance part="IC2" gate="A" x="124.46" y="157.48">
+<attribute name="PARTNO" x="124.46" y="157.48" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="IC3" gate="A" x="124.46" y="111.76">
+<attribute name="PARTNO" x="124.46" y="111.76" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R1" gate="G$1" x="116.84" y="177.8" rot="R90">
+<attribute name="PARTNO" x="116.84" y="177.8" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="C1" gate="G$1" x="81.28" y="170.18" rot="R270">
 <attribute name="PARTNO" x="81.28" y="170.18" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="C2" gate="G$1" x="124.46" y="170.18" rot="R90"/>
+<instance part="C2" gate="G$1" x="124.46" y="170.18" rot="R90">
+<attribute name="PARTNO" x="124.46" y="170.18" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND2" gate="1" x="86.36" y="137.16"/>
 <instance part="P+2" gate="1" x="111.76" y="190.5"/>
 <instance part="C3" gate="G$1" x="78.74" y="124.46" rot="R90">
@@ -9477,8 +9587,12 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="P+3" gate="1" x="45.72" y="172.72"/>
 <instance part="GND4" gate="1" x="45.72" y="149.86"/>
 <instance part="P+4" gate="1" x="60.96" y="132.08"/>
-<instance part="C4" gate="G$1" x="121.92" y="121.92" rot="R90"/>
-<instance part="R2" gate="G$1" x="121.92" y="129.54" rot="R180"/>
+<instance part="C4" gate="G$1" x="121.92" y="121.92" rot="R90">
+<attribute name="PARTNO" x="121.92" y="121.92" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R2" gate="G$1" x="121.92" y="129.54" rot="R180">
+<attribute name="PARTNO" x="121.92" y="129.54" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+5" gate="1" x="132.08" y="129.54" rot="R270"/>
 <instance part="GND6" gate="1" x="132.08" y="121.92" rot="R90"/>
 <instance part="STOP-BUTTON" gate="G$1" x="38.1" y="114.3" rot="MR0">
@@ -9486,31 +9600,55 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 </instance>
 <instance part="GND7" gate="1" x="45.72" y="104.14"/>
 <instance part="P+6" gate="1" x="45.72" y="127"/>
-<instance part="R3" gate="G$1" x="81.28" y="96.52"/>
-<instance part="R4" gate="G$1" x="66.04" y="167.64" rot="R270"/>
+<instance part="R3" gate="G$1" x="81.28" y="96.52">
+<attribute name="PARTNO" x="81.28" y="96.52" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R4" gate="G$1" x="66.04" y="167.64" rot="R270">
+<attribute name="PARTNO" x="66.04" y="167.64" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="U1" gate="G$1" x="162.56" y="154.94">
 <attribute name="PARTNO" x="162.56" y="154.94" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U2" gate="G$1" x="162.56" y="109.22">
 <attribute name="PARTNO" x="162.56" y="109.22" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R5" gate="G$1" x="78.74" y="154.94" rot="R180"/>
-<instance part="C5" gate="G$1" x="91.44" y="147.32" rot="R180"/>
-<instance part="R6" gate="G$1" x="81.28" y="109.22" rot="R180"/>
-<instance part="C6" gate="G$1" x="91.44" y="101.6" rot="R180"/>
+<instance part="R5" gate="G$1" x="78.74" y="154.94" rot="R180">
+<attribute name="PARTNO" x="78.74" y="154.94" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="C5" gate="G$1" x="91.44" y="147.32" rot="R180">
+<attribute name="PARTNO" x="91.44" y="147.32" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R6" gate="G$1" x="81.28" y="109.22" rot="R180">
+<attribute name="PARTNO" x="81.28" y="109.22" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="C6" gate="G$1" x="91.44" y="101.6" rot="R180">
+<attribute name="PARTNO" x="91.44" y="101.6" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND1" gate="1" x="91.44" y="88.9"/>
-<instance part="R7" gate="G$1" x="144.78" y="157.48" rot="R180"/>
-<instance part="R8" gate="G$1" x="144.78" y="111.76" rot="R180"/>
+<instance part="R7" gate="G$1" x="144.78" y="157.48" rot="R180">
+<attribute name="PARTNO" x="144.78" y="157.48" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R8" gate="G$1" x="144.78" y="111.76" rot="R180">
+<attribute name="PARTNO" x="144.78" y="111.76" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND8" gate="1" x="149.86" y="96.52"/>
 <instance part="GND9" gate="1" x="149.86" y="142.24"/>
 <instance part="P+1" gate="1" x="175.26" y="187.96"/>
 <instance part="PWR-STATE" gate="G$1" x="127" y="81.28" rot="R180">
 <attribute name="PARTNO" x="127" y="81.28" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="D1" gate="G$1" x="185.42" y="106.68"/>
-<instance part="D2" gate="G$1" x="185.42" y="152.4"/>
-<instance part="D3" gate="G$1" x="167.64" y="91.44"/>
-<instance part="D4" gate="G$1" x="185.42" y="83.82"/>
+<instance part="D1" gate="G$1" x="185.42" y="106.68">
+<attribute name="PARTNO" x="185.42" y="106.68" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D2" gate="G$1" x="185.42" y="152.4">
+<attribute name="PARTNO" x="185.42" y="152.4" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D3" gate="G$1" x="167.64" y="91.44">
+<attribute name="PARTNO" x="167.64" y="91.44" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D4" gate="G$1" x="185.42" y="83.82">
+<attribute name="PARTNO" x="185.42" y="83.82" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="K1" gate="SET" x="203.2" y="152.4" rot="R90"/>
 <instance part="K1" gate="RESET" x="203.2" y="106.68" rot="R90">
 <attribute name="PARTNO" x="203.2" y="106.68" size="1.778" layer="96" rot="R90" display="off"/>
@@ -9518,26 +9656,54 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="K1" gate="A" x="180.34" y="63.5" rot="R180"/>
 <instance part="K1" gate="B" x="198.12" y="63.5" rot="MR180"/>
 <instance part="GND11" gate="1" x="213.36" y="93.98"/>
-<instance part="D5" gate="G$1" x="203.2" y="116.84" rot="R180"/>
-<instance part="D6" gate="G$1" x="203.2" y="162.56" rot="R180"/>
+<instance part="D5" gate="G$1" x="203.2" y="116.84" rot="R180">
+<attribute name="PARTNO" x="203.2" y="116.84" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D6" gate="G$1" x="203.2" y="162.56" rot="R180">
+<attribute name="PARTNO" x="203.2" y="162.56" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND12" gate="1" x="167.64" y="50.8" rot="MR0"/>
 <instance part="GND13" gate="1" x="190.5" y="50.8" rot="MR0"/>
-<instance part="R9" gate="G$1" x="160.02" y="78.74" rot="R180"/>
-<instance part="R10" gate="G$1" x="152.4" y="76.2" rot="R180"/>
-<instance part="D7" gate="G$1" x="60.96" y="119.38" rot="R90"/>
-<instance part="D8" gate="G$1" x="63.5" y="109.22" rot="R90"/>
-<instance part="D9" gate="G$1" x="60.96" y="165.1" rot="R90"/>
-<instance part="D10" gate="G$1" x="63.5" y="154.94" rot="R90"/>
-<instance part="R11" gate="G$1" x="53.34" y="114.3"/>
-<instance part="R12" gate="G$1" x="53.34" y="160.02"/>
+<instance part="R9" gate="G$1" x="160.02" y="78.74" rot="R180">
+<attribute name="PARTNO" x="160.02" y="78.74" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R10" gate="G$1" x="152.4" y="76.2" rot="R180">
+<attribute name="PARTNO" x="152.4" y="76.2" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D7" gate="G$1" x="60.96" y="119.38" rot="R90">
+<attribute name="PARTNO" x="60.96" y="119.38" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D8" gate="G$1" x="63.5" y="109.22" rot="R90">
+<attribute name="PARTNO" x="63.5" y="109.22" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D9" gate="G$1" x="60.96" y="165.1" rot="R90">
+<attribute name="PARTNO" x="60.96" y="165.1" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D10" gate="G$1" x="63.5" y="154.94" rot="R90">
+<attribute name="PARTNO" x="63.5" y="154.94" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R11" gate="G$1" x="53.34" y="114.3">
+<attribute name="PARTNO" x="53.34" y="114.3" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R12" gate="G$1" x="53.34" y="160.02">
+<attribute name="PARTNO" x="53.34" y="160.02" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="IC3" gate="P" x="35.56" y="55.88"/>
 <instance part="IC2" gate="P" x="45.72" y="55.88"/>
-<instance part="C7" gate="G$1" x="27.94" y="53.34" rot="R180"/>
-<instance part="C8" gate="G$1" x="53.34" y="53.34" rot="MR180"/>
+<instance part="C7" gate="G$1" x="27.94" y="53.34" rot="R180">
+<attribute name="PARTNO" x="27.94" y="53.34" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="C8" gate="G$1" x="53.34" y="53.34" rot="MR180">
+<attribute name="PARTNO" x="53.34" y="53.34" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND5" gate="1" x="40.64" y="38.1"/>
 <instance part="P+8" gate="1" x="40.64" y="73.66"/>
-<instance part="D11" gate="G$1" x="134.62" y="68.58" rot="R90"/>
-<instance part="D12" gate="G$1" x="144.78" y="68.58" rot="R90"/>
+<instance part="D11" gate="G$1" x="134.62" y="68.58" rot="R90">
+<attribute name="PARTNO" x="134.62" y="68.58" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="D12" gate="G$1" x="144.78" y="68.58" rot="R90">
+<attribute name="PARTNO" x="144.78" y="68.58" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+7" gate="1" x="210.82" y="76.2"/>
 <instance part="LED1" gate="G$1" x="205.74" y="142.24" rot="R90">
 <attribute name="PARTNO" x="205.74" y="142.24" size="1.778" layer="96" display="off"/>
@@ -9545,19 +9711,33 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED2" gate="G$1" x="205.74" y="127" rot="R90">
 <attribute name="PARTNO" x="205.74" y="127" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R13" gate="G$1" x="198.12" y="142.24" rot="R180"/>
-<instance part="R14" gate="G$1" x="198.12" y="127" rot="R180"/>
+<instance part="R13" gate="G$1" x="198.12" y="142.24" rot="R180">
+<attribute name="PARTNO" x="198.12" y="142.24" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="R14" gate="G$1" x="198.12" y="127" rot="R180">
+<attribute name="PARTNO" x="198.12" y="127" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="LED3" gate="G$1" x="220.98" y="66.04">
 <attribute name="PARTNO" x="220.98" y="66.04" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R15" gate="G$1" x="220.98" y="73.66" rot="R90"/>
+<instance part="R15" gate="G$1" x="220.98" y="73.66" rot="R90">
+<attribute name="PARTNO" x="220.98" y="73.66" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="LED4" gate="G$1" x="228.6" y="66.04">
 <attribute name="PARTNO" x="228.6" y="66.04" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R16" gate="G$1" x="228.6" y="73.66" rot="R90"/>
-<instance part="U3" gate="G$1" x="99.06" y="43.18"/>
-<instance part="C9" gate="G$1" x="86.36" y="35.56"/>
-<instance part="C10" gate="G$1" x="111.76" y="35.56"/>
+<instance part="R16" gate="G$1" x="228.6" y="73.66" rot="R90">
+<attribute name="PARTNO" x="228.6" y="73.66" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="U3" gate="G$1" x="99.06" y="43.18">
+<attribute name="PARTNO" x="99.06" y="43.18" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="C9" gate="G$1" x="86.36" y="35.56">
+<attribute name="PARTNO" x="86.36" y="35.56" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="C10" gate="G$1" x="111.76" y="35.56">
+<attribute name="PARTNO" x="111.76" y="35.56" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+9" gate="1" x="111.76" y="53.34"/>
 <instance part="GND10" gate="1" x="86.36" y="22.86" rot="MR0"/>
 <instance part="P+10" gate="1" x="86.36" y="53.34"/>
@@ -10200,17 +10380,23 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED5" gate="G$1" x="248.92" y="149.86">
 <attribute name="PARTNO" x="248.92" y="149.86" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R17" gate="G$1" x="248.92" y="157.48" rot="R90"/>
+<instance part="R17" gate="G$1" x="248.92" y="157.48" rot="R90">
+<attribute name="PARTNO" x="248.92" y="157.48" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+11" gate="1" x="127" y="147.32" rot="R90"/>
 <instance part="GND14" gate="1" x="195.58" y="137.16"/>
 <instance part="LED6" gate="G$1" x="248.92" y="182.88">
 <attribute name="PARTNO" x="248.92" y="182.88" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R18" gate="G$1" x="248.92" y="190.5" rot="R90"/>
+<instance part="R18" gate="G$1" x="248.92" y="190.5" rot="R90">
+<attribute name="PARTNO" x="248.92" y="190.5" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="MOTOR-RELAY" gate="G$1" x="220.98" y="119.38">
 <attribute name="PARTNO" x="220.98" y="119.38" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R19" gate="G$1" x="248.92" y="124.46" rot="R90"/>
+<instance part="R19" gate="G$1" x="248.92" y="124.46" rot="R90">
+<attribute name="PARTNO" x="248.92" y="124.46" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="LED7" gate="G$1" x="248.92" y="116.84">
 <attribute name="PARTNO" x="248.92" y="116.84" size="1.778" layer="96" display="off"/>
 </instance>
@@ -10231,7 +10417,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED8" gate="G$1" x="177.8" y="182.88">
 <attribute name="PARTNO" x="177.8" y="182.88" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R20" gate="G$1" x="177.8" y="190.5" rot="R90"/>
+<instance part="R20" gate="G$1" x="177.8" y="190.5" rot="R90">
+<attribute name="PARTNO" x="177.8" y="190.5" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+12" gate="1" x="121.92" y="203.2"/>
 <instance part="GND15" gate="1" x="121.92" y="172.72"/>
 <instance part="P+13" gate="1" x="190.5" y="203.2"/>
@@ -10249,10 +10437,18 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <attribute name="PARTNO" x="180.34" y="152.4" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="GND19" gate="1" x="109.22" y="35.56"/>
-<instance part="H1" gate="G$1" x="114.3" y="81.28"/>
-<instance part="H2" gate="G$1" x="104.14" y="83.82" rot="R180"/>
-<instance part="H3" gate="G$1" x="114.3" y="86.36"/>
-<instance part="H4" gate="G$1" x="104.14" y="88.9" rot="R180"/>
+<instance part="H1" gate="G$1" x="114.3" y="81.28">
+<attribute name="BOM" x="114.3" y="81.28" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="H2" gate="G$1" x="104.14" y="83.82" rot="R180">
+<attribute name="BOM" x="104.14" y="83.82" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="H3" gate="G$1" x="114.3" y="86.36">
+<attribute name="BOM" x="114.3" y="86.36" size="1.778" layer="96" display="off"/>
+</instance>
+<instance part="H4" gate="G$1" x="104.14" y="88.9" rot="R180">
+<attribute name="BOM" x="104.14" y="88.9" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="GND20" gate="1" x="142.24" y="170.18"/>
 <instance part="GND21" gate="1" x="213.36" y="170.18"/>
 <instance part="GND22" gate="1" x="213.36" y="137.16"/>
@@ -10279,7 +10475,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED9" gate="G$1" x="101.6" y="182.88">
 <attribute name="PARTNO" x="101.6" y="182.88" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R21" gate="G$1" x="101.6" y="190.5" rot="R90"/>
+<instance part="R21" gate="G$1" x="101.6" y="190.5" rot="R90">
+<attribute name="PARTNO" x="101.6" y="190.5" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+14" gate="1" x="45.72" y="203.2"/>
 <instance part="GND24" gate="1" x="45.72" y="172.72"/>
 <instance part="GND25" gate="1" x="66.04" y="170.18"/>
@@ -10296,7 +10494,9 @@ Source: http://eshop.phoenixcontact.com .. 1751248.pdf</description>
 <instance part="LED10" gate="G$1" x="101.6" y="139.7">
 <attribute name="PARTNO" x="101.6" y="139.7" size="1.778" layer="96" display="off"/>
 </instance>
-<instance part="R22" gate="G$1" x="101.6" y="147.32" rot="R90"/>
+<instance part="R22" gate="G$1" x="101.6" y="147.32" rot="R90">
+<attribute name="PARTNO" x="101.6" y="147.32" size="1.778" layer="96" display="off"/>
+</instance>
 <instance part="P+15" gate="1" x="45.72" y="160.02"/>
 <instance part="GND26" gate="1" x="45.72" y="129.54"/>
 <instance part="GND27" gate="1" x="66.04" y="127"/>
