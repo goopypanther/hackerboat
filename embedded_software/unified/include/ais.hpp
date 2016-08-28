@@ -136,6 +136,7 @@ class AISShip : AISBase {
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
 		Location project ();					/**< Project the position of the current contact now. */
 		Location project (sysclock t);			/**< Project the position of this contact at time_point. */
+		bool merge (AISShip other);				/**< Merges two targets with the same MMSI. Returns false if the MMSIs do not match */
 		bool prune (Location& current);
 		bool parse (json_t *input);
 		json_t *pack () const;
@@ -144,20 +145,20 @@ class AISShip : AISBase {
 		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
 		
-		AISNavStatus	status;					/**< Navigation status of target */
-		double			turn;					/**< Rate of turn, degrees per minute. */
-		double			speed;					/**< Speed in knots. */
-		double			course;					/**< True course, degrees. */
-		double			heading;				/**< Magnet heading, degrees. */
-		int				imo;					/**< IMO number */
-		std::string		callsign;				/**< Ship's callsign. */
-		std::string		shipname;				/**< Name of ship. */
-		AISShipType		shiptype;				/**< Type of ship. */
-		int				to_bow;					/**< Distance from the GNSS receiver to the bow, in meters. */
-		int				to_stern;				/**< Distance from the GNSS receiver to the stern, in meters. */
-		int				to_port;				/**< Distance from the GNSS receiver to the port, in meters. */
-		int				to_starboard;			/**< Distance from the GNSS receiver to the starboard, in meters. */
-		AISEPFDType		epfd;					/**< Type of position locating device. */
+		AISNavStatus	status = AISNavStatus::UNDEFINED;	/**< Navigation status of target */
+		double			turn = NAN;				/**< Rate of turn, degrees per minute. */
+		double			speed = NAN;			/**< Speed in knots. */
+		double			course = NAN;			/**< True course, degrees. */
+		double			heading = NAN;			/**< Magnet heading, degrees. */
+		int				imo = 0;				/**< IMO number */
+		std::string		callsign = "";			/**< Ship's callsign. */
+		std::string		shipname = "";			/**< Name of ship. */
+		AISShipType		shiptype = AISShipType::UNAVAILABLE;	/**< Type of ship. */
+		int				to_bow = -1;			/**< Distance from the GNSS receiver to the bow, in meters. */
+		int				to_stern = -1;			/**< Distance from the GNSS receiver to the stern, in meters. */
+		int				to_port= -1;			/**< Distance from the GNSS receiver to the port, in meters. */
+		int				to_starboard = -1;		/**< Distance from the GNSS receiver to the starboard, in meters. */
+		AISEPFDType		epfd = AISEPFDType::UNDEFINED;		/**< Type of position locating device. */
 		
 	private:
 		bool coreParse (json_t* input);			/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */

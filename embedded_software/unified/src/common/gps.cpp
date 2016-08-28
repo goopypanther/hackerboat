@@ -70,18 +70,19 @@ json_t *GPSFix::pack () const {
 }
 
 bool GPSFix::coreParse (json_t *input) {
-	return (GET_VAR(track) & 
-			GET_VAR(speed) & 
-			GET_VAR(alt) & 
-			GET_VAR(climb) & 
-			GET_VAR(ept) & 
-			GET_VAR(epx) & 
-			GET_VAR(epy) & 
-			GET_VAR(epv) & 
-			GET_VAR(epd) & 
-			GET_VAR(eps) & 
-			GET_VAR(epc) &
-			GET_VAR(device));
+	GET_VAR(track);
+	GET_VAR(speed);
+	GET_VAR(alt);
+	GET_VAR(climb);
+	GET_VAR(ept);
+	GET_VAR(epx);
+	GET_VAR(epy);
+	GET_VAR(epv);
+	GET_VAR(epd);
+	GET_VAR(eps);
+	GET_VAR(epc);
+	GET_VAR(device);
+	return true;
 }
 
 bool GPSFix::parseGpsdPacket (json_t *input) {

@@ -46,6 +46,10 @@ class TwoVector : public HackerboatState {
 		double inline angleDeg () {return rad2deg(atan2(_y,_x));}; 
 		void angleDeg (double _ang);
 		
+		// rotations
+		void rotateDeg (double _deg) {rotateRad(deg2rad(_deg));};
+		void rotateRad (double _rad);
+		
 		// vector math
 		inline TwoVector& operator+= (const TwoVector& r) {					/**< Vector addition */
 			this->_x += r._x; 

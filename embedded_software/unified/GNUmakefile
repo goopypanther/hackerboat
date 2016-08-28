@@ -12,7 +12,12 @@ MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS) -std=gnu14
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread
-CPPFLAGS += -I submodules/include -I include -I submodules/PixelBone -MMD -MT $@
+CPPFLAGS += -I submodules/include 
+CPPFLAGS += -I include 
+CPPFLAGS += -I submodules/PixelBone 
+CPPFLAGS += -I submodules/date
+CPPFLAGS += -D _USE_MATH_DEFINES
+CPPFLAGS += -MMD -MT $@
 LDFLAGS  += -L submodules/lib
 
 LDLIBS += -ljansson -lsqlite3 -lm -lrt

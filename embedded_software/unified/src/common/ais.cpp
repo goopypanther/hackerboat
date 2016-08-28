@@ -42,11 +42,30 @@ bool AISShip::parseGpsdPacket (json_t *input) {
 }
 
 bool AISShip::parse (json_t *input) {
+	bool result = true;
+	int tmp;
+	std::string time;
+	double lat, lon;
+	
+	result &= this->coreParse(input);
+	
 	return false;
 }
 
 bool AISShip::coreParse (json_t *input) {
-	return false;
+	AISNavStatus navstat;
+	AISShipType thistype;
+	AISEPFDType myepfd;
+	bool result = true;
+	result &= GET_VAR(mmsi);
+	GET_VAR(course);
+	GET_VAR(heading);
+	GET_VAR(turn);
+	GET_VAR(speed);
+	GET_VAR(device);
+	
+	
+	return result.
 }
 
 Location AISShip::project () {
@@ -59,7 +78,7 @@ Location AISShip::project (sysclock t) {
 	TwoVector projection;
 	projection.angleDeg(course);
 	projection.mag(distance);
-	return fix.projectm(projection);
+	return fix.project(projection);
 }
 			
 bool AISShip::prune (Location& current) {
@@ -199,6 +218,6 @@ bool AISShip::readFromRow(SQLiteRowReference row, sequence seq) {
 }
 
 bool AISShip::removeEntry () {
-	
+	// implementation postponed -- we can allow the DB to grow 
 	return false;
 }
