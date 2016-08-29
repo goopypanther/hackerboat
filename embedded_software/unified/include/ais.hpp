@@ -136,7 +136,7 @@ class AISShip : AISBase {
 		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
 		Location project ();					/**< Project the position of the current contact now. */
 		Location project (sysclock t);			/**< Project the position of this contact at time_point. */
-		bool merge (AISShip other);				/**< Merges two targets with the same MMSI. Returns false if the MMSIs do not match */
+		bool merge (AISShip* other);				/**< Merges two targets with the same MMSI. Returns false if the MMSIs do not match */
 		bool prune (Location& current);
 		bool parse (json_t *input);
 		json_t *pack () const;

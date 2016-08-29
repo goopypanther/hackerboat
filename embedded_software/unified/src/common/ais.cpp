@@ -17,6 +17,7 @@
 #include <math.h>
 #include <string>
 #include <chrono>
+#include <stdexcept>
 #include "hackerboatRoot.hpp"
 #include "location.hpp"
 #include "hal/config.h"
@@ -28,6 +29,7 @@
 
 #define METERS_PER_KNOT		(1852)
 #define SECONDS_PER_HOUR	(3600)
+#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
@@ -38,34 +40,85 @@ AISShip::AISShip (json_t *packet) {
 }			
 
 bool AISShip::parseGpsdPacket (json_t *input) {
-	return false;
-}
-
-bool AISShip::parse (json_t *input) {
 	bool result = true;
-	int tmp;
 	std::string time;
 	double lat, lon;
 	
-	result &= this->coreParse(input);
+	result &= coreParse(input);
+	result &= GET_VAR(time);
+	result &= parseTime(time, this->lastTimeStamp);
+	result &= GET_VAR(lat);
+	result &= GET_VAR(lon);
 	
-	return false;
+	if (result) return this->isValid();
+	return result;
+}
+
+bool AISShip::parse (json_t *input) {
+	json_t* inFix;
+	bool result = true;
+	std::string myTime, lastTime;
+	
+	inFix = json_object_get(input, "fix");
+	result &= this->coreParse(input);
+	result &= ::parse(json_object_get(input, "recordTime"), &myTime);
+	result &= ::parse(json_object_get(input, "lastTimeStamp"), &lastTime);
+	result &= parseTime(myTime, this->recordTime);
+	result &= parseTime(lastTime, this->lastTimeStamp);
+	result &= fix.parse(inFix);
+	json_decref(inFix);
+	
+	if (result) return this->isValid();
+	return result;
 }
 
 bool AISShip::coreParse (json_t *input) {
-	AISNavStatus navstat;
-	AISShipType thistype;
-	AISEPFDType myepfd;
 	bool result = true;
+	json_t* tmpObj;
+	int tmpInt;
+	
 	result &= GET_VAR(mmsi);
 	GET_VAR(course);
 	GET_VAR(heading);
 	GET_VAR(turn);
 	GET_VAR(speed);
 	GET_VAR(device);
+	GET_VAR(imo);
+	GET_VAR(callsign);
+	GET_VAR(shipname);
+	GET_VAR(to_bow);
+	GET_VAR(to_starboard);
+	GET_VAR(to_stern);
+	GET_VAR(to_port);
+	tmpObj = json_object_get(input, "status");
+	if (::parse(tmpObj, &tmpInt)) {
+		try {
+			this->status = static_cast<AISNavStatus>(tmpInt);
+		} catch (...) {
+			status = AISNavStatus::UNDEFINED;
+		}
+	}
+	json_decref(tmpObj);
+	tmpObj = json_object_get(input, "shiptype");
+	if (::parse(tmpObj, &tmpInt)) {
+		try {
+			this->shiptype = static_cast<AISShipType>(tmpInt);
+		} catch (...) {
+			this->shiptype = AISShipType::UNAVAILABLE;
+		}
+	}
+	json_decref(tmpObj);
+	tmpObj = json_object_get(input, "epfd");
+	if (::parse(tmpObj, &tmpInt)) {
+		try {
+			this->epfd = static_cast<AISEPFDType>(tmpInt);
+		} catch (...) {
+			this->epfd = AISEPFDType::UNDEFINED;
+		}
+	}
+	json_decref(tmpObj);
 	
-	
-	return result.
+	return result;
 }
 
 Location AISShip::project () {
@@ -220,4 +273,38 @@ bool AISShip::readFromRow(SQLiteRowReference row, sequence seq) {
 bool AISShip::removeEntry () {
 	// implementation postponed -- we can allow the DB to grow 
 	return false;
+}
+
+bool AISShip::merge(AISShip* other) {
+	AISShip *a,*b;
+	if (this->mmsi != other->mmsi) return false;		// Can only merge contacts with the same MMSI
+	if (this->lastTimeStamp > other->lastTimeStamp) {	// make the newer one dominant
+		a = this; 
+		b = other;
+	} else {
+		a = other;
+		b = this;
+	}
+	this->recordTime 	= std::chrono::system_clock::now();
+	this->lastTimeStamp = a->lastTimeStamp;
+	
+	// Check the newer version for validity and if it's valid, use it; otherwise, use the older one
+	this->fix 			= (a->fix.isValid()) ? a->fix : b->fix;
+	this->device		= (a->device != "") ? a->device : b->device;
+	this->status 		= (a->status != AISNavStatus::UNDEFINED) ? b->status : a->status;
+	this->turn			= (std::isnormal(a->turn)) ? a->turn : b->turn;
+	this->speed			= (std::isnormal(a->speed)) ? a->speed : b->speed;
+	this->course		= (std::isnormal(a->course)) ? a->course : b->course;
+	this->heading		= (std::isnormal(a->heading)) ? a->heading : b->heading;
+	this->imo			= (a->imo >= 0) ? a->imo : b->imo;
+	this->callsign		= (a->callsign != "") ? a->callsign : b->callsign;
+	this->shipname		= (a->shipname != "") ? a->shipname : b->shipname;
+	this->shiptype		= (a->shiptype != AISShipType::UNAVAILABLE) ? a->shiptype : b->shiptype;
+	this->to_bow		= (a->to_bow >= 0) ? a->to_bow : b->to_bow;
+	this->to_stern		= (a->to_stern >= 0) ? a->to_stern : b->to_stern;
+	this->to_port		= (a->to_port >= 0) ? a->to_port : b->to_port;
+	this->to_starboard	= (a->to_starboard >= 0) ? a->to_starboard : b->to_starboard;
+	this->epfd			= (a->epfd != AISEPFDType::UNDEFINED) ? a->epfd : b->epfd;
+	
+	return true;
 }
