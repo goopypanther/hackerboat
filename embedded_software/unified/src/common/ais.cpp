@@ -147,28 +147,28 @@ bool AISShip::prune (Location& current) {
 
 json_t *AISShip::pack () const {
 	json_t* output = json_object();
-	bool packResult = true;
-	packResult &= json_object_set_new(output, "mmsi", json_integer(this->mmsi));
-	packResult &= json_object_set_new(output, "recordTime", json(packTime(this->recordTime)));
-	packResult &= json_object_set_new(output, "lastTimeStamp", json(packTime(this->lastTimeStamp)));
+	int packResult = 0;
+	packResult += json_object_set_new(output, "mmsi", json_integer(this->mmsi));
+	packResult += json_object_set_new(output, "recordTime", json(packTime(this->recordTime)));
+	packResult += json_object_set_new(output, "lastTimeStamp", json(packTime(this->lastTimeStamp)));
 	packResult += json_object_set_new(output, "device", json(device));
 	packResult += json_object_set_new(output, "fix", this->fix.pack());
-	packResult &= json_object_set_new(output, "status", json_integer(static_cast<int>(this->status)));
-	packResult &= json_object_set_new(output, "turn", json_real(this->turn));
-	packResult &= json_object_set_new(output, "speed", json_real(this->speed));
-	packResult &= json_object_set_new(output, "course", json_real(this->course));
-	packResult &= json_object_set_new(output, "heading", json_real(this->heading));
-	packResult &= json_object_set_new(output, "imo", json_integer(this->imo));
-	packResult &= json_object_set_new(output, "callsign", json(this->callsign));
-	packResult &= json_object_set_new(output, "shipname", json(this->shipname));
-	packResult &= json_object_set_new(output, "shiptype", json_integer(static_cast<int>(this->shiptype)));
-	packResult &= json_object_set_new(output, "to_bow", json_integer(this->to_bow));
-	packResult &= json_object_set_new(output, "to_stern", json_integer(this->to_stern));
-	packResult &= json_object_set_new(output, "to_port", json_integer(this->to_port));
-	packResult &= json_object_set_new(output, "to_starboard", json_integer(this->to_starboard));
-	packResult &= json_object_set_new(output, "epfd", json_integer(static_cast<int>(this->epfd)));
+	packResult += json_object_set_new(output, "status", json_integer(static_cast<int>(this->status)));
+	packResult += json_object_set_new(output, "turn", json_real(this->turn));
+	packResult += json_object_set_new(output, "speed", json_real(this->speed));
+	packResult += json_object_set_new(output, "course", json_real(this->course));
+	packResult += json_object_set_new(output, "heading", json_real(this->heading));
+	packResult += json_object_set_new(output, "imo", json_integer(this->imo));
+	packResult += json_object_set_new(output, "callsign", json(this->callsign));
+	packResult += json_object_set_new(output, "shipname", json(this->shipname));
+	packResult += json_object_set_new(output, "shiptype", json_integer(static_cast<int>(this->shiptype)));
+	packResult += json_object_set_new(output, "to_bow", json_integer(this->to_bow));
+	packResult += json_object_set_new(output, "to_stern", json_integer(this->to_stern));
+	packResult += json_object_set_new(output, "to_port", json_integer(this->to_port));
+	packResult += json_object_set_new(output, "to_starboard", json_integer(this->to_starboard));
+	packResult += json_object_set_new(output, "epfd", json_integer(static_cast<int>(this->epfd)));
 	
-	if (!packResult) {
+	if (packResult != 0) {
 		json_decref(output);
 		return NULL;
 	}

@@ -150,7 +150,7 @@ class AISShip : AISBase {
 		double			speed = NAN;			/**< Speed in knots. */
 		double			course = NAN;			/**< True course, degrees. */
 		double			heading = NAN;			/**< Magnet heading, degrees. */
-		int				imo = 0;				/**< IMO number */
+		int				imo = -1;				/**< IMO number */
 		std::string		callsign = "";			/**< Ship's callsign. */
 		std::string		shipname = "";			/**< Name of ship. */
 		AISShipType		shiptype = AISShipType::UNAVAILABLE;	/**< Type of ship. */

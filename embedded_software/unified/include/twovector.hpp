@@ -15,6 +15,9 @@
  
 #include <stdlib.h>
 #include <cmath> 
+#include "hackerboatRoot.hpp"
+ 
+using namespace std;
  
 /**
  * @brief The TwoVector class provides operations for working with 2D vectors in either cartesian or polar forms.
@@ -26,13 +29,11 @@ class TwoVector : public HackerboatState {
 			_x(x), _y(y) {};
 		bool parse (json_t *input);
 		json_t *pack () const;
-		bool isValid ();
+		bool isValid () {return ((isnormal(_x)) & (isnormal(_y)));};
 		
 		// functions for deriving cartesian coordinates from polar input
-		static double getXrad(double ang, double mag);
-		static double getYrad(double ang, double mag);
-		static double getXdeg(double ang, double mag);
-		static double getYdeg(double ang, double mag);
+		static TwoVector getVectorRad(double ang, double mag);
+		static TwoVector getVectorDeg(double ang, double mag) {return getVectorRad(deg2rad(ang),mag);};
 		
 		// get/set cartesian values, angle, or magnitude 
 		double inline x () {return _x;};
@@ -40,15 +41,15 @@ class TwoVector : public HackerboatState {
 		double inline y () {return _y;};
 		void inline y (double y) {_y=y;};
 		double inline mag () {return sqrt((_x*_x)+(_y*_y));};
-		void mag (double _mag);
+		void inline mag (double _mag) {*this *= _mag/mag();};
 		double inline angleRad () {return atan2(_y,_x);}; 
-		void angleRad (double _ang);
+		void angleRad (double _ang) {this->rotateRad(_ang - this->angleRad());};
 		double inline angleDeg () {return rad2deg(atan2(_y,_x));}; 
-		void angleDeg (double _ang);
+		void inline angleDeg (double _ang) {angleRad(deg2rad(_ang));};
 		
 		// rotations
-		void rotateDeg (double _deg) {rotateRad(deg2rad(_deg));};
-		void rotateRad (double _rad);
+		void inline rotateDeg (double _deg) {rotateRad(deg2rad(_deg));};	/**< Rotate vector through the given angle in degrees */
+		void rotateRad (double _rad);										/**< Rotate vector through the given angle in radians */
 		
 		// vector math
 		inline TwoVector& operator+= (const TwoVector& r) {					/**< Vector addition */
@@ -63,7 +64,7 @@ class TwoVector : public HackerboatState {
 			return *this; 
 		};
 		
-		inline TwoVector& operator*= (const double& r) {						/**< Scalar multiplication */ 
+		inline TwoVector& operator*= (const double& r) {					/**< Scalar multiplication */ 
 			this->_x *= r; 
 			this->_y *= r; 
 			return *this; 
@@ -94,7 +95,6 @@ class TwoVector : public HackerboatState {
 		}
 		
 		// other vector functions
-		TwoVector rotate (double angle);	/**< Rotate vector through the given angle */
 		TwoVector unit ();					/**< Get the corresponding unit vector */
 		
 		// utility functions
