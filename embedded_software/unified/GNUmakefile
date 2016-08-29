@@ -10,7 +10,7 @@ GTEST_INC=/usr/include/gtest
 
 MINMEA=submodules/minmea
 
-CFLAGS   += $(OPTS) -std=gnu14
+CFLAGS   += $(OPTS) -std=gnu11
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread
 CPPFLAGS += -I submodules/include 
 CPPFLAGS += -I include 

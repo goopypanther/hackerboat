@@ -22,19 +22,27 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <sstream>
 #include "hal/config.h"
 #include "json_utilities.hpp"
 #include "sqliteStorage.hpp"
+#include "date.h"
 
 // forward declarations
 class HackerboatStateStorage;
 class SQLiteParameterSlice;
 class SQLiteRowReference;
 
+// namespaces used to make the time functions readable
+
+using namespace date;
+using namespace std::chrono;
+
 // type definitions for code sanity
 
-typedef std::chrono::time_point<std::chrono::system_clock> 	sysclock;
-typedef std::chrono::duration<std::chrono::system_clock>	sysdur;
+typedef time_point<system_clock> 	sysclock;
+typedef duration<system_clock>		sysdur;
 
 #define USE_RESULT __attribute__((warn_unused_result))
 
@@ -62,21 +70,45 @@ class HackerboatState {
 			return true;
 		};
 
-		//static json_t *packTime (std::chrono::time_point<std::chrono::system_clock> t);
+		//static json_t *HackerboatState::packTime (std::chrono::time_point<std::chrono::system_clock> t);
 		//static int parseTime (json_t *input, std::chrono::time_point<std::chrono::system_clock> *t) USE_RESULT;
 		
 		sysclock recordTime;
-
+		
+		/**
+		 * @function packTime
+		 *
+		 * @brief Function for packing sysclock objects into ISO 8601 date/time strings
+		 * @param t The time to pack
+		 * @return The time in ISO 8601, UTC, with millisecond precision
+		 *
+		 * This function is based on the implementation described here: 
+		 * http://stackoverflow.com/questions/26895428/how-do-i-parse-an-iso-8601-date-with-optional-milliseconds-to-a-struct-tm-in-c
+		 */
+		 
+		static std::string packTime (sysclock t) {
+			std::ostringstream output;
+			date::sys_time<milliseconds> tp = date::floor<milliseconds>(t);
+			output << tp;
+			return output.str();
+		};
+		/**
+		 * @function parseTime
+		 *
+		 * @brief Function for extracting a sysclock object from an ISO8601 date/time string
+		 * @param in The input string
+		 * @param t A reference to a sysclock object where the incoming time will be stored
+		 * @return True is parsing is successful, false otherwise
+		 */
+		 
+		static bool parseTime (std::string in, sysclock& t) {
+			return false;
+		};
+		
 	protected:
 		HackerboatState(void) {};
 };
 
-//inline json_t *json(std::chrono::time_point<std::chrono::system_clock> t) {
-//	return HackerboatState::packTime(t);
-//}
-//inline bool parse(json_t *input, std::chrono::time_point<std::chrono::system_clock> &t) {
-//	return HackerboatState::parseTime(input, t) == 0;
-//};
 
 
 /**
@@ -142,25 +174,5 @@ class HackerboatStateStorable : public HackerboatState {
 		 */
 		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 };
-
-/**
- * @function packTime
- *
- * @brief Function for packing sysclock objects into ISO 8601 date/time strings
- * @param t The time to pack
- * @return The time in ISO 8601, UTC, with millisecond precision 
- */
-std::string packTime (sysclock t);
-
-/**
- * @function parseTime
- *
- * @brief Function for extracting a sysclock object from an ISO8601 date/time string
- * @param in The input string
- * @param t A reference to a sysclock object where the incoming time will be stored
- * @return True is parsing is successful, false otherwise
- */
- 
-bool parseTime (std::string in, sysclock& t);
 
 #endif

@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 #include "logs.hpp"
+#include "hackerboatRoot.hpp"
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -23,20 +24,9 @@ using namespace std;
 using namespace std::chrono;
 
 std::string timeOutput (void) {
-	auto logTime = system_clock::now();
-	auto minTime = time_point_cast<minutes>(logTime);
-	auto millis = duration_cast<milliseconds>(logTime - minTime);
-	struct tm * myUTCtime;
-	time_t myEpochTime;
-	char timebuf[LOCAL_BUF_LEN];
-	
-	myEpochTime = system_clock::to_time_t(logTime);
-	myUTCtime = gmtime(&myEpochTime);
-	strftime(timebuf, LOCAL_BUF_LEN, "[%F-%R:", myUTCtime);
-	std::stringstream ret(timebuf);
-	ret << (millis.count()/1000) << "]:";
-	free(myUTCtime);
-	return ret.str();
+	std::ostringstream out;
+	out << "[" << HackerboatState::packTime(system_clock::now()) << "]";
+	return out.str();
 }
 
 bool LogError::open(std::string path)

@@ -44,8 +44,8 @@ GPSFix::GPSFix(json_t *packet) {
 json_t *GPSFix::pack () const {
 	json_t *output = json_object();
 	int packResult = 0;
-	packResult += json_object_set_new(output, "recordTime", json(packTime(this->recordTime)));
-	packResult += json_object_set_new(output, "gpsTime", json(packTime(this->gpsTime)));
+	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
+	packResult += json_object_set_new(output, "gpsTime", json(HackerboatState::packTime(this->gpsTime)));
 	packResult += json_object_set_new(output, "mode", json(NMEAModeNames.get(mode)));
 	packResult += json_object_set_new(output, "device", json(device));
 	packResult += json_object_set_new(output, "fix", this->fix.pack());
@@ -173,8 +173,8 @@ HackerboatStateStorage &GPSFix::storage() {
 
 bool GPSFix::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(17);
-	row.bind(0, packTime(recordTime));
-	row.bind(1, packTime(gpsTime));
+	row.bind(0, HackerboatState::packTime(recordTime));
+	row.bind(1, HackerboatState::packTime(gpsTime));
 	row.bind(2, fix.lat);
 	row.bind(3, fix.lon);
 	row.bind(4, track);

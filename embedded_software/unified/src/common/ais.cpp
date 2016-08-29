@@ -149,8 +149,8 @@ json_t *AISShip::pack () const {
 	json_t* output = json_object();
 	int packResult = 0;
 	packResult += json_object_set_new(output, "mmsi", json_integer(this->mmsi));
-	packResult += json_object_set_new(output, "recordTime", json(packTime(this->recordTime)));
-	packResult += json_object_set_new(output, "lastTimeStamp", json(packTime(this->lastTimeStamp)));
+	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
+	packResult += json_object_set_new(output, "lastTimeStamp", json(HackerboatState::packTime(this->lastTimeStamp)));
 	packResult += json_object_set_new(output, "device", json(device));
 	packResult += json_object_set_new(output, "fix", this->fix.pack());
 	packResult += json_object_set_new(output, "status", json_integer(static_cast<int>(this->status)));
@@ -217,8 +217,8 @@ HackerboatStateStorage& AISShip::storage() {
 bool AISShip::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(20);
 	row.bind(0, mmsi);
-	row.bind(1, packTime(recordTime));
-	row.bind(2, packTime(lastTimeStamp));
+	row.bind(1, HackerboatState::packTime(recordTime));
+	row.bind(2, HackerboatState::packTime(lastTimeStamp));
 	row.bind(3, fix.lat);
 	row.bind(4, fix.lon);
 	row.bind(5, device);

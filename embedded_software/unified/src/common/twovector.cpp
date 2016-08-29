@@ -35,12 +35,16 @@ json_t* TwoVector::pack () const {
 }
 
 TwoVector TwoVector::getVectorRad(double ang, double mag) {
-	TwoVector result {1, 0};
-	result.rotateRad(ang);
-	result *= mag;
+	TwoVector result {1, 0};	// create a unit vector at angle 0
+	result.rotateRad(ang);		// rotate that vector through the given ang
+	result *= mag;				// multiply by the desired magnitude
 	return result;
 }
 
+/** 
+ * @brief This function implements a simple two-dimensional rotation matrix.
+ * See https://en.wikipedia.org/wiki/Rotation_matrix for details.
+ */
 void TwoVector::rotateRad (double _rad) {
 	double x, y;
 	x = (_x * cos(_rad)) - (_y * sin(_rad));
