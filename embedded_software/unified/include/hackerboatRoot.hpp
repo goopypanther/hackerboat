@@ -24,10 +24,12 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <locale>
 #include "hal/config.h"
 #include "json_utilities.hpp"
 #include "sqliteStorage.hpp"
 #include "date.h"
+#include "tz.h"
 
 // forward declarations
 class HackerboatStateStorage;
@@ -88,7 +90,7 @@ class HackerboatState {
 		 
 		static std::string packTime (sysclock t) {
 			std::ostringstream output;
-			date::sys_time<milliseconds> tp = date::floor<milliseconds>(t);
+			sys_time<milliseconds> tp = floor<milliseconds>(t);
 			output << tp;
 			return output.str();
 		};
@@ -102,7 +104,16 @@ class HackerboatState {
 		 */
 		 
 		static bool parseTime (std::string in, sysclock& t) {
-			return false;
+			std::istringstream input {in};
+			date::parse(input, "%FT%TZ", t);
+			if (input.fail()){
+				input.clear();
+				input.exceptions(std::ios::failbit);
+				input.str(in);
+				date::parse(input, "%FT%T%Ez", t);
+			}
+			//t = time_point_cast<system_clock>(tp);
+			return true;
 		};
 		
 	protected:

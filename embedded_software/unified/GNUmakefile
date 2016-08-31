@@ -1,5 +1,8 @@
 # This file uses GNU make extensions.
 
+# use g++-6
+CXX = /usr/bin/g++-6
+
 # Tweakable / overridable compilation options (debugging and optimization)
 OPTS = -gdwarf-4 -g3 -Os -Wall
 # OPTS = -gdwarf-4 -g3 -Wall
@@ -7,8 +10,6 @@ OPTS = -gdwarf-4 -g3 -Os -Wall
 # Paths
 GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
-
-MINMEA=submodules/minmea
 
 CFLAGS   += $(OPTS) -std=gnu11
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread
@@ -47,6 +48,7 @@ LIBHACKERBOAT_SRCS+= location.cpp
 LIBHACKERBOAT_SRCS+= gps.cpp 
 LIBHACKERBOAT_SRCS+= enumtable.cpp  
 LIBHACKERBOAT_SRCS+= ais.cpp   
+LIBHACKERBOAT_SRCS+= pid.cpp   
 LIBHACKERBOAT_SRCS+= twovector.cpp
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 

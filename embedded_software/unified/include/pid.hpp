@@ -16,13 +16,16 @@
 
 #include <stdlib.h>
 #include <cmath>
-#include <inttypes.h>
+#include <cstdint>
 #include <chrono>
 #include <string>
-#include "hackerboatRoot.hpp"
+
+using namespace std::chrono;
+using namespace std::chrono_literals;
+
+#define PID_CLOCK	std::chrono::steady_clock
 
 class PID {
-
 
   public:
 
@@ -57,8 +60,8 @@ class PID {
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
 										  //   once it is set in the constructor.
-    void SetSampleTime(std::chrono::duration<std::chrono::high_resolution_clock>); // * sets the frequency with which 
-                                          //   the PID calculation is performed.  default is 100
+    void SetSampleTime(long int NewSampleTime); 		// * sets the frequency with which 
+                                          //   the PID calculation is performed, in ms.  default is 100ms
 										  
 										  
 										  
@@ -87,11 +90,12 @@ class PID {
     double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                   //   what these values are.  with pointers we'll just know.
 			  
-	std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
+	time_point<PID_CLOCK> lastTime;
 	double ITerm, lastInput;
 
-	std::chrono::duration<std::chrono::high_resolution_clock> SampleTime;
-	double outMin, outMax;
+	duration<long long int, std::milli> SampleTime = 100ms;
+	double outMin = 0;
+	double outMax = 255;
 	bool inAuto;
 };
 
