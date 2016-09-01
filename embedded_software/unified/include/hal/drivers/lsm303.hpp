@@ -114,6 +114,8 @@
     #define LSM303_ID                     (0b11010100)
 /*=========================================================================*/
 
+using namespace std;
+
 class LSM303 {
 	public:
 		LSM303 () = default;
@@ -122,13 +124,15 @@ class LSM303 {
 		bool setBus (int bus);											/**< Set the I2C bus to use. */
 		bool begin(void);												/**< Initialize the LSM303. */
 		bool readAll (void);											/**< Read all accelerometer and magnetometer values */
+		bool readMag ();
+		bool readAccel ();
 		void enableAutoRange(bool enable);								/**< Enable auto-ranging function (see data sheet). */
-		void setMagGain(LSM303MagGainEnum gain);							/**< Set the magnetometer gain. */
+		void setMagGain(LSM303MagGainEnum gain);						/**< Set the magnetometer gain. */
 		map<char, double> getMagData (void);							/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
 		map<char, double> getAccelData (void);							/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
 		map<char, int> getRawMagData (void);							/**< Get raw magnetometer data. Field names as for scaled data. */
 		map<char, int> getRawAccelData (void);							/**< Get raw accelerometer data. Field names as for scaled data. */
-		void setMagRegister(LSM303MagRegistersEnum reg, uint8_t val);		/**< Set an arbitrary register on the chip. */
+		void setMagRegister(LSM303MagRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
 		uint8_t getMagRegister(LSM303MagRegistersEnum reg);				/**< Read an arbitrary register on the chip. */
 		void setAccelRegister(LSM303AccelRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
 		uint8_t getAccelRegister(LSM303AccelRegistersEnum reg);			/**< Read an arbitrary register on the chip. */

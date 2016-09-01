@@ -13,10 +13,11 @@
 #ifndef INPUTTHREAD_H
 #define INPUTTHREAD_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <mutex>
 #include "hackerboatRoot.hpp"
 
 /**
@@ -28,9 +29,6 @@ class InputThread {
 		InputThread() = default;	
 		
 		virtual bool begin() = 0;				/**< Start the input thread */
-		virtual bool lock(sysdur dur);			/**< Lock the thread's data for the given duration (for example, to read data) */
-		virtual bool unlock();					/**< Unlock the thread's data. */	
-		virtual bool unlockWait(sysdur dur);	/**< Wait for the given duration to unlock the data. */
 		virtual bool execute() = 0;				/**< Gather input	*/
 		void runThread() {						/**< Thread runner function */
 			runFlag = true;
@@ -41,17 +39,19 @@ class InputThread {
 			}
 		};
 		void kill() {runFlag = false;};			/**< Kill the thread */
-		sysclock getLastInputTime() {	/**< Get the time the last data arrived. */
+		sysclock getLastInputTime() {			/**< Get the time the last data arrived. */
 			return lastInput;
 		};
 		
+		std::unique_lock<std::timed_mutex> lock {mtx, std::defer_lock};	/**< Locking object for data */
+	
 	protected:
-		sysclock lastInput;	/**< Time that last input was processed */
-		virtual bool forceUnlock();			/**< Force the data to unlock. */
-		std::atomic_bool lockFlag { false };
+		void setLastInputTime() {lastInput = system_clock::now();};
 		
 	private:
+		sysclock lastInput;						/**< Time that last input was processed */
 		std::atomic_bool runFlag { false };
+		std::timed_mutex mtx;
 	
 };
 

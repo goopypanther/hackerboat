@@ -14,7 +14,7 @@
  
 #include <jansson.h>
 #include "hal/config.h"
-#include <math.h>
+#include <cmath>
 #include <string>
 #include "hackerboatRoot.hpp"
 
@@ -39,8 +39,13 @@ class Orientation : public HackerboatState {
 		double heading 	= NAN;
 
 	private:
-		static const double constexpr	maxVal = 180.0;
-		static const double constexpr	minVal = -180.0;
+		double normAxis (double val, const double max, const double min) const;
+		static const double constexpr	maxRoll = 180.0;
+		static const double constexpr	minRoll = -180.0;
+		static const double constexpr	maxPitch = 180.0;
+		static const double constexpr	minPitch = -180.0;
+		static const double constexpr	maxHeading = 360.0;
+		static const double constexpr	minHeading = 0.0;
 };
 
 #endif

@@ -41,8 +41,11 @@
 #define IMU_I2C_BUS			(1)
 #define THROTTLE_RELAY_VECTOR {"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT"}
 #define LIGHTS_COUNT		(144)
-#define AIS_MAX_TIME		600s
+#define AIS_MAX_TIME		(600s)
 #define AIS_MAX_DISTANCE	(10)
+
+// Mutex timeouts
+# define IMU_LOCK_TIMEOUT	(300us)
 
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Hackerboat orientation input module
  * hal/orientationInput.hpp
- * This module reads orientation data. Its AHRS code is based on Adafruit's
- * simple AHRS code. 
+ * This module reads orientation data. Its AHRS code is based on 
+ * the Adafruit 9DOF library (https://github.com/adafruit/Adafruit_9DOF)
  *
  * See the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016
@@ -25,15 +25,41 @@
 #include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
 
+
+enum class SensorOrientation : char {	/**< Choose the axis parallel to gravity when the system is level */
+	SENSOR_AXIS_X_UP  = 'X',
+	SENSOR_AXIS_Y_UP  = 'Y',
+	SENSOR_AXIS_Z_UP  = 'Z',
+	SENSOR_AXIS_X_DN  = 'x',
+	SENSOR_AXIS_Y_DN  = 'y',
+	SENSOR_AXIS_Z_DN  = 'z'
+};
+
 class OrientationInput : public InputThread {
-	public:
-		OrientationInput(void);			
-		Orientation* getOrientation() {return &_current;};	/**< Get the last orientation recorded */
-		
+	public:	
+		OrientationInput(SensorOrientation axis = SensorOrientation::SENSOR_AXIS_Z_UP);
+		Orientation* getOrientation() {						/**< Get the last orientation recorded */
+			return &_current;
+		}
+		bool init();										/**< initialize hardware */
+		bool isValid() {return sensorsValid;};				/**< Check if the hardware connections are good */
+		bool begin();										/**< Start the input thread */
+		bool execute();										/**< Gather input	*/
+		void setAxis(SensorOrientation axis) {_axis = axis;};
+		SensorOrientation getAxis () {return _axis;};
+	
 	private:
-		LSM303	gyro { IMU_I2C_BUS };
-		L3GD20	compass { IMU_I2C_BUS };
-		Orientation _current;
+		bool getData ();
+		void mapAxes (map<char, double> data, double &x, double &y, double &z);
+		void getAccelOrientation ();
+		void getMagOrientation ();
+	
+		LSM303						compass { IMU_I2C_BUS };
+		L3GD20						gyro { IMU_I2C_BUS };
+		
+		Orientation 				_current;
+		bool 						sensorsValid = false;
+		SensorOrientation			_axis = SensorOrientation::SENSOR_AXIS_Z_UP;	
 };
 
 #endif

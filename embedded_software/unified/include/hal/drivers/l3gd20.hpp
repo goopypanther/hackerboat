@@ -108,14 +108,17 @@
     };
 /*=========================================================================*/
 
+using namespace std;
+
 class L3GD20 {
 	public:
 		L3GD20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
 
 		bool begin( GyroRangeEnum rng = GyroRangeEnum::GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
 		void enableAutoRange( bool enabled );				/**< Set autorange function (see datasheet) */
-		map<std::string, double> getScaledData(void);		/**< Get the scaled data for each axis. Axes are named 'x', 'y', and 'z' in the map */
-		map<std::string, int> getRawData(void);				/**< Get the raw data for each axis. Axes are named as for scaled data. */
+		bool read();										/**< Read the sensor. Returns true if successful. */
+		map<char, double> getScaledData(void);				/**< Get the scaled data for each axis. Axes are named 'x', 'y', and 'z' in the map */
+		map<char, int> getRawData(void);					/**< Get the raw data for each axis. Axes are named as for scaled data. */
 		void setRegister(GyroRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
 		uint8_t getRegister(GyroRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
 		void setSpeed(GyroSpeedEnum speed);					/**< Set gyro update rate & bandwidth */
