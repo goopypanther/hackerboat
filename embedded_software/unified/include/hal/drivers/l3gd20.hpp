@@ -112,7 +112,7 @@ using namespace std;
 
 class L3GD20 {
 	public:
-		L3GD20(int bus);									/**< Create a gyroscope object on the given I2C bus. */
+		L3GD20(I2CBus bus);									/**< Create a gyroscope object on the given I2C bus. */
 
 		bool begin( GyroRangeEnum rng = GyroRangeEnum::GYRO_RANGE_250DPS );	/**< Initialize the sensor with the given range. */
 		void enableAutoRange( bool enabled );				/**< Set autorange function (see datasheet) */

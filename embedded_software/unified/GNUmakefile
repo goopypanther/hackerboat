@@ -25,7 +25,7 @@ LDLIBS += -ljansson -lsqlite3 -lm -lrt
 
 export OPTS
 
-VPATH=src/common:src/master
+VPATH=src/common:src/master:src/drivers
 all: submodules master
 test: storage_test
 	./storage_test
@@ -42,7 +42,9 @@ run: svctree
 	svscan $(SVCTREE)
 .PHONY: svctree run
 
-LIBHACKERBOAT_SRCS= logs.cpp 
+LIBHACKERBOAT_SRCS= logs.cpp  
+LIBHACKERBOAT_SRCS+= i2c.cpp
+LIBHACKERBOAT_SRCS+= lsm303.cpp
 LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp 
 LIBHACKERBOAT_SRCS+= gps.cpp 

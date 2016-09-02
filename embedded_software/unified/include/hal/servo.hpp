@@ -30,7 +30,8 @@ class Servo {
 					int min = MIN_PULSE_WIDTH,
 					int max = MAX_PULSE_WIDTH,
 					int freq = DEFAULT_FREQUENCY);		
-		bool attach(int port, 							/**< Attach servo to named pin. Returns true if successful. */
+		bool attach(int port, 							/**< Attach servo to named pin on the named port {8|9}. Returns true if successful. */
+					int pin,
 					int min = MIN_PULSE_WIDTH,
 					int max = MAX_PULSE_WIDTH,
 					int freq = DEFAULT_FREQUENCY);		

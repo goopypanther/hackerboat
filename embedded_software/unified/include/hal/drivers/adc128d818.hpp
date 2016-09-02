@@ -48,7 +48,7 @@ enum class operation_mode_t {
 
 class ADC128D818 {
 	public:
-		ADC128D818(uint8_t address, int bus);			/**< Create an ADC object for a sensor on bus devpath with address address */
+		ADC128D818(uint8_t address, I2CBus bus);		/**< Create an ADC object for a sensor on bus devpath with address address */
   
 		void setReference(double ref_voltage);			/**< Set the reference voltage for scaling purposes (external reference only) */
 		void setReferenceMode(reference_mode_t mode);	/**< Set the reference mode (either internal or external) */

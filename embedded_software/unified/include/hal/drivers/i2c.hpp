@@ -27,20 +27,28 @@
 #include <iostream>
 #include <sstream>
 
+enum class I2CBus : int {
+	BUS_0 = 0,
+	BUS_1 = 1,
+	BUS_2 = 2
+};
+
 class I2CDriver {
 	public:
 		I2CDriver () = default;							
-		I2CDriver (int bus);						/**< Creates an I2CDriver object pointed at the numbered I2C bus */ 
-		bool setBus (int bus);					/**< Set the bus to the desired bus. Numbers other than 1, 2, or 3 are invalid and will return false. */
-		bool open (uint8_t address);			/**< Open a connection to the given address. Returns false if this fails. */
-		int write (std::ostringstream output);	/**< Write the given output stream to the open device. Returns the number of bytes written, or -1 on any error. */
-		int read (std::istringstream response, int minBytes = 0);	/**< Reads the response. Returns the number of bytes read. Returns -1 if there's an error and 0 if less than minBytes were returned */
-		bool close ();							/**< Close the current connection. */
-		bool isOpen ();							/**< returns true if the connection is open */
+		I2CDriver (I2CBus bus);						/**< Creates an I2CDriver object pointed at the numbered I2C bus */ 
+		bool setBus (I2CBus bus);					/**< Set the bus to the desired bus. Numbers other than 1, 2, or 3 are invalid and will return false. */
+		bool openI2C (uint8_t address);				/**< Open a connection to the given address. Returns false if this fails. */
+		int writeI2C (std::ostringstream output);	/**< Write the given output stream to the open device. Returns the number of bytes written, or -1 on any error. */
+		int readI2C (std::string& response,  		/**< Reads up to maxBytes. Returns the number of bytes read. Returns -1 if there's an error and 0 if less than minBytes were returned */
+					int maxBytes = 100,
+					int minBytes = 0);	
+		bool closeI2C ();							/**< Close the current connection. */
+		bool isOpen ();								/**< returns true if the connection is open */
 		
 	private:
-		int 		i2cfile;	/**< File handle of the open device */
-		std::string devName;	/**< Name of the device file. */
+		int 		file = -1;	/**< File handle of the open device */
+		std::string path;		/**< Name of the device file. */
 };
 
 #endif

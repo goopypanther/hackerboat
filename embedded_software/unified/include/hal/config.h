@@ -37,8 +37,8 @@
 
 #define ADC_UPPER_ADDR		(0x71)
 #define ADC_LOWER_ADDR		(0x70)
-#define ADC_I2C_BUS			(2)
-#define IMU_I2C_BUS			(1)
+#define ADC_I2C_BUS			(I2CBus::BUS_2)
+#define IMU_I2C_BUS			(I2CBus::BUS_1)
 #define THROTTLE_RELAY_VECTOR {"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT"}
 #define LIGHTS_COUNT		(144)
 #define AIS_MAX_TIME		(600s)
