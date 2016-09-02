@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <sstream>
+#include <vector>
 #include "hal/drivers/i2c.hpp"
 					
 I2CDriver::I2CDriver (I2CBus bus) {
@@ -59,27 +60,25 @@ bool I2CDriver::openI2C (uint8_t address) {
 	return true;
 }
 
-int I2CDriver::writeI2C (std::ostringstream output) {
-	if (write(file, output.str().c_str(), output.str().length()) != (long int)output.str().length()) {	// the cast is to make this comparison not throw a warning
+int I2CDriver::writeI2C (std::vector<uint8_t> output) {
+	if (write(file, output.data(), output.size()) != (long int)output.size()) {	// the cast is to make this comparison not throw a warning
 		std::cerr << "Failed to write data to I2C" << std::endl;
 		return false;
-	}
+	} 
 	return true;
 }
 
-int I2CDriver::readI2C (std::string& response, int maxBytes, int minBytes) {
-	char buf[maxBytes] = { 0x00 };
-	int bytesRead = read(file, buf, maxBytes);
+int I2CDriver::readI2C (std::vector<uint8_t>& input, int maxBytes, int minBytes) {
+	std::vector<uint8_t> buf (maxBytes);
+	int bytesRead = read(file, buf.data(), maxBytes);
 	if (bytesRead < 0) {
 		std::cerr << "I2C read failed" << std::endl;
 		return bytesRead;
-	} else if (bytesRead < minBytes) {
+	} else if (bytesRead <= minBytes) {
 		std::cerr << "I2C read did not read at least " << minBytes << " bytes." << std::endl;
 		return 0;
 	} 
-	for (int i = 0; i < bytesRead; i++){
-		response.push_back(buf[i]);
-	}
+	input = buf;
 	return bytesRead;
 	
 }

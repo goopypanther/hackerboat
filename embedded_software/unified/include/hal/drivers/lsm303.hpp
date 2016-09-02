@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include "hal/config.h"
 #include <map>
+#include <vector>
 #include "hal/drivers/i2c.hpp"
 
 
@@ -135,29 +136,42 @@ class LSM303 {
 		bool readAll () {return (readAccel() && readMag());};			/**< Read all accelerometer and magnetometer values */
 		bool readMag ();
 		bool readAccel ();
-		void enableMagAutoRange(bool enable);							/**< Enable auto-ranging function (see data sheet). */
+		bool readTemp ();
 		void setMagGain(LSM303MagGainEnum gain);						/**< Set the magnetometer gain. */
+	
+		bool setMagRegister(LSM303MagRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
+		uint8_t getMagRegister(LSM303MagRegistersEnum reg);				/**< Read an arbitrary register on the chip. */
+		bool setAccelRegister(LSM303AccelRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
+		uint8_t getAccelRegister(LSM303AccelRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
+		
 		map<char, double> getMagData ();								/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
 		map<char, double> getAccelData ();								/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
+		double getTempData ();											/**< Get the scaled temperature data */
 		map<char, int> getRawMagData () {return _magData;};				/**< Get raw magnetometer data. Field names as for scaled data. */
 		map<char, int> getRawAccelData () {return _accelData;};			/**< Get raw accelerometer data. Field names as for scaled data. */
-		void setMagRegister(LSM303MagRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
-		uint8_t getMagRegister(LSM303MagRegistersEnum reg);				/**< Read an arbitrary register on the chip. */
-		void setAccelRegister(LSM303AccelRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
-		uint8_t getAccelRegister(LSM303AccelRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
+		int getRawTempData () {return _tempData;};						/**< Get raw temperature data. */
 		map<char, int> getMagOffset () {return _magOffset;};			/**< Get the current offset for magnetometer data. Field names as for data. */
 		map<char, int> getAccelOffset () {return _accelOffset;};		/**< Get the current offset for accelerometer data. Field names as for data. */
+		int getTempOffset () {return _tempOffset;};
 		map<char, double> getMagScale () {return _magScale;};			/**< Get the current scale factor for the magnetometer data. Field names as for data. */
 		map<char, double> getAccelScale () {return _accelScale;};		/**< Get the current scale factor for the accelerometer data. Field names as for data. */
-		bool setMagOffset (map<char, int>);								/**< Set magnetometer offsets. */
-		bool setAccelOffset (map<char, int>);							/**< Set accelerometer offsets. */
-		bool setMagScale (map<char, double>);							/**< Set magnetometer scale. */
-		bool setAccelScale (map<char, double>);							/**< Set accelerometer scale. */
-
+		double getTempScale () {return _tempScale;};
+		bool setMagOffset (map<char, int> offset);						/**< Set magnetometer offsets. */
+		bool setAccelOffset (map<char, int> offset);						/**< Set accelerometer offsets. */
+		bool setMagScale (map<char, double> scale);						/**< Set magnetometer scale. */
+		bool setAccelScale (map<char, double> scale);					/**< Set accelerometer scale. */
+		void setTempOffset (int offset) {_tempOffset = offset;};
+		void setTempScale (double scale) {_tempScale = scale;};
+		
 	private:
+		bool 				setReg (uint8_t addr, uint8_t reg, uint8_t val);
+		uint8_t				getReg (uint8_t addr, uint8_t reg);
 		I2CDriver			_bus;
-		map<char, int> 		_accelData;   
-		map<char, int>		_magData;
+		int					_tempData = 0;
+		map<char, int> 		_accelData = {{'x',0},{'y',0},{'z',0}};   
+		map<char, int>		_magData = {{'x',0},{'y',0},{'z',0}};
+		int 				_tempOffset = 0;
+		double				_tempScale = 1;
 		map<char, double>  	_magScale = {{'x',1},{'y',1},{'z',1}};
 		map<char, int>   	_magOffset = {{'x',0},{'y',0},{'z',0}};
 		map<char, double>  	_accelScale = {{'x',1},{'y',1},{'z',1}};
