@@ -36,6 +36,7 @@ template <typename T, typename U> class StateMachineBase {
 		virtual ~StateMachineBase () {};
 		
 	protected:
+		int callCount = 0;
 		const U& _state;
 		const sysclock start;
 		const T _thisMode;

@@ -60,4 +60,19 @@ class Relay : public HackerboatState {
 		ADCInput& _adc;
 };
 
+class RelayMap {
+	public:
+		static RelayMap* instance () {return &_instance;}	/**< Returns a pointer to the object */
+		bool init ();										/**< Initialize all relays */
+		Relay& get (std::string name);						/**< Get a reference to the named relay */
+		
+	private:
+		RelayMap ();
+		RelayMap (RelayMap const&) = delete;
+		RelayMap& operator=(RelayMap const&) = delete;
+		static RelayMap 			_instance;
+		map<std::string, Relay>		relays;
+		bool						initialize = false;
+};
+
 #endif

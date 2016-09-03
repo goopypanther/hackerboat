@@ -27,7 +27,6 @@
 #define FRAME_LEN_NS		(500000000)		/// State machine execution frame length, in nanoseconds
 #define UART_TIMEOUT		(100)		/// UART contention timeout, in milliseconds
 #define UART_READ_TIMEOUT	(15)		/// UART read timeout, in milliseconds
-#define SELFTEST_DELAY		(30)
 #define SHORE_TIMEOUT		(60)
 #define HORN_TIME			(2)
 #define RETURN_TIMEOUT		(180)
@@ -44,8 +43,12 @@
 #define AIS_MAX_TIME		(600s)
 #define AIS_MAX_DISTANCE	(10)
 
-// Mutex timeouts
-# define IMU_LOCK_TIMEOUT	(300us)
+// Timeouts
+#define GPS_SENSE_TIMEOUT	(5s)
+#define RC_SENSE_TIMEOUT	(500ms)
+#define IMU_SENSE_TIMEOUT	(500ms)
+#define IMU_LOCK_TIMEOUT	(300us)
+#define SELFTEST_DELAY		(30s)
 
 // File names
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */

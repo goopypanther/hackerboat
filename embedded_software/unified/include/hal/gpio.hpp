@@ -28,28 +28,30 @@
 class Pin {
 	public:
 		Pin () = default;
-		Pin (int port, int pin, bool dir, bool state = false) :
+		Pin (int port, int pin, bool dir, bool state = false) : 
 			_port(port), _pin(pin), _dir(dir), _state(false) {
 				this->init();
 		};
-		bool init ();
-		bool setPort (int port);
-		bool setPin (int pin);
-		void setDir (bool dir);
-		void writePin (bool state) {
-			(state)?(this->set()):(this->clear());
+		bool init ();					/**< Initialize the pin. _port and _pin must be set or this returns false. */
+		bool setPort (int port);		/**< Set the port -- either 8 or 9 */
+		bool setPin (int pin);			/**< Set the number of the pin to use */
+		void setDir (bool dir);			/**< Set direction -- true is output, false is input. */
+		bool writePin (bool state) {	/**< Write the pin. Returns true if successful  */
+			return (state)?(this->set()):(this->clear());
 		};
 		bool readPin () {return this->get();};
-		bool set();
-		bool clear();
+		bool set();						/**< Returns true if pin is writeable and write is successful */
+		bool clear();					/**< Returns true if pin is writeable and write is successful */					
 		bool get();
+		bool pullUp ();
+		bool pullDown ();
 		
 	private:
 		std::string path;
-		int _port;
-		int _pin;
-		bool _dir;
-		bool _state;
+		int _port = -1;
+		int _pin = -1;
+		bool _dir = false;
+		bool _state = false;
 };
 
 #endif

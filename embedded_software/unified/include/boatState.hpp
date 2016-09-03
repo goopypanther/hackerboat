@@ -24,8 +24,13 @@
 #include "logs.hpp"
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"
-//#include "waypoints.hpp"
+#include "waypoint.hpp"
 #include "dodge.hpp"
+#include "hal/relay.hpp"
+#include "hal/gpio.hpp"
+#include "hal/adcInput.hpp"
+#include "hal/RCinput.hpp"
+#include "hal/gpsdInput.hpp"
 
 using namespace std;
 
@@ -65,12 +70,18 @@ class BoatState : public HackerboatStateStorable {
 		double					waypointStrength;	/**< Relative strength of the waypoint */
 		sysclock				lastContact;		/**< Time of last shore contact */
 		sysclock				lastRC;				/**< Time of the last signal from the RC input */
-		Location				lastFix;			/**< Location of the last GPS fix */
+		GPSFix					lastFix;			/**< Location of the last GPS fix */
 		Location				launchPoint;		/**< Location of the launch point */
-//		WaypointList			waypoints;			/**< Waypoints to follow */
+		Waypoints				waypointList;		/**< Waypoints to follow */
 		WaypointActionEnum		action;				/**< Action to take at the last waypoint */
-		Dodge					diversion;			/**< Avoid obstacles! */
-		HealthMonitor			health;				/**< Current state of the boat's health */
+		Dodge&					diversion;			/**< Avoid obstacles! */
+		HealthMonitor&			health;				/**< Current state of the boat's health */
+		Pin						disarmInput;
+		Pin						armInput;
+		RCInput&				rc;
+		ADCInput&				adc;
+		GPSdInput&				gps;
+		
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:

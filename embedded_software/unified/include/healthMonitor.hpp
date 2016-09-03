@@ -35,7 +35,8 @@ class HealthMonitor : public HackerboatStateStorable {
 		json_t *pack () const;
 		bool isValid () {return valid;};
 		HackerboatStateStorage& storage();
-		bool setADCdevice(ADCInput& adc);	/**< Set the ADC input thread */
+		bool setADCdevice(ADCInput& adc);		/**< Set the ADC input thread */
+		bool readHealth ();
 		
 		map<string, RelayTuple>	relays;			/**< State of the relays. Each tuple is current, state, and fault state */
 		double					servoCurrent;	/**< Current supplied to the servo */

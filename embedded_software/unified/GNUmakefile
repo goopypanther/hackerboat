@@ -25,7 +25,7 @@ LDLIBS += -ljansson -lsqlite3 -lm -lrt
 
 export OPTS
 
-VPATH=src/common:src/master:src/drivers
+VPATH=src/common:src/master:src/drivers:src/tests
 all: submodules master
 test: storage_test
 	./storage_test
@@ -69,7 +69,9 @@ master: $(MASTER_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
-TEST_OBJS=enumtable_test.o sqliteStorage_test.o smallJson_test.o boneState_test.o arduinoState_test.o navigation_test.o
+TEST_OBJS = enumtable_test.o 
+#TEST_OBJS += sqliteStorage_test.o 
+#TEST_OBJS += smallJson_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
 storage_test: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
