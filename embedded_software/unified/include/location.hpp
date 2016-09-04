@@ -21,6 +21,11 @@
 #include "hackerboatRoot.hpp"
 #include "twovector.hpp"
 
+enum class CourseTypeEnum {
+	GreatCircle,
+	RhumbLine
+};
+
 /**
  * @class Location
  *
@@ -30,10 +35,6 @@
 
 class Location : public HackerboatState {
 	public:
-		enum CourseTypeEnum {
-			GreatCircle,
-			RhumbLine
-		};
 		Location (void)
 		  : lat(NAN), lon(NAN)
 		{ };
@@ -43,10 +44,10 @@ class Location : public HackerboatState {
 		bool parse (json_t *input);
 		json_t *pack () const USE_RESULT;
 		bool isValid (void) const;						/**< Check for validity */
-		double bearing (const Location& dest, CourseTypeEnum type = GreatCircle) const;		/**< Get the bearing from the current location to the target */
-		double distance (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the distance from the current location to the target, in meters */
-		TwoVector target (const Location& dest, CourseTypeEnum type = GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector, in meters */
-		Location project (TwoVector& projection, CourseTypeEnum type = GreatCircle);		/**< Get the Location at the given meter-valued TwoVector from the current location */
+		double bearing (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;		/**< Get the bearing from the current location to the target */
+		double distance (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;	/**< Get the distance from the current location to the target, in meters */
+		TwoVector target (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector, in meters */
+		Location project (TwoVector& projection, CourseTypeEnum type = CourseTypeEnum::GreatCircle);		/**< Get the Location at the given meter-valued TwoVector from the current location */
 		
 		double lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
 		double lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		

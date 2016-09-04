@@ -27,8 +27,8 @@ export OPTS
 
 VPATH=src/common:src/master:src/drivers:src/tests
 all: submodules master
-test: storage_test
-	./storage_test
+test: unit_tests
+	./unit_tests
 .PHONY: all test
 
 ifdef SVCTREE
@@ -70,11 +70,13 @@ master: $(MASTER_OBJS) libhackerboat.a
 
 # Unit test targets
 TEST_OBJS = enumtable_test.o 
+TEST_OBJS += twovector_test.o 
+TEST_OBJS += location_test.o 
 #TEST_OBJS += sqliteStorage_test.o 
 #TEST_OBJS += smallJson_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
-storage_test: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
+unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # gtest rules:
@@ -93,6 +95,7 @@ submodules:
 
 clean:
 	rm -f libhackerboat.a
+	rm -f storage_test
 	rm -f $(ALL_OBJS)
 	rm -f $(ALL_OBJS:.o=.d)
 	rm -f master nav hb.fcgi gpsParse

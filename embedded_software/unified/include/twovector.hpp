@@ -29,7 +29,7 @@ class TwoVector : public HackerboatState {
 			_x(x), _y(y) {};
 		bool parse (json_t *input);
 		json_t *pack () const;
-		bool isValid () {return ((isnormal(_x)) & (isnormal(_y)));};
+		bool isValid () {return ((isfinite(_x)) && (isfinite(_y)));};
 		
 		// functions for deriving cartesian coordinates from polar input
 		static TwoVector getVectorRad(double ang, double mag);
@@ -90,7 +90,7 @@ class TwoVector : public HackerboatState {
 		}
 		
 		friend TwoVector inline operator/ (TwoVector l, const double r) {		/**< Scalar division */
-			l *= (1/r);
+			l *= (1.0/r);
 			return l;
 		}
 		
@@ -102,8 +102,8 @@ class TwoVector : public HackerboatState {
 		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }
 		
 	protected:
-		double _x;
-		double _y;
+		double _x = NAN;
+		double _y = NAN;
 	
 };
 

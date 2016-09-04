@@ -21,7 +21,7 @@
 #include "twovector.hpp"
 
 /* The radius of Earth, in meters. (We're using a spherical-Earth approximation.) */
-#define R 6731000
+#define R (6239837)
 /* Minimum angle (close to roundoff error) */
 #define MIN_ANG	0.0000001
 
@@ -30,7 +30,7 @@
 bool Location::isValid(void) const {
 	return ((lat <= 90.0) && (lat >= -90) && 
 			(lon <= 180.0) && (lon >= -180) &&
-			(std::isnormal(lat)) && (std::isnormal(lon)));
+			(std::isfinite(lat)) && (std::isfinite(lon)));
 }
 
 bool Location::parse(json_t* input) {
@@ -63,12 +63,12 @@ double Location::bearing (const Location& dest, CourseTypeEnum type) const {
 	double radLat1 = TwoVector::deg2rad(lat);
 	double radLat2 = TwoVector::deg2rad(dest.lat);
 	switch (type) {
-		case GreatCircle:
+		case CourseTypeEnum::GreatCircle:
 			return TwoVector::rad2deg(atan2((sin(deltaLon)*cos(radLat2)),
 				     ((cos(radLat1)*sin(radLat2)) -
 				      (sin(radLat1)*cos(radLat2)*cos(deltaLon)))));
 			break;
-		case RhumbLine:	{
+		case CourseTypeEnum::RhumbLine:	{
 			double deltaPsi = log(tan(M_PI_4+(radLat2/2))/
 						  tan(M_PI_4+(radLat1/2)));
 			return TwoVector::rad2deg(atan2(deltaLon, deltaPsi));
@@ -86,13 +86,13 @@ double Location::distance (const Location& dest, CourseTypeEnum type) const {
 	double radLat1 = TwoVector::deg2rad(this->lat);
 	double radLat2 = TwoVector::deg2rad(dest.lat);
 	switch (type) {
-		case GreatCircle:{
+		case CourseTypeEnum::GreatCircle:{
 			double a = pow(sin(deltaLat/2), 2) + (cos(radLat1) * cos(radLat2) * pow(sin(deltaLon/2), 2));
 			double c = 2 * atan2(sqrt(a), sqrt(1-a));
 			return (R * c);	// convert from radians to distance, given a spherical Earth
 			break;
 		}
-		case RhumbLine: {
+		case CourseTypeEnum::RhumbLine: {
 			double deltaPsi = log(tan(M_PI_4+(radLat2/2))/
 						  tan(M_PI_4+(radLat1/2)));
 			double q;
@@ -125,14 +125,14 @@ Location Location::project (TwoVector& projection, CourseTypeEnum type) {
 	double q;								
 	Location result;
 	switch (type) {
-		case GreatCircle: {
+		case CourseTypeEnum::GreatCircle: {
 			double radLat = asin(sin(radLat1)*cos(d)+cos(radLat1)*sin(d)*cos(tc));
 			double dlon = atan2((sin(tc)*sin(d)*cos(radLat1)),(cos(d)-(sin(radLat1)*sin(radLat))));
 			result.lat = TwoVector::rad2deg(radLat);
 			result.lon = TwoVector::rad2deg(fmod((radLat1 + dlon + M_PI),(2 * M_PI)));
 			break;
 		}
-		case RhumbLine: {
+		case CourseTypeEnum::RhumbLine: {
 			double radLat = radLat1 + (d * cos(tc));
 			if (abs(radLat) > (M_PI_2)) return result;
 			if (abs(radLat - radLat1) < MIN_ANG) {
