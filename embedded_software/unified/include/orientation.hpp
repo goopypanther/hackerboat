@@ -30,16 +30,16 @@ class Orientation : public HackerboatState {
 		Orientation() = default;
 		Orientation(double r, double p, double y) :
 			pitch(p), roll(r), heading(y) {};
-		bool parse (json_t *input);
-		json_t *pack () const;
-		bool isValid ();
-		bool normalize (void);		/**< Normalize the roll/pitch/heading */
-		double roll 	= NAN;
+		bool parse (json_t *input);				/**< Parse an orientation object out of json object */
+		json_t *pack () const;					/**< Create a json object of this orientation */
+		bool isValid ();						/**< Check if this is a valid orientation object */
+		bool normalize (void);					/**< Normalize the roll/pitch/heading values to +/-180 degrees (or 0-360 degrees in the case of heading) */
+		double roll 	= NAN;			
 		double pitch 	= NAN;
 		double heading 	= NAN;
 
 	private:
-		double normAxis (double val, const double max, const double min) const;
+		double normAxis (double val, const double max, const double min) const;		/**< Normalize given axis */
 		static const double constexpr	maxRoll = 180.0;
 		static const double constexpr	minRoll = -180.0;
 		static const double constexpr	maxPitch = 180.0;

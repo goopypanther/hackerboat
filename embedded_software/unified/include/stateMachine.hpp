@@ -30,10 +30,10 @@ template <typename T, typename U> class StateMachineBase {
 			_state(state), _lastMode(last), _thisMode(thisMode),
 			start(std::chrono::system_clock::now()) {};
 		virtual StateMachineBase* execute() = 0;			/**< Execute one step of the state machine */
-		U& getState() {return _state;}
-		T getMode() {return _thisMode;}
-		T getLastMode() {return _lastMode;}
-		virtual ~StateMachineBase () {};
+		U& getState() {return _state;}						/**< Get the state vector */
+		T getMode() {return _thisMode;}						/**< Get the current mode */
+		T getLastMode() {return _lastMode;}					/**< Get the last mode */
+		virtual ~StateMachineBase () {};					
 		
 	protected:
 		int callCount = 0;

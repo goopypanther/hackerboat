@@ -29,7 +29,7 @@
 
 typedef tuple<double, bool, bool> RelayTuple;
 
-class Relay : public HackerboatState {
+class Relay {
 	public:
 		Relay () = default;
 		Relay (std::string name, Pin& output, Pin& fault, ADCInput& adc, bool state = false) :
@@ -37,20 +37,18 @@ class Relay : public HackerboatState {
 				this->init();
 			};
 			
-		bool parse (json_t *input);
-		json_t *pack () const;
-		bool isValid () {return true;};
+		json_t *pack () const;						/**< Pack a relay tuple with state, fault, and current output of this relay */
 		
-		bool init();
-		bool set() {return _drive.set();};
-		bool clear() {return _drive.clear();};
-		bool isFaulted() {return _fault.get();};
-		double current();
-		RelayTuple getState();
-		std::string& name() {return _name;};
-		Pin& output() {return _drive;};
-		Pin& fault() {return _fault;};
-		ADCInput& adc() {return _adc;};
+		bool init();								/**< Initialize this relay */
+		bool set() {return _drive.set();};			/**< Set the output state of this relay to ON */
+		bool clear() {return _drive.clear();};		/**< Set the output state of this relay to OFF */
+		bool isFaulted() {return _fault.get();};	/**< Check if this relay has a fault */
+		double current();							/**< Get the current, in amps */
+		RelayTuple getState();						/**< Get the current state of the relay as a tuple */
+		std::string& name() {return _name;};		/**< Get a reference to the name of this relay */
+		Pin& output() {return _drive;};				/**< Get a reference to the drive pin */
+		Pin& fault() {return _fault;};				/**< Get a reference to the fault pin */
+		ADCInput& adc() {return _adc;};				/**< Get a reference to the ADCInput object this relay uses to measure current. */
 		
 	private:
 		std::string _name;
@@ -58,6 +56,7 @@ class Relay : public HackerboatState {
 		Pin& _fault;
 		bool _state;
 		ADCInput& _adc;
+		bool initialized = false;
 };
 
 class RelayMap {
@@ -65,14 +64,15 @@ class RelayMap {
 		static RelayMap* instance () {return &_instance;}	/**< Returns a pointer to the object */
 		bool init ();										/**< Initialize all relays */
 		Relay& get (std::string name);						/**< Get a reference to the named relay */
+		json_t *pack () const;								/**< Pack status for all of relays in the map. */
 		
 	private:
-		RelayMap ();
-		RelayMap (RelayMap const&) = delete;
-		RelayMap& operator=(RelayMap const&) = delete;
-		static RelayMap 			_instance;
-		map<std::string, Relay>		relays;
-		bool						initialize = false;
+		RelayMap () = default;								/**< Hark, a singleton! */
+		RelayMap (RelayMap const&) = delete;				/**< Hark, a singleton! */
+		RelayMap& operator=(RelayMap const&) = delete;		/**< Hark, a singleton! */
+		static RelayMap 			_instance;				/**< Hark, a singleton! */
+		map<std::string, Relay>		relays;					/**< Named map of all relays */
+		bool						initialized = false;	/**< Record whether all relays are initialized */
 };
 
 #endif

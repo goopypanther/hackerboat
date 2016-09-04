@@ -152,16 +152,16 @@ class LSM303 {
 		int getRawTempData () {return _tempData;};						/**< Get raw temperature data. */
 		map<char, int> getMagOffset () {return _magOffset;};			/**< Get the current offset for magnetometer data. Field names as for data. */
 		map<char, int> getAccelOffset () {return _accelOffset;};		/**< Get the current offset for accelerometer data. Field names as for data. */
-		int getTempOffset () {return _tempOffset;};
+		int getTempOffset () {return _tempOffset;};						/**< Get the offset used for the temperature data */
 		map<char, double> getMagScale () {return _magScale;};			/**< Get the current scale factor for the magnetometer data. Field names as for data. */
 		map<char, double> getAccelScale () {return _accelScale;};		/**< Get the current scale factor for the accelerometer data. Field names as for data. */
-		double getTempScale () {return _tempScale;};
+		double getTempScale () {return _tempScale;};					/**< Get the scaling factor used for the temperature */
 		bool setMagOffset (map<char, int> offset);						/**< Set magnetometer offsets. */
-		bool setAccelOffset (map<char, int> offset);						/**< Set accelerometer offsets. */
+		bool setAccelOffset (map<char, int> offset);					/**< Set accelerometer offsets. */
 		bool setMagScale (map<char, double> scale);						/**< Set magnetometer scale. */
 		bool setAccelScale (map<char, double> scale);					/**< Set accelerometer scale. */
-		void setTempOffset (int offset) {_tempOffset = offset;};
-		void setTempScale (double scale) {_tempScale = scale;};
+		void setTempOffset (int offset) {_tempOffset = offset;};		/**< Set temperature offset */
+		void setTempScale (double scale) {_tempScale = scale;};			/**< Set temperature scale */
 		
 	private:
 		bool 				setReg (uint8_t addr, uint8_t reg, uint8_t val);

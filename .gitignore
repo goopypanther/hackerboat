@@ -25,6 +25,8 @@
 gpsParse
 hb.fcgi
 nav
+embedded_software/unified/master
+embedded_software/unified/unit_tests
 
 # Eagle
 *.s#*

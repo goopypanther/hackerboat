@@ -47,23 +47,23 @@ class BoatState : public HackerboatStateStorable {
 		bool isValid ();
 		HackerboatStateStorage& storage();
 		
-		bool insertFault (const std::string fault);			/**< Add the named fault to the fault string. Returns false if fault string is full */
-		bool removeFault (const std::string fault);			/**< Remove the named fault from the fault string. Returns false if not present */
-		bool hasFault (const std::string fault) const;		/**< Returns true if given fault is present */
-		int faultCount (void) const;						/**< Returns the current number of faults */
- 		void clearFaults () {faultString = "";};			/**< Remove all faults */
-		std::string getFaultString() {return faultString;};	/**< Returns the entire fault string */
+		bool insertFault (const std::string fault);					/**< Add the named fault to the fault string. Returns false if fault string is full */
+		bool removeFault (const std::string fault);					/**< Remove the named fault from the fault string. Returns false if not present */
+		bool hasFault (const std::string fault) const;				/**< Returns true if given fault is present */
+		int faultCount (void) const;								/**< Returns the current number of faults */
+ 		void clearFaults () {faultString = "";};					/**< Remove all faults */
+		std::string getFaultString() {return faultString;};			/**< Returns the entire fault string */
 		bool setBoatMode (BoatModeEnum m) {_boat = m; return true;};/**< Set boat mode to the given value */
-		bool setBoatMode (std::string mode);				/**< Set boat mode to the given value */
-		BoatModeEnum getBoatMode () {return _boat;};		/**< Return boat mode */
+		bool setBoatMode (std::string mode);						/**< Set boat mode to the given value */
+		BoatModeEnum getBoatMode () {return _boat;};				/**< Return boat mode */
 		bool setNavMode (NavModeEnum m) {_nav = m; return true;};	/**< Set nav mode to the given value */
-		bool setNavMode (std::string mode);					/**< Set nav mode to the given value */
+		bool setNavMode (std::string mode);							/**< Set nav mode to the given value */
 		NavModeEnum getNavMode () {return _nav;};
 		bool setAutoMode (AutoModeEnum m) {_auto = m; return true;};/**< Set autonomous mode to the given value */
-		bool setAutoMode (std::string mode);				/**< Set autonomous mode to the given value */
+		bool setAutoMode (std::string mode);						/**< Set autonomous mode to the given value */
 		AutoModeEnum getAutoMode () {return _auto;};
 		bool setRCmode (RCModeEnum m) {_rc = m; return true;};		/**< Set RC mode to the given value */
-		bool setRCmode (std::string mode);					/**< Set RC mode to the given value */
+		bool setRCmode (std::string mode);							/**< Set RC mode to the given value */
 		RCModeEnum getRCMode () {return _rc;};
 			
 		int 					currentWaypoint; 	/**< The current waypoint */
@@ -76,11 +76,12 @@ class BoatState : public HackerboatStateStorable {
 		WaypointActionEnum		action;				/**< Action to take at the last waypoint */
 		Dodge&					diversion;			/**< Avoid obstacles! */
 		HealthMonitor&			health;				/**< Current state of the boat's health */
-		Pin						disarmInput;
-		Pin						armInput;
-		RCInput&				rc;
-		ADCInput&				adc;
-		GPSdInput&				gps;
+		Pin						disarmInput;		/**< Disarm input from power distribution box */
+		Pin						armInput;			/**< Arm input from power distribution box */
+		RCInput&				rc;					/**< RC input thread */
+		ADCInput&				adc;				/**< ADC input thread */
+		GPSdInput&				gps;				/**< GPS input thread */
+		RelayMap*				relays;				/**< Pointer to relay singleton */
 		
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		

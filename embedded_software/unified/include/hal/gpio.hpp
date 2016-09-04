@@ -34,21 +34,22 @@ class Pin {
 			_port(port), _pin(pin), _dir(dir), _state(state) {
 				this->init();
 		};
-		bool init ();					/**< Initialize the pin. _port and _pin must be set or this returns false. Must be called any time the configuration is changed. */
-		bool setPort (int port);		/**< Set the port -- either 8 or 9 */
-		bool setPin (int pin);			/**< Set the number of the pin to use */
-		void setDir (bool dir) {_dir=dir;};	/**< Set direction -- true is output, false is input. */
-		bool writePin (bool state);			/**< Write the pin. Returns true if successful  */
+		bool init ();							/**< Initialize the pin. _port and _pin must be set or this returns false. Must be called any time the configuration is changed. */
+		bool setPort (int port);				/**< Set the port -- either 8 or 9 */
+		bool setPin (int pin);					/**< Set the number of the pin to use */
+		void setDir (bool dir) {_dir=dir;};		/**< Set direction -- true is output, false is input. */
+		bool writePin (bool state);				/**< Write the pin. Returns true if successful  */
 		int readPin () {return this->get();};
 		bool set() {return writePin(true);};	/**< Returns true if pin is writeable and write is successful */
 		bool clear() {return writePin(false);};	/**< Returns true if pin is writeable and write is successful */					
-		int get();						/**< Reads the value of the pin. 1 is high, 0 if low, -1 if error */
-		bool getState() {return _state;};
-		bool pullUp ();
-		bool pullDown ();
-		static int getGPIO (int port, int pin);
+		int get();								/**< Reads the value of the pin. 1 is high, 0 if low, -1 if error */
+		bool getState() {return _state;};		/**< Get the state of the pin at the last successful reading */
+		bool pullUp () {return false;};			/**< Turn on the internal pull-up (currently unimplemented) */
+		bool pullDown () {return false;};		/**< Turn on the internal pull-up (currently unimplemented) */
+		bool floating () {return false;};		/**< Turn off internal pull-ups and pull-downs (currently unimplemented) */
 		
 	private:
+		static int getGPIO (int port, int pin);	/**< Return the internal GPIO number for the pin at the given port and pin number */
 		std::ostringstream path;
 		int _port = -1;
 		int _pin = -1;

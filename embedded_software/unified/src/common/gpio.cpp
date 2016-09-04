@@ -189,6 +189,3 @@ int Pin::getGPIO (int port, int pin) {
 	} else return -1;
 	return -1;
 }
-
-bool Pin::pullUp () {return false;}		// to be implemented when I figure out how
-bool Pin::pullDown () {return false;}	// to be implemented when I figure out how

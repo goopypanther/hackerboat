@@ -24,15 +24,15 @@
 class Throttle {
 	public:
 		Throttle() = default;						
-		Throttle(ADCInput& adc);		/**< Create a motor device with a reference to an ADC input instance for motor current & voltage */
+		Throttle(ADCInput& adc);			/**< Create a motor device with a reference to an ADC input instance for motor current & voltage */
 			
-		bool setThrottle(int throttle);			/**< Set throttle to the given value. Returns false if the value is outside of the range defined by getMaxThrottle() and getMinThrottle() */
-		int getThrottle();						/**< Get current throttle position */
-		double getMotorCurrent();				/**< Get the current motor current */
-		double getMotorVoltage();				/**< Get the current motor voltage */
+		bool setThrottle(int throttle);		/**< Set throttle to the given value. Returns false if the value is outside of the range defined by getMaxThrottle() and getMinThrottle() */
+		int getThrottle();					/**< Get current throttle position */
+		double getMotorCurrent();			/**< Get the current motor current */
+		double getMotorVoltage();			/**< Get the current motor voltage */
 		bool setADCdevice(ADCInput& adc);	/**< Set the ADC input thread */
-		int getMaxThrottle();					/**< Get the maximum throttle value */
-		int getMinThrottle();					/**< Get the minimum throttle value */
+		int getMaxThrottle();				/**< Get the maximum throttle value */
+		int getMinThrottle();				/**< Get the minimum throttle value */
 	private:
 		int _throttle = 0;
 		ADCInput& _adc;

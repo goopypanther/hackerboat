@@ -32,20 +32,20 @@ class TwoVector : public HackerboatState {
 		bool isValid () {return ((isfinite(_x)) && (isfinite(_y)));};
 		
 		// functions for deriving cartesian coordinates from polar input
-		static TwoVector getVectorRad(double ang, double mag);
-		static TwoVector getVectorDeg(double ang, double mag) {return getVectorRad(deg2rad(ang),mag);};
+		static TwoVector getVectorRad(double ang, double mag);												/**< Get a vector with the given angle (in radians) and magnitude */
+		static TwoVector getVectorDeg(double ang, double mag) {return getVectorRad(deg2rad(ang),mag);};		/**< Get a vector with the given angle (in degrees) and magnitude */
 		
 		// get/set cartesian values, angle, or magnitude 
-		double inline x () {return _x;};
-		void inline x (double x) {_x=x;};
-		double inline y () {return _y;};
-		void inline y (double y) {_y=y;};
-		double inline mag () {return sqrt((_x*_x)+(_y*_y));};
-		void inline mag (double _mag) {*this *= _mag/mag();};
-		double inline angleRad () {return atan2(_y,_x);}; 
-		void angleRad (double _ang) {this->rotateRad(_ang - this->angleRad());};
-		double inline angleDeg () {return rad2deg(atan2(_y,_x));}; 
-		void inline angleDeg (double _ang) {angleRad(deg2rad(_ang));};
+		double inline x () {return _x;};							/**< Get the x value */
+		void inline x (double x) {_x=x;};							/**< Set the x value */
+		double inline y () {return _y;};							/**< Get the y value */
+		void inline y (double y) {_y=y;};							/**< Set the y value */
+		double inline mag () {return sqrt((_x*_x)+(_y*_y));};		/**< Get the magnitude */
+		void inline mag (double _mag) {*this *= _mag/mag();};		/**< Set the magnitude */
+		double inline angleRad () {return atan2(_y,_x);}; 			/**< Get the angle in radians */
+		void angleRad (double _ang) {this->rotateRad(_ang - this->angleRad());};	/**< Set the angle in radians */
+		double inline angleDeg () {return rad2deg(atan2(_y,_x));}; 					/**< Get the angle in degrees */
+		void inline angleDeg (double _ang) {angleRad(deg2rad(_ang));};				/**< Set the angle in radians */
 		
 		// rotations
 		void inline rotateDeg (double _deg) {rotateRad(deg2rad(_deg));};	/**< Rotate vector through the given angle in degrees */
@@ -98,8 +98,8 @@ class TwoVector : public HackerboatState {
 		TwoVector unit ();					/**< Get the corresponding unit vector */
 		
 		// utility functions
-		static double inline deg2rad (double deg) { return deg * ( M_PI / 180.0 ); }
-		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }
+		static double inline deg2rad (double deg) { return deg * ( M_PI / 180.0 ); }	/**< Convert degrees to radians */
+		static double inline rad2deg (double rad) { return rad * ( 180.0 / M_PI ); }	/**< Convert radians to degrees */
 		
 	protected:
 		double _x = NAN;

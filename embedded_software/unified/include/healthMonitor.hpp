@@ -29,27 +29,29 @@ using namespace std;
 class HealthMonitor : public HackerboatStateStorable {
 	public:
 		HealthMonitor () = default;
-		HealthMonitor (ADCInput& adc) :
-			_adc(adc) {};
+		HealthMonitor (ADCInput& adc, RelayMap* map) :
+			_adc(adc), _map(map) {};
 		bool parse (json_t *input);
 		json_t *pack () const;
 		bool isValid () {return valid;};
 		HackerboatStateStorage& storage();
-		bool setADCdevice(ADCInput& adc);		/**< Set the ADC input thread */
-		bool readHealth ();
+		bool setADCdevice(ADCInput& adc);	/**< Set the ADC input thread */
+		bool setRelayMap(RelayMap* map);	/**< Set the relay map */
+		bool readHealth ();					/**< Update health monitor values */
 		
-		map<string, RelayTuple>	relays;			/**< State of the relays. Each tuple is current, state, and fault state */
-		double					servoCurrent;	/**< Current supplied to the servo */
-		double					batteryMon;
-		double					mainVoltage;
-		double					mainCurrent;
-		double					chargeVoltage;
-		double					chargeCurrent;
-		double					motorVoltage;
-		double					motorCurrent;
-		int						rcRssi;
-		int						cellRssi;
-		int 					wifiRssi;
+		double		servoCurrent;			/**< Current supplied to the servo, amps */
+		double		batteryMon;				/**< Battery voltage, volts */
+		double		mainVoltage;			/**< Main bus voltage, volts */
+		double		mainCurrent;			/**< Main bus current, amps */
+		double		chargeVoltage;			/**< Charging voltage, volts */
+		double		chargeCurrent;			/**< Charging current, amps */
+		double		motorVoltage;			/**< Motor voltage, volts */
+		double		motorCurrent;			/**< Motor current, amps */
+		int			rcRssi;					/**< RC system RSSI, dbm */
+		int			cellRssi;				/**< Cell system RSSI, dbm */
+		int			wifiRssi;				/**< Wifi RSSI, dbm */
+		RelayMap* 	_map;					/**< Map of all system relays */
+		
 	private:
 		bool valid;
 		ADCInput& _adc;

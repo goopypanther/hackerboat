@@ -41,9 +41,9 @@ class Location : public HackerboatState {
 		Location (double _lat, double _lon)			/**< Create a location object at the given latitude & longitude */
 		  : lat(_lat), lon(_lon)
 		{ };
-		bool parse (json_t *input);
-		json_t *pack () const USE_RESULT;
-		bool isValid (void) const;						/**< Check for validity */
+		bool parse (json_t *input);					/**< Populate this Location object from a properly formated json object */
+		json_t *pack () const USE_RESULT;			/**< Pack a json object from this Location object. */
+		bool isValid (void) const;					/**< Check for validity */
 		double bearing (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;		/**< Get the bearing from the current location to the target */
 		double distance (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;	/**< Get the distance from the current location to the target, in meters */
 		TwoVector target (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector, in meters */

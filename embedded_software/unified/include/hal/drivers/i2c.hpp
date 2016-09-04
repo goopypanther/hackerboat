@@ -41,7 +41,7 @@ class I2CDriver {
 		bool setBus (I2CBus bus);					/**< Set the bus to the desired bus. Numbers other than 1, 2, or 3 are invalid and will return false. */
 		bool openI2C (uint8_t address);				/**< Open a connection to the given address. Returns false if this fails. */
 		int writeI2C (std::vector<uint8_t> output);	/**< Write the given output stream to the open device. Returns the number of bytes written, or -1 on any error. */
-		int readI2C (std::vector<uint8_t>& input,  		/**< Reads up to maxBytes. Returns the number of bytes read. Returns -1 if there's an error and 0 if less than minBytes were returned */
+		int readI2C (std::vector<uint8_t>& input,  	/**< Reads up to maxBytes. Returns the number of bytes read. Returns -1 if there's an error and 0 if less than minBytes were returned */
 					int maxBytes = 100,
 					int minBytes = 0);	
 		bool closeI2C ();							/**< Close the current connection. */

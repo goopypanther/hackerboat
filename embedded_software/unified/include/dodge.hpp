@@ -33,7 +33,8 @@ using namespace std;
  */
 class Dodge {
 	public:
-		Dodge (GPSdInput& input) : _in(input) {};
+		Dodge (GPSdInput& input) : 
+			_in(input) {};
 		
 		TwoVector calcDodge ();		/**< calculates the dodge vector and returns it*/
 		TwoVector getDodge ();		/**< Returns the dodge vector. Values are bearing in degrees from magnetic north and relative strength */

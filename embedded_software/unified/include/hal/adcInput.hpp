@@ -39,6 +39,7 @@ class ADCInput : public InputThread {
 	private:
 		ADC128D818 					upper { ADC_UPPER_ADDR, ADC_I2C_BUS };
 		ADC128D818 					lower { ADC_LOWER_ADDR, ADC_I2C_BUS };
+		std::string					batmonPath;
 		map<std::string, int> 		_raw;
 		map<std::string, int> 		_offsets;
 		map<std::string, double> 	_scales;

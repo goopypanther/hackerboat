@@ -8,7 +8,8 @@ testing::AssertionResult assertJSONEqual(const char *expected_expr, const char *
 #define EXPECT_JSON_EQ(a, b) EXPECT_PRED_FORMAT2(assertJSONEqual, a, b)
 #define ASSERT_JSON_EQ(a, b) ASSERT_PRED_FORMAT2(assertJSONEqual, a, b)
 
-bool inline toleranceEquals (double a, double b, double tolerance) {
+
+bool inline toleranceEquals (double a, double b, double tolerance) {	/**< Compare two doubles with a tolerance */
 	double diff = a - b;
 	if (abs(diff) < tolerance) {
 		return true;

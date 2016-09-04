@@ -37,7 +37,7 @@ json_t *Orientation::pack () const {
 }
 
 bool Orientation::isValid () {
-	return (std::isnormal(roll) && std::isnormal(pitch) && std::isnormal(heading));
+	return (std::isfinite(roll) && std::isfinite(pitch) && std::isfinite(heading));
 }
 
 bool Orientation::normalize () {

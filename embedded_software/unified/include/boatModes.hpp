@@ -27,7 +27,7 @@ class BoatModeBase : public StateMachineBase<BoatModeEnum, BoatState> {
 		static BoatModeBase* factory(BoatState& state, BoatModeEnum mode);	/**< Create a new object of the given mode */
 		virtual ~BoatModeBase() {};
 	protected:
-		BoatModeBase (BoatState& state, BoatModeEnum last, BoatModeEnum thisMode) :
+		BoatModeBase (BoatState& state, BoatModeEnum last, BoatModeEnum thisMode) :	/**< Protected constructor so subclas constructors can call the superclass constructor */
 			StateMachineBase<BoatModeEnum, BoatState> (state, last, thisMode) {};
 };
 
@@ -37,7 +37,7 @@ class BoatStartMode : public BoatModeBase {
 			BoatModeBase(state, BoatModeEnum::NONE, BoatModeEnum::START) {
 				state.setBoatMode(BoatModeEnum::START);
 			}; 
-		BoatModeBase* execute();
+		BoatModeBase* execute();							/**< Execute the current state */
 };
 
 class BoatSelfTestMode : public BoatModeBase {
@@ -46,7 +46,7 @@ class BoatSelfTestMode : public BoatModeBase {
 			BoatModeBase(state, last, BoatModeEnum::SELFTEST) {
 				state.setBoatMode(BoatModeEnum::SELFTEST);
 			};  
-		BoatModeBase* execute();
+		BoatModeBase* execute();							/**< Execute the current state */
 };
 
 class BoatDisarmedMode : public BoatModeBase {
@@ -55,7 +55,7 @@ class BoatDisarmedMode : public BoatModeBase {
 			BoatModeBase(state, last, BoatModeEnum::DISARMED) {
 				state.setBoatMode(BoatModeEnum::DISARMED);
 			}; 
-		BoatModeBase* execute();
+		BoatModeBase* execute();							/**< Execute the current state */
 };
 
 class BoatFaultMode : public BoatModeBase {
@@ -64,7 +64,7 @@ class BoatFaultMode : public BoatModeBase {
 			BoatModeBase(state, last, BoatModeEnum::FAULT) {
 				state.setBoatMode(BoatModeEnum::FAULT);
 			};
-		BoatModeBase* execute();
+		BoatModeBase* execute();							/**< Execute the current state */
 };
 
 class BoatNavigationMode : public BoatModeBase {
@@ -76,8 +76,8 @@ class BoatNavigationMode : public BoatModeBase {
 				state.setNavMode(submode);
 			};
 		NavModeBase* getNavMode () {return _navMode;};		/**< Get the current nav mode object */
-		BoatModeBase* execute();
-		~BoatNavigationMode () {delete _navMode;};
+		BoatModeBase* execute();							/**< Execute the current state */
+		~BoatNavigationMode () {delete _navMode;};			/**< Explicit destructor to make sure we nuke the submode */
 	private:
 		NavModeBase* _navMode;
 };
@@ -88,7 +88,7 @@ class BoatArmedTestMode : public BoatModeBase {
 			BoatModeBase(state, last, BoatModeEnum::ARMEDTEST) {
 				state.setBoatMode(BoatModeEnum::ARMEDTEST);
 			};
-		BoatModeBase* execute();
+		BoatModeBase* execute();							/**< Execute the current state */
 };
 
 #endif

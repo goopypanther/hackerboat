@@ -38,15 +38,15 @@ enum class SensorOrientation : char {	/**< Choose the axis parallel to gravity w
 class OrientationInput : public InputThread {
 	public:	
 		OrientationInput(SensorOrientation axis = SensorOrientation::SENSOR_AXIS_Z_UP);
-		Orientation* getOrientation() {						/**< Get the last orientation recorded */
+		Orientation* getOrientation() {							/**< Get the last orientation recorded */
 			return &_current;
 		}
-		bool init();										/**< initialize hardware */
-		bool isValid() {return sensorsValid;};				/**< Check if the hardware connections are good */
-		bool begin();										/**< Start the input thread */
-		bool execute();										/**< Gather input	*/
-		void setAxis(SensorOrientation axis) {_axis = axis;};
-		SensorOrientation getAxis () {return _axis;};
+		bool init();											/**< initialize hardware */
+		bool isValid() {return sensorsValid;};					/**< Check if the hardware connections are good */
+		bool begin();											/**< Start the input thread */
+		bool execute();											/**< Gather input	*/
+		void setAxis(SensorOrientation axis) {_axis = axis;};	/**< Set the gravity axis */
+		SensorOrientation getAxis () {return _axis;};			/**< Get the gravity axis */
 	
 	private:
 		bool getData ();
