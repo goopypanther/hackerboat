@@ -57,6 +57,7 @@ LIBHACKERBOAT_SRCS+= orientationInput.cpp
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp 
 LIBHACKERBOAT_SRCS+= json_utilities.cpp 
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
+LIBHACKERBOAT_SRCS+= gpio.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)

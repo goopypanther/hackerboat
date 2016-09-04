@@ -32,7 +32,7 @@ typedef tuple<double, bool, bool> RelayTuple;
 class Relay : public HackerboatState {
 	public:
 		Relay () = default;
-		Relay (std::string name, Pin output, Pin fault, ADCInput& adc, bool state = false) :
+		Relay (std::string name, Pin& output, Pin& fault, ADCInput& adc, bool state = false) :
 			_name(name), _drive(output), _fault(fault), _adc(adc), _state(state) {
 				this->init();
 			};
@@ -54,8 +54,8 @@ class Relay : public HackerboatState {
 		
 	private:
 		std::string _name;
-		Pin _drive;
-		Pin _fault;
+		Pin& _drive;
+		Pin& _fault;
 		bool _state;
 		ADCInput& _adc;
 };
