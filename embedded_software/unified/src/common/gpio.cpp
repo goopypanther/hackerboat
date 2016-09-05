@@ -32,16 +32,26 @@ bool Pin::init () {
 	_gpio = getGPIO(_port, _pin);
 	if (_gpio < 0) return false;
 	
+	pinName = "P" + _port;
+	pinName += "_" + _pin;
 	
-	path << "/sys/class/gpio/gpio" << _gpio;
-	if (access(path.str().c_str(), F_OK)) {	// returns 0 if it exists, and therefore skips this step
-		std::ostringstream cmd;
-		cmd << "echo " << _gpio << " > /sys/class/gpio/export" << std::endl;
-		if (system(cmd.str().c_str()) != 0) return false;
+	// export the gpio so we can manipulate it
+	path = "/sys/class/gpio/gpio" + _gpio;
+	if (access(path.c_str(), F_OK)) {	// returns 0 if it exists, and therefore skips this step
+		std::string cmd;
+		cmd = "echo " + _gpio;
+		cmd += " > /sys/class/gpio/export\n"; 
+		if (system(cmd.c_str()) != 0) return false;
 	}
 	
-	ofstream direction;
-	direction.open(path.str() + "/direction");
+	// use config-pin to set the pinmux
+	std::string pinmux = CONFIG_PIN_PATH; 
+	pinmux += " " + pinName + function + "\n";
+	if (system(pinmux.c_str()) != 0) return false;
+	
+	// set the direction
+	std::ofstream direction;
+	direction.open(path + "/direction");
 	if (direction.is_open()) {
 		if (_dir) {
 			direction << "out";
@@ -51,6 +61,7 @@ bool Pin::init () {
 		direction.close();
 	} else return false;
 	
+	_init = true;
 	return ((direction.good()) && this->writePin (_state));
 
 }
@@ -58,11 +69,13 @@ bool Pin::init () {
 bool Pin::setPort (int port) {
 	if ((port != 8) && (port != 9)) return false;
 	_port = port;
+	_init = false;
 	return true;
 }	
 
 bool Pin::setPin (int pin) {
 	if (_port < 0) return false;
+	_init = false;
 	if (_port == 8) {
 		if ((pin > 2) && (pin < 47)) {
 			_pin = pin;
@@ -83,7 +96,7 @@ bool Pin::setPin (int pin) {
 bool Pin::writePin (bool val) {
 	ofstream value;
 	_state = val;
-	value.open(path.str() + "/value");
+	value.open(path + "/value");
 	if (value.is_open()) {
 		if (_state) {
 			value << "1";
@@ -98,7 +111,7 @@ bool Pin::writePin (bool val) {
 int Pin::get() {
 	ifstream value;
 	std::string line;
-	value.open(path.str() + "/value");
+	value.open(path + "/value");
 	if (value.is_open()) {
 		if(getline(value, line)) {
 			if (line[0] == '1') {
@@ -110,6 +123,36 @@ int Pin::get() {
 			} else return -1;
 		} else return -1;
 	} else return -1;
+}
+
+bool Pin::pullUp () {
+	function = "gpio_pu";
+	if (_init) {
+		std::string pinmux = CONFIG_PIN_PATH; 
+		pinmux += " " + pinName + function + "\n";
+		if (system(pinmux.c_str()) != 0) return false;
+	}
+	return true;
+}
+
+bool Pin::pullDown () {
+	function = "gpio_pd";
+	if (_init) {
+		std::string pinmux = CONFIG_PIN_PATH; 
+		pinmux += " " + pinName + function + "\n";
+		if (system(pinmux.c_str()) != 0) return false;
+	}
+	return true;
+}
+
+bool Pin::floating () {
+	function = "gpio";
+	if (_init) {
+		std::string pinmux = CONFIG_PIN_PATH; 
+		pinmux += " " + pinName + function + "\n";
+		if (system(pinmux.c_str()) != 0) return false;
+	}
+	return true;
 }
 
 int Pin::getGPIO (int port, int pin) {

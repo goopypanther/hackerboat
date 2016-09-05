@@ -42,6 +42,7 @@
 #define LIGHTS_COUNT		(144)
 #define AIS_MAX_TIME		(600s)
 #define AIS_MAX_DISTANCE	(10)
+#define CONFIG_PIN_PATH		"/usr/local/bin/config-pin"
 
 // Timeouts
 #define GPS_SENSE_TIMEOUT	(5s)

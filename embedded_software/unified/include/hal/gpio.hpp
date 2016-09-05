@@ -44,18 +44,21 @@ class Pin {
 		bool clear() {return writePin(false);};	/**< Returns true if pin is writeable and write is successful */					
 		int get();								/**< Reads the value of the pin. 1 is high, 0 if low, -1 if error */
 		bool getState() {return _state;};		/**< Get the state of the pin at the last successful reading */
-		bool pullUp () {return false;};			/**< Turn on the internal pull-up (currently unimplemented) */
-		bool pullDown () {return false;};		/**< Turn on the internal pull-up (currently unimplemented) */
-		bool floating () {return false;};		/**< Turn off internal pull-ups and pull-downs (currently unimplemented) */
+		bool pullUp ();							/**< Turn on the internal pull-up */
+		bool pullDown ();						/**< Turn on the internal pull-up */
+		bool floating ();						/**< Turn off internal pull-ups and pull-downs */
 		
 	private:
 		static int getGPIO (int port, int pin);	/**< Return the internal GPIO number for the pin at the given port and pin number */
-		std::ostringstream path;
+		std::string path;
+		std::string pinName;
+		std::string function = "gpio";
 		int _port = -1;
 		int _pin = -1;
 		int _gpio = -1;
 		bool _dir = false;
 		bool _state;
+		bool _init = false;
 };
 
 #endif
