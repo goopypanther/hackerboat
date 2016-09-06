@@ -123,8 +123,8 @@ bool GPSFix::parse (json_t *input) {
 	inFix = json_object_get(input, "fix");
 	result &= ::parse(json_object_get(input, "recordTime"), &inTime);
 	result &= ::parse(json_object_get(input, "gpsTime"), &gpsInTime);
-	result &= parseTime(inTime, this->recordTime);
-	result &= parseTime(gpsInTime, this->gpsTime);
+	result &= HackerboatState::parseTime(inTime, this->recordTime);
+	result &= HackerboatState::parseTime(gpsInTime, this->gpsTime);
 	result &= this->coreParse(input);
 	result &= GET_VAR(fixValid);
 	result &= fix.parse(inFix);

@@ -21,22 +21,27 @@
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"
 #include "hal/adcInput.hpp"
-#include "logs.hpp"
-#include "hal/relay.hpp"
 
 using namespace std;
 
 class HealthMonitor : public HackerboatStateStorable {
 	public:
 		HealthMonitor () = default;
-		HealthMonitor (ADCInput& adc, RelayMap* map) :
-			_adc(adc), _map(map) {};
+		HealthMonitor (ADCInput* adc) : _adc(adc) {};
 		bool parse (json_t *input);
 		json_t *pack () const;
 		bool isValid () {return valid;};
 		HackerboatStateStorage& storage();
-		bool setADCdevice(ADCInput& adc);	/**< Set the ADC input thread */
-		bool setRelayMap(RelayMap* map);	/**< Set the relay map */
+		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
+		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		bool setADCdevice(ADCInput* adc) {	/**< Set the ADC input thread */
+			valid = false;
+			if (adc) {
+				_adc = adc;
+				return true;
+			}
+			return false;
+		}
 		bool readHealth ();					/**< Update health monitor values */
 		
 		double		servoCurrent;			/**< Current supplied to the servo, amps */
@@ -50,11 +55,11 @@ class HealthMonitor : public HackerboatStateStorable {
 		int			rcRssi;					/**< RC system RSSI, dbm */
 		int			cellRssi;				/**< Cell system RSSI, dbm */
 		int			wifiRssi;				/**< Wifi RSSI, dbm */
-		RelayMap* 	_map;					/**< Map of all system relays */
 		
 	private:
+		HackerboatStateStorage *healthStorage = NULL;
 		bool valid;
-		ADCInput& _adc;
+		ADCInput* _adc;
 };
 
 

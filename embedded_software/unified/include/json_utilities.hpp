@@ -38,6 +38,9 @@ inline json_t *json(const char *s) {
 inline json_t *json(json_int_t i) {
 	return json_integer(i);
 }
+inline json_t *json(int i) {
+	return json_integer((json_int_t)i);
+}
 inline json_t *json(double v) {
 	return json_real(v);
 }

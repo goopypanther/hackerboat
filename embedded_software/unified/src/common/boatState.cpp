@@ -136,6 +136,31 @@ json_t* BoatState::pack () const {
 	return output;
 }
 
+bool BoatState::parse (json_t* input ) {
+	std::string recordTimeIn, lastContactIn, lastRCin, boatMode, navMode, autoMode, rcMode;
+	bool result = true;
+	
+	result &= GET_VAR(currentWaypoint);
+	result &= GET_VAR(waypointStrength);
+	result &= GET_VAR(faultString);
+	result &= GET_VAR(boatMode);
+	result &= GET_VAR(navMode);
+	result &= GET_VAR(autoMode);
+	result &= GET_VAR(rcMode);
+	result &= ::parse(json_object_get(input, "recordTime"), &recordTimeIn);
+	result &= ::parse(json_object_get(input, "lastContact"), &lastContactIn);
+	result &= ::parse(json_object_get(input, "lastRC"), &lastRCin);
+	result &= HackerboatState::parseTime(recordTimeIn, this->recordTime);
+	result &= HackerboatState::parseTime(lastContactIn, this->lastContact);
+	result &= HackerboatState::parseTime(lastRCin, this->lastRC);
+	result &= boatModeNames.get(boatMode, &(this->_boat));
+	result &= navModeNames.get(boatMode, &(this->_nav));
+	result &= autoModeNames.get(boatMode, &(this->_auto));
+	result &= rcModeNames.get(boatMode, &(this->_rc));
+	
+	return result;
+}
+
 HackerboatStateStorage &BoatState::storage () {
 	if (!stateStorage) {
 		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE), 

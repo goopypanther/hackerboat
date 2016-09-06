@@ -52,6 +52,7 @@
 #define SELFTEST_DELAY		(30s)
 #define ADC_START_COUNT		(30)
 #define ADC_START_PERIOD	(500us)
+#define ADC_LOCK_TIMEOUT	(500us)
 
 // Log file names
 #define MAIN_LOGFILE		"main.log"
@@ -62,6 +63,7 @@
 #define GPS_DB_FILE			"gps.db"
 #define AIS_DB_FILE			"ais.db"
 #define STATE_DB_FILE		"state.db"
+#define HEALTH_DB_FILE		"health.db"
 
 #endif /* CONFIG_H */
 
