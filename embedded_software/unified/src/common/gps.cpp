@@ -200,9 +200,9 @@ bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
 	row.assertWidth(17);
 	
 	std::string recordTimeStr = row.string_field(0);
-	result &= parseTime(recordTimeStr, this->recordTime);
+	result &= HackerboatState::parseTime(recordTimeStr, this->recordTime);
 	std::string gpsTimeStr = row.string_field(1);
-	result &= parseTime(gpsTimeStr, this->gpsTime);
+	result &= HackerboatState::parseTime(gpsTimeStr, this->gpsTime);
 	this->fix.lat = row.double_field(2);
 	this->fix.lon = row.double_field(3);
 	this->track = row.double_field(4);

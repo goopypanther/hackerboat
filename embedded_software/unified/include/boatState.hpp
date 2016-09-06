@@ -2,7 +2,7 @@
  * Hackerboat Beaglebone boat state module
  * boatState.hpp
  * see the Hackerboat documentation for more details
- * Written by Pierce Nichols, Jan 2016
+ * Written by Pierce Nichols, Aug 2016
  *
  * Version 0.1: First alpha
  *
@@ -46,6 +46,8 @@ class BoatState : public HackerboatStateStorable {
 		json_t *pack () const;
 		bool isValid ();
 		HackerboatStateStorage& storage();
+		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
+		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 		
 		bool insertFault (const std::string fault);					/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const std::string fault);					/**< Remove the named fault from the fault string. Returns false if not present */
@@ -74,18 +76,19 @@ class BoatState : public HackerboatStateStorable {
 		Location				launchPoint;		/**< Location of the launch point */
 		Waypoints				waypointList;		/**< Waypoints to follow */
 		WaypointActionEnum		action;				/**< Action to take at the last waypoint */
-		Dodge&					diversion;			/**< Avoid obstacles! */
-		HealthMonitor&			health;				/**< Current state of the boat's health */
+		Dodge*					diversion;			/**< Avoid obstacles! */
+		HealthMonitor*			health;				/**< Current state of the boat's health */
 		Pin						disarmInput;		/**< Disarm input from power distribution box */
 		Pin						armInput;			/**< Arm input from power distribution box */
-		RCInput&				rc;					/**< RC input thread */
-		ADCInput&				adc;				/**< ADC input thread */
-		GPSdInput&				gps;				/**< GPS input thread */
+		RCInput*				rc;					/**< RC input thread */
+		ADCInput*				adc;				/**< ADC input thread */
+		GPSdInput*				gps;				/**< GPS input thread */
 		RelayMap*				relays;				/**< Pointer to relay singleton */
 		
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:
+		HackerboatStateStorage *stateStorage = NULL;
 		std::string 	faultString;
 		BoatModeEnum 	_boat;
 		NavModeEnum		_nav;
@@ -93,4 +96,39 @@ class BoatState : public HackerboatStateStorable {
 		RCModeEnum 		_rc;
 	
 };
+
+
+const EnumNameTable<BoatModeEnum> BoatState::boatModeNames = {
+	"Start",
+	"SelfTest",
+	"Disarmed",
+	"Fault",
+	"Navigation",
+	"ArmedTest",
+	"None"
+};
+
+const EnumNameTable<NavModeEnum> BoatState::navModeNames = {
+	"Idle",
+	"Fault",
+	"RC",
+	"Autonomous",
+	"None"
+};
+
+const EnumNameTable<AutoModeEnum> BoatState::autoModeNames = {
+	"Idle",
+	"Waypoint",
+	"Return",
+	"Anchor,"
+	"None"
+};
+
+const EnumNameTable<RCModeEnum> BoatState::rcModeNames = {
+	"Idle",
+	"Rudder",
+	"Course",
+	"None"
+};
+
 #endif 

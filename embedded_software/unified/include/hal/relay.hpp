@@ -67,7 +67,7 @@ class RelayMap {
 		json_t *pack () const;								/**< Pack status for all of relays in the map. */
 		
 	private:
-		RelayMap () = default;								/**< Hark, a singleton! */
+		RelayMap ();										/**< Hark, a singleton! */
 		RelayMap (RelayMap const&) = delete;				/**< Hark, a singleton! */
 		RelayMap& operator=(RelayMap const&) = delete;		/**< Hark, a singleton! */
 		static RelayMap 			_instance;				/**< Hark, a singleton! */

@@ -187,6 +187,11 @@ public:
 		assert(column < count);
 		return sqlite3_column_double(sth, column + offset);
 	}
+	int int_field(int column) const {
+		assert(column >= 0);
+		assert(column < count);
+		return sqlite3_column_int(sth, column + offset);
+	}
 	bool isnull(int column) const {
 		assert(column >= 0);
 		assert(column < count);

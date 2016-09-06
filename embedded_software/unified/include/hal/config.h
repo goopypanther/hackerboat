@@ -61,6 +61,7 @@
 #define DB_DIRECTORY		"/tmp" /* Or override with DB_DIRECTORY environment variable */
 #define GPS_DB_FILE			"gps.db"
 #define AIS_DB_FILE			"ais.db"
+#define STATE_DB_FILE		"state.db"
 
 #endif /* CONFIG_H */
 
