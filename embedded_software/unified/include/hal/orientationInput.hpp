@@ -47,6 +47,9 @@ class OrientationInput : public InputThread {
 		bool execute();											/**< Gather input	*/
 		void setAxis(SensorOrientation axis) {_axis = axis;};	/**< Set the gravity axis */
 		SensorOrientation getAxis () {return _axis;};			/**< Get the gravity axis */
+		~OrientationInput () {
+			this->kill(); 
+		}
 	
 	private:
 		bool getData ();
@@ -56,6 +59,8 @@ class OrientationInput : public InputThread {
 	
 		LSM303						compass { IMU_I2C_BUS };
 		L3GD20						gyro { IMU_I2C_BUS };
+		
+		std::thread *myThread;
 		
 		Orientation 				_current;
 		bool 						sensorsValid = false;

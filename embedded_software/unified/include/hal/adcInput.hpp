@@ -1,7 +1,7 @@
 /******************************************************************************
  * Hackerboat ADC input module
  * hal/adcInput.hpp
- * This module reads orientation data
+ * This module reads analog input data
  *
  * See the Hackerboat documentation for more details
  * Written by Pierce Nichols, Aug 2016
@@ -21,30 +21,41 @@
 #include <vector>
 #include <map>
 #include <inttypes.h>
-#include "inputThread.hpp"
+#include "hal/inputThread.hpp"
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 
 class ADCInput : public InputThread {
 	public:
-		ADCInput(void);	
+		ADCInput(void) {inputsValid = init();};	
 		
-		std::map<std::string, int> 		getRawValues (void);							/**< Return the raw ADC values */
+		bool 							isValid() {return inputsValid;};				/**< Check if the hardware connections are good */
+		bool							init();											/**< Intialize all inputs */
+		bool 							begin();										/**< Start the input thread */
+		bool 							execute();										/**< Gather input	*/
+		std::map<std::string, double> 	getRawValues (void) {return _raw;};				/**< Return the raw ADC values, in volts */
 		std::map<std::string, double> 	getScaledValues (void);							/**< Return the scaled ADC values */
-		bool 							setOffsets (std::map<std::string, int> offsets);		/**< Set the offsets for all channels. */
-		bool 							setScales (std::map<std::string, double> scales);	/**< Set the scaling for all channels. */
-		std::map<std::string, int> 		getOffsets();									/**< Get the offsets for all channels. */
-		std::map<std::string, double> 	getScales();									/**< Get the scaling for all channels. */
+		bool 							setOffsets (std::map<std::string, double> offsets);/**< Set the offsets for all channels. */
+		bool 							setScales (std::map<std::string, double> scales);/**< Set the scaling for all channels. */
+		std::map<std::string, double> 	getOffsets() {return _offsets;};				/**< Get the offsets for all channels. */
+		std::map<std::string, double> 	getScales() {return _scales;};					/**< Get the scaling for all channels. */
+		~ADCInput () {
+			this->kill(); 
+		}
 		
 		using InputThread::getLastInputTime;
 		
 	private:
 		ADC128D818 						upper { ADC_UPPER_ADDR, ADC_I2C_BUS };
 		ADC128D818 						lower { ADC_LOWER_ADDR, ADC_I2C_BUS };
+		std::vector<std::string>		upperChannels ADC_UPPER_INITIALIZER;
+		std::vector<std::string>		lowerChannels ADC_LOWER_INITIALIZER;
 		std::string						batmonPath;
-		std::map<std::string, int> 		_raw;
-		std::map<std::string, int> 		_offsets;
+		std::map<std::string, double> 	_raw;
+		std::map<std::string, double> 	_offsets;
 		std::map<std::string, double> 	_scales;
+		bool							inputsValid = false;
+		std::thread *myThread;
 };
 
 #endif /* ADCINPUT_H */

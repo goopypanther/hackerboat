@@ -56,7 +56,7 @@ class Pin {
 		int _port = -1;
 		int _pin = -1;
 		int _gpio = -1;
-		bool _dir = false;
+		bool _dir = false;						
 		bool _state;
 		bool _init = false;
 };

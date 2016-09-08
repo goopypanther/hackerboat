@@ -37,12 +37,17 @@ bool OrientationInput::init() {
 }	
 				
 bool OrientationInput::begin() {
-	return (this->init());
+	if (this->init()) {
+		this->myThread = new std::thread (InputThread::InputThreadRunner(this));
+		myThread->detach();
+		return true;
+	}
+	return false;
 }
 
 bool OrientationInput::execute() {
-	if (!getData()) return false;
 	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	if (!getData()) return false;
 	getAccelOrientation();
 	getMagOrientation();
 	lock.unlock();

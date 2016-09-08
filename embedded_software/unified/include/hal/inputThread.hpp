@@ -20,40 +20,49 @@
 #include <mutex>
 #include "hackerboatRoot.hpp"
 
+
 /**
  * @brief This class defines a common interface and routines for creating input threads.
  */
- 
 class InputThread {
 	public:
 		InputThread() = default;	
 		
+		class InputThreadRunner {
+			public:
+				InputThreadRunner (InputThread *mine) : me(mine) {};
+				void operator()() {						/**< Thread runner function */
+					me->runFlag = true;
+					while (me->runFlag) {
+						me->execute();
+						std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					}
+				};
+				
+			private:
+				InputThread *me;	// The InputThread this function is running
+		};
+		
 		virtual bool begin() = 0;				/**< Start the input thread */
 		virtual bool execute() = 0;				/**< Gather input	*/
-		void runThread() {						/**< Thread runner function */
-			runFlag = true;
-			if (!(this->begin())) return;
-			while (runFlag) {
-				this->execute();
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			}
-		};
 		void kill() {runFlag = false;};			/**< Kill the thread */
 		sysclock getLastInputTime() {			/**< Get the time the last data arrived. */
 			return lastInput;
 		};
 		
 		std::unique_lock<std::timed_mutex> lock {mtx, std::defer_lock};	/**< Locking object for data */
+		friend InputThreadRunner;
 	
 	protected:
 		void setLastInputTime() {lastInput = system_clock::now();};
+		std::atomic_bool runFlag { false };
 		
 	private:
 		sysclock lastInput;						/**< Time that last input was processed */
-		std::atomic_bool runFlag { false };
 		std::timed_mutex mtx;
 	
 };
+
 
 
 #endif 
