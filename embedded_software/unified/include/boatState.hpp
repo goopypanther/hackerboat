@@ -31,6 +31,7 @@
 #include "hal/adcInput.hpp"
 #include "hal/RCinput.hpp"
 #include "hal/gpsdInput.hpp"
+#include "hal/throttle.hpp"
 
 using namespace std;
 
@@ -81,6 +82,7 @@ class BoatState : public HackerboatStateStorable {
 		Pin						disarmInput;		/**< Disarm input from power distribution box */
 		Pin						armInput;			/**< Arm input from power distribution box */
 		Pin						servoEnable;		/**< Pin to turn on the servo power output */
+		Throttle*				throttle;			/**< Throttle object */
 		RCInput*				rc;					/**< RC input thread */
 		ADCInput*				adc;				/**< ADC input thread */
 		GPSdInput*				gps;				/**< GPS input thread */

@@ -99,6 +99,8 @@ BoatModeBase* BoatDisarmedMode::execute() {
 	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
 	
+	state.servoEnable.clear();
+	state.throttle.setThrottle(0);
 	if (state.armInput.get() > 0) {
 		if (hornOn) {
 			if (recordTime > (hornStartTime + HORN_TIME)) {
@@ -117,6 +119,7 @@ BoatModeBase* BoatDisarmedMode::execute() {
 BoatModeBase* BoatFaultMode::execute() {
 	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
+	state.throttle.setThrottle(0);
 	if (state.health->batteryMon > SYSTEM_START_BATTERY_MIN) state.removeFault("Low Battery");
 	if (state.health->isValid()) state.removeFault("Invalid Health Monitor");
 	if (state.rc->isValid()) state.removeFault("RC input invalid");
@@ -136,12 +139,24 @@ BoatModeBase* BoatFaultMode::execute() {
 }
 
 BoatModeBase* BoatNavigationMode::execute() {
-	this->callCount++;
 	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
-	
+	this->callCount++;
+	_oldNavMode = _navMode;
+	_navMode = _navMode->execute();
+	if (_navMode != _oldNavMode) delete _oldNavMode;
+	if (state.faultCount() || (state._navMode == NavModeEnum::FAULT)) {
+		state.setNavMode(NavModeEnum::FAULT);
+		delete _navMode;
+		_navMode = NavModeBase::factory(state, NavModeEnum::FAULT);
+		return BoatModeBase::factory(state, BoatModeEnum::FAULT);
+	}
+	if ((state.disarmInput.get() == 1) || (state.armInput() != 1)) {
+		return BoatModeBase::factory(state, BoatModeEnum::DISARMED)
+	}
+	return this;
 }
 
 BoatModeBase* BoatArmedTestMode::execute() {
 	this->callCount++;
-	
+	return BoatModeBase::factory(state, BoatModeEnum::DISARMED);
 }
