@@ -80,6 +80,7 @@ class BoatState : public HackerboatStateStorable {
 		HealthMonitor*			health;				/**< Current state of the boat's health */
 		Pin						disarmInput;		/**< Disarm input from power distribution box */
 		Pin						armInput;			/**< Arm input from power distribution box */
+		Pin						servoEnable;		/**< Pin to turn on the servo power output */
 		RCInput*				rc;					/**< RC input thread */
 		ADCInput*				adc;				/**< ADC input thread */
 		GPSdInput*				gps;				/**< GPS input thread */

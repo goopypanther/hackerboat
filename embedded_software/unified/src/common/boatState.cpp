@@ -34,11 +34,30 @@
 
 BoatState::BoatState () {
 	relays = RelayMap::instance();
+	if (!disarmInput.isInit()) {
+		disarmInput.setPort(SYSTEM_DISARM_INPUT_PORT);
+		disarmInput.setPin(SYSTEM_DISARM_INPUT_PIN);
+		disarmInput.setDir(false);
+		disarmInput.init();
+	}
+	if (!armInput.isInit()) {
+		armInput.setPort(SYSTEM_ARM_INPUT_PORT);
+		armInput.setPin(SYSTEM_ARM_INPUT_PIN);
+		armInput.setDir(false);
+		armInput.init();
+	}
+	if (!servoEnable.isInit()) {
+		servoEnable.setPort(SYSTEM_SERVO_PORT);
+		servoEnable.setPin(SYSTEM_SERVO_PIN);
+		servoEnable.setDir(false);
+		servoEnable.init();
+	}
 }
 
 bool BoatState::insertFault (const string fault) {
 	if (!this->hasFault(fault)) {
-		faultString += fault + ":";
+		if (this->faultCount()) faultString += ":";
+		faultString += fault;
 	}
 	return true;
 }

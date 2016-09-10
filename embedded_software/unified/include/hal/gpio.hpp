@@ -47,6 +47,7 @@ class Pin {
 		bool pullUp ();							/**< Turn on the internal pull-up */
 		bool pullDown ();						/**< Turn on the internal pull-up */
 		bool floating ();						/**< Turn off internal pull-ups and pull-downs */
+		bool isInit() {return _init;};
 		
 	private:
 		static int getGPIO (int port, int pin);	/**< Return the internal GPIO number for the pin at the given port and pin number */

@@ -47,6 +47,8 @@ class BoatSelfTestMode : public BoatModeBase {
 				state.setBoatMode(BoatModeEnum::SELFTEST);
 			};  
 		BoatModeBase* execute();							/**< Execute the current state */
+	private:
+		BoatState oldState;
 };
 
 class BoatDisarmedMode : public BoatModeBase {
@@ -56,6 +58,9 @@ class BoatDisarmedMode : public BoatModeBase {
 				state.setBoatMode(BoatModeEnum::DISARMED);
 			}; 
 		BoatModeBase* execute();							/**< Execute the current state */
+	private:
+		sysclock hornStartTime;
+		bool hornOn = false;
 };
 
 class BoatFaultMode : public BoatModeBase {
@@ -80,6 +85,7 @@ class BoatNavigationMode : public BoatModeBase {
 		~BoatNavigationMode () {delete _navMode;};			/**< Explicit destructor to make sure we nuke the submode */
 	private:
 		NavModeBase* _navMode;
+		NavModeBase* _oldNavMode;
 };
 
 class BoatArmedTestMode : public BoatModeBase {

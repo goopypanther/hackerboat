@@ -16,36 +16,34 @@
 #define GNSS_BPS			B9600
 #define GNSS_BAUD			Baud9600
 #define GNSS_TIMEOUT		(180)
-#define ARDUINO_TIMEOUT		(60)
-#define ARDUINO_REST_TTY	"/dev/ttyS2"		
-#define ARDUINO_LOG_TTY		"/dev/ttyS1"
-#define ARDUINO_REST_UART	UART2		
-#define ARDUINO_LOG_UART	UART1
-#define ARDUINO_BPS			B115200	
-#define ARDUINO_BAUD		Baud115200	
-#define ARDUINO_RESET_PIN	GPIO_48
 #define FRAME_LEN_NS		(500000000)		/// State machine execution frame length, in nanoseconds
 #define UART_TIMEOUT		(100)		/// UART contention timeout, in milliseconds
 #define UART_READ_TIMEOUT	(15)		/// UART read timeout, in milliseconds
 #define SHORE_TIMEOUT		(60)
-#define HORN_TIME			(2)
 #define RETURN_TIMEOUT		(180)
 #define LAUNCH_WAYPOINT		(0)
 
 // New hardware declarations
 
-#define ADC_UPPER_ADDR		(0x1f)
-#define ADC_LOWER_ADDR		(0x1d)
-#define ADC_I2C_BUS			(I2CBus::BUS_2)
-#define IMU_I2C_BUS			(I2CBus::BUS_1)
-#define THROTTLE_MAX		(5)
-#define THROTTLE_MIN		(-5)
-#define LIGHTS_COUNT		(72)
-#define AIS_MAX_TIME		(600s)
-#define AIS_MAX_DISTANCE	(10)
-#define CONFIG_PIN_PATH		"/usr/local/bin/config-pin"
+#define ADC_UPPER_ADDR				(0x1f)
+#define ADC_LOWER_ADDR				(0x1d)
+#define ADC_I2C_BUS					(I2CBus::BUS_2)
+#define IMU_I2C_BUS					(I2CBus::BUS_1)
+#define THROTTLE_MAX				(5)
+#define THROTTLE_MIN				(-5)
+#define LIGHTS_COUNT				(72)
+#define AIS_MAX_TIME				(600s)
+#define AIS_MAX_DISTANCE			(10)
+#define CONFIG_PIN_PATH				"/usr/local/bin/config-pin"
+#define SYSTEM_DISARM_INPUT_PORT	(8)
+#define SYSTEM_DISARM_INPUT_PIN		(22)
+#define SYSTEM_ARM_INPUT_PORT		(8)
+#define SYSTEM_ARM_INPUT_PIN		(20)
+#define	SYSTEM_SERVO_PORT			(8)
+#define SYSTEM_SERVO_PIN			(19)
 
 // Timeouts
+
 #define GPS_SENSE_TIMEOUT	(5s)
 #define RC_SENSE_TIMEOUT	(500ms)
 #define IMU_SENSE_TIMEOUT	(500ms)
@@ -54,6 +52,12 @@
 #define ADC_START_COUNT		(30)  
 #define ADC_START_PERIOD	(500us)
 #define ADC_LOCK_TIMEOUT	(500us)
+#define DISARM_PULSE_LEN	(500us)
+#define HORN_TIME			(2s)
+
+// Voltage/current limits
+
+#define SYSTEM_START_BATTERY_MIN	(12.0)
 
 // Log file names
 #define MAIN_LOGFILE		"main.log"
