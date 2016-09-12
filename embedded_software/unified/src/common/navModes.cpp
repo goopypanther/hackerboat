@@ -36,25 +36,26 @@ NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 			return new NavAutoMode(state, state.getNavMode());
 		case NavModeEnum::NONE:
 		default:
-			return new NavIdleMode(state, state.getBoatMode());
+			return new NavIdleMode(state, state.getNavMode());
 			break;
 	}
 }
 
 NavModeBase *NavIdleMode::execute () {
-	state.throttle->setThrottle(0);
-	state.rudder->write(0);
+	_state.throttle->setThrottle(0);
+	_state.rudder->write(0);
+	_state.servoEnable.set();
 	return this;
 }
 
 NavModeBase *NavFaultMode::execute () {
-	
+	return this;
 }
 
 NavModeBase *NavRCMode::execute () {
-	
+	return this;
 }
 
 NavModeBase *NavAutoMode::execute () {
-	
+	return this;
 }

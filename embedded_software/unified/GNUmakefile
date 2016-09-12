@@ -64,6 +64,8 @@ LIBHACKERBOAT_SRCS+= json_ostream.cpp
 LIBHACKERBOAT_SRCS+= gpio.cpp
 LIBHACKERBOAT_SRCS+= servo.cpp
 LIBHACKERBOAT_SRCS+= boatState.cpp
+LIBHACKERBOAT_SRCS+= boatModes.cpp
+LIBHACKERBOAT_SRCS+= navModes.cpp
 LIBHACKERBOAT_SRCS+= healthMonitor.cpp
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))

@@ -23,14 +23,11 @@
 #include <map>
 #include "hal/config.h"
 #include "hackerboatRoot.hpp"
-#include "boatState.hpp"
 
 class Command {
 	public:
 		Command ();
-		Command (BoatState &state);
-		Command (BoatState &state, std::string cmd, json_t *args = NULL);
-		bool attachState (BoatState &state);
+		Command (std::string cmd, json_t *args = NULL);
 		bool setCommand (std::string cmd, json_t *args = NULL);
 		std::string getCmd();
 		json_t *getArgs();
@@ -38,6 +35,6 @@ class Command {
 	private:
 		std::string 	_cmd;
 		json_t 			*args = NULL;
-}
+};
 
 #endif

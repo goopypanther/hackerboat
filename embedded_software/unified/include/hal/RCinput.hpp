@@ -31,7 +31,7 @@ class RCInput : public InputThread {
 		int getThrottle (void);			/**< Get the last throttle position from the RC input 				*/
 		double getRudder (void);		/**< Get the last rudder position from the RC input 				*/
 		double getCourse ();			/**< Get the last course command, in degrees. */	
-		
+		bool isValid ();
 		RCModeEnum getRCMode (void);	/**< Get the last mode command from the RC input 					*/	
 		bool getFailSafe ();			/**< Returns true if in failsafe mode. */
 			

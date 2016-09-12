@@ -26,6 +26,7 @@
 class NavModeBase : public StateMachineBase<NavModeEnum, BoatState> {
 	public:
 		static NavModeBase* factory(BoatState& state, NavModeEnum mode);			/**< Create a new object of the given mode */
+		virtual NavModeBase* execute () = 0;
 		virtual ~NavModeBase() {};
 	protected:
 		NavModeBase (BoatState& state, NavModeEnum last, NavModeEnum thisMode) :

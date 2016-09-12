@@ -19,6 +19,7 @@
 #include "boatState.hpp"
 #include "navModes.hpp"
 #include "boatModes.hpp"
+#include "hackerboatRoot.hpp"
 #include "hal/relay.hpp"
 #include "hal/gpio.hpp"
 #include "json_utilities.hpp"
@@ -51,48 +52,48 @@ BoatModeBase* BoatModeBase::factory(BoatState& state, BoatModeEnum mode) {
 }
 
 BoatModeBase* BoatStartMode::execute() {
-	state.getLastRecord();	// grab the last record, so we can go into that state if necessary. 
-	return BoatModeBase::factory(state, BoatModeEnum::SELFTEST);
+	_state.getLastRecord();	// grab the last record, so we can go into that state if necessary. 
+	return BoatModeBase::factory(_state, BoatModeEnum::SELFTEST);
 }
 
 BoatModeBase* BoatSelfTestMode::execute() {
-	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
+	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	
 	if (this->callCount == 0) {				// Some housekeeping is in order if we just started up...
-		oldState = state;					// Copy the old state so we can exit into the correct mode. 
-		state.clearFaults();
+		oldState = _state;					// Copy the old state so we can exit into the correct mode. 
+		_state.clearFaults();
 	}	
 	this->callCount++;
-	servoEnable.set();
+	_state.servoEnable.set();
 	
 	// check for errors
-	if (state.health->batteryMon < SYSTEM_START_BATTERY_MIN) state.insertFault("Low Battery");
-	if (!state.health->isValid()) state.insertFault("Invalid Health Monitor");
-	if (!state.rc->isValid()) state.insertFault("RC input invalid");
-	if (!state.adc->isValid()) state.insertFault("ADC input invalid");
-	if (!state.gps->isValid()) state.insertFault("GPS input invalid");
-	if (!state.lastFix->isValid()) state.insertFault("Last GPS fix invalid");
-	if (state.disarmInput.get() < 0) state.insertFault("Disarm input invalid");
-	if (state.armInput.get() < 0) state.insertFault("Arm input invalid");
-	if (state.disarmInput.get() == state.armInput.get()) state.insertFault("Arm/disarm inputs do not agree");
-	for (auto const r : *(state.relays->getmap())) {
-		if (!r.second.isInitialized()) state.insertFault("Relay " + r.first +  " did not initialize");
-		if (r.second.isFaulted()) state.insertFault("Relay " + r.first + " is faulted")
+	if (_state.health->batteryMon < SYSTEM_START_BATTERY_MIN) _state.insertFault("Low Battery");
+	if (!_state.health->isValid()) _state.insertFault("Invalid Health Monitor");
+	if (!_state.rc->isValid()) _state.insertFault("RC input invalid");
+	if (!_state.adc->isValid()) _state.insertFault("ADC input invalid");
+	if (!_state.gps->isValid()) _state.insertFault("GPS input invalid");
+	if (!_state.lastFix.isValid()) _state.insertFault("Last GPS fix invalid");
+	if (_state.disarmInput.get() < 0) _state.insertFault("Disarm input invalid");
+	if (_state.armInput.get() < 0) _state.insertFault("Arm input invalid");
+	if (_state.disarmInput.get() == _state.armInput.get()) _state.insertFault("Arm/disarm inputs do not agree");
+	for (auto r : *(_state.relays->getmap())) {
+		if (!r.second.isInitialized()) _state.insertFault("Relay " + r.first +  " did not initialize");
+		if (r.second.isFaulted()) _state.insertFault("Relay " + r.first + " is faulted");
 	}
 	
 	// Are we done?
-	if (recordTime > (start + SELFTEST_DELAY) {
-		if (state.faultCount()) {
-			return BoatModeBase::factory(state, BoatModeEnum::FAULT);
+	if (_state.recordTime > (start + SELFTEST_DELAY)) {
+		if (_state.faultCount()) {
+			return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 		} else {
-			if ((oldState.boat() = BoatModeEnum::NAVIGATION) && (state.armInput.get() > 0)) {
-				return new BoatNavigationMode(state, state.getBoatMode(), oldState.getNavMode());
+			if ((oldState.getBoatMode() == BoatModeEnum::NAVIGATION) && (_state.armInput.get() > 0)) {
+				return new BoatNavigationMode(_state, _state.getBoatMode(), oldState.getNavMode());
 			} else {
-				state.relays->get("DISARM").set();
+				_state.relays->get("DISARM").set();
 				std::this_thread::sleep_for(DISARM_PULSE_LEN);
-				state.relays->get("DISARM").clear();
-				servoEnable.clear();
-				return BoatModeBase::factory(state, BoatModeEnum::DISARMED);
+				_state.relays->get("DISARM").clear();
+				_state.servoEnable.clear();
+				return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
 			}
 		}
 	}
@@ -100,130 +101,130 @@ BoatModeBase* BoatSelfTestMode::execute() {
 }
 
 BoatModeBase* BoatDisarmedMode::execute() {
-	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
+	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
 	
-	state.servoEnable.clear();
-	state.throttle->setThrottle(0);
+	_state.servoEnable.clear();
+	_state.throttle->setThrottle(0);
 	
 	// read the next command
-	if (state.cmdvec.size()) {
-		if (state.cmdvec.front().getCmd() == "SetMode") {
+	if (_state.cmdvec.size()) {
+		if (_state.cmdvec.front().getCmd() == "SetMode") {
 			BoatModeEnum newmode;
 			std::string newmodename;
-			::parse(json_object_get(input, "mode"), &newmodename);
-			if (boatModeNames.get(newmodename, &newmode)) {
-				state.cmdvec.erase(state.cmdvec.begin());
+			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
+			if (_state.boatModeNames.get(newmodename, &newmode)) {
+				_state.cmdvec.erase(_state.cmdvec.begin());
 				if (newmode == BoatModeEnum::SELFTEST) {
-					return BoatModeBase::factory(state, newmode);
+					return BoatModeBase::factory(_state, newmode);
 				} else if (newmode == BoatModeEnum::NAVIGATION) {
-					state.relays->get("ENABLE").set();
+					_state.relays->get("ENABLE").set();
 					std::this_thread::sleep_for(ARM_PULSE_LEN);
-					state.relays->get("ENABLE").clear();
-					return BoatModeBase::factory(state, newmode);
+					_state.relays->get("ENABLE").clear();
+					return BoatModeBase::factory(_state, newmode);
 				}
-			}
+			} else _state.cmdvec.erase(_state.cmdvec.begin());	// drop the one we just read from queue
 		} else {
-			state.cmdvec.front().execute();
+			_state.cmdvec.front().execute();
+			_state.cmdvec.erase(_state.cmdvec.begin());
 		}
-		state.cmdvec.erase(state.cmdvec.begin());
 	}
 	
 	// check if the boat has been armed
-	if (state.armInput.get() > 0) {
+	if (_state.armInput.get() > 0) {
 		if (hornOn) {
-			if (recordTime > (hornStartTime + HORN_TIME)) {
-				state.relays->get("HORN").clear();
-				return BoatModeBase::factory(state, BoatModeEnum::NAVIGATION);
+			if (_state.recordTime > (hornStartTime + HORN_TIME)) {
+				_state.relays->get("HORN").clear();
+				return BoatModeBase::factory(_state, BoatModeEnum::NAVIGATION);
 			}
 		} else {
 			hornOn = true;
-			hornStartTime = sysclock::now();
-			state.relays->get("HORN").set();
+			hornStartTime = std::chrono::system_clock::now();
+			_state.relays->get("HORN").set();
 		}
 	}
 	
 	// check if we've got a fault
-	if (state.faultCount()) {
-		return BoatModeBase::factory(state, BoatModeEnum::FAULT);
+	if (_state.faultCount()) {
+		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}	
 	return this;
 }
 
 BoatModeBase* BoatFaultMode::execute() {
-	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
+	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	if (!callCount) {						// Execute only on the first invocation... 
-		state.relays->get("DISARM").set();
+		_state.relays->get("DISARM").set();
 		std::this_thread::sleep_for(DISARM_PULSE_LEN);
-		state.relays->get("DISARM").clear();
+		_state.relays->get("DISARM").clear();
 	}
 	this->callCount++;
-	state.throttle->setThrottle(0);
+	_state.throttle->setThrottle(0);
 	
 	// read the command stack
-	if (state.cmdvec.size()) {
-		if (state.cmdvec.front().getCmd() == "SetMode") {
+	if (_state.cmdvec.size()) {
+		if (_state.cmdvec.front().getCmd() == "SetMode") {
 			BoatModeEnum newmode;
 			std::string newmodename;
-			::parse(json_object_get(input, "mode"), &newmodename);
-			if (boatModeNames.get(newmodename, &newmode)) {
+			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
+			if (_state.boatModeNames.get(newmodename, &newmode)) {
 				if (newmode == BoatModeEnum::SELFTEST) {
-					state.cmdvec.erase(state.cmdvec.begin());
-					return BoatModeBase::factory(state, newmode);
+					_state.cmdvec.erase(_state.cmdvec.begin());
+					return BoatModeBase::factory(_state, newmode);
 				}
-			}
+			} else _state.cmdvec.erase(_state.cmdvec.begin());
 		} else {
-			state.cmdvec.front().execute();
+			_state.cmdvec.front().execute();
+			_state.cmdvec.erase(_state.cmdvec.begin());
 		}
-		state.cmdvec.erase(state.cmdvec.begin());
 	}
 	
 	// check if the error has cleared
-	if (state.health->batteryMon > SYSTEM_START_BATTERY_MIN) state.removeFault("Low Battery");
-	if (state.health->isValid()) state.removeFault("Invalid Health Monitor");
-	if (state.rc->isValid()) state.removeFault("RC input invalid");
-	if (state.adc->isValid()) state.removeFault("ADC input invalid");
-	if (state.gps->isValid()) state.removeFault("GPS input invalid");
-	if (state.lastFix->isValid()) state.removeFault("Last GPS fix invalid");
-	if (state.disarmInput.get() > 0) state.removeFault("Disarm input invalid");
-	if (state.armInput.get() > 0) state.removeFault("Arm input invalid");
-	if (state.disarmInput.get() != state.armInput.get()) state.removeFault("Arm/disarm inputs do not agree");
-	for (auto const r : *(state.relays->getmap())) {
-		if (r.second.isInitialized()) state.removeFault("Relay " + r.first +  " did not initialize");
-		if (!r.second.isFaulted()) state.removeFault("Relay " + r.first + " is faulted")
+	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
+	if (_state.health->isValid()) _state.removeFault("Invalid Health Monitor");
+	if (_state.rc->isValid()) _state.removeFault("RC input invalid");
+	if (_state.adc->isValid()) _state.removeFault("ADC input invalid");
+	if (_state.gps->isValid()) _state.removeFault("GPS input invalid");
+	if (_state.lastFix.isValid()) _state.removeFault("Last GPS fix invalid");
+	if (_state.disarmInput.get() > 0) _state.removeFault("Disarm input invalid");
+	if (_state.armInput.get() > 0) _state.removeFault("Arm input invalid");
+	if (_state.disarmInput.get() != _state.armInput.get()) _state.removeFault("Arm/disarm inputs do not agree");
+	for (auto r : *(_state.relays->getmap())) {
+		if (r.second.isInitialized()) _state.removeFault("Relay " + r.first +  " did not initialize");
+		if (!r.second.isFaulted()) _state.removeFault("Relay " + r.first + " is faulted");
 	}
 
 	// check if we've cleared our error
-	if (state.faultCount()) {
+	if (_state.faultCount()) {
 		return this;
-	} else return BoatModeBase::factory(state, this->getLastMode());
+	} else return BoatModeBase::factory(_state, this->getLastMode());
 }
 
 BoatModeBase* BoatNavigationMode::execute() {
-	this->recordTime = sysclock::now();		// Get a consistent time for everything in this invocation
+	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
 	
 	// read the next command
-	if (state.cmdvec.size()) {
-		if (state.cmdvec.front().getCmd() == "SetMode") {
+	if (_state.cmdvec.size()) {
+		if (_state.cmdvec.front().getCmd() == "SetMode") {
 			BoatModeEnum newmode;
 			std::string newmodename;
-			::parse(json_object_get(input, "mode"), &newmodename);
-			if (boatModeNames.get(newmodename, &newmode)) {
-				state.cmdvec.erase(state.cmdvec.begin());
+			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
+			if (_state.boatModeNames.get(newmodename, &newmode)) {
+				_state.cmdvec.erase(_state.cmdvec.begin());
 				if (newmode == BoatModeEnum::SELFTEST) {
-					return BoatModeBase::factory(state, newmode);
-				} else if (newmode == BoatModeEnum::DISARM) {
-					state.relays->get("DISARM").set();
+					return BoatModeBase::factory(_state, newmode);
+				} else if (newmode == BoatModeEnum::DISARMED) {
+					_state.relays->get("DISARM").set();
 					std::this_thread::sleep_for(DISARM_PULSE_LEN);
-					state.relays->get("DISARM").clear();
-					return BoatModeBase::factory(state, newmode);
+					_state.relays->get("DISARM").clear();
+					return BoatModeBase::factory(_state, newmode);
 				}
-			}
+			} else _state.cmdvec.erase(_state.cmdvec.begin());
 		} else {
-			state.cmdvec.front().execute();
+			_state.cmdvec.front().execute();
+			_state.cmdvec.erase(_state.cmdvec.begin());
 		}
-		state.cmdvec.erase(state.cmdvec.begin());
 	}
 	
 	// execute the current nav state
@@ -232,14 +233,14 @@ BoatModeBase* BoatNavigationMode::execute() {
 	if (_navMode != _oldNavMode) delete _oldNavMode;
 
 	// check if we have a fault or a disarm signal
-	if (state.faultCount() || (state._navMode == NavModeEnum::FAULT)) {
-		state.setNavMode(NavModeEnum::FAULT);
+	if (_state.faultCount() || (_state.getNavMode() == NavModeEnum::FAULT)) {
+		_state.setNavMode(NavModeEnum::FAULT);
 		delete _navMode;
-		_navMode = NavModeBase::factory(state, NavModeEnum::FAULT);
-		return BoatModeBase::factory(state, BoatModeEnum::FAULT);
+		_navMode = NavModeBase::factory(_state, NavModeEnum::FAULT);
+		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}
-	if ((state.disarmInput.get() == 1) || (state.armInput() != 1)) {
-		return BoatModeBase::factory(state, BoatModeEnum::DISARMED)
+	if ((_state.disarmInput.get() == 1) || (_state.armInput.get() != 1)) {
+		return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
 	}
 	
 	return this;
@@ -247,5 +248,5 @@ BoatModeBase* BoatNavigationMode::execute() {
 
 BoatModeBase* BoatArmedTestMode::execute() {
 	this->callCount++;
-	return BoatModeBase::factory(state, BoatModeEnum::DISARMED);
+	return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
 }

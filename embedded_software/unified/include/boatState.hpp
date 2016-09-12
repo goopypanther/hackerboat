@@ -32,6 +32,7 @@
 #include "hal/RCinput.hpp"
 #include "hal/gpsdInput.hpp"
 #include "hal/throttle.hpp"
+#include "hal/servo.hpp"
 #include "command.hpp"
 
 using namespace std;

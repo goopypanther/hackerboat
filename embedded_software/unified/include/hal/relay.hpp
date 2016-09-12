@@ -44,14 +44,14 @@ class Relay {
 		bool set() {return _drive->set();};			/**< Set the output state of this relay to ON */
 		bool clear() {return _drive->clear();};		/**< Set the output state of this relay to OFF */
 		bool isFaulted() {return _fault->get();};	/**< Check if this relay has a fault */
-		double current() const;						/**< Get the current, in amps */
-		RelayTuple getState() ;						/**< Get the current state of the relay as a tuple */
-		std::string& name() const {return const _name;};		/**< Get a reference to the name of this relay */
-		Pin* output() const {return const _drive;};	/**< Get a pointer to the drive pin */
+		double current();							/**< Get the current, in amps */
+		RelayTuple getState();						/**< Get the current state of the relay as a tuple */
+		std::string& name() {return _name;};		/**< Get a reference to the name of this relay */
+		Pin* output() {return _drive;};				/**< Get a pointer to the drive pin */
 		bool output(Pin* drive);					/**< Define a new drive pin */
-		Pin* fault() const {return const _fault;};	/**< Get a pointer to the fault pin */
+		Pin* fault() {return _fault;};				/**< Get a pointer to the fault pin */
 		bool fault(Pin* fault);						/**< Define a new fault pin */
-		ADCInput* adc() const {return const _adc;};	/**< Get a pointer to the ADCInput object this relay uses to measure current. */
+		ADCInput* adc() {return _adc;};				/**< Get a pointer to the ADCInput object this relay uses to measure current. */
 		bool adc(ADCInput* adc);					/**< Define a new ADCInput object */
 		bool isInitialized () {return initialized;};
 		
@@ -71,9 +71,7 @@ class RelayMap {
 		Relay& get (std::string name) {return relays->at(name);}	/**< Get a reference to the named relay */
 		json_t *pack ();									/**< Pack status for all of relays in the map. */
 		bool adc(ADCInput* adc);							/**< Set the ADC for all relays */
-		std::map<std::string, Relay> *getmap const {
-			return const relays;
-		}
+		std::map<std::string, Relay> *getmap () {return relays;};
 		
 	private:
 		RelayMap ();										/**< Hark, a singleton! */

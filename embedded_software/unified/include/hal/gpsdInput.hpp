@@ -43,6 +43,7 @@ class GPSdInput : public InputThread {
 		AISBase& getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
 		AISBase& getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
 		int pruneAIS();								/**< Call the prune() function of each AIS contact. */
+		bool isValid();
 		
 	private:
 		string 				_host;

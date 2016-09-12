@@ -51,7 +51,7 @@ bool Relay::init() {
 	return false;
 }
 
-double Relay::current() const {
+double Relay::current() {
 	return this->_adc->getScaledValues().at(this->_name);
 }
 

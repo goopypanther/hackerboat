@@ -37,7 +37,7 @@ template <typename T, typename U> class StateMachineBase {
 		
 	protected:
 		int callCount = 0;
-		const U& _state;
+		U& _state;
 		const sysclock start;
 		const T _thisMode;
 		const T _lastMode;
