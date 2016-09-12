@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat URL fetch module
- * hal/fetchULR.hpp
+ * hal/fetchURL.hpp
  * This module is an interface to the URL fetching functionality.
  * On a setup with a regular network connection, this works through libcurl
  * Use of a FONA will be different
@@ -26,20 +26,25 @@
 #include "hal/config.h"
 #include "hackerboatRoot.hpp"
 #include "hal/inputThread.hpp"
+#include "boatState.hpp"
+#include "command.hpp"
 
-typedef map<std::string, HackerboatState*> objectMap;	
+typedef map<std::string, HackerboatState*> objectMap;
+typedef vector<Command> cmdVector;
 
 class Fetch : public InputThread {
 	public:
 		Fetch (std::string url, 		/**< Create a fetch object pointed at the given URL with the given output objectMap of data to send and input objectMap of data to receive */
+				BoatState &state,
 				objectMap &output,		
-				objectMap &input);	
+				cmdVector &input);	
 		bool begin ();					/**< initialize communications (only called once.) */
 		bool execute ();				/**< transmit the contents of output and get input */
 		bool setUrl (std::string url);	/**< Set the target URL */
 		std::string getURL ();			/**< Get the current target URL */
 		bool scrub ();					/**< Delete all saved input data */
 		objectMap& getInputs ();		/**< Get a reference to the map of data received */
+		bool isComplete();	
 		
 	private:
 		bool globalInit ();					/**< Calls libcurl's global initializer only once */

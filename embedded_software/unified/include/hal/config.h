@@ -52,7 +52,8 @@
 #define ADC_START_COUNT		(30)  
 #define ADC_START_PERIOD	(500us)
 #define ADC_LOCK_TIMEOUT	(500us)
-#define DISARM_PULSE_LEN	(500us)
+#define DISARM_PULSE_LEN	(50ms)
+#define ARM_PULSE_LEN		(50ms)
 #define HORN_TIME			(2s)
 
 // Voltage/current limits

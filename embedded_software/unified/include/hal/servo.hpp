@@ -18,10 +18,10 @@
 #include <string>
 #include <inttypes.h>
 
-#define MIN_PULSE_WIDTH			1000	// the shortest pulse sent to a servo  
-#define MAX_PULSE_WIDTH      	2000	// the longest pulse sent to a servo 
+#define MIN_PULSE_WIDTH			1000	// the shortest pulse sent to a servo, microseconds  
+#define MAX_PULSE_WIDTH      	2000	// the longest pulse sent to a servo, microseconds 
 #define DEFAULT_PULSE_WIDTH  	1500	// default pulse width when servo is attached
-#define DEFAULT_FREQUENCY    	50		// minumim time to refresh servos in microseconds 
+#define DEFAULT_FREQUENCY    	50000	// servo period
 
 class Servo {
 	public:
