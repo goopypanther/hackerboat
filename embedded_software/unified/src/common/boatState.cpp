@@ -31,6 +31,7 @@
 #include "boatState.hpp"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
+#define MAKE_FUNC(func) { #func, std::function<bool(json_t*, BoatState*)>( Command::func ) }
 
 BoatState::BoatState () {
 	relays = RelayMap::instance();
@@ -264,3 +265,185 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 	
 	return result;
 }
+
+void BoatState::pushCmd (std::string name, json_t* args) {
+	cmdvec.push_back(Command(this, name, args));
+}
+
+int BoatState::executeCmds (int num) {
+	if (num == 0) num = this->cmdvec.size();	// If we got a zero, eat everything
+	int result = 0;
+	for (int i = 0; i < num; i++) {				// iterate over the given set of commands
+		if (cmdvec.size()) {					// this is here to guard against any modifications elsewhere
+			if (cmdvec[0].execute()) result++;	// execute the command at the head of the queue
+			cmdvec.erase(cmdvec.begin());		// remove the head element
+		}
+	}
+	return result;
+}
+
+bool Command::setCommand (std::string cmd, json_t *args) {
+	try {	// check that the requested command exists
+		this->_funcs.at(cmd);
+	} catch (...) {
+		return false;
+	}
+	_cmd = cmd;
+	_args = args;
+	return true;
+}
+
+bool Command::setState(BoatState *state) {
+	if (state) {
+		_state = state;
+		return true;
+	} else return false;
+}
+
+bool Command::setArgs(json_t *args) {
+	_args = args;
+	return true;
+}
+
+bool Command::SetMode(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	std::string modeString;
+	if (::parse(json_object_get(args, "mode"), &modeString)) {
+		BoatModeEnum newmode;
+		if (state->boatModeNames.get(modeString, &newmode)) {
+			state->setBoatMode(newmode);
+			return true;
+		} else return false;
+	}  
+	return false;
+}
+
+bool Command::SetNavMode(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	std::string modeString;
+	if (::parse(json_object_get(args, "mode"), &modeString)) {
+		NavModeEnum newmode;
+		if (state->navModeNames.get(modeString, &newmode)) {
+			state->setNavMode(newmode);
+			return true;
+		} else return false;
+	} 
+	return false;
+}
+
+bool Command::SetAutoMode(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	std::string modeString;
+	if (::parse(json_object_get(args, "mode"), &modeString)) {
+		AutoModeEnum newmode;
+		if (state->autoModeNames.get(modeString, &newmode)) {
+			state->setAutoMode(newmode);
+			return true;
+		} else return false;
+	} 
+	return false;
+}
+
+bool Command::SetHome(json_t* args, BoatState *state) {
+	if (!state) return false;
+	if ((!args) && state->lastFix.isValid()) {
+		state->launchPoint = state->lastFix.fix;
+		return true;
+	} else {
+		Location newhome;
+		if ((newhome.parse(json_object_get(args, "location"))) && (newhome.isValid())) {
+			state->launchPoint = newhome;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Command::ReverseShell(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::SetWaypoint(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	int number;
+	if (::parse(json_object_get(args, "number"), &number)) {
+		if (number > state->waypointList.count()) number = state->waypointList.count();
+		if (number < 0) number = 0;
+		state->waypointList.setCurrent(number);
+		return true;
+	}
+	return false;
+}
+
+bool Command::SetWaypointAction(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	std::string modeString;
+	if (::parse(json_object_get(args, "action"), &modeString)) {
+		WaypointActionEnum action;
+		if (state->waypointList.actionNames.get(modeString, &action)) {
+			state->waypointList.setAction(action);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Command::DumpPathKML(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::DumpWaypointKML(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::DumpObstacleKML(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::DumpAIS(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::FetchWaypoints(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::PushPath(json_t* args, BoatState *state) {
+	return false;
+}
+
+bool Command::SetPID(json_t* args, BoatState *state) {
+	if ((!state) || (!args)) return false;
+	json_t *input = args;
+	double Kp, Ki, Kd;
+	bool result = false;
+	if (GET_VAR(Kp)) {
+		std::get<0>(state->K) = Kp;
+		result = true;
+	}
+	if (GET_VAR(Ki)) {
+		std::get<1>(state->K) = Ki;
+		result = true;
+	}
+	if (GET_VAR(Kd)) {
+		std::get<2>(state->K) = Kd;
+		result = true;
+	}
+	return result;
+}
+
+map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
+	MAKE_FUNC(SetMode),
+	MAKE_FUNC(SetNavMode),
+	MAKE_FUNC(SetHome),
+	MAKE_FUNC(ReverseShell),
+	MAKE_FUNC(SetWaypoint),
+	MAKE_FUNC(SetWaypointAction),
+	MAKE_FUNC(DumpPathKML),
+	MAKE_FUNC(DumpWaypointKML),
+	MAKE_FUNC(DumpObstacleKML),
+	MAKE_FUNC(DumpAIS),
+	MAKE_FUNC(FetchWaypoints),
+	MAKE_FUNC(PushPath),
+	MAKE_FUNC(SetPID)
+};

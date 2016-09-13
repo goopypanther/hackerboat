@@ -27,7 +27,6 @@
 #include "hackerboatRoot.hpp"
 #include "hal/inputThread.hpp"
 #include "boatState.hpp"
-#include "command.hpp"
 
 typedef map<std::string, HackerboatState*> objectMap;
 typedef vector<Command> cmdVector;
