@@ -117,8 +117,8 @@ BoatModeBase* BoatDisarmedMode::execute() {
 			std::this_thread::sleep_for(ARM_PULSE_LEN);
 			_state.relays->get("ENABLE").clear();
 			return BoatModeBase::factory(_state, newmode);
-		}
-	} else _state.setBoatMode(BoatModeEnum::DISARMED);
+		} else _state.setBoatMode(BoatModeEnum::DISARMED);
+	} 
 	
 	// check if the boat has been armed
 	if (_state.armInput.get() > 0) {
@@ -156,8 +156,8 @@ BoatModeBase* BoatFaultMode::execute() {
 	if (newmode != BoatModeEnum::FAULT) {
 		if (newmode == BoatModeEnum::SELFTEST) {
 			return BoatModeBase::factory(_state, newmode);
-		} 
-	} else _state.setBoatMode(BoatModeEnum::FAULT);
+		} else _state.setBoatMode(BoatModeEnum::FAULT);
+	} 
 	
 	// check if the error has cleared
 	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
@@ -194,10 +194,10 @@ BoatModeBase* BoatNavigationMode::execute() {
 			std::this_thread::sleep_for(DISARM_PULSE_LEN);
 			_state.relays->get("DISARM").clear();
 			return BoatModeBase::factory(_state, newmode);
-		}
-	} else _state.setBoatMode(BoatModeEnum::NAVIGATION);
+		} else _state.setBoatMode(BoatModeEnum::NAVIGATION);
+	} 
 	
-	// execute the current nav state
+	// execute the current nav mode
 	_oldNavMode = _navMode;
 	_navMode = _navMode->execute();
 	if (_navMode != _oldNavMode) delete _oldNavMode;

@@ -24,6 +24,8 @@
 class AutoModeBase : public StateMachineBase<AutoModeEnum, BoatState> {
 	public:
 		static AutoModeBase* factory(BoatState& state, AutoModeEnum mode);			/**< Create a new object of the given mode */
+		virtual AutoModeBase* execute () = 0;
+		virtual ~AutoModeBase() {};
 	protected:
 		AutoModeBase (BoatState& state, AutoModeEnum last, AutoModeEnum thisMode) :	/**< Protected constructor so subclas constructors can call the superclass constructor */
 			StateMachineBase<AutoModeEnum, BoatState> (state, last, thisMode) {};

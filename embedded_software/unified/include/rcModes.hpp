@@ -24,6 +24,7 @@
 class RCModeBase : public StateMachineBase<RCModeEnum, BoatState> {
 	public:
 		static RCModeBase* factory(BoatState& state, RCModeEnum mode);			/**< Create a new object of the given mode */
+		virtual RCModeBase* execute () = 0;
 		virtual ~RCModeBase () {};												/**< Explicit destructor to make sure any connections etc get properly closed out */
 	protected:	
 		RCModeBase (BoatState& state, RCModeEnum last, RCModeEnum thisMode) :	/**< Hidden constructor to allow subclasses to call the super class's constructor */

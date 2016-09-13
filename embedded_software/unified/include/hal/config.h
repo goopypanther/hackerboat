@@ -41,6 +41,10 @@
 #define SYSTEM_ARM_INPUT_PIN		(20)
 #define	SYSTEM_SERVO_PORT			(8)
 #define SYSTEM_SERVO_PIN			(19)
+#define RC_AUTO_SWITCH				(4)
+#define RC_MODE_SWITCH				(5)
+#define RC_COURSE_SELECTOR			(6)
+#define RC_MIDDLE_POSN				(1023)
 
 // Timeouts
 

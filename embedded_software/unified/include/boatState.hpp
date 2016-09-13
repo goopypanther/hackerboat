@@ -176,6 +176,7 @@ const EnumNameTable<RCModeEnum> BoatState::rcModeNames = {
 	"Idle",
 	"Rudder",
 	"Course",
+	"Failsafe",
 	"None"
 };
 

@@ -31,16 +31,15 @@ class RCInput : public InputThread {
 		int getThrottle (void);			/**< Get the last throttle position from the RC input 				*/
 		double getRudder (void);		/**< Get the last rudder position from the RC input 				*/
 		double getCourse ();			/**< Get the last course command, in degrees. */	
+		int getChannel (int channel);	/**< Return the raw value of the given channel */
 		bool isValid ();
-		RCModeEnum getRCMode (void);	/**< Get the last mode command from the RC input 					*/	
-		bool getFailSafe ();			/**< Returns true if in failsafe mode. */
+		bool isFailSafe ();				/**< Returns true if in failsafe mode. */
 			
 		~RCInput();						/**< Explicit destructor to make sure we close out the serial port and kill the thread.	*/
 				
 	private:
 		int _throttle = 0;
 		double _rudder = 0;
-		RCModeEnum _mode = RCModeEnum::NONE;
 		std::string _path;
 		int devFD;
 };
