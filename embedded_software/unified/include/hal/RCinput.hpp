@@ -19,21 +19,28 @@
 #include <thread>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <inttypes.h>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "hal/config.h"
 #include "hal/inputThread.hpp"
+
+#define SBUS_STARTBYTE			0x0f
+#define SBUS_ENDBYTE			0x00
+#define SBUS_BUF_LEN			25
  
 class RCInput : public InputThread {
 	public:
-		RCInput (std::string devpath);	/**< Create a rcInput reader attached to serial port devpath 		*/
-		RCInput (void);					/**< Create a rcInput reader attached to serial port defined in hal/config.h */
-		int getThrottle (void);			/**< Get the last throttle position from the RC input 				*/
-		double getRudder (void);		/**< Get the last rudder position from the RC input 				*/
+		RCInput (std::string devpath = RC_SERIAL_PATH);	/**< Create a rcInput reader attached to serial port devpath 		*/
+		int getThrottle ();				/**< Get the last throttle position from the RC input 				*/
+		double getRudder ();			/**< Get the last rudder position from the RC input 				*/
 		double getCourse ();			/**< Get the last course command, in degrees. */	
 		int getChannel (int channel);	/**< Return the raw value of the given channel */
-		bool isValid ();
-		bool isFailSafe ();				/**< Returns true if in failsafe mode. */
+		bool isValid () {return _valid;};
+		bool isFailSafe () {return failsafe;};		/**< Returns true if in failsafe mode. */
+		bool begin();
+		bool execute();
 			
 		~RCInput();						/**< Explicit destructor to make sure we close out the serial port and kill the thread.	*/
 				
@@ -41,7 +48,13 @@ class RCInput : public InputThread {
 		int _throttle = 0;
 		double _rudder = 0;
 		std::string _path;
-		int devFD;
+		int devFD = -1;
+		bool failsafe = false;
+		bool _valid = false;
+		std::vector<uint16_t> rawChannels { RC_CHANNEL_COUNT };
+		std::string inbuf;
+		int _errorFrames = 0;
+		int _goodFrames = 0;
+		std::thread *myThread;
 };
- 
 #endif

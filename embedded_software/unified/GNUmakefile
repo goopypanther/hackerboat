@@ -43,6 +43,7 @@ run: svctree
 .PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= logs.cpp  
+LIBHACKERBOAT_SRCS+= RCinput.cpp
 LIBHACKERBOAT_SRCS+= adcInput.cpp
 LIBHACKERBOAT_SRCS+= throttle.cpp
 LIBHACKERBOAT_SRCS+= relay.cpp
