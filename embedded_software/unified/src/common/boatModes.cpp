@@ -107,28 +107,18 @@ BoatModeBase* BoatDisarmedMode::execute() {
 	_state.servoEnable.clear();
 	_state.throttle->setThrottle(0);
 	
-	// read the next command
-	if (_state.cmdvec.size()) {
-		if (_state.cmdvec.front().getCmd() == "SetMode") {
-			BoatModeEnum newmode;
-			std::string newmodename;
-			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
-			if (_state.boatModeNames.get(newmodename, &newmode)) {
-				_state.cmdvec.erase(_state.cmdvec.begin());
-				if (newmode == BoatModeEnum::SELFTEST) {
-					return BoatModeBase::factory(_state, newmode);
-				} else if (newmode == BoatModeEnum::NAVIGATION) {
-					_state.relays->get("ENABLE").set();
-					std::this_thread::sleep_for(ARM_PULSE_LEN);
-					_state.relays->get("ENABLE").clear();
-					return BoatModeBase::factory(_state, newmode);
-				}
-			} else _state.cmdvec.erase(_state.cmdvec.begin());	// drop the one we just read from queue
-		} else {
-			_state.cmdvec.front().execute();
-			_state.cmdvec.erase(_state.cmdvec.begin());
-		}
-	}
+	// check if a command has changed our state
+	BoatModeEnum newmode = _state.getBoatMode();
+	if (newmode != BoatModeEnum::DISARMED) {
+		if (newmode == BoatModeEnum::SELFTEST) {
+			return BoatModeBase::factory(_state, newmode);
+		} else if (newmode == BoatModeEnum::NAVIGATION) {
+			_state.relays->get("ENABLE").set();
+			std::this_thread::sleep_for(ARM_PULSE_LEN);
+			_state.relays->get("ENABLE").clear();
+			return BoatModeBase::factory(_state, newmode);
+		} else _state.setBoatMode(BoatModeEnum::DISARMED);
+	} 
 	
 	// check if the boat has been armed
 	if (_state.armInput.get() > 0) {
@@ -162,22 +152,12 @@ BoatModeBase* BoatFaultMode::execute() {
 	_state.throttle->setThrottle(0);
 	
 	// read the command stack
-	if (_state.cmdvec.size()) {
-		if (_state.cmdvec.front().getCmd() == "SetMode") {
-			BoatModeEnum newmode;
-			std::string newmodename;
-			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
-			if (_state.boatModeNames.get(newmodename, &newmode)) {
-				if (newmode == BoatModeEnum::SELFTEST) {
-					_state.cmdvec.erase(_state.cmdvec.begin());
-					return BoatModeBase::factory(_state, newmode);
-				}
-			} else _state.cmdvec.erase(_state.cmdvec.begin());
-		} else {
-			_state.cmdvec.front().execute();
-			_state.cmdvec.erase(_state.cmdvec.begin());
-		}
-	}
+	BoatModeEnum newmode = _state.getBoatMode();
+	if (newmode != BoatModeEnum::FAULT) {
+		if (newmode == BoatModeEnum::SELFTEST) {
+			return BoatModeBase::factory(_state, newmode);
+		} else _state.setBoatMode(BoatModeEnum::FAULT);
+	} 
 	
 	// check if the error has cleared
 	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
@@ -205,29 +185,19 @@ BoatModeBase* BoatNavigationMode::execute() {
 	this->callCount++;
 	
 	// read the next command
-	if (_state.cmdvec.size()) {
-		if (_state.cmdvec.front().getCmd() == "SetMode") {
-			BoatModeEnum newmode;
-			std::string newmodename;
-			::parse(json_object_get(_state.cmdvec.front().getArgs(), "mode"), &newmodename);
-			if (_state.boatModeNames.get(newmodename, &newmode)) {
-				_state.cmdvec.erase(_state.cmdvec.begin());
-				if (newmode == BoatModeEnum::SELFTEST) {
-					return BoatModeBase::factory(_state, newmode);
-				} else if (newmode == BoatModeEnum::DISARMED) {
-					_state.relays->get("DISARM").set();
-					std::this_thread::sleep_for(DISARM_PULSE_LEN);
-					_state.relays->get("DISARM").clear();
-					return BoatModeBase::factory(_state, newmode);
-				}
-			} else _state.cmdvec.erase(_state.cmdvec.begin());
-		} else {
-			_state.cmdvec.front().execute();
-			_state.cmdvec.erase(_state.cmdvec.begin());
-		}
-	}
+	BoatModeEnum newmode = _state.getBoatMode();
+	if (newmode != BoatModeEnum::NAVIGATION) {
+		if (newmode == BoatModeEnum::SELFTEST) {
+			return BoatModeBase::factory(_state, newmode);
+		} else if (newmode == BoatModeEnum::DISARMED) {
+			_state.relays->get("DISARM").set();
+			std::this_thread::sleep_for(DISARM_PULSE_LEN);
+			_state.relays->get("DISARM").clear();
+			return BoatModeBase::factory(_state, newmode);
+		} else _state.setBoatMode(BoatModeEnum::NAVIGATION);
+	} 
 	
-	// execute the current nav state
+	// execute the current nav mode
 	_oldNavMode = _navMode;
 	_navMode = _navMode->execute();
 	if (_navMode != _oldNavMode) delete _oldNavMode;

@@ -11,3 +11,6 @@
 	path = embedded_software/unified/submodules/date
 	url = https://github.com/logos-electromechanical/date.git
 
+[submodule "embedded_software/unified/submodules/GeographicLib"]
+	path = embedded_software/unified/submodules/GeographicLib
+	url = git://git.code.sf.net/p/geographiclib/code

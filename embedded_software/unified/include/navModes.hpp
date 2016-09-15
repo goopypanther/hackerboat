@@ -55,9 +55,10 @@ class NavRCMode : public NavModeBase {
 			_rcMode(RCModeBase::factory(state, submode)) {};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		RCModeBase* getRCMode () {return _rcMode;};							/**< Get the current RC mode object */
-		~NavRCMode () {delete _rcMode;};									/**< Explicit destructor to make sure we take care of the submode */
+		~NavRCMode () {delete _rcMode; delete _oldRCmode;};					/**< Explicit destructor to make sure we take care of the submode */
 	private:
 		RCModeBase* _rcMode;
+		RCModeBase* _oldRCmode;
 };
 
 class NavAutoMode : public NavModeBase {
@@ -67,9 +68,10 @@ class NavAutoMode : public NavModeBase {
 			_autoMode(AutoModeBase::factory(state, submode)) {};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		AutoModeBase* getAutoMode () {return _autoMode;};					/**< Get the current autonomous mode object */
-		~NavAutoMode () {delete _autoMode;};								/**< Explicit destructor to make sure we take care of the submode */
+		~NavAutoMode () {delete _autoMode; delete _oldAutoMode;};			/**< Explicit destructor to make sure we take care of the submode */
 	private:
 		AutoModeBase* _autoMode;
+		AutoModeBase* _oldAutoMode;
 };
 
 #endif

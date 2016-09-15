@@ -31,6 +31,10 @@
 #define IMU_I2C_BUS					(I2CBus::BUS_1)
 #define THROTTLE_MAX				(5)
 #define THROTTLE_MIN				(-5)
+#define RUDDER_MAX					(100)
+#define RUDDER_MIN					(-100)
+#define COURSE_MAX					(360.0)
+#define COURSE_MIN					(0.0)
 #define LIGHTS_COUNT				(72)
 #define AIS_MAX_TIME				(600s)
 #define AIS_MAX_DISTANCE			(10)
@@ -42,12 +46,25 @@
 #define	SYSTEM_SERVO_PORT			(8)
 #define SYSTEM_SERVO_PIN			(19)
 
+// RC defines
+#define RC_THROTTLE_CH				(0)
+#define RC_RUDDER_CH				(3)
+#define RC_AUTO_SWITCH				(4)
+#define RC_MODE_SWITCH				(5)
+#define RC_COURSE_SELECTOR			(6)
+#define RC_MIN						(0)
+#define RC_MAX						(2047)
+#define RC_MIDDLE_POSN				(1023)
+#define RC_SERIAL_PATH				"/dev/ttyS5"
+#define RC_CHANNEL_COUNT			(18)
+
 // Timeouts
 
 #define GPS_SENSE_TIMEOUT	(5s)
 #define RC_SENSE_TIMEOUT	(500ms)
 #define IMU_SENSE_TIMEOUT	(500ms)
 #define IMU_LOCK_TIMEOUT	(300us)
+#define RC_LOCK_TIMEOUT		(300us)
 #define SELFTEST_DELAY		(30s)
 #define ADC_START_COUNT		(30)  
 #define ADC_START_PERIOD	(500us)

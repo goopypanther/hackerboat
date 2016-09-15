@@ -33,9 +33,46 @@
 #include "hal/gpsdInput.hpp"
 #include "hal/throttle.hpp"
 #include "hal/servo.hpp"
-#include "command.hpp"
+#include "hal/orientationInput.hpp"
 
 using namespace std;
+class BoatState;	// forward declaration so this compiles
+
+class Command {
+	public:
+		Command () {};
+		Command (BoatState *state) : _state(state) {};
+		Command (BoatState *state, std::string cmd, json_t *args = NULL) :
+			_state(state), _cmd(cmd), _args(args) {
+				this->_funcs.at(_cmd);	// force an exception on an invalid command name
+			};
+		bool setCommand (std::string cmd, json_t *args = NULL);
+		bool setState (BoatState *state);
+		bool setArgs (json_t *args);
+		std::string getCmd() {return _cmd;};
+		json_t *getArgs() {return _args;};
+		bool execute () {return (this->_funcs[_cmd])(_args, _state);};
+	private:
+		static map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
+		BoatState 		*_state = NULL;
+		std::string 	_cmd;
+		json_t 			*_args = NULL;
+		// here begins the functions that implement incoming commands
+		static bool SetMode(json_t* args, BoatState *state);
+		static bool SetNavMode(json_t* args, BoatState *state);
+		static bool SetAutoMode(json_t* args, BoatState *state);
+		static bool SetHome(json_t* args, BoatState *state);
+		static bool ReverseShell(json_t* args, BoatState *state);
+		static bool SetWaypoint(json_t* args, BoatState *state);
+		static bool SetWaypointAction(json_t* args, BoatState *state);
+		static bool DumpPathKML(json_t* args, BoatState *state);
+		static bool DumpWaypointKML(json_t* args, BoatState *state);
+		static bool DumpObstacleKML(json_t* args, BoatState *state);
+		static bool DumpAIS(json_t* args, BoatState *state);
+		static bool FetchWaypoints(json_t* args, BoatState *state);
+		static bool PushPath(json_t* args, BoatState *state);
+		static bool SetPID(json_t* args, BoatState *state);
+};
 
 class BoatState : public HackerboatStateStorable {
 	public:
@@ -70,6 +107,10 @@ class BoatState : public HackerboatStateStorable {
 		bool setRCmode (RCModeEnum m) {_rc = m; return true;};		/**< Set RC mode to the given value */
 		bool setRCmode (std::string mode);							/**< Set RC mode to the given value */
 		RCModeEnum getRCMode () {return _rc;};
+		int commandCnt () {return cmdvec.size();};					/**< Return the number of commands waiting to be executed */
+		void pushCmd (std::string name, json_t* args = NULL);		/**< Add a command to the back of the command queue */
+		void flushCmds () {cmdvec.clear();};						/**< Empty the command queue */
+		int executeCmds (int num);									/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
 			
 		int 					currentWaypoint; 	/**< The current waypoint */
 		double					waypointStrength;	/**< Relative strength of the waypoint */
@@ -89,12 +130,13 @@ class BoatState : public HackerboatStateStorable {
 		RCInput*				rc;					/**< RC input thread */
 		ADCInput*				adc;				/**< ADC input thread */
 		GPSdInput*				gps;				/**< GPS input thread */
+		OrientationInput*		orient;				/**< Orientation input thread */
 		RelayMap*				relays;				/**< Pointer to relay singleton */
 		
-		std::vector<Command>	cmdvec;
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:
+		std::vector<Command>	cmdvec;
 		HackerboatStateStorage *stateStorage = NULL;
 		std::string 	faultString;
 		BoatModeEnum 	_boat;
@@ -103,7 +145,6 @@ class BoatState : public HackerboatStateStorable {
 		RCModeEnum 		_rc;
 	
 };
-
 
 const EnumNameTable<BoatModeEnum> BoatState::boatModeNames = {
 	"Start",
@@ -135,6 +176,7 @@ const EnumNameTable<RCModeEnum> BoatState::rcModeNames = {
 	"Idle",
 	"Rudder",
 	"Course",
+	"Failsafe",
 	"None"
 };
 

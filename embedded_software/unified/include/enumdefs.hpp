@@ -53,9 +53,10 @@ enum class AutoModeEnum : int  {
  */
 enum class RCModeEnum : int  {
 	IDLE		= 0,		/**< RC system is deactivated 						*/
-	RUDDER		= 1,  		/**< Boat is navigating along a list of waypoints.	*/
-	COURSE		= 2,  		/**< Return to launch site.							*/
-	NONE		= 3			/**< State of the nav system is currently unknown	*/
+	RUDDER		= 1,  		/**< Manual rudder and throttle						*/
+	COURSE		= 2,  		/**< Steer the course selected on the controller.	*/
+	FAILSAFE	= 3,		/**< RC is in failsafe mode							*/
+	NONE		= 4			/**< State of the RC system is currently unknown	*/
 };
 
 /**
@@ -64,9 +65,9 @@ enum class RCModeEnum : int  {
 
 enum class WaypointActionEnum : int {
 	IDLE,		/**< Do nothing -- navigation and autonomous mode both idle */
-	ANCHOR,		/**< Anchor at the last waypoint */
-	RETURN,		/**< Return to launch site */
-	REPEAT,		/**< Go back to the first waypoint. */
+	ANCHOR,		/**< Anchor at the last waypoint. If triggered from RC Failsafe mode, anchor at current location. */
+	RETURN,		/**< Return to launch site. */
+	REPEAT,		/**< Go back to the first waypoint. If triggered from RC Failsafe mode, proceed with waypoints */
 	NONE		/**< No action specified */
 };
 

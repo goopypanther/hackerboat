@@ -83,7 +83,7 @@ class BoatNavigationMode : public BoatModeBase {
 			};
 		NavModeBase* getNavMode () {return _navMode;};		/**< Get the current nav mode object */
 		BoatModeBase* execute();							/**< Execute the current state */
-		~BoatNavigationMode () {delete _navMode;};			/**< Explicit destructor to make sure we nuke the submode */
+		~BoatNavigationMode () {delete _navMode; delete _oldNavMode;};	/**< Explicit destructor to make sure we nuke the submode */
 	private:
 		NavModeBase* _navMode;
 		NavModeBase* _oldNavMode;

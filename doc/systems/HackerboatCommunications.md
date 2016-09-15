@@ -161,7 +161,6 @@ There MAY be any number of commands, and the boat SHALL execute them in the orde
 	DumpAIS
 	FetchWaypoints(optional: repository)
 	PushPath(optional: repository)
-	GetPID
 	SetPID(Kp, Ki, Kd)
 
 See Commands section, below, for details. 
