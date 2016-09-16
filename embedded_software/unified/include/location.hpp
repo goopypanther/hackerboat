@@ -20,6 +20,11 @@
 #include <string>
 #include "hackerboatRoot.hpp"
 #include "twovector.hpp"
+#include <GeographicLib/Geodesic.hpp>
+#include <GeographicLib/Rhumb.hpp>
+#include <GeographicLib/Constants.hpp>
+
+using namespace GeographicLib;
 
 enum class CourseTypeEnum {
 	GreatCircle,
@@ -49,9 +54,14 @@ class Location : public HackerboatState {
 		TwoVector target (const Location& dest, CourseTypeEnum type = CourseTypeEnum::GreatCircle) const;	/**< Get the course and distance to destination as a TwoVector, in meters */
 		Location project (TwoVector& projection, CourseTypeEnum type = CourseTypeEnum::GreatCircle);		/**< Get the Location at the given meter-valued TwoVector from the current location */
 		
-		double lat;								/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
-		double lon;								/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
-
+		double 		lat;							/**< Latitude in degrees north of the equator. Values from -90.0 to 90.0, inclusive. */
+		double 		lon;							/**< Longitude in degrees east of the prime meridian. Values from -180.0 to 180.0, inclusive. */		
+	private:
+		static Geodesic *geod;	
+		static Rhumb 	*rhumb;
 };
+
+Geodesic *Location::geod = new Geodesic(Constants::WGS84_a(), Constants::WGS84_f());
+Rhumb *Location::rhumb = new Rhumb(Constants::WGS84_a(), Constants::WGS84_f());
 
 #endif /* LOCATION_H */

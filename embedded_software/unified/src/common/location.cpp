@@ -20,8 +20,8 @@
 #include "json_utilities.hpp"
 #include "twovector.hpp"
 
-/* The radius of Earth, in meters. (We're using a spherical-Earth approximation.) */
-#define R (6239837)
+using namespace GeographicLib;
+
 /* Minimum angle (close to roundoff error) */
 #define MIN_ANG	0.0000001
 
@@ -59,49 +59,36 @@ json_t* Location::pack(void) const {
 
 double Location::bearing (const Location& dest, CourseTypeEnum type) const {
 	if ((!this->isValid()) || (!dest.isValid())) return NAN;
-	double deltaLon = TwoVector::deg2rad(dest.lon - lon);
-	double radLat1 = TwoVector::deg2rad(lat);
-	double radLat2 = TwoVector::deg2rad(dest.lat);
+	double azi1, azi2, dist;
 	switch (type) {
-		case CourseTypeEnum::GreatCircle:
-			return TwoVector::rad2deg(atan2((sin(deltaLon)*cos(radLat2)),
-				     ((cos(radLat1)*sin(radLat2)) -
-				      (sin(radLat1)*cos(radLat2)*cos(deltaLon)))));
+		case CourseTypeEnum::GreatCircle: {
+			geod->Inverse(this->lat, this->lon, dest.lat, dest.lon, azi1, azi2);
+			return azi1;
 			break;
+		}
 		case CourseTypeEnum::RhumbLine:	{
-			double deltaPsi = log(tan(M_PI_4+(radLat2/2))/
-						  tan(M_PI_4+(radLat1/2)));
-			return TwoVector::rad2deg(atan2(deltaLon, deltaPsi));
+			rhumb->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist, azi1);
+			return azi1;
 			break;
 		}
 		default:
 			return NAN;
 	}
+	return NAN;
 }
 
 double Location::distance (const Location& dest, CourseTypeEnum type) const {
 	if ((!this->isValid()) || (!dest.isValid())) return NAN;
-	double deltaLon = TwoVector::deg2rad(dest.lon - this->lon);
-	double deltaLat = TwoVector::deg2rad(dest.lat - this->lat);
-	double radLat1 = TwoVector::deg2rad(this->lat);
-	double radLat2 = TwoVector::deg2rad(dest.lat);
+	double azi1, dist;
 	switch (type) {
-		case CourseTypeEnum::GreatCircle:{
-			double a = pow(sin(deltaLat/2), 2) + (cos(radLat1) * cos(radLat2) * pow(sin(deltaLon/2), 2));
-			double c = 2 * atan2(sqrt(a), sqrt(1-a));
-			return (R * c);	// convert from radians to distance, given a spherical Earth
+		case CourseTypeEnum::GreatCircle: {
+			geod->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist);
+			return dist;
 			break;
 		}
 		case CourseTypeEnum::RhumbLine: {
-			double deltaPsi = log(tan(M_PI_4+(radLat2/2))/
-						  tan(M_PI_4+(radLat1/2)));
-			double q;
-			if (abs(deltaLat) < MIN_ANG) {
-				q = cos(radLat1);
-			} else {
-				q = deltaLat/deltaPsi;
-			}
-			return (R * sqrt((deltaLat * deltaLat) + (q * q * deltaLon * deltaLon)));
+			rhumb->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist, azi1);
+			return dist;
 			break;
 		}
 		default:
@@ -118,32 +105,16 @@ TwoVector Location::target (const Location& dest, CourseTypeEnum type) const {
 	return direction;
 }
 
-Location Location::project (TwoVector& projection, CourseTypeEnum type) {
-	double d = (projection.mag())/R;				// distance traveled in radians, given a spherical Earth
-	double tc = (projection.angleRad());			// course in radians
-	double radLat1 = TwoVector::deg2rad(this->lat);	// latitude, in radians
-	double q;								
+Location Location::project (TwoVector& projection, CourseTypeEnum type) {					
 	Location result;
 	switch (type) {
 		case CourseTypeEnum::GreatCircle: {
-			double radLat = asin(sin(radLat1)*cos(d)+cos(radLat1)*sin(d)*cos(tc));
-			double dlon = atan2((sin(tc)*sin(d)*cos(radLat1)),(cos(d)-(sin(radLat1)*sin(radLat))));
-			result.lat = TwoVector::rad2deg(radLat);
-			result.lon = TwoVector::rad2deg(fmod((radLat1 + dlon + M_PI),(2 * M_PI)));
+			geod->Direct(this->lat, this->lon, projection.angleDeg(), projection.mag(), result.lat, result.lon);
+			return result;
 			break;
 		}
 		case CourseTypeEnum::RhumbLine: {
-			double radLat = radLat1 + (d * cos(tc));
-			if (abs(radLat) > (M_PI_2)) return result;
-			if (abs(radLat - radLat1) < MIN_ANG) {
-				q = cos(radLat);
-			} else {
-				double dphi = log10(tan((radLat/2) + M_PI_4))/(tan((radLat1/2) + M_PI_4));
-				q = (radLat - radLat1)/dphi;
-			}
-			double dlon = -d * sin(tc)/q;
-			result.lat = TwoVector::rad2deg(radLat);
-			result.lon = TwoVector::rad2deg(fmod((radLat1 + dlon + M_PI),(2 * M_PI)));
+			rhumb->Direct(this->lat, this->lon, projection.angleDeg(), projection.mag(), result.lat, result.lon);
 			break;
 		}
 		default:

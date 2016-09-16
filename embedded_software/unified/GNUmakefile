@@ -21,7 +21,7 @@ CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
 LDFLAGS  += -L submodules/lib
 
-LDLIBS += -ljansson -lsqlite3 -lm -lrt
+LDLIBS += -ljansson -lsqlite3 -lm -lrt -lGeographic
 
 export OPTS
 
