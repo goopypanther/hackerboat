@@ -28,7 +28,7 @@
 
 #define SBUS_STARTBYTE			0x0f
 #define SBUS_ENDBYTE			0x00
-#define SBUS_BUF_LEN			25
+#define SBUS_BUF_LEN			25 
  
 class RCInput : public InputThread {
 	public:
@@ -36,9 +36,10 @@ class RCInput : public InputThread {
 		int getThrottle ();				/**< Get the last throttle position from the RC input 				*/
 		double getRudder ();			/**< Get the last rudder position from the RC input 				*/
 		double getCourse ();			/**< Get the last course command, in degrees. */	
+		RCModeEnum getMode();			/**< Returns the correct RC mode, given the current state of the inputs */
 		int getChannel (int channel);	/**< Return the raw value of the given channel */
 		bool isValid () {return _valid;};
-		bool isFailSafe () {return failsafe;};		/**< Returns true if in failsafe mode. */
+		bool isFailSafe () {return failsafe;};	/**< Returns true if in failsafe mode. */
 		bool begin();
 		bool execute();
 			

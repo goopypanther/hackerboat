@@ -33,6 +33,8 @@
 #define THROTTLE_MIN				(-5)
 #define RUDDER_MAX					(100)
 #define RUDDER_MIN					(-100)
+#define RUDDER_DIRECTION			(0)
+#define RUDDER_PERIOD				(100)
 #define COURSE_MAX					(360.0)
 #define COURSE_MIN					(0.0)
 #define LIGHTS_COUNT				(72)
