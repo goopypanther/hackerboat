@@ -12,16 +12,23 @@ GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
 CFLAGS   += $(OPTS) -std=gnu11
-CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread
+CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread 
 CPPFLAGS += -I submodules/include 
 CPPFLAGS += -I include 
 CPPFLAGS += -I submodules/PixelBone 
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
-LDFLAGS  += -L submodules/lib
+#LDFLAGS  += -static
+#LDFLAGS  += -L submodules/lib 
+LDFLAGS  += -L /usr/local/lib
 
-LDLIBS += -ljansson -lsqlite3 -lm -lrt -lGeographic
+LDLIBS += -ljansson
+LDLIBS += -lsqlite3
+LDLIBS += -lm
+LDLIBS += -lrt
+LDLIBS += /usr/local/lib/libGeographic.a
+#LDLIBS += -lGeographic
 
 export OPTS
 
@@ -84,12 +91,13 @@ master: $(MASTER_OBJS) libhackerboat.a
 TEST_OBJS = enumtable_test.o 
 TEST_OBJS += twovector_test.o 
 TEST_OBJS += location_test.o 
+TEST_OBJS += orientation_test.o 
 #TEST_OBJS += sqliteStorage_test.o 
 #TEST_OBJS += smallJson_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
 unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # gtest rules:
 # gtest isn't installed as a library by the debian package because it

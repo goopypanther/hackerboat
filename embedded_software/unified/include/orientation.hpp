@@ -28,11 +28,12 @@
  *
  */
 
+ 
 class Orientation : public HackerboatState {
 	public:
 		Orientation() = default;
-		Orientation(double r, double p, double y) :
-			pitch(p), roll(r), heading(y) {};
+		Orientation(double r, double p, double y, bool mag = true) :
+			pitch(p), roll(r), heading(y), magnetic(mag) {};
 		bool parse (json_t *input);				/**< Parse an orientation object out of json object */
 		json_t *pack () const;					/**< Create a json object of this orientation */
 		bool isValid ();						/**< Check if this is a valid orientation object */
@@ -42,13 +43,16 @@ class Orientation : public HackerboatState {
 		Orientation makeMag ();					/**< Return an Orientation object with the heading as a magnetic (rather than true) heading. Requires location to compute magnetic declination. */
 		bool isMagnetic() {return magnetic;};	/**< Returns true if the heading is magnetic rather than true */ 
 		bool updateDeclination(Location loc);
+		double getDeclination () {return declination;};
 		double roll 	= NAN;			
 		double pitch 	= NAN;
 		double heading 	= NAN;
+	
+	protected:
+		bool magnetic;
 
 	private:
 		double normAxis (double val, const double max, const double min) const;		/**< Normalize given axis */
-		bool magnetic = true;
 		static double declination;
 		static const double constexpr	maxRoll = 180.0;
 		static const double constexpr	minRoll = -180.0;

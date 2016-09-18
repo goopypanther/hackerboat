@@ -15,30 +15,30 @@ TEST (Location, Creation) {
 	Location good {10.0, 10.0};
 	Location bad;
 	
-	ASSERT_TRUE(good.isValid());
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_TRUE(good.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lat = 1;
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lon = -179;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 	bad.lon = -181;
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lon = 179;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 	bad.lon = 181;
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lon = -140;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 	bad.lat = 91;
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lat = 89;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 	bad.lat = -91;
-	ASSERT_FALSE(bad.isValid());
+	EXPECT_FALSE(bad.isValid());
 	bad.lat = -89;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 	bad.lat = 6;
-	ASSERT_TRUE(bad.isValid());
+	EXPECT_TRUE(bad.isValid());
 }
 
 TEST (Location, JSON) {
@@ -48,86 +48,86 @@ TEST (Location, JSON) {
 	
 	loc = u.pack();
 	v.parse(loc);
-	ASSERT_TRUE(toleranceEquals(u.lat, v.lat, TOL));
-	ASSERT_TRUE(toleranceEquals(u.lat, v.lat, TOL));
+	EXPECT_TRUE(toleranceEquals(u.lat, v.lat, TOL));
+	EXPECT_TRUE(toleranceEquals(u.lat, v.lat, TOL));
 }
 
 // Taken from the worked examples in the Aviation Formulary
 TEST (Location, GreatCircleBearing) {
 	Location lax LAX;
 	Location jfk JFK;
-	ASSERT_EQ((int)round(lax.bearing(jfk)), 66);
+	EXPECT_EQ((int)round(lax.bearing(jfk)), 66);
 }
 
 // Taken from the worked examples in the Aviation Formulary
 TEST (Location, RhumbLineBearing) {
 	Location lax LAX;
 	Location jfk JFK;
-	ASSERT_EQ((int)round(lax.bearing(jfk, CourseTypeEnum::RhumbLine)), 79);
-	ASSERT_EQ((int)round(jfk.bearing(lax, CourseTypeEnum::RhumbLine)), (79-180));
+	EXPECT_EQ((int)round(lax.bearing(jfk, CourseTypeEnum::RhumbLine)), 79);
+	EXPECT_EQ((int)round(jfk.bearing(lax, CourseTypeEnum::RhumbLine)), (79-180));
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, GreatCircleDistance) {
 	Location lax LAX;
 	Location jfk JFK;
-	ASSERT_TRUE(toleranceEquals((lax.distance(jfk)/NMTOM), 2144.0, 1));
-	ASSERT_TRUE(toleranceEquals((jfk.distance(lax)/NMTOM), 2144.0, 1));
+	EXPECT_TRUE(toleranceEquals((lax.distance(jfk)/NMTOM), 2193.0, 1));
+	EXPECT_TRUE(toleranceEquals((jfk.distance(lax)/NMTOM), 2193.0, 1));
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, RhumbLineDistance) {
 	Location lax LAX;
 	Location jfk JFK;
-	ASSERT_TRUE(toleranceEquals((lax.distance(jfk, CourseTypeEnum::RhumbLine)/NMTOM), 2164.0, 1));
-	ASSERT_TRUE(toleranceEquals((jfk.distance(lax, CourseTypeEnum::RhumbLine)/NMTOM), 2164.0, 1));
+	EXPECT_TRUE(toleranceEquals((lax.distance(jfk, CourseTypeEnum::RhumbLine)/NMTOM), 2214.0, 1));
+	EXPECT_TRUE(toleranceEquals((jfk.distance(lax, CourseTypeEnum::RhumbLine)/NMTOM), 2214.0, 1));
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, GreatCircleTarget) {
 	Location lax LAX;
 	Location jfk JFK;
 	TwoVector vec;
 	vec = lax.target(jfk);
-	ASSERT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2144.0, 1));
-	ASSERT_EQ((int)round(vec.angleDeg()), 66);
+	EXPECT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2193.0, 1));
+	EXPECT_EQ((int)round(vec.angleDeg()), 66);
 	vec = jfk.target(lax);
-	ASSERT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2144.0, 1));
+	EXPECT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2193.0, 1));
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, RhumbLineTarget) {
 	Location lax LAX;
 	Location jfk JFK;
 	TwoVector vec;
 	vec = lax.target(jfk, CourseTypeEnum::RhumbLine);
-	ASSERT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2164.0, 1));
-	ASSERT_EQ((int)round(vec.angleDeg()), 79);
+	EXPECT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2214.0, 1));
+	EXPECT_EQ((int)round(vec.angleDeg()), 79);
 	vec = jfk.target(lax, CourseTypeEnum::RhumbLine);
-	ASSERT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2164.0, 1));
-	ASSERT_EQ((int)round(vec.angleDeg()), (79-180));
+	EXPECT_TRUE(toleranceEquals((vec.mag()/NMTOM), 2214.0, 1));
+	EXPECT_EQ((int)round(vec.angleDeg()), (79-180));
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, GreatCircleProject) {
 	Location lax LAX;
 	Location jfk JFK;
 	Location loc;
 	TwoVector vec = TwoVector::getVectorDeg(66, (100 * NMTOM));
 	loc = lax.project(vec);
-	ASSERT_TRUE(toleranceEquals(loc.lat, (34.0 + (37.0/60.0)), 0.01));
-	ASSERT_TRUE(toleranceEquals(loc.lon, (116.0 + (33.0/60.0)), 0.01));
+	EXPECT_TRUE(toleranceEquals(loc.lat, 33.666, 0.01));
+	EXPECT_TRUE(toleranceEquals(loc.lon, -116.176, 0.01));
 	
 }
 
-// Taken from the worked examples in the Aviation Formulary
+// Taken from the worked examples in the Aviation Formulary, modified to get the right answers with GeographicLib
 TEST (Location, RhumbLineProject) {
 	Location lax LAX;
 	Location jfk JFK;
 	Location loc;
-	TwoVector vec = TwoVector::getVectorDeg(79.3, (2164 * NMTOM));
+	TwoVector vec = TwoVector::getVectorDeg(79, (2214 * NMTOM));
 	loc = lax.project(vec);
-	ASSERT_TRUE(toleranceEquals(loc.lat, jfk.lat, 0.1));
-	ASSERT_TRUE(toleranceEquals(loc.lon, jfk.lat, 0.1));
+	EXPECT_TRUE(toleranceEquals(loc.lat, 32.1341, 0.1));
+	EXPECT_TRUE(toleranceEquals(loc.lon, -74.0216, 0.1));
 	
 }
