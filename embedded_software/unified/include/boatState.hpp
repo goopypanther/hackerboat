@@ -111,6 +111,8 @@ class BoatState : public HackerboatStateStorable {
 		void pushCmd (std::string name, json_t* args = NULL);		/**< Add a command to the back of the command queue */
 		void flushCmds () {cmdvec.clear();};						/**< Empty the command queue */
 		int executeCmds (int num);									/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
+		std::string getCSV();										/**< Export the current state as a line for a CSV file */
+		std::string getCSVheaders();								/**< Generate CSV headers */
 			
 		int 					currentWaypoint; 	/**< The current waypoint */
 		double					waypointStrength;	/**< Relative strength of the waypoint */

@@ -282,6 +282,63 @@ int BoatState::executeCmds (int num) {
 	return result;
 }
 
+std::string BoatState::getCSV() {
+	std::string csv;
+	csv =  HackerboatState::packTime(recordTime);
+	csv += ",";
+	csv	+= currentWaypoint;
+	csv += ",";
+	csv += waypointStrength;
+	csv += ",";
+	csv	+= HackerboatState::packTime(lastContact);
+	csv += ",";
+	csv += HackerboatState::packTime(lastRC);
+	csv += ",";
+	csv += lastFix.fix.lat;
+	csv += ",";
+	csv += lastFix.fix.lon;
+	csv += ",";
+	csv += lastFix.track;
+	csv += ",";
+	csv += lastFix.speed;
+	csv += ",";
+	csv += lastFix.fixValid;
+	csv += ",";
+	csv += disarmInput.get();
+	csv += ",";
+	csv += armInput.get();
+	csv += ",";
+	csv += servoEnable.get();
+	csv += ",";
+	csv += throttle->getThrottle();
+	csv += ",";
+	csv += rudder->readMicroseconds();
+	csv += ",";
+	csv += orient->getOrientation()->heading;
+	csv += ",";
+	csv += rc->getThrottle();
+	csv += ",";
+	csv += rc->getCourse();
+	csv += ",";
+	csv += rc->isFailSafe();
+	csv += ",";
+	csv += rcModeNames.get(rc->getMode());
+	csv += ",";
+	csv += adc->getRawValues()["mot_i"];
+	csv += ",";
+	csv += adc->getRawValues()["battery_mon"];
+	return csv;
+}
+
+std::string BoatState::getCSVheaders() {
+	std::string headers;
+	headers = "RecordTime,CurrentWaypoint,WaypointStrength,LastContactTime,LastRCTime,";
+	headers += "Lat,Lon,Track,Speed,FixValid,StopButtonState,ArmButtonState,ServoEnableState,";
+	headers += "ThrottlePosition,RudderCommand,CurrentHeading,ThrottleInput,CourseInput,RCFailSafe,";
+	headers += "RCMode,RawMotorCurrent,RawBatteryVoltage";
+	return headers;
+}
+
 bool Command::setCommand (std::string cmd, json_t *args) {
 	try {	// check that the requested command exists
 		this->_funcs.at(cmd);
