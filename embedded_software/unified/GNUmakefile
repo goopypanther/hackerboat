@@ -17,6 +17,7 @@ CPPFLAGS += -I submodules/include
 CPPFLAGS += -I include 
 CPPFLAGS += -I submodules/PixelBone 
 CPPFLAGS += -I submodules/date
+CPPFLAGS += -I submodules/pstreams
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
 #LDFLAGS  += -static
@@ -50,6 +51,7 @@ run: svctree
 .PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= logs.cpp  
+LIBHACKERBOAT_SRCS+= gpsdInput.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
 LIBHACKERBOAT_SRCS+= RCinput.cpp
 LIBHACKERBOAT_SRCS+= adcInput.cpp

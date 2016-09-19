@@ -25,6 +25,10 @@ stty -F /dev/ttyS4 9600 -echo
 config-pin P9.17 i2c
 config-pin P9.18 i2c
 
-# PWM setup
+# PWM setup 
 
 config-pin P9.16 pwm
+
+# start gpsd
+
+gpsd -n -S 3001 /dev/ttyS4

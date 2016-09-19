@@ -144,6 +144,7 @@ class AISShip : AISBase {
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
+		int getMMSI () {return this->mmsi;};
 		
 		AISNavStatus	status = AISNavStatus::UNDEFINED;	/**< Navigation status of target */
 		double			turn = NAN;				/**< Rate of turn, degrees per minute. */
@@ -152,8 +153,8 @@ class AISShip : AISBase {
 		double			heading = NAN;			/**< Magnet heading, degrees. */
 		int				imo = -1;				/**< IMO number */
 		std::string		callsign = "";			/**< Ship's callsign. */
-		std::string		shipname = "";			/**< Name of ship. */
 		AISShipType		shiptype = AISShipType::UNAVAILABLE;	/**< Type of ship. */
+		std::string		shipname = "";			/**< Name of ship. */
 		int				to_bow = -1;			/**< Distance from the GNSS receiver to the bow, in meters. */
 		int				to_stern = -1;			/**< Distance from the GNSS receiver to the stern, in meters. */
 		int				to_port= -1;			/**< Distance from the GNSS receiver to the port, in meters. */

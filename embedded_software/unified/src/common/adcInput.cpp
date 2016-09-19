@@ -97,6 +97,8 @@ bool ADCInput::execute() {
 	for (unsigned int j = 0; j < lowerChannels.size(); j++) {
 		_raw[lowerChannels[j]] = lowerInputs[j];
 	}
+	
+	lock.unlock();
 	return result;
 }
 

@@ -49,6 +49,7 @@ class OrientationInput : public InputThread {
 		SensorOrientation getAxis () {return _axis;};			/**< Get the gravity axis */
 		~OrientationInput () {
 			this->kill(); 
+			delete myThread;
 		}
 	
 	private:
