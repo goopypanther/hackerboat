@@ -53,7 +53,7 @@ class ADC128D818 {
 		void setConversionMode(conv_mode_t mode);		/**< Set the conversion mode */
 		bool begin();									/**< Initialize the sensor. ReferenceMode, OperationMode, and ConversionMode should already be set */
 		int16_t read(uint8_t channel);					/**< Read the given channel. Returns -1 if the channel is disabled. */
-		std::vector<int16_t> readAll (void);			/**< Returns a vector with all channels. Disabled channels are set to -1 */
+		std::vector<int> readAll (void);				/**< Returns a vector with all channels. Disabled channels are set to -1 */
 		double readScaled(uint8_t channel);				/**< Reads data and scales it according to the reference voltage. Returns NAN if the channel is disabled. */
 		std::vector<double> readScaled (void);			/**< Returns a vector with the scaled voltage of all channels. Disabled channels contain NAN. */
 		double readTemperatureScaled();					/**< Read the ADC temperature */

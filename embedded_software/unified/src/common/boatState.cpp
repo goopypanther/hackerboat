@@ -36,7 +36,7 @@
 BoatState::BoatState () {
 	relays = RelayMap::instance();
 	rudder = new Servo();
-	rudder->attach(SYSTEM_SERVO_PORT, SYSTEM_SERVO_PIN);
+	rudder->attach(RUDDER_PORT, RUDDER_PIN);
 	if (!disarmInput.isInit()) {
 		disarmInput.setPort(SYSTEM_DISARM_INPUT_PORT);
 		disarmInput.setPin(SYSTEM_DISARM_INPUT_PIN);
@@ -50,8 +50,8 @@ BoatState::BoatState () {
 		armInput.init();
 	}
 	if (!servoEnable.isInit()) {
-		servoEnable.setPort(SYSTEM_SERVO_PORT);
-		servoEnable.setPin(SYSTEM_SERVO_PIN);
+		servoEnable.setPort(SYSTEM_SERVO_ENB_PORT);
+		servoEnable.setPin(SYSTEM_SERVO_ENB_PIN);
 		servoEnable.setDir(false);
 		servoEnable.init();
 	}

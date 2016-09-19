@@ -3,24 +3,15 @@
 
 #include <chrono>
 
-#define ARDUINO_BUF_LEN 	4096
-#define LOCAL_BUF_LEN		32768
-#define MAX_URI_TOKENS		8
-#define REST_ID				254
-#define REST_NAME			"BoneHackerBoat"
-#define MAX_TOKENS			5
-#define MAX_TOKEN_LEN		64
-#define HASHSEED			0xdeadbeef
 #define GNSS_TTY			"/dev/ttyS4"
 #define GNSS_UART			UART4
 #define GNSS_BPS			B9600
-#define GNSS_BAUD			Baud9600
 #define GNSS_TIMEOUT		(180)
-#define FRAME_LEN_NS		(500000000)		/// State machine execution frame length, in nanoseconds
-#define UART_TIMEOUT		(100)		/// UART contention timeout, in milliseconds
-#define UART_READ_TIMEOUT	(15)		/// UART read timeout, in milliseconds
-#define SHORE_TIMEOUT		(60)
-#define RETURN_TIMEOUT		(180)
+#define FRAME_LEN			(100ms)		/// State machine execution frame length
+#define UART_TIMEOUT		(100ms)		/// UART contention timeout
+#define UART_READ_TIMEOUT	(15ms)		/// UART read timeout
+#define SHORE_TIMEOUT		(60s)
+#define RETURN_TIMEOUT		(180s)
 #define LAUNCH_WAYPOINT		(0)
 
 // New hardware declarations
@@ -45,8 +36,10 @@
 #define SYSTEM_DISARM_INPUT_PIN		(22)
 #define SYSTEM_ARM_INPUT_PORT		(8)
 #define SYSTEM_ARM_INPUT_PIN		(20)
-#define	SYSTEM_SERVO_PORT			(8)
-#define SYSTEM_SERVO_PIN			(19)
+#define	SYSTEM_SERVO_ENB_PORT		(8)
+#define SYSTEM_SERVO_ENB_PIN		(19)
+#define	RUDDER_PORT					(9)
+#define RUDDER_PIN					(16)
 
 // RC defines
 #define RC_THROTTLE_CH				(0)
@@ -98,7 +91,7 @@
 #define ADC_UPPER_INITIALIZER	{"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT", "DIR", "DISARM", "ENABLE"}
 #define ADC_LOWER_INITIALIZER	{"HORN", "mot_i", "mot_v", "charge_v", "charge_i", "aux_0", "aux_1", "servo_i"}								  
 #define ADC128D818_EXTERNAL_REF	(5.0)
-#define ADC_BATMON_PATH			""
+#define ADC_BATMON_PATH			"/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0/in_voltage0_raw"
 #define ADC_BATMON_NAME			"battery_mon"
 
 // Database names

@@ -161,10 +161,10 @@ int16_t ADC128D818::read(uint8_t channel) {
 	return -1;
 }
 
-vector<int16_t> ADC128D818::readAll (void) {
-	std::vector<int16_t> data {8};
+vector<int> ADC128D818::readAll (void) {
+	std::vector<int> data {8};
 	for (int i = 0; i < 7; i++) {
-		data[i] = this->read(i);
+		data[i] = (int)(this->read(i));
 	}
 	return data;
 }
