@@ -116,15 +116,20 @@ submodules:
 .PHONY: submodules
 
 # Functional tests
-FUNCTIONAL_TEST_SRCS = functional_tests/rc_test.cpp
+RC_TEST_SRCS = functional_tests/rc_test.cpp
+ORIENTATION_TEST_SRCS += functional_tests/orientation_test.cpp
 
-FUNCTIONAL_TEST_OBJS = $(addprefix src/,$(FUNCTIONAL_TEST_SRCS:.cpp=.o))
-ALL_OBJS+=$(FUNCTIONAL_TEST_OBJS)
+RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
+ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
+ALL_OBJS+=$(RC_TEST_OBJS)
+ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
 
-rc_functional_test: $(FUNCTIONAL_TEST_OBJS) libhackerboat.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+rc_test: $(RC_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 	
-
 clean:
 	rm -f libhackerboat.a
 	rm -f storage_test

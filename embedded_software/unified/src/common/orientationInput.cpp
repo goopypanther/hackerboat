@@ -32,7 +32,7 @@ OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
 }		
 
 bool OrientationInput::init() {
-	sensorsValid = (gyro.begin() & compass.begin());
+	sensorsValid = (/*gyro.begin() & */compass.begin());
 	return sensorsValid;
 }	
 				
@@ -56,7 +56,7 @@ bool OrientationInput::execute() {
 
 bool OrientationInput::getData () {
 	this->setLastInputTime();
-	return (compass.readAll() && gyro.read());
+	return (compass.readAll()/* && gyro.read()*/);
 }
 
 
