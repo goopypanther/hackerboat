@@ -27,12 +27,12 @@ void runTestSet (OrientationInput *orient) {
 	double pitch, roll, heading;
 	bool valid;
 	for (int i = 0; i < 120; i++) {
-		orient->lock.try_lock_for(100ms);
+		//orient->lock.try_lock_for(100ms);
 		pitch = data->pitch;
 		roll = data->roll;
 		heading = data->heading;
 		valid = data->isValid();
-		orient->lock.unlock();
+		//orient->lock.unlock();
 		cout << to_string(pitch) << "\t" << to_string(roll) << "\t"; 
 		cout << to_string(heading) << "\t" << valid << endl;
 		std::this_thread::sleep_for(500ms);

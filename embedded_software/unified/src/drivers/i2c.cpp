@@ -75,8 +75,8 @@ int I2CDriver::readI2C (std::vector<uint8_t>& input, int maxBytes, int minBytes)
 		std::cerr << "I2C read failed" << std::endl;
 		return bytesRead;
 	} else if (bytesRead <= minBytes) {
-		std::cerr << "I2C read did not read at least " << minBytes << " bytes." << std::endl;
-		return 0;
+		//std::cerr << "I2C read did not read at least " << minBytes << " bytes." << std::endl;
+		//return 0;
 	} 
 	input = buf;
 	return bytesRead;

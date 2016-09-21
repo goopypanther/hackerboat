@@ -129,6 +129,8 @@ rc_test: $(RC_TEST_OBJS) libhackerboat.a
 
 orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+functional_tests: rc_test orientation_test
 	
 clean:
 	rm -f libhackerboat.a

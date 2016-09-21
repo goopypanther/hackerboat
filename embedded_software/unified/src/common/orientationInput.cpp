@@ -28,7 +28,7 @@
 
 
 OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
-	sensorsValid = init();
+	//sensorsValid = init();
 }		
 
 bool OrientationInput::init() {
