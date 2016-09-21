@@ -115,6 +115,16 @@ submodules:
 	@$(MAKE) -C submodules
 .PHONY: submodules
 
+# Functional tests
+FUNCTIONAL_TEST_SRCS = functional_tests/rc_test.cpp
+
+FUNCTIONAL_TEST_OBJS = $(addprefix src/,$(FUNCTIONAL_TEST_SRCS:.cpp=.o))
+ALL_OBJS+=$(FUNCTIONAL_TEST_OBJS)
+
+rc_functional_test: $(FUNCTIONAL_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	
+
 clean:
 	rm -f libhackerboat.a
 	rm -f storage_test
