@@ -39,9 +39,25 @@ void runTestSet (OrientationInput *orient) {
 	}
 }
 
+void printRaw (OrientationInput *orient) {
+	cout << "Raw Sensor Output" << endl;
+	cout << "AccelX\tAccelY\tAccelZ\tMagX\tMagY\tMagZ" << endl;
+	for (int i = 0; i < 600; i++) {
+		map<char, int> mag = orient->compass.getRawMagData();
+		map<char, int> acc = orient->compass.getRawAccelData();
+		for (auto const &r : acc) cout << to_string(r.second) << "\t";
+		for (auto const &r : mag) cout << to_string(r.second) << "\t";
+		cout << endl;
+		std::this_thread::sleep_for(500ms);
+	}
+}
+
+
+
 int main () {
 	OrientationInput orient(SensorOrientation::SENSOR_AXIS_X_UP);
 	if (orient.begin() && orient.isValid()) {
+		printRaw(&orient);
 		cout << "Initialization successful" << endl;
 		cout << "Oriented with X axis up" << endl;
 		cout << "Pitch\tRoll\tHeading\tValid" << endl;

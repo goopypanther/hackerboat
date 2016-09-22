@@ -51,6 +51,7 @@ class OrientationInput : public InputThread {
 			this->kill(); 
 			delete myThread;
 		}
+		LSM303 compass { IMU_I2C_BUS };
 	
 	private:
 		bool getData ();
@@ -58,8 +59,8 @@ class OrientationInput : public InputThread {
 		void getAccelOrientation ();
 		void getMagOrientation ();
 	
-		LSM303						compass { IMU_I2C_BUS };
-		//L3GD20						gyro { IMU_I2C_BUS };
+		
+		//L3GD20	gyro { IMU_I2C_BUS };
 		
 		std::thread *myThread;
 		

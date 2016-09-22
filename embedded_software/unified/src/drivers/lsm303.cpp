@@ -43,29 +43,33 @@ bool LSM303::begin() {
 
 bool LSM303::setReg (uint8_t addr, uint8_t reg, uint8_t val) {
 	int handle = i2c_open(_bus);
+	bool result = false;
 	if (handle >= 0) {
 		std::vector<uint16_t> seq;
 		seq.push_back(addr << 1);
 		seq.push_back(reg);
 		seq.push_back(val);
-		if (i2c_send_sequence(handle, seq.data(), seq.size(), NULL) >= 0) return true;
-	} else return false;
-	return false;
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), NULL) >= 0) result = true;
+	} 
+	i2c_close(handle);
+	return result;
 }
 
 int16_t LSM303::getReg (uint8_t addr, uint8_t reg) {
+	int result = -1;
 	int handle = i2c_open(_bus);
 	if (handle >= 0) {
 		std::vector<uint16_t> seq;
-		uint8_t result;
+		uint8_t val;
 		seq.push_back(addr << 1);
 		seq.push_back(reg);
 		seq.push_back(I2C_RESTART);
 		seq.push_back((addr << 1)|1);
 		seq.push_back(I2C_READ);
-		if (i2c_send_sequence(handle, seq.data(), seq.size(), &result) >= 0) return (int16_t)result;
-	} else return -1;
-	return -1;
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), &val) >= 0) result = (int16_t)val;
+	} 
+	i2c_close(handle);
+	return result;
 }
 
 bool LSM303::setMagRegister(LSM303MagRegistersEnum reg, unsigned char val) {
@@ -86,26 +90,29 @@ unsigned char LSM303::getAccelRegister(LSM303AccelRegistersEnum reg) {
 
 bool LSM303::readMag () {
 	int handle = i2c_open(_bus);
+	bool result = false;
 	if (handle >= 0) {
 		std::vector<uint8_t> buf(6);
 		std::vector<uint16_t> seq;
 		seq.push_back(LSM303_ADDRESS_MAG << 1);
-		seq.push_back(static_cast<uint16_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_OUT_X_H_M) + 0x80);
+		seq.push_back(static_cast<uint16_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_OUT_X_H_M));
 		seq.push_back(I2C_RESTART);
 		seq.push_back((LSM303_ADDRESS_MAG << 1)|1);
 		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
-			_magData['x'] = (int)buf[1] + ((int)buf[0] * 0xff);
-			_magData['z'] = (int)buf[3] + ((int)buf[2] * 0xff);
-			_magData['y'] = (int)buf[5] + ((int)buf[4] * 0xff);
-			return true;
+			_magData['x'] = (int16_t)((uint16_t)buf[1] | ((uint16_t)buf[0] << 8));
+			_magData['z'] = (int16_t)((uint16_t)buf[3] | ((uint16_t)buf[2] << 8));
+			_magData['y'] = (int16_t)((uint16_t)buf[5] | ((uint16_t)buf[4] << 8));
+			result = true;
 		}
 	} 
-	return false;
+	i2c_close(handle);
+	return result;
 }
 
 bool LSM303::readAccel () {
 	int handle = i2c_open(_bus);
+	bool result = false;
 	if (handle >= 0) {
 		std::vector<uint8_t> buf(6);
 		std::vector<uint16_t> seq;
@@ -115,17 +122,19 @@ bool LSM303::readAccel () {
 		seq.push_back((LSM303_ADDRESS_ACCEL << 1)|1);
 		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
-			_accelData['x'] = (int)buf[0] + ((int)buf[1] * 0xff);
-			_accelData['y'] = (int)buf[2] + ((int)buf[3] * 0xff);
-			_accelData['z'] = (int)buf[4] + ((int)buf[5] * 0xff);
-			return true;
+			_accelData['x'] = (int16_t)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
+			_accelData['y'] = (int16_t)((uint16_t)buf[2] | ((uint16_t)buf[3] << 8));
+			_accelData['z'] = (int16_t)((uint16_t)buf[4] | ((uint16_t)buf[5] << 8));
+			result = true;
 		}
 	} 
-	return false;
+	i2c_close(handle);
+	return result;
 }
 
 bool LSM303::readTemp () {
 	int handle = i2c_open(_bus);
+	bool result = false;
 	if (handle >= 0) {
 		std::vector<uint8_t> buf(2);
 		std::vector<uint16_t> seq;
@@ -136,10 +145,11 @@ bool LSM303::readTemp () {
 		for (int i = 0; i < 2; i++) seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
 			_tempData = (int)buf[1] + ((int)buf[0] * 0xff);
-			return true;
+			result = true;
 		}
 	}
-	return false;	
+	i2c_close(handle);
+	return result;
 }
 
 map<char, double> LSM303::getMagData (void) {
