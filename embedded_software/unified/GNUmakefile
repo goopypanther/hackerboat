@@ -2,6 +2,7 @@
 
 # use g++-6
 CXX = /usr/bin/g++-6
+CC = /usr/bin/gcc-6
 
 # Tweakable / overridable compilation options (debugging and optimization)
 OPTS = -gdwarf-4 -g3 -Os -Wall
@@ -11,17 +12,19 @@ OPTS = -gdwarf-4 -g3 -Os -Wall
 GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
-CFLAGS   += $(OPTS) -std=gnu11
+CFLAGS   += $(OPTS) -std=gnu11 -I submodules/lsquaredc
+
 CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread 
+
 CPPFLAGS += -I submodules/include 
+CPPFLAGS += -I submodules/lsquaredc
 CPPFLAGS += -I include 
 CPPFLAGS += -I submodules/PixelBone 
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
-#LDFLAGS  += -static
-#LDFLAGS  += -L submodules/lib 
+
 LDFLAGS  += -L /usr/local/lib
 
 LDLIBS += -ljansson
@@ -29,11 +32,10 @@ LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
 LDLIBS += /usr/local/lib/libGeographic.a
-#LDLIBS += -lGeographic
 
 export OPTS
 
-VPATH=src/common:src/master:src/drivers:src/tests
+VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc
 all: submodules master
 test: unit_tests
 	./unit_tests
@@ -78,12 +80,13 @@ LIBHACKERBOAT_SRCS+= boatState.cpp
 LIBHACKERBOAT_SRCS+= boatModes.cpp
 LIBHACKERBOAT_SRCS+= navModes.cpp
 LIBHACKERBOAT_SRCS+= healthMonitor.cpp
+LIBHACKERBOAT_C_SRCS+= lsquaredc.c
 
-libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o))
+libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o) $(LIBHACKERBOAT_C_SRCS:.c=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)
+ALL_OBJS+=$(LIBHACKERBOAT_C_SRCS:.c=.o)
 
 MASTER_SRCS=master/hackerboatMasterControl.cpp 
-#MASTER_SRCS+=master/stateMachine.cpp
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
 ALL_OBJS+=$(MASTER_OBJS)
 master: $(MASTER_OBJS) libhackerboat.a

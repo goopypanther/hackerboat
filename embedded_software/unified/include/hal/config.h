@@ -19,7 +19,7 @@
 #define ADC_UPPER_ADDR				(0x1f)
 #define ADC_LOWER_ADDR				(0x1d)
 #define ADC_I2C_BUS					(I2CBus::BUS_2)
-#define IMU_I2C_BUS					(I2CBus::BUS_1)
+#define IMU_I2C_BUS					(1)
 #define THROTTLE_MAX				(5)
 #define THROTTLE_MIN				(-5)
 #define RUDDER_MAX					(100)

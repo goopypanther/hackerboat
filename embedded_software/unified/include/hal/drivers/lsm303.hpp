@@ -130,8 +130,8 @@ using namespace std;
 class LSM303 {
 	public:
 		LSM303 () = default;
-		LSM303(I2CBus bus) {setBus(bus);};								/**< Create an interface object for an LSM303 on the given I2C bus. */
-		bool setBus (I2CBus bus) {return _bus.setBus(bus);};			/**< Set the I2C bus to use. */
+		LSM303(uint8_t bus) {setBus(bus);};								/**< Create an interface object for an LSM303 on the given I2C bus. */
+		bool setBus (uint8_t bus);										/**< Set the I2C bus to use. */
 		bool begin();													/**< Initialize the LSM303. */
 		bool readAll () {return (readAccel() && readMag());};			/**< Read all accelerometer and magnetometer values */
 		bool readMag ();
@@ -163,10 +163,10 @@ class LSM303 {
 		void setTempOffset (int offset) {_tempOffset = offset;};		/**< Set temperature offset */
 		void setTempScale (double scale) {_tempScale = scale;};			/**< Set temperature scale */
 		
-	private:
+	private:	
 		bool 				setReg (uint8_t addr, uint8_t reg, uint8_t val);
-		uint8_t				getReg (uint8_t addr, uint8_t reg);
-		I2CDriver			_bus;
+		int16_t				getReg (uint8_t addr, uint8_t reg);
+		int					_bus;
 		int					_tempData = 0;
 		map<char, int> 		_accelData = {{'x',0},{'y',0},{'z',0}};   
 		map<char, int>		_magData = {{'x',0},{'y',0},{'z',0}};

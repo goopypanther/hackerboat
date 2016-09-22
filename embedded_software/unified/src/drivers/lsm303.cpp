@@ -20,6 +20,15 @@
 #include <vector>
 #include "hal/drivers/i2c.hpp"
 #include "hal/drivers/lsm303.hpp"
+extern "C" {
+	#include "lsquaredc.h"
+}
+
+bool LSM303::setBus (uint8_t bus) {
+	if (bus > 2) return false;
+	_bus = bus;
+	return true;
+}
 
 bool LSM303::begin() {
 	bool result = true;
@@ -33,33 +42,30 @@ bool LSM303::begin() {
 }
 
 bool LSM303::setReg (uint8_t addr, uint8_t reg, uint8_t val) {
-	std::vector<uint8_t> out;
-	out.push_back(reg);
-	out.push_back(val); 
-	if (_bus.openI2C(addr)) {
-		if (_bus.writeI2C(out) < 0) {
-			_bus.closeI2C();
-			return false;
-		}
-		_bus.closeI2C();
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint16_t> seq;
+		seq.push_back(addr << 1);
+		seq.push_back(reg);
+		seq.push_back(val);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), NULL) >= 0) return true;
 	} else return false;
-	return true;
+	return false;
 }
 
-unsigned char LSM303::getReg (uint8_t addr, uint8_t reg) {
-	std::vector<uint8_t> out, result;
-	out.push_back(reg);
-	if (_bus.openI2C(addr)) {
-		if (_bus.writeI2C(out) < 0) {
-			_bus.closeI2C();
-			return 0x00;
-		} else if (_bus.readI2C(result, 1, 1) != 1) {
-			_bus.closeI2C();
-			return 0x00;
-		}
-	} else return 0x00;
-	_bus.closeI2C();
-	return result[0];
+int16_t LSM303::getReg (uint8_t addr, uint8_t reg) {
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint16_t> seq;
+		uint8_t result;
+		seq.push_back(addr << 1);
+		seq.push_back(reg);
+		seq.push_back(I2C_RESTART);
+		seq.push_back((addr << 1)|1);
+		seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), &result) >= 0) return (int16_t)result;
+	} else return -1;
+	return -1;
 }
 
 bool LSM303::setMagRegister(LSM303MagRegistersEnum reg, unsigned char val) {
@@ -79,61 +85,61 @@ unsigned char LSM303::getAccelRegister(LSM303AccelRegistersEnum reg) {
 }
 
 bool LSM303::readMag () {
-	std::vector<uint8_t> buf(6), get;
-	get.push_back(static_cast<uint8_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_OUT_X_H_M));
-	if (_bus.openI2C(LSM303_ADDRESS_MAG)) {
-		if (_bus.writeI2C(get) < 0) {
-			_bus.closeI2C();
-			return false;
-		} else if (_bus.readI2C(buf, 6, 6) != 6) {
-			_bus.closeI2C();
-			return false;
-		} else {
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint8_t> buf(6);
+		std::vector<uint16_t> seq;
+		seq.push_back(LSM303_ADDRESS_MAG << 1);
+		seq.push_back(static_cast<uint16_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_OUT_X_H_M) + 0x80);
+		seq.push_back(I2C_RESTART);
+		seq.push_back((LSM303_ADDRESS_MAG << 1)|1);
+		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
 			_magData['x'] = (int)buf[1] + ((int)buf[0] * 0xff);
 			_magData['z'] = (int)buf[3] + ((int)buf[2] * 0xff);
 			_magData['y'] = (int)buf[5] + ((int)buf[4] * 0xff);
+			return true;
 		}
-	} else return false;
-	_bus.closeI2C();
-	return true;
+	} 
+	return false;
 }
 
 bool LSM303::readAccel () {
-	std::vector<uint8_t> buf(6), get;
-	get.push_back(static_cast<uint8_t>(LSM303AccelRegistersEnum::LSM303_REGISTER_ACCEL_OUT_X_L_A));
-	if (_bus.openI2C(LSM303_ADDRESS_ACCEL)) {
-		if (_bus.writeI2C(get) < 0) {
-			_bus.closeI2C();
-			return false;
-		} else if (_bus.readI2C(buf, 6, 6) != 6) {
-			_bus.closeI2C();
-			return false;
-		} else {
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint8_t> buf(6);
+		std::vector<uint16_t> seq;
+		seq.push_back(LSM303_ADDRESS_ACCEL << 1);
+		seq.push_back(static_cast<uint16_t>(LSM303AccelRegistersEnum::LSM303_REGISTER_ACCEL_OUT_X_L_A) + 0x80);
+		seq.push_back(I2C_RESTART);
+		seq.push_back((LSM303_ADDRESS_ACCEL << 1)|1);
+		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
 			_accelData['x'] = (int)buf[0] + ((int)buf[1] * 0xff);
 			_accelData['y'] = (int)buf[2] + ((int)buf[3] * 0xff);
 			_accelData['z'] = (int)buf[4] + ((int)buf[5] * 0xff);
+			return true;
 		}
-	} else return false;
-	_bus.closeI2C();
-	return true;	
+	} 
+	return false;
 }
 
 bool LSM303::readTemp () {
-	std::vector<uint8_t> buf(2), get;
-	get.push_back(static_cast<uint8_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_TEMP_OUT_H_M));
-	if (_bus.openI2C(LSM303_ADDRESS_MAG)) {
-		if (_bus.writeI2C(get) < 0) {
-			_bus.closeI2C();
-			return false;
-		} else if (_bus.readI2C(buf, 2, 2) != 2) {
-			_bus.closeI2C();
-			return false;
-		} else {
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint8_t> buf(2);
+		std::vector<uint16_t> seq;
+		seq.push_back(LSM303_ADDRESS_MAG << 1);
+		seq.push_back(static_cast<uint16_t>(LSM303MagRegistersEnum::LSM303_REGISTER_MAG_TEMP_OUT_H_M) + 0x80);
+		seq.push_back(I2C_RESTART);
+		seq.push_back((LSM303_ADDRESS_MAG << 1)|1);
+		for (int i = 0; i < 2; i++) seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
 			_tempData = (int)buf[1] + ((int)buf[0] * 0xff);
+			return true;
 		}
-	} else return false;
-	_bus.closeI2C();
-	return true;		
+	}
+	return false;	
 }
 
 map<char, double> LSM303::getMagData (void) {
