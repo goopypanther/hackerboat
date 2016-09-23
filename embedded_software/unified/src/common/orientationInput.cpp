@@ -28,7 +28,7 @@
 
 
 OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
-	//sensorsValid = init();
+	period = IMU_READ_PERIOD;
 }		
 
 bool OrientationInput::init() {

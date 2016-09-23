@@ -68,6 +68,13 @@
 #define ARM_PULSE_LEN		(50ms)
 #define HORN_TIME			(2s)
 
+// Sense periods
+
+#define IMU_READ_PERIOD		(10ms)
+#define ADC_READ_PERIOD		(10ms)
+#define RC_READ_PERIOD		(50ms)
+#define GPS_READ_PERIOD		(100ms)
+
 // Voltage/current limits
 
 #define SYSTEM_START_BATTERY_MIN	(12.0)

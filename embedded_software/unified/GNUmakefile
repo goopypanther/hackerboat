@@ -121,9 +121,10 @@ submodules:
 # Functional tests
 RC_TEST_SRCS = functional_tests/rc_test.cpp
 ORIENTATION_TEST_SRCS += functional_tests/orientation_test.cpp
-
+ADC_TEST_SRCS += functional_tests/adc_test.cpp
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
+ADC_TEST_OBJS = $(addprefix src/,$(ADC_TEST_SRCS:.cpp=.o))
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
 
@@ -133,7 +134,10 @@ rc_test: $(RC_TEST_OBJS) libhackerboat.a
 orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-functional_tests: rc_test orientation_test
+adc_test: $(ADC_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
+functional_tests: rc_test orientation_test adc_test
 	
 clean:
 	rm -f libhackerboat.a
