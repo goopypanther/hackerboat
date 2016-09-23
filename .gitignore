@@ -29,6 +29,7 @@ embedded_software/unified/master
 embedded_software/unified/unit_tests
 embedded_software/unified/rc_test
 embedded_software/unified/orientation_test
+embedded_software/unified/adc_test
 
 # Eagle
 *.s#*

@@ -21,10 +21,15 @@
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 #include "hal/inputThread.hpp"
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 #include "hal/adcInput.hpp" 
+ 
+ADCInput::ADCInput(void) {
+	period = IMU_READ_PERIOD;
+}
  
 bool ADCInput::init() {
 	bool result = true;
@@ -85,8 +90,8 @@ bool ADCInput::execute() {
 	char in[5];
 	ain.open(batmonPath);
 	if (ain.is_open()) {
-		ain.get(in, 4);		// value is from 0-1799, so at most four characters
-		_raw["battery_mon"] = atoi(in);	// convert millivolts to volts for storage
+		ain.get(in, 4);		// value is from 0-4095, so at most four characters
+		_raw["battery_mon"] = atoi(in);	
 	} else {
 		_raw["battery_mon"] = -1;
 		result = false;

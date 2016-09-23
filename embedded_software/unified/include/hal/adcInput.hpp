@@ -27,7 +27,7 @@
 
 class ADCInput : public InputThread {
 	public:
-		ADCInput(void) {inputsValid = init();};	
+		ADCInput(void); 
 		
 		bool 							isValid() {return inputsValid;};				/**< Check if the hardware connections are good */
 		bool							init();											/**< Intialize all inputs */
@@ -41,7 +41,7 @@ class ADCInput : public InputThread {
 		std::map<std::string, double> 	getScales() {return _scales;};					/**< Get the scaling for all channels. */
 		~ADCInput () {
 			this->kill(); 
-			delete myThread;
+			if (myThread) delete myThread;
 		}
 		
 		using InputThread::getLastInputTime;
@@ -56,7 +56,7 @@ class ADCInput : public InputThread {
 		std::map<std::string, int> 		_offsets;
 		std::map<std::string, double> 	_scales;
 		bool							inputsValid = false;
-		std::thread *myThread;
+		std::thread *myThread = NULL;
 };
 
 #endif /* ADCINPUT_H */

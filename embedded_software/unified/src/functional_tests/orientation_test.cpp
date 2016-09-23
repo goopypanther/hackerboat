@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat Beaglebone Orientation Functional Test program
- * rc_test.cpp
+ * orientation_test.cpp
  * This program is a functional test of the orientation input subsystem
  * see the Hackerboat documentation for more details
  *

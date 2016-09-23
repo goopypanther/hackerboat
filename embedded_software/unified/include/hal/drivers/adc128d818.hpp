@@ -21,7 +21,9 @@
 #include <inttypes.h>
 #include <vector>
 #include "hal/config.h"
-#include "hal/drivers/i2c.hpp"
+extern "C" {
+	#include "lsquaredc.h"
+}
 
 #define ADC128D818_INTERNAL_REF		(2.56)
 
@@ -44,7 +46,7 @@ enum class operation_mode_t : uint8_t {
 
 class ADC128D818 {
 	public:
-		ADC128D818(uint8_t address, I2CBus bus);		/**< Create an ADC object for a sensor on bus devpath with address address */
+		ADC128D818(uint8_t address, int bus);		/**< Create an ADC object for a sensor on bus devpath with address address */
   
 		void setReference(double ref_voltage);			/**< Set the reference voltage for scaling purposes (external reference only) */
 		void setReferenceMode(reference_mode_t mode);	/**< Set the reference mode (either internal or external) */
@@ -62,7 +64,7 @@ class ADC128D818 {
 		bool writeByteRegister(uint8_t reg, uint8_t data);
 		bool readByteRegister(uint8_t reg, uint8_t& data);
 	
-		I2CDriver	_bus;
+		int			_bus;
 	
 		uint8_t 	addr;
 		uint8_t 	disabled_mask;
