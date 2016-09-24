@@ -12,14 +12,11 @@
 
 #include <string>
 #include <stdlib.h>
-#include <atomic>
-#include <thread>
 #include <chrono>
 #include <vector>
 #include <map>
 #include <inttypes.h>
 #include <iostream>
-#include <sstream>
 #include "hal/config.h"
 #include "hal/gpio.hpp"
 #include <fcntl.h>  
@@ -29,40 +26,28 @@
 using namespace std;
 
 bool Pin::init () {
+	if (_init) return true;
 	_gpio = getGPIO(_port, _pin);
 	if (_gpio < 0) return false;
 	
-	pinName = "P" + _port;
-	pinName += "_" + _pin;
+	pinName = "P" + to_string(_port);
+	pinName += "_" + to_string(_pin);
 	
-	// export the gpio so we can manipulate it
-	path = "/sys/class/gpio/gpio" + _gpio;
-	if (access(path.c_str(), F_OK)) {	// returns 0 if it exists, and therefore skips this step
-		std::string cmd;
-		cmd = "echo " + _gpio;
-		cmd += " > /sys/class/gpio/export\n"; 
+	// use config-pin to set the pinmux & direction
+	std::string pinmux = CONFIG_PIN_PATH; 
+	pinmux += " " + pinName + " " + function + "\n";
+	if (system(pinmux.c_str()) != 0) return false;
+	
+	// assemble & test path
+	path = "/sys/class/gpio/gpio" + to_string(_gpio);
+	if (access(path.c_str(), F_OK)) {      // check if the file exists & export if necessary
+		string cmd = "echo " + to_string(_gpio);
+		cmd += " > /sys/class/gpio/export\n";
 		if (system(cmd.c_str()) != 0) return false;
 	}
 	
-	// use config-pin to set the pinmux
-	std::string pinmux = CONFIG_PIN_PATH; 
-	pinmux += " " + pinName + function + "\n";
-	if (system(pinmux.c_str()) != 0) return false;
-	
-	// set the direction
-	std::ofstream direction;
-	direction.open(path + "/direction");
-	if (direction.is_open()) {
-		if (_dir) {
-			direction << "out";
-		} else {
-			direction << "in";
-		}
-		direction.close();
-	} else return false;
-	
 	_init = true;
-	return ((direction.good()) && this->writePin (_state));
+	return _init;
 
 }
 
@@ -111,42 +96,48 @@ bool Pin::writePin (bool val) {
 int Pin::get() {
 	ifstream value;
 	std::string line;
+	int result = -1;
 	value.open(path + "/value");
 	if (value.is_open()) {
 		if(getline(value, line)) {
 			if (line[0] == '1') {
 				_state = true;
-				return 1;
+				result = 1;
 			} else if (line[0] == '0') {
 				_state = false;
-				return 0;
-			} else return -1;
-		} else return -1;
-	} else return -1;
+				result = 0;
+			} 
+		} 
+	} 
+	value.close();
+	return result;
 }
 
 bool Pin::pullUp () {
-	function = "gpio_pu";
+	if (_dir) return false;
+	function += "in_pu";
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
-		pinmux += " " + pinName + function + "\n";
+		pinmux += " " + pinName + " " + function + "\n";
 		if (system(pinmux.c_str()) != 0) return false;
 	}
 	return true;
 }
 
 bool Pin::pullDown () {
-	function = "gpio_pd";
+	if (_dir) return false;
+	function = "in_pd";
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
-		pinmux += " " + pinName + function + "\n";
+		pinmux += " " + pinName + " " + function + "\n";
 		if (system(pinmux.c_str()) != 0) return false;
 	}
 	return true;
 }
 
 bool Pin::floating () {
-	function = "gpio";
+	if (_dir) return false;
+	function = "in";
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
 		pinmux += " " + pinName + function + "\n";

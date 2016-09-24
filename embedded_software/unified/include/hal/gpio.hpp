@@ -15,14 +15,12 @@
 
 #include <string>
 #include <stdlib.h>
-#include <atomic>
-#include <thread>
 #include <chrono>
 #include <vector>
 #include <map>
 #include <inttypes.h>
 #include <iostream>
-#include <sstream>
+#include <fstream>
 #include "hal/config.h"
 
 //typedef tuple<int, int, bool> pinDef;	/**< Pin port, pin, and direction, respectively */
@@ -32,6 +30,9 @@ class Pin {
 		Pin () = default;
 		Pin (int port, int pin, bool dir, bool state = false) : 
 			_port(port), _pin(pin), _dir(dir), _state(state) {
+				if (_dir) {
+					function = "out";
+				} else function = "in";
 				this->init();
 		};
 		bool init ();							/**< Initialize the pin. _port and _pin must be set or this returns false. Must be called any time the configuration is changed. */

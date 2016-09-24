@@ -22,7 +22,6 @@
 #include <cmath>
 #include "logs.hpp"
 #include "hal/config.h"
-#include "hal/drivers/i2c.hpp"
 #include "hal/drivers/adc128d818.hpp"
 
 #define CONFIG_REG    		((uint8_t)0x00)

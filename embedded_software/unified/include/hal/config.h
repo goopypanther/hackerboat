@@ -84,15 +84,15 @@
 #define HARDWARE_LOGFILE	"hardware.log"
 
 // Relay map initializer
-#define RELAY_MAP_INITIALIZER	{ { "RED", Relay("RED", Pin(8, 3, true), Pin(8, 4, false)) }, \
-								  { "WHITE", Relay("WHITE", Pin(8, 5, true), Pin(8, 6, false)) }, \
-								  { "YELLOW", Relay("YELLOW", Pin(8, 7, true), Pin(8, 8, false)) }, \
-								  { "REDWHT", Relay("REDWHT", Pin(8, 9, true), Pin(8, 10, false)) }, \
-								  { "YLWWHT", Relay("YLWWHT", Pin(8, 11, true), Pin(8, 12, false)) }, \
-								  { "DIR", Relay("DIR", Pin(8, 13, true), Pin(8, 14, false)) }, \
-								  { "DISARM", Relay("DISARM", Pin(8, 15, true), Pin(8, 16, false)) }, \
-								  { "HORN", Relay("HORN", Pin(8, 17, true), Pin(8, 18, false)) }, \
-								  { "ENABLE", Relay("ENABLE", Pin(8, 24, true), Pin(8, 26, false)) } }
+#define RELAY_MAP_INITIALIZER	{ { "RED", Relay("RED", new Pin(8, 3, true), new Pin(8, 4, false)) }, \
+								  { "WHITE", Relay("WHITE", new Pin(8, 5, true), new Pin(8, 6, false)) }, \
+								  { "YELLOW", Relay("YELLOW", new Pin(8, 7, true), new Pin(8, 8, false)) }, \
+								  { "REDWHT", Relay("REDWHT", new Pin(8, 9, true), new Pin(8, 10, false)) }, \
+								  { "YLWWHT", Relay("YLWWHT", new Pin(8, 11, true), new Pin(8, 12, false)) }, \
+								  { "DIR", Relay("DIR", new Pin(8, 13, true), new Pin(8, 14, false)) }, \
+								  { "DISARM", Relay("DISARM", new Pin(8, 15, true), new Pin(8, 16, false)) }, \
+								  { "HORN", Relay("HORN", new Pin(8, 17, true), new Pin(8, 18, false)) }, \
+								  { "ENABLE", Relay("ENABLE", new Pin(8, 24, true), new Pin(8, 26, false)) } }
 
 // Analog initializers
 #define ADC_UPPER_INITIALIZER	{"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT", "DIR", "DISARM", "ENABLE"}

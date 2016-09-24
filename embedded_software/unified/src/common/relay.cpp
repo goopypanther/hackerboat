@@ -13,12 +13,11 @@
 
 #include <string>
 #include <stdlib.h>
-#include <atomic>
-#include <thread>
 #include <chrono>
 #include <vector>
 #include <map>
 #include <inttypes.h>
+#include <cmath>
 #include "hal/config.h"
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
@@ -30,9 +29,11 @@ json_t *Relay::pack () {
 	json_t* output = json_object();
 	int packResult = 0;
 	RelayTuple thisrelay = getState();
-	packResult += json_object_set_new(output, "current", json(std::get<0>(thisrelay)));
-	packResult += json_object_set_new(output, "output", json(std::get<1>(thisrelay)));
-	packResult += json_object_set_new(output, "fault", json(std::get<2>(thisrelay)));
+	double current = std::get<0>(thisrelay);
+	packResult += std::isfinite(current) ? json_object_set_new(output, "current", json_real(current)) : 
+										json_object_set_new(output, "current", json_null());
+	packResult += json_object_set_new(output, "drive", json_boolean(std::get<1>(thisrelay)));
+	packResult += json_object_set_new(output, "fault", json_boolean(std::get<2>(thisrelay)));
 	if (packResult != 0) {
 		json_decref(output);
 		return NULL;
@@ -41,18 +42,20 @@ json_t *Relay::pack () {
 }
 
 bool Relay::init() {
-	if (initialized) return true;
-	if ((this->_adc->getScaledValues().count(this->_name)) > 0) {
-		if (_drive->init() && _fault->init() && _drive->writePin(_state)) {
-			initialized = true;
-			return true;
-		}
-	}	
-	return false;
+	if (this->initialized) return true;
+	if ((this->_adc) && !((this->_adc->getScaledValues().count(this->_name)) > 0)) return false; 
+	this->initialized = true;
+	this->initialized &= _drive->init();
+	this->initialized &= _fault->init();
+	this->initialized &= _drive->writePin(_state);
+	return this->initialized;
 }
 
 double Relay::current() {
-	return this->_adc->getScaledValues().at(this->_name);
+	if (this->_adc) {
+		return this->_adc->getScaledValues().at(this->_name);
+	}
+	return NAN;
 }
 
 RelayTuple Relay::getState() {
@@ -95,8 +98,14 @@ bool Relay::adc(ADCInput* adc) {
 	return false;
 }
 
+RelayMap* RelayMap::_instance = new RelayMap();
+
 RelayMap::RelayMap () {
 	relays = new std::map<std::string, Relay> RELAY_MAP_INITIALIZER; 
+}
+
+RelayMap *RelayMap::instance () {
+	return RelayMap::_instance;
 }
 
 bool RelayMap::init() {

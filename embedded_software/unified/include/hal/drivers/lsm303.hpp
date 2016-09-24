@@ -21,7 +21,6 @@
 #include "hal/config.h"
 #include <map>
 #include <vector>
-#include "hal/drivers/i2c.hpp"
 
 
 /*=========================================================================
