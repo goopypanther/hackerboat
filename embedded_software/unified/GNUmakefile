@@ -122,10 +122,14 @@ RC_TEST_SRCS = functional_tests/rc_test.cpp
 ORIENTATION_TEST_SRCS += functional_tests/orientation_test.cpp
 ADC_TEST_SRCS += functional_tests/adc_test.cpp
 RELAY_TEST_SRCS += functional_tests/relay_test.cpp
+THROTTLE_TEST_SRCS += functional_tests/throttle_test.cpp
+SERVO_TEST_SRCS += functional_tests/servo_test.cpp
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
 ADC_TEST_OBJS = $(addprefix src/,$(ADC_TEST_SRCS:.cpp=.o))
 RELAY_TEST_OBJS = $(addprefix src/,$(RELAY_TEST_SRCS:.cpp=.o))
+THROTTLE_TEST_OBJS += $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
+SERVO_TEST_OBJS += $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
 
@@ -141,7 +145,13 @@ adc_test: $(ADC_TEST_OBJS) libhackerboat.a
 relay_test: $(RELAY_TEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-functional_tests: rc_test orientation_test adc_test relay_test
+throttle_test: $(THROTTLE_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+servo_test: $(SERVO_TEST_OBJS) libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test
 	
 clean:
 	rm -f libhackerboat.a

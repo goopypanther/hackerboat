@@ -1,6 +1,6 @@
 /******************************************************************************
  * Hackerboat Beaglebone Relay Functional Test program
- * rc_test.cpp
+ * relay_test.cpp
  * This program is a functional test of the Relay subsystem
  * see the Hackerboat documentation for more details
  *
