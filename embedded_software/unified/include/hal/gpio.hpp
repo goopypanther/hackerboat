@@ -51,7 +51,7 @@ class Pin {
 		bool isInit() {return _init;};
 		
 	private:
-		static int getGPIO (int port, int pin);	/**< Return the internal GPIO number for the pin at the given port and pin number */
+		int getGPIO (int port, int pin);	/**< Return the internal GPIO number for the pin at the given port and pin number */
 		std::string path;
 		std::string pinName;
 		std::string function = "gpio";

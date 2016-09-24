@@ -72,8 +72,8 @@
 
 #define IMU_READ_PERIOD		(10ms)
 #define ADC_READ_PERIOD		(10ms)
-#define RC_READ_PERIOD		(50ms)
-#define GPS_READ_PERIOD		(100ms)
+#define RC_READ_PERIOD		(8ms)
+#define GPS_READ_PERIOD		(20ms)
 
 // Voltage/current limits
 
