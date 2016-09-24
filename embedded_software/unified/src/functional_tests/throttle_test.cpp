@@ -16,6 +16,7 @@
 #include <string>
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include "hal/throttle.hpp"
 
 int main () {
@@ -32,5 +33,6 @@ int main () {
 		std::cout << "Throttle set to " << std::to_string(throttle.getThrottle()) << std::endl;
 		std::this_thread::sleep_for(1500ms);
 	}
+	throttle.setThrottle(0);
 	return 0;
 }

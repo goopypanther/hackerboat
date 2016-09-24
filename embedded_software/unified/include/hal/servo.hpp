@@ -25,7 +25,7 @@
 
 class Servo {
 	public:
-		Servo();
+		Servo() = default;
 		bool attach(int port, 							/**< Attach servo to named pin on the named port {8|9}. Returns true if successful. */
 					int pin,
 					int min = MIN_PULSE_WIDTH,
@@ -33,14 +33,14 @@ class Servo {
 					int freq = DEFAULT_FREQUENCY);		
 		void detach();									/**< Detach servo from the pin */
 		bool write(double value);						/**< Set the servo position, from -100.0 to +100.0. Returns true if successful, false is unsuccessful or out of range. */
-		bool writeMicroseconds(unsigned int value);		/**< Set the servo position in microseconds. Returns true if successful, false is unsuccessful or out of range. */
-		bool setFrequency(unsigned int freq);			/**< Set servo frequency in Hz. Returns true if successful. */
-		bool setMax (unsigned int max);					/**< Set the maximum servo value, in microseconds. Returns false if max time period is longer than one time period at the current frequency */
-		bool setMin (unsigned int min);					/**< Set the minimum servo value, in microseconds. Returns false is larger than max */
-		int getMax () {return _max/1000;};
-		int getMin () {return _min/1000;};
+		bool writeMicroseconds(unsigned long value);	/**< Set the servo position in microseconds. Returns true if successful, false is unsuccessful or out of range. */
+		bool setFrequency(unsigned long freq);			/**< Set servo frequency in Hz. Returns true if successful. */
+		bool setMax (unsigned long max);				/**< Set the maximum servo value, in microseconds. Returns false if max time period is longer than one time period at the current frequency */
+		bool setMin (unsigned long min);				/**< Set the minimum servo value, in microseconds. Returns false is larger than max */
+		long getMax () {return _max/1000.0;};
+		long getMin () {return _min/1000.0;};
 		double read();									/**< Read the current servo value. */
-		unsigned int readMicroseconds();				/**< Read the current servo value, in microseconds. */
+		unsigned long readMicroseconds();				/**< Read the current servo value, in microseconds. */
 		bool isAttached() {return attached;};			/**< Check if this object is attached to a pin. */	
 	private:
 		static std::string getServoPath (int port, int pin);
@@ -50,11 +50,11 @@ class Servo {
 		std::string path = "";
 		std::string name = "";
 		// all time values in nanoseconds
-		unsigned int _min = 1000000;
-		unsigned int _max = 2000000;
-		unsigned int _freq = 20000000;
-		unsigned int _center = 1500000;
-		unsigned int _val = 1500000;
+		unsigned long _min = 1000000;
+		unsigned long _max = 2000000;
+		unsigned long _freq = 20000000;
+		unsigned long _center = 1500000;
+		unsigned long _val = 1500000;
 		bool attached = false;
 	
 };

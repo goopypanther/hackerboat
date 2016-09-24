@@ -26,8 +26,8 @@ static LogError* mylog = LogError::instance();
 bool Servo::attach (int port, int pin, int min, int max, int freq) {
 	path = getServoPath(port, pin);
 	if (path == "") return false;
-	name = "P" + port;
-	name += "_" + pin;
+	name = "P" + std::to_string(port);
+	name += "_" + std::to_string(pin);
 	
 	_min = (min * 1000);		// convert milliseconds to microseconds
 	_max = (max * 1000);		// convert milliseconds to microseconds
@@ -38,7 +38,7 @@ bool Servo::attach (int port, int pin, int min, int max, int freq) {
 	// call config-pin to turn things on
 	// we assume that the correct udev rule has been invoked to fire up the pwm
 	std::string pinmux = CONFIG_PIN_PATH;
-	pinmux += " " + name + "pwm\n";
+	pinmux += " " + name + " pwm\n";
 	if (system(pinmux.c_str()) != 0) {
 		mylog->open(HARDWARE_LOGFILE);
 		mylog->write("SERVO", "Unable to enable pinmux for " + name);
@@ -80,7 +80,7 @@ void Servo::detach () {
 		enable.close();
 	}
 	std::string pinmux = CONFIG_PIN_PATH; 
-	pinmux += " " + name + "default\n";
+	pinmux += " " + name + " default\n";
 	if (system(pinmux.c_str()) != 0) {
 		mylog->open(HARDWARE_LOGFILE);
 		mylog->write("SERVO", "Unable to disable pinmux for " + name);
@@ -94,21 +94,21 @@ bool Servo::write (double value) {
 	if (value > 100.0) return false;
 	if (value < -100.0) return false;
 	
-	int span = _max - _min;	// this should probably be pre-calculated
+	long span = _max - _min;	// this should probably be pre-calculated
 	// We divide span by 200.0 to get the number of nanosecconds for each count of the input span
 	// We add 100 to the input value so it runs from {0 - 200} rather than {-100 - 100}
 	_val = floor((value+100)*(span/200.0)) + _min;
 	return writeMicroseconds();
 }
 
-bool Servo::writeMicroseconds (unsigned int value) {
+bool Servo::writeMicroseconds (unsigned long value) {
 	if (value < _min) return false;
 	if (value > _max) return false;
 	_val = value;
-	return writeMicroseconds();
+	return true;
 }
 
-bool Servo::setFrequency (unsigned int freq) {
+bool Servo::setFrequency (unsigned long freq) {
 	_freq = (1e9/freq);
 	if (_max > _freq) _max = _freq;
 	if (_min > _freq) _min = _freq;
@@ -157,14 +157,14 @@ bool Servo::setFrequency () {
 	return true;
 }
 
-bool Servo::setMax (unsigned int max) {
+bool Servo::setMax (unsigned long max) {
 	max *= 1000;
 	if (max > _freq) return false;
 	_max = max;
 	return false;
 }
 
-bool Servo::setMin (unsigned int min) {
+bool Servo::setMin (unsigned long min) {
 	min *= 1000;
 	if (min > _max) return false;
 	_min = min;
@@ -177,7 +177,7 @@ double Servo::read() {
 	return ((double)posn*(200.0/(double)span)) - 100.0;
 }
 
-unsigned int Servo::readMicroseconds() {
+unsigned long Servo::readMicroseconds() {
 	return _val/1000;
 }
 
