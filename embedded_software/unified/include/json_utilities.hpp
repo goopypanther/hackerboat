@@ -43,7 +43,7 @@ inline json_t *json(int i) {
 	return json_integer((json_int_t)i);
 }
 inline json_t *json(double v) {
-	if (isfinite(v)) return json_real(v);
+	if (std::isfinite(v)) return json_real(v);
 	return json_null();
 }
 

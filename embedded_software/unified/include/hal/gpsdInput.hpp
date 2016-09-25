@@ -33,7 +33,7 @@ using namespace std;
 
 class GPSdInput : public InputThread {
 	public:
-		GPSdInput() = default;					
+		GPSdInput();					
 		GPSdInput(string host, int port);			/**< Create a gpsd object pointing at the given host & port combination. */
 		bool setHost (string host);					/**< Point the input listener at the given host. */
 		bool setPort (int port);					/**< Point the input listener at the given port */

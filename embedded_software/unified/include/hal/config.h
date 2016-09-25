@@ -47,11 +47,12 @@
 #define RC_AUTO_SWITCH				(4)
 #define RC_MODE_SWITCH				(5)
 #define RC_COURSE_SELECTOR			(6)
-#define RC_MIN						(0)
-#define RC_MAX						(2047)
-#define RC_MIDDLE_POSN				(1023)
+#define RC_MIN						(171)
+#define RC_MAX						(1811)
+#define RC_MIDDLE_POSN				(1028)
 #define RC_SERIAL_PATH				"/dev/ttyS5"
 #define RC_CHANNEL_COUNT			(18)
+#define RC_HORN_SWITCH				(7)
 
 // Timeouts
 

@@ -31,4 +31,4 @@ config-pin P9.16 pwm
 
 # start gpsd
 
-gpsd -n -S 3001 /dev/ttyS4
+gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0

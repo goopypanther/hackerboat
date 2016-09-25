@@ -16,9 +16,8 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include <vector>
-#include <tuple>
 #include <map>
+#include <iostream>
 #include "jansson.h"
 #include "hal/config.h"
 #include "gps.hpp"
@@ -32,6 +31,9 @@ using namespace redi;
 
 GPSdInput::GPSdInput (string host, int port) :
 	_host(host), _port(port) {};
+	
+GPSdInput::GPSdInput () :
+	_host("127.0.0.1"), _port(3001) {};
 
 bool GPSdInput::setHost (string host) {
 	if (host != "") {
@@ -84,12 +86,14 @@ bool GPSdInput::execute() {
 	bool result = true;
 	json_error_t* inerr;
 	string buf = "";
-	while ((gpsdstream.sgetc() != '\n') && (gpsdstream.sgetc() != EOF)) {
-		buf += gpsdstream.sbumpc();
-	}
+	while (gpsdstream.in_avail()) {
+		buf.push_back(gpsdstream.sbumpc());
+		if (buf.back() == '\r') break;
+	} 
 	if (buf != "") {
 		json_t* input = json_loads(buf.c_str(), JSON_DECODE_ANY | JSON_REJECT_DUPLICATES, inerr);
 		if (input) {
+			buf.clear();
 			json_t* objclass = json_object_get(input, "class");
 			if (objclass) {
 				string s;
@@ -97,9 +101,12 @@ bool GPSdInput::execute() {
 				size_t l = json_string_length(objclass);
 				s.assign(p, l);
 				if (s == "TPV") {
+					cout << "Got GPS packet" << endl;
 					result = _lastFix.parseGpsdPacket(input);
+					cout << "Parsed GPS packet" << endl;
 				} else if (s == "AIS") {
 					AISShip newship;
+					cout << "Got AIS packet" << endl;
 					if (newship.parseGpsdPacket(input)) {
 						_aisTargets.emplace(newship.getMMSI(), newship);
 						result = true;

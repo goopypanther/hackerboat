@@ -175,7 +175,7 @@ class HackerboatStateStorable : public HackerboatState {
 		 * HackerboatState::pack() and expects the database to
 		 * contain a single JSON column.
 		 */
-		virtual bool fillRow(SQLiteParameterSlice) const USE_RESULT;
+		virtual bool fillRow(SQLiteParameterSlice) const USE_RESULT = 0;
 
 		/** Populate the receiver from a database row.
 		 *
@@ -183,7 +183,7 @@ class HackerboatStateStorable : public HackerboatState {
 		 * containing JSON text which is deserialized and given to
 		 * HackerboatState::parse().
 		 */
-		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT = 0;
 };
 
 #endif

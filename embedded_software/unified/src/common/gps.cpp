@@ -94,7 +94,7 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 	
 	result &= coreParse(input);
 	result &= GET_VAR(time);
-	result &= parseTime(time, this->gpsTime);
+	//result &= parseTime(time, this->gpsTime);
 	result &= GET_VAR(lat);
 	result &= GET_VAR(lon);
 	gpsMode = json_object_get(input, "mode");

@@ -120,12 +120,12 @@ class AISBase : public HackerboatStateStorable {
 	public:
 		AISBase () = default;
 		
-		virtual bool prune (Location& current);	/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
+		virtual bool prune (Location& current) = 0;	/**< Test if this contact should be pruned. If true, it deletes itself from the database and should be deleted upon return. */
 		
 		sysclock 		lastTimeStamp;		/**< Time of last time stamp from the target transmitter. */
 		int 			mmsi = -1;			/**< MMSI of transmitter */
 		Location		fix;				/**< Location of last position transmission */
-		const std::string msgClass = "AIS";	/**< Message class from gpsd */
+		static const std::string msgClass;	/**< Message class from gpsd */
 		std::string		device;				/**< Name of the device */
 };
 
@@ -167,6 +167,5 @@ class AISShip : AISBase {
 		HackerboatStateStorage *aisShipStorage = NULL;
 	
 };
-
 
 #endif

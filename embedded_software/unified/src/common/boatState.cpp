@@ -308,7 +308,7 @@ std::string BoatState::getCSV() {
 	csv += ",";
 	csv += std::to_string(armInput.get());
 	csv += ",";
-	csv += std::servoEnable.get();
+	csv += servoEnable.get();
 	csv += ",";
 	csv += std::to_string(throttle->getThrottle());
 	csv += ",";
@@ -327,7 +327,7 @@ std::string BoatState::getCSV() {
 	//csv += adc->getRawValues()["mot_i"];
 	//csv += ",";
 	//csv += adc->getRawValues()["battery_mon"];
-	csv += std::endl;
+	csv += "\n";
 	return csv;
 }
 

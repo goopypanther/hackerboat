@@ -36,7 +36,7 @@ LDLIBS += /usr/local/lib/libGeographic.a
 export OPTS
 
 VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc
-all: submodules master
+all: submodules master rcctrl
 test: unit_tests
 	./unit_tests
 .PHONY: all test
@@ -91,6 +91,11 @@ ALL_OBJS+=$(MASTER_OBJS)
 master: $(MASTER_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
+RC_SRCS=master/hackerboatRC.cpp 
+RC_OBJS=$(addprefix src/,$(RC_SRCS:.cpp=.o))
+rcctrl: $(RC_OBJS) libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
 # Unit test targets
 TEST_OBJS = enumtable_test.o 
 TEST_OBJS += twovector_test.o 
@@ -124,12 +129,14 @@ ADC_TEST_SRCS += functional_tests/adc_test.cpp
 RELAY_TEST_SRCS += functional_tests/relay_test.cpp
 THROTTLE_TEST_SRCS += functional_tests/throttle_test.cpp
 SERVO_TEST_SRCS += functional_tests/servo_test.cpp
+GPS_TEST_SRCS += functional_tests/gps_test.cpp
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
 ADC_TEST_OBJS = $(addprefix src/,$(ADC_TEST_SRCS:.cpp=.o))
 RELAY_TEST_OBJS = $(addprefix src/,$(RELAY_TEST_SRCS:.cpp=.o))
 THROTTLE_TEST_OBJS += $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
 SERVO_TEST_OBJS += $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
+GPS_TEST_OBJ += $(addprefix src/,$(GPS_TEST_SRCS:.cpp=.o))
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
 
@@ -150,8 +157,11 @@ throttle_test: $(THROTTLE_TEST_OBJS) libhackerboat.a
 
 servo_test: $(SERVO_TEST_OBJS) libhackerboat.a 
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
+gps_test: $(GPS_TEST_OBJ) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test
 	
 clean:
 	rm -f libhackerboat.a
