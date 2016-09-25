@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 #include <iostream>
-#include <sstream>
 #include <fcntl.h>  
 #include <unistd.h>
 #include <fstream>
@@ -22,26 +21,59 @@
 #include "logs.hpp"
 
 static LogError* mylog = LogError::instance();
+static const std::string basepath = "/sys/class/pwm/pwmchip";
 
-bool Servo::attach (int port, int pin, int min, int max, int freq) {
+using namespace std;
+
+Servo::Servo() : path(""), pinname("PPPP"), majornum(-1), minornum(-1), attached(false) {}
+
+bool Servo::attach (int port, int pin, long min, long max, long freq) {
 	path = getServoPath(port, pin);
 	if (path == "") return false;
-	name = "P" + port;
-	name += "_" + pin;
+	pinname = "P";
+	pinname += to_string(port);
+	pinname += "_" + to_string(pin);
 	
-	_min = (min * 1000);		// convert milliseconds to microseconds
-	_max = (max * 1000);		// convert milliseconds to microseconds
+	_min = (min * 1000);		// convert microsecond to nanoseconds
+	_max = (max * 1000);		// convert microsecond to nanoseconds
 	_center = (_min + _max)/2;	// find the center point
 	_freq = (1e9/freq);			// convert Hz into ns
 	_val = _center;
 	
+	// Turn on the PWM subsystem, set permissions correctly, and check that we've got access
+	// It includes some very rude hacks using sudo, chown, and chmod to get the permissions right
+	// because I can't seem to get the motherfucking udev rule to do the right thing in any sort of
+	// consistent fashion.
+	std::string chmodcmd = "sudo chown -R root:gpio /sys/class/pwm; sudo chmod -R 770 /sys/class/pwm";
+	system(chmodcmd.c_str());
+	chmodcmd = "sudo chown -R root:gpio /sys/devices/platform/ocp/4????000.epwmss/*; sudo chmod -R 770 /sys/devices/platform/ocp/4????000.epwmss/*";
+	system(chmodcmd.c_str());
+	std::string exportcmd = "echo " + std::to_string(minornum) + " > ";
+	exportcmd += basepath + std::to_string(majornum) + "/export";
+	// check if the export exists before attempting to export it to avoid errors
+	if (access(path.c_str(), F_OK)) {
+		if (system(exportcmd.c_str()) != 0)  {
+			mylog->open(HARDWARE_LOGFILE);
+			mylog->write("SERVO", "Unable to export pwm channel for " + path);
+			mylog->close();
+			return false;
+		}	
+	}
+	system(chmodcmd.c_str());
+	if (access(path.c_str(), W_OK)) {
+		mylog->open(HARDWARE_LOGFILE);
+		mylog->write("SERVO", "Unable to write to pwm channel for " + path);
+		mylog->close();
+		return false;
+	}
+	
 	// call config-pin to turn things on
 	// we assume that the correct udev rule has been invoked to fire up the pwm
 	std::string pinmux = CONFIG_PIN_PATH;
-	pinmux += " " + name + "pwm\n";
+	pinmux += " " + pinname + " pwm\n";
 	if (system(pinmux.c_str()) != 0) {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to enable pinmux for " + name);
+		mylog->write("SERVO", "Unable to enable pinmux for " + pinname);
 		mylog->close();
 		return false;
 	}
@@ -60,7 +92,7 @@ bool Servo::attach (int port, int pin, int min, int max, int freq) {
 	} else {
 		detach();
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to enable specified pwm channel or pin " + path + " " + name);
+		mylog->write("SERVO", "Unable to enable specified pwm channel or pin " + path + " " + pinname);
 		mylog->close();
 		return false;
 	}
@@ -80,10 +112,10 @@ void Servo::detach () {
 		enable.close();
 	}
 	std::string pinmux = CONFIG_PIN_PATH; 
-	pinmux += " " + name + "default\n";
+	pinmux += " " + pinname + " default\n";
 	if (system(pinmux.c_str()) != 0) {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to disable pinmux for " + name);
+		mylog->write("SERVO", "Unable to disable pinmux for " + pinname);
 		mylog->close();
 	}
 	attached = false;
@@ -94,21 +126,21 @@ bool Servo::write (double value) {
 	if (value > 100.0) return false;
 	if (value < -100.0) return false;
 	
-	int span = _max - _min;	// this should probably be pre-calculated
+	long span = _max - _min;	// this should probably be pre-calculated
 	// We divide span by 200.0 to get the number of nanosecconds for each count of the input span
 	// We add 100 to the input value so it runs from {0 - 200} rather than {-100 - 100}
 	_val = floor((value+100)*(span/200.0)) + _min;
 	return writeMicroseconds();
 }
 
-bool Servo::writeMicroseconds (unsigned int value) {
+bool Servo::writeMicroseconds (unsigned long value) {
 	if (value < _min) return false;
 	if (value > _max) return false;
 	_val = value;
-	return writeMicroseconds();
+	return true;
 }
 
-bool Servo::setFrequency (unsigned int freq) {
+bool Servo::setFrequency (unsigned long freq) {
 	_freq = (1e9/freq);
 	if (_max > _freq) _max = _freq;
 	if (_min > _freq) _min = _freq;
@@ -119,17 +151,17 @@ bool Servo::writeMicroseconds () {
 	std::ofstream duty;
 	duty.open(path + "/duty_cycle");
 	if (duty.is_open()) {
-		duty << _val;
+		duty << to_string(_val);
 		duty.close();
 	} else {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to open duty_cycle for " + path + " " + name);
+		mylog->write("SERVO", "Unable to open duty_cycle for " + path + " " + pinname);
 		mylog->close();
 		return false;
 	}
 	if (duty.bad()) {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to write duty_cycle for " + path + " " + name);
+		mylog->write("SERVO", "Unable to write duty_cycle for " + path + " " + pinname);
 		mylog->close();
 		return false;
 	}
@@ -140,31 +172,31 @@ bool Servo::setFrequency () {
 	std::ofstream freq;
 	freq.open(path + "/period");
 	if (freq.is_open()) {
-		freq << _freq;
+		freq << to_string(_freq);
 		freq.close();
 	} else {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to open period for " + path + " " + name);
+		mylog->write("SERVO", "Unable to open period for " + path + " " + pinname);
 		mylog->close();
 		return false;
 	}
 	if (freq.bad()) {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to write period for " + path + " " + name);
+		mylog->write("SERVO", "Unable to write period for " + path + " " + pinname);
 		mylog->close();
 		return false;
 	}
 	return true;
 }
 
-bool Servo::setMax (unsigned int max) {
+bool Servo::setMax (unsigned long max) {
 	max *= 1000;
 	if (max > _freq) return false;
 	_max = max;
 	return false;
 }
 
-bool Servo::setMin (unsigned int min) {
+bool Servo::setMin (unsigned long min) {
 	min *= 1000;
 	if (min > _max) return false;
 	_min = min;
@@ -177,33 +209,76 @@ double Servo::read() {
 	return ((double)posn*(200.0/(double)span)) - 100.0;
 }
 
-unsigned int Servo::readMicroseconds() {
+unsigned long Servo::readMicroseconds() {
 	return _val/1000;
 }
 
 std::string Servo::getServoPath (int port, int pin) {
 	if (port == 9) {
 		switch (pin) {
-			case 14:	return "/sys/class/pwm/pwmchip4/pwm0";
-			case 16:	return "/sys/class/pwm/pwmchip4/pwm1";
-			case 21:	return "/sys/class/pwm/pwmchip0/pwm1";
-			case 22:	return "/sys/class/pwm/pwmchip0/pwm0";
-			case 28:	return "/sys/class/pwm/pwmchip3/pwm0"; 
-			case 29:	return "/sys/class/pwm/pwmchip0/pwm1";
-			case 31:	return "/sys/class/pwm/pwmchip0/pwm0";
-			case 42:	return "/sys/class/pwm/pwmchip2/pwm0";
+			case 14:
+				majornum = 4;
+				minornum = 0;
+				break;
+			case 16:
+				majornum = 4;
+				minornum = 1;
+				break;
+			case 21:
+				majornum = 0;
+				minornum = 1;
+				break;
+			case 22:
+				majornum = 0;
+				minornum = 0;
+				break;
+			case 28:
+				majornum = 3;
+				minornum = 0;
+				break;
+			case 29:
+				majornum = 0;
+				minornum = 1;
+				break;
+			case 31:
+				majornum = 0;
+				minornum = 0;
+				break;
+			case 42:
+				majornum = 2;
+				minornum = 0;
+				break;
 			default: 	return "";
 		}
 	} else if (port == 8) {
 		switch (pin) {
-			case 13:	return "/sys/class/pwm/pwmchip6/pwm1";
-			case 19:	return "/sys/class/pwm/pwmchip6/pwm0";
-			case 34:	return "/sys/class/pwm/pwmchip4/pwm1";
-			case 36:	return "/sys/class/pwm/pwmchip4/pwm0";
-			case 45:	return "/sys/class/pwm/pwmchip6/pwm0";
-			case 46:	return "/sys/class/pwm/pwmchip6/pwm1";
+			case 13:
+				majornum = 6;
+				minornum = 1;
+				break;
+			case 19:
+				majornum = 6;
+				minornum = 0;
+				break;
+			case 34:
+				majornum = 4;
+				minornum = 1;
+				break;
+			case 36:
+				majornum = 4;
+				minornum = 0;
+				break;
+			case 45:
+				majornum = 6;
+				minornum = 0;
+				break;
+			case 46:
+				majornum = 6;
+				minornum = 1;
+				break;
 			default: 	return "";
 		}
 	} else return "";
-	return "";
+	string result = basepath + to_string(majornum) + "/pwm" + to_string(minornum);
+	return result;
 }
