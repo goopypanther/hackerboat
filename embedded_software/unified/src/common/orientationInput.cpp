@@ -33,6 +33,8 @@ OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
 
 bool OrientationInput::init() {
 	sensorsValid = (/*gyro.begin() & */compass.begin());
+	compass.setMagOffset ( IMU_MAG_OFFSET );
+	compass.setMagScale ( IMU_MAG_SCALE );
 	return sensorsValid;
 }	
 				
@@ -62,6 +64,7 @@ bool OrientationInput::getData () {
 
 void OrientationInput::mapAxes (map<char, double> data, double &x, double &y, double &z) {
 	// assign the axis data, making sure to keep it all right hand ruled
+	// only the Z_UP direction has been tested. 
 	switch (_axis) {
 		case (SensorOrientation::SENSOR_AXIS_X_UP):
 			x = data['y'];
@@ -91,7 +94,7 @@ void OrientationInput::mapAxes (map<char, double> data, double &x, double &y, do
 		case (SensorOrientation::SENSOR_AXIS_Z_DN):
 			x = data['y'];
 			y = data['x'];
-			z = -data['z'];
+			z = data['z'];
 			break;
 		default:
 			break;
@@ -104,15 +107,13 @@ void OrientationInput::mapAxes (map<char, double> data, double &x, double &y, do
  * Converts a set of accelerometer readings into pitch and roll
  * angles. The returned values indicate the orientation of the
  * accelerometer with respect to the "down" vector which it is
- * sensing. Must be called before getMagOrientation(), because 
- * that function depends on the roll and pitch values here.
+ * sensing. 
  */
  
 void OrientationInput::getAccelOrientation () {
-	double x, y, z, zSign;
+	double x, y, z;
 	
 	mapAxes(compass.getAccelData(), x, y, z);
-	zSign = (z >= 0) ? 1.0 : -1.0;
 	
 	/* roll: Rotation around the longitudinal axis (the plane body, 'X axis'). -90<=roll<=90    */
 	/* roll is positive and increasing when moving downward                                     */
@@ -132,24 +133,28 @@ void OrientationInput::getAccelOrientation () {
 	/*                          sqrt(y^2 + z^2)                                                 */
 	/* where:  x, y, z are returned value from accelerometer sensor                             */
 	
-	_current.pitch = TwoVector::rad2deg(atan2(x, zSign*sqrt(y*y+z*z)));
+	_current.pitch = TwoVector::rad2deg(atan2(x, z));
 	_current.normalize();
 	
 }
 
 void OrientationInput::getMagOrientation () {
-	double x, xRaw, y, yRaw, zRaw;
+	double xRaw, yRaw, zRaw;
+	double Axraw, Ayraw, Azraw;
 	
 	mapAxes(compass.getMagData(), xRaw, yRaw, zRaw);
+	mapAxes(compass.getAccelData(), Axraw, Ayraw, Azraw);
 	
-	// mag tilt compensation
-	double cosRoll = cos(TwoVector::deg2rad(_current.roll));
-	double sinRoll = sin(TwoVector::deg2rad(_current.roll));
-	double cosPitch = cos(TwoVector::deg2rad(_current.pitch));
-	double sinPitch = sin(TwoVector::deg2rad(_current.pitch));
-	x = xRaw*cosPitch + zRaw*cosPitch;
-	y = xRaw*sinRoll*sinPitch + yRaw*cosRoll - zRaw*sinRoll*cosPitch;
-	
+	// mag tilt compensation, per http://www.cypress.com/file/130456/download
+	double Atotal = sqrt(Axraw*Axraw + Ayraw*Ayraw + Azraw*Azraw);
+	double Ax = Axraw/Atotal;
+	double Ay = Ayraw/Atotal;
+	double B = 1 - (Ax*Ax);
+	double C = Ax*Ay;
+	double D = sqrt(1 - (Ax*Ax) - (Ay*Ay));
+	double x = xRaw*B - yRaw*C - zRaw*Ax*D;		// Equation 18
+	double y = yRaw*D - zRaw*Ay;				// Equation 19
+		
 	// magnetic heading
 	_current.heading = TwoVector::rad2deg(atan2(y,x));
 	_current.normalize();

@@ -25,6 +25,7 @@
 #include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
 
+using namespace std;
 
 enum class SensorOrientation : char {	/**< Choose the axis parallel to gravity when the system is level */
 	SENSOR_AXIS_X_UP  = 'X',
@@ -58,15 +59,13 @@ class OrientationInput : public InputThread {
 		void mapAxes (map<char, double> data, double &x, double &y, double &z);
 		void getAccelOrientation ();
 		void getMagOrientation ();
-	
-		
 		//L3GD20	gyro { IMU_I2C_BUS };
 		
 		std::thread *myThread;
 		
 		Orientation 				_current;
 		bool 						sensorsValid = false;
-		SensorOrientation			_axis = SensorOrientation::SENSOR_AXIS_Z_UP;	
+		SensorOrientation			_axis = SensorOrientation::SENSOR_AXIS_Z_UP;
 };
 
 #endif

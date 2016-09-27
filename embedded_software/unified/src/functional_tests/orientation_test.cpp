@@ -26,7 +26,7 @@ void runTestSet (OrientationInput *orient) {
 	Orientation *data = orient->getOrientation();
 	double pitch, roll, heading;
 	bool valid;
-	for (int i = 0; i < 120; i++) {
+	for (int i = 0; i < 300; i++) {
 		//orient->lock.try_lock_for(100ms);
 		pitch = data->pitch;
 		roll = data->roll;
@@ -34,54 +34,51 @@ void runTestSet (OrientationInput *orient) {
 		valid = data->isValid();
 		//orient->lock.unlock();
 		cout << to_string(pitch) << "\t" << to_string(roll) << "\t"; 
-		cout << to_string(heading) << "\t" << valid << endl;
-		std::this_thread::sleep_for(500ms);
+		cout << to_string(heading) << "\t";
+		map<char, double> mag = orient->compass.getMagData();
+		map<char, double> acc = orient->compass.getAccelData();
+		//cout << to_string(acc['x']) << "\t";
+		//cout << to_string(acc['y']) << "\t";
+		//cout << to_string(acc['z']) << "\t";
+		cout << to_string(mag['x']) << "\t";
+		cout << to_string(mag['y']) << "\t";
+		cout << to_string(mag['z']) << "\t";
+		cout << valid << endl;
+		std::this_thread::sleep_for(250ms);
 	}
 }
 
-void printRaw (OrientationInput *orient) {
-	cout << "Raw Sensor Output" << endl;
-	cout << "AccelX\tAccelY\tAccelZ\tMagX\tMagY\tMagZ" << endl;
-	for (int i = 0; i < 600; i++) {
+void runMagExtrema (OrientationInput *orient) {
+	int maxX = 0, minX = 0, maxY = 0, minY = 0, maxZ = 0, minZ = 0;
+	cout << "maxX\tminX\tmaxY\tminY\tmaxZ\tminZ" << endl;
+	for (int i = 0; i < 10000; i++) {
 		map<char, int> mag = orient->compass.getRawMagData();
-		map<char, int> acc = orient->compass.getRawAccelData();
-		for (auto const &r : acc) cout << to_string(r.second) << "\t";
-		for (auto const &r : mag) cout << to_string(r.second) << "\t";
-		cout << endl;
-		std::this_thread::sleep_for(500ms);
+		if (mag['x'] > maxX) maxX = mag['x'];
+		if (mag['x'] < minX) minX = mag['x'];
+		if (mag['y'] > maxY) maxY = mag['y'];
+		if (mag['y'] < minY) minY = mag['y'];
+		if (mag['z'] > maxZ) maxZ = mag['z'];
+		if (mag['z'] < minZ) minZ = mag['z'];
+		if (!(i%50)) {
+			cout << to_string(maxX) << "\t";
+			cout << to_string(minX) << "\t";
+			cout << to_string(maxY) << "\t";
+			cout << to_string(minY) << "\t";
+			cout << to_string(maxZ) << "\t";
+			cout << to_string(minZ) << endl;
+		}
+		std::this_thread::sleep_for(10ms);
 	}
 }
-
-
 
 int main () {
-	OrientationInput orient(SensorOrientation::SENSOR_AXIS_X_UP);
+	OrientationInput orient(SensorOrientation::SENSOR_AXIS_Z_UP);
 	if (orient.begin() && orient.isValid()) {
-		printRaw(&orient);
 		cout << "Initialization successful" << endl;
-		cout << "Oriented with X axis up" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
-		runTestSet(&orient);
-		orient.setAxis(SensorOrientation::SENSOR_AXIS_X_DN);
-		cout << "Oriented with X axis down" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
-		runTestSet(&orient);
-		orient.setAxis(SensorOrientation::SENSOR_AXIS_Y_UP);
-		cout << "Oriented with Y axis up" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
-		runTestSet(&orient);
-		orient.setAxis(SensorOrientation::SENSOR_AXIS_Y_DN);
-		cout << "Oriented with Y axis down" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
-		runTestSet(&orient);
-		orient.setAxis(SensorOrientation::SENSOR_AXIS_Z_UP);
 		cout << "Oriented with Z axis up" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
+		cout << "Pitch\tRoll\tHeading\tAccelX\tAccelY\tAccelZ\tMagX\tMagY\tMagZ\tValid" << endl;
 		runTestSet(&orient);
-		orient.setAxis(SensorOrientation::SENSOR_AXIS_Z_DN);
-		cout << "Oriented with Z axis down" << endl;
-		cout << "Pitch\tRoll\tHeading\tValid" << endl;
-		runTestSet(&orient);
+		//runMagExtrema(&orient);
 	} else {
 		cout << "Initialization failed; exiting" << endl;
 		return -1;

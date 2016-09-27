@@ -41,7 +41,12 @@
 #define	RUDDER_PORT					(9)
 #define RUDDER_PIN					(16)
 
+// Scales and offsets
+#define IMU_MAG_OFFSET				{{'x',330},{'y',-86},{'z',386}}	
+#define IMU_MAG_SCALE				{{'x',0.15835},{'y',0.18519},{'z',0.18149}}			
+
 // RC defines
+
 #define RC_THROTTLE_CH				(0)
 #define RC_RUDDER_CH				(3)
 #define RC_AUTO_SWITCH				(4)
@@ -86,17 +91,17 @@
 
 // Relay map initializer
 #define RELAY_MAP_INITIALIZER	{ { "RED", Relay("RED", new Pin(8, 3, true), new Pin(8, 4, false)) }, \
-								  { "WHITE", Relay("WHITE", new Pin(8, 5, true), new Pin(8, 6, false)) }, \
-								  { "YELLOW", Relay("YELLOW", new Pin(8, 7, true), new Pin(8, 8, false)) }, \
+								  { "DIR", Relay("DIR", new Pin(8, 5, true), new Pin(8, 6, false)) }, \
+								  { "YLWWHT", Relay("YLWWHT", new Pin(8, 7, true), new Pin(8, 8, false)) }, \
 								  { "REDWHT", Relay("REDWHT", new Pin(8, 9, true), new Pin(8, 10, false)) }, \
-								  { "YLWWHT", Relay("YLWWHT", new Pin(8, 11, true), new Pin(8, 12, false)) }, \
-								  { "DIR", Relay("DIR", new Pin(8, 13, true), new Pin(8, 14, false)) }, \
+								  { "YLW", Relay("YLW", new Pin(8, 11, true), new Pin(8, 12, false)) }, \
+								  { "WHT", Relay("WHT", new Pin(8, 13, true), new Pin(8, 14, false)) }, \
 								  { "DISARM", Relay("DISARM", new Pin(8, 15, true), new Pin(8, 16, false)) }, \
 								  { "HORN", Relay("HORN", new Pin(8, 17, true), new Pin(8, 18, false)) }, \
 								  { "ENABLE", Relay("ENABLE", new Pin(8, 24, true), new Pin(8, 26, false)) } }
 
 // Analog initializers
-#define ADC_UPPER_INITIALIZER	{"RED", "WHITE", "YELLOW", "REDWHT", "YLWWHT", "DIR", "DISARM", "ENABLE"}
+#define ADC_UPPER_INITIALIZER	{"RED", "DIR", "YLWWHT", "REDWHT", "YLW", "WHT", "DISARM", "ENABLE"}
 #define ADC_LOWER_INITIALIZER	{"HORN", "mot_i", "mot_v", "charge_v", "charge_i", "aux_0", "aux_1", "servo_i"}								  
 #define ADC128D818_EXTERNAL_REF	(5.0)
 #define ADC_BATMON_PATH			"/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0/in_voltage0_raw"
