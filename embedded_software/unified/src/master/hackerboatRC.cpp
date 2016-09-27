@@ -37,7 +37,7 @@ int main () {
 	}
 	if (!orient.begin()) {
 		cout << "Orientation subsystem failed to start" << endl;
-		return -1;
+		//return -1;
 	}
 	if (!rc.begin()) {
 		cout << "RC subsystem failed to start" << endl;
