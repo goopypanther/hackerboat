@@ -48,7 +48,7 @@ bool AISShip::parseGpsdPacket (json_t *input) {
 	
 	result &= coreParse(input);
 	result &= GET_VAR(time);
-	result &= parseTime(time, this->lastTimeStamp);
+	this->lastTimeStamp = std::chrono::system_clock::now();
 	result &= GET_VAR(lat);
 	result &= GET_VAR(lon);
 	

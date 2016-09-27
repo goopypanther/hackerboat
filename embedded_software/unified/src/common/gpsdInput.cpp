@@ -103,7 +103,6 @@ bool GPSdInput::execute() {
 				if (s == "TPV") {
 					cout << "Got GPS packet" << endl;
 					result = _lastFix.parseGpsdPacket(input);
-					cout << "Parsed GPS packet" << endl;
 				} else if (s == "AIS") {
 					AISShip newship;
 					cout << "Got AIS packet" << endl;

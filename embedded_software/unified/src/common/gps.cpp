@@ -94,7 +94,7 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 	
 	result &= coreParse(input);
 	result &= GET_VAR(time);
-	//result &= parseTime(time, this->gpsTime);
+	this->gpsTime = std::chrono::system_clock::now();
 	result &= GET_VAR(lat);
 	result &= GET_VAR(lon);
 	gpsMode = json_object_get(input, "mode");
@@ -105,7 +105,6 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 		this->mode = NMEAModeEnum::NONE;
 		result = false;
 	}
-	parseTime(time, gpsTime);
 	this->fix.lat = lat;
 	this->fix.lon = lon;
 	this->recordTime = std::chrono::system_clock::now();
