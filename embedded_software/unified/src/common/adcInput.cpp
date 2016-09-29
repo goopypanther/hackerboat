@@ -90,7 +90,7 @@ bool ADCInput::execute() {
 	char in[5];
 	ain.open(batmonPath);
 	if (ain.is_open()) {
-		ain.get(in, 4);		// value is from 0-4095, so at most four characters
+		ain.get(in, 5);		// value is from 0-4095, so at most four characters, but we have to grab at least 5 to get it all
 		_raw["battery_mon"] = atoi(in);	
 	} else {
 		_raw["battery_mon"] = -1;

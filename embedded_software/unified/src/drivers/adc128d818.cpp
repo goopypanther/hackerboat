@@ -108,7 +108,7 @@ bool ADC128D818::begin() {
 	uint8_t data { 0xff };				// We initialize this value to all ones so the while loop fires onces
 	uint8_t reg { BUSY_STATUS_REG };	// This is the first register up, so we might as well start here. 
 	int count = 0;
-	while (data && count < ADC_START_COUNT) { 	// check the ready & busy bits. Once they're all zero, we can proceed 
+	while ((data & 0x02) && (count < ADC_START_COUNT)) { 	// Check that the chip has started. 
 		readByteRegister(reg, data);
 		count++;
 		std::this_thread::sleep_for(ADC_START_PERIOD);
@@ -142,17 +142,17 @@ int16_t ADC128D818::read(uint8_t channel) {
 	if (disabled_mask & (((uint8_t)1)<<channel)) return -1;	// check if this channel has been disabled and bail if it has
 	int result = -1;
 	int handle = i2c_open(_bus);
+	std::vector<uint16_t> seq;
+	std::vector<uint8_t> buf { 4 };
 	if (handle >= 0) {
-		std::vector<uint16_t> seq;
-		std::vector<uint8_t> buf { 2 };
 		seq.push_back(addr << 1);
 		seq.push_back(READ_REG_BASE + channel);
 		seq.push_back(I2C_RESTART);
-		seq.push_back((addr << 1)|1);
+		seq.push_back(((addr << 1)|1));
 		seq.push_back(I2C_READ);
 		seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
-			result = (int16_t)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
+			result = (int)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
 		}
 	} else {
 		mylog->open(HARDWARE_LOGFILE);
@@ -165,9 +165,9 @@ int16_t ADC128D818::read(uint8_t channel) {
 }
 
 vector<int> ADC128D818::readAll (void) {
-	std::vector<int> data {8};
+	std::vector<int> data;
 	for (int i = 0; i < 7; i++) {
-		data[i] = (int)(this->read(i));
+		data.push_back(this->read(i));
 	}
 	return data;
 }
@@ -181,9 +181,9 @@ double ADC128D818::readScaled(uint8_t channel) {
 }
 
 vector<double> ADC128D818::readScaled (void) {
-	std::vector<double> data {8};
+	std::vector<double> data;
 	for (int i = 0; i < 7; i++) {
-		data[i] = this->readScaled(i);
+		data.push_back(this->readScaled(i));
 	}
 	return data;
 }

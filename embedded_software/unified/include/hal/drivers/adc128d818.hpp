@@ -64,9 +64,9 @@ class ADC128D818 {
 		bool writeByteRegister(uint8_t reg, uint8_t data);
 		bool readByteRegister(uint8_t reg, uint8_t& data);
 	
-		int			_bus;
+		const int	_bus;
 	
-		uint8_t 	addr;
+		const uint8_t 	addr;
 		uint8_t 	disabled_mask;
 		double 		ref_v;
 

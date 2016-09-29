@@ -104,7 +104,7 @@
 #define ADC_UPPER_INITIALIZER	{"RED", "DIR", "YLWWHT", "REDWHT", "YLW", "WHT", "DISARM", "ENABLE"}
 #define ADC_LOWER_INITIALIZER	{"HORN", "mot_i", "mot_v", "charge_v", "charge_i", "aux_0", "aux_1", "servo_i"}								  
 #define ADC128D818_EXTERNAL_REF	(5.0)
-#define ADC_BATMON_PATH			"/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0/in_voltage0_raw"
+#define ADC_BATMON_PATH			"/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0/in_voltage1_raw"
 #define ADC_BATMON_NAME			"battery_mon"
 
 // Database names

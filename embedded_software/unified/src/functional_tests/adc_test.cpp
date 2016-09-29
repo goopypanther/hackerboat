@@ -34,5 +34,5 @@ int main () {
 			for (auto const &r : scaled) cout << r.second << "\t";
 			cout << endl;
 		}
-	}
+	} else cout << "Initialization failed" << endl;
 }
