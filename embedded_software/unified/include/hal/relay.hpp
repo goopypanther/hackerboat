@@ -16,8 +16,6 @@
 
 #include <string>
 #include <stdlib.h>
-#include <atomic>
-#include <thread>
 #include <chrono>
 #include <vector>
 #include <map>
@@ -35,6 +33,10 @@ class Relay {
 		Relay () = default;
 		Relay (std::string name, Pin output, Pin fault, ADCInput* adc = NULL, bool state = false) :
 			_name(name), _drive(&output), _fault(&fault), _adc(adc), _state(state) {
+				this->init();
+			};
+		Relay (std::string name, Pin *output, Pin *fault, ADCInput* adc = NULL, bool state = false) :
+			_name(name), _drive(output), _fault(fault), _adc(adc), _state(state) {
 				this->init();
 			};
 			
@@ -66,7 +68,7 @@ class Relay {
 
 class RelayMap {
 	public:
-		static RelayMap* instance () {return &_instance;}	/**< Returns a pointer to the object */
+		static RelayMap* instance ();						/**< Returns a pointer to the object */
 		bool init ();										/**< Initialize all relays */
 		Relay& get (std::string name) {return relays->at(name);}	/**< Get a reference to the named relay */
 		json_t *pack ();									/**< Pack status for all of relays in the map. */
@@ -77,7 +79,7 @@ class RelayMap {
 		RelayMap ();										/**< Hark, a singleton! */
 		RelayMap (RelayMap const&) = delete;				/**< Hark, a singleton! */
 		RelayMap& operator=(RelayMap const&) = delete;		/**< Hark, a singleton! */
-		static RelayMap 			_instance;				/**< Hark, a singleton! */
+		static RelayMap* 			_instance;				/**< Hark, a singleton! */
 		std::map<std::string, Relay> *relays;				/**< Named map of all relays */
 		bool						initialized = false;	/**< Record whether all relays are initialized */
 };

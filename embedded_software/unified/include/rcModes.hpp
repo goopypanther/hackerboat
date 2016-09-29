@@ -20,6 +20,7 @@
 #include "enumdefs.hpp"
 #include "stateMachine.hpp"
 #include "boatState.hpp"
+#include "pid.hpp"
 
 class RCModeBase : public StateMachineBase<RCModeEnum, BoatState> {
 	public:
@@ -48,8 +49,20 @@ class RCRudderMode : public RCModeBase {
 class RCCourseMode : public RCModeBase {
 	public:
 		RCCourseMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :	/**< Create a mode object of this type. */
-			RCModeBase(state, last, RCModeEnum::COURSE) {};
+			RCModeBase(state, last, RCModeEnum::COURSE),
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
+	private:
+		PID helm;
+		double in;
+		double out;
+		double setpoint = 0;
 };
 
+class RCFailsafeMode : public RCModeBase {
+	public:
+		RCFailsafeMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :	/**< Create a mode object of this type. */
+			RCModeBase(state, last, RCModeEnum::FAILSAFE) {};
+		RCModeBase* execute ();													/**< Execute one step of this mode. */
+};
 #endif

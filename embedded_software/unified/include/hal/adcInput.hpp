@@ -27,20 +27,21 @@
 
 class ADCInput : public InputThread {
 	public:
-		ADCInput(void) {inputsValid = init();};	
+		ADCInput(void); 
 		
 		bool 							isValid() {return inputsValid;};				/**< Check if the hardware connections are good */
 		bool							init();											/**< Intialize all inputs */
 		bool 							begin();										/**< Start the input thread */
 		bool 							execute();										/**< Gather input	*/
-		std::map<std::string, double> 	getRawValues (void) {return _raw;};				/**< Return the raw ADC values, in volts */
+		std::map<std::string, int> 		getRawValues (void) {return _raw;};				/**< Return the raw ADC values, in volts */
 		std::map<std::string, double> 	getScaledValues (void);							/**< Return the scaled ADC values */
-		bool 							setOffsets (std::map<std::string, double> offsets);/**< Set the offsets for all channels. */
+		bool 							setOffsets (std::map<std::string, int> offsets);/**< Set the offsets for all channels. */
 		bool 							setScales (std::map<std::string, double> scales);/**< Set the scaling for all channels. */
-		std::map<std::string, double> 	getOffsets() {return _offsets;};				/**< Get the offsets for all channels. */
+		std::map<std::string, int> 		getOffsets() {return _offsets;};				/**< Get the offsets for all channels. */
 		std::map<std::string, double> 	getScales() {return _scales;};					/**< Get the scaling for all channels. */
 		~ADCInput () {
 			this->kill(); 
+			if (myThread) delete myThread;
 		}
 		
 		using InputThread::getLastInputTime;
@@ -51,11 +52,11 @@ class ADCInput : public InputThread {
 		std::vector<std::string>		upperChannels ADC_UPPER_INITIALIZER;
 		std::vector<std::string>		lowerChannels ADC_LOWER_INITIALIZER;
 		std::string						batmonPath;
-		std::map<std::string, double> 	_raw;
-		std::map<std::string, double> 	_offsets;
+		std::map<std::string, int> 		_raw;
+		std::map<std::string, int> 		_offsets;
 		std::map<std::string, double> 	_scales;
 		bool							inputsValid = false;
-		std::thread *myThread;
+		std::thread *myThread = NULL;
 };
 
 #endif /* ADCINPUT_H */

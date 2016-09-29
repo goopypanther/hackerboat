@@ -27,6 +27,14 @@ hb.fcgi
 nav
 embedded_software/unified/master
 embedded_software/unified/unit_tests
+embedded_software/unified/rc_test
+embedded_software/unified/orientation_test
+embedded_software/unified/adc_test
+embedded_software/unified/relay_test
+embedded_software/unified/throttle_test
+embedded_software/unified/servo_test
+embedded_software/unified/rcctrl
+embedded_software/unified/gps_test
 
 # Eagle
 *.s#*

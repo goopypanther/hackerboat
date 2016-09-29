@@ -17,6 +17,7 @@ extern "C" {
 #include <type_traits>
 #include <string>
 #include <ostream>
+#include <cmath>
 
 /** @fn json_t *json(T foo)
  *
@@ -42,7 +43,8 @@ inline json_t *json(int i) {
 	return json_integer((json_int_t)i);
 }
 inline json_t *json(double v) {
-	return json_real(v);
+	if (std::isfinite(v)) return json_real(v);
+	return json_null();
 }
 
 /** @fn bool parse(json_t *obj, T *var)

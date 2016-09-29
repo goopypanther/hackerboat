@@ -38,7 +38,7 @@ class Throttle {
 			return false;
 		}
 		int getMaxThrottle() {return throttleMax;};		/**< Get the maximum throttle value */
-		int getMinThrottle() {return throttleMax;};		/**< Get the minimum throttle value */
+		int getMinThrottle() {return throttleMin;};		/**< Get the minimum throttle value */
 	private:
 		int _throttle = 0;
 		ADCInput* _adc;

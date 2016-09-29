@@ -34,8 +34,9 @@ class InputThread {
 				void operator()() {						/**< Thread runner function */
 					me->runFlag = true;
 					while (me->runFlag) {
+						auto endtime = std::chrono::system_clock::now() + me->period;
 						me->execute();
-						std::this_thread::sleep_for(std::chrono::milliseconds(1));
+						std::this_thread::sleep_until(endtime);
 					}
 				};
 				
@@ -56,6 +57,7 @@ class InputThread {
 	protected:
 		void setLastInputTime() {lastInput = system_clock::now();};
 		std::atomic_bool runFlag { false };
+		std::chrono::system_clock::duration period = 10ms;
 		
 	private:
 		sysclock lastInput;						/**< Time that last input was processed */

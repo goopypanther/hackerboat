@@ -36,7 +36,7 @@
 BoatState::BoatState () {
 	relays = RelayMap::instance();
 	rudder = new Servo();
-	rudder->attach(SYSTEM_SERVO_PORT, SYSTEM_SERVO_PIN);
+	rudder->attach(RUDDER_PORT, RUDDER_PIN);
 	if (!disarmInput.isInit()) {
 		disarmInput.setPort(SYSTEM_DISARM_INPUT_PORT);
 		disarmInput.setPin(SYSTEM_DISARM_INPUT_PIN);
@@ -50,8 +50,8 @@ BoatState::BoatState () {
 		armInput.init();
 	}
 	if (!servoEnable.isInit()) {
-		servoEnable.setPort(SYSTEM_SERVO_PORT);
-		servoEnable.setPin(SYSTEM_SERVO_PIN);
+		servoEnable.setPort(SYSTEM_SERVO_ENB_PORT);
+		servoEnable.setPin(SYSTEM_SERVO_ENB_PIN);
 		servoEnable.setDir(false);
 		servoEnable.init();
 	}
@@ -280,6 +280,64 @@ int BoatState::executeCmds (int num) {
 		}
 	}
 	return result;
+}
+
+std::string BoatState::getCSV() {
+	std::string csv;
+	csv =  HackerboatState::packTime(recordTime);
+	csv += ",";
+	csv	+= std::to_string(currentWaypoint);
+	csv += ",";
+	csv += std::to_string(waypointStrength);
+	csv += ",";
+	csv	+= HackerboatState::packTime(lastContact);
+	csv += ",";
+	csv += HackerboatState::packTime(lastRC);
+	csv += ",";
+	csv += std::to_string(lastFix.fix.lat);
+	csv += ",";
+	csv += std::to_string(lastFix.fix.lon);
+	csv += ",";
+	csv += std::to_string(lastFix.track);
+	csv += ",";
+	csv += std::to_string(lastFix.speed);
+	csv += ",";
+	csv += std::to_string(lastFix.fixValid);
+	csv += ",";
+	csv += std::to_string(disarmInput.get());
+	csv += ",";
+	csv += std::to_string(armInput.get());
+	csv += ",";
+	csv += servoEnable.get();
+	csv += ",";
+	csv += std::to_string(throttle->getThrottle());
+	csv += ",";
+	csv += std::to_string(rudder->readMicroseconds());
+	csv += ",";
+	csv += std::to_string(orient->getOrientation()->heading);
+	csv += ",";
+	csv += std::to_string(rc->getThrottle());
+	csv += ",";
+	csv += std::to_string(rc->getCourse());
+	csv += ",";
+	csv += rc->isFailSafe();
+	csv += ",";
+	csv += rcModeNames.get(rc->getMode());
+	//csv += ",";
+	//csv += adc->getRawValues()["mot_i"];
+	//csv += ",";
+	//csv += adc->getRawValues()["battery_mon"];
+	csv += "\n";
+	return csv;
+}
+
+std::string BoatState::getCSVheaders() {
+	std::string headers;
+	headers = "RecordTime,CurrentWaypoint,WaypointStrength,LastContactTime,LastRCTime,";
+	headers += "Lat,Lon,Track,Speed,FixValid,StopButtonState,ArmButtonState,ServoEnableState,";
+	headers += "ThrottlePosition,RudderCommand,CurrentHeading,ThrottleInput,CourseInput,RCFailSafe,";
+	headers += "RCMode,RawMotorCurrent,RawBatteryVoltage";
+	return headers;
 }
 
 bool Command::setCommand (std::string cmd, json_t *args) {

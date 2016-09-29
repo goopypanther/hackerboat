@@ -39,6 +39,7 @@ double map(double x, double in_min, double in_max, double out_min, double out_ma
 RCInput::RCInput (std::string devpath) : 
 	_path(devpath) {
 		rawChannels.assign(RC_CHANNEL_COUNT, 0);
+		period = RC_READ_PERIOD;
 	}
 
 int RCInput::getThrottle () {
@@ -55,6 +56,13 @@ double RCInput::getCourse () {
 
 int RCInput::getChannel (int channel) {
 	return rawChannels[channel];
+}
+
+RCModeEnum RCInput::getMode() {
+	if (this->isFailSafe()) return RCModeEnum::FAILSAFE;
+	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-100)) return RCModeEnum::RUDDER;
+	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+100)) return RCModeEnum::COURSE;
+	return RCModeEnum::IDLE;
 }
 
 bool RCInput::begin() {
@@ -94,7 +102,7 @@ bool RCInput::execute() {
 	char buf[SBUS_BUF_LEN];
 	ssize_t bytesRead = read(devFD, buf, SBUS_BUF_LEN);
 	if (bytesRead > 0) {
-		inbuf += buf;
+		for (int i = 0; i < bytesRead; i++) inbuf.push_back(buf[i]); // we have to do this in order to copy /0 correctly
 		memset(buf, 0, SBUS_BUF_LEN);
 	}
 	if (inbuf.size() >= SBUS_BUF_LEN) {
@@ -132,7 +140,8 @@ bool RCInput::execute() {
 				failsafe = true;
 			} else {
 				failsafe = false;
-			}			
+			}
+			inbuf.clear();			
 		}
 	}
 	return true;
@@ -141,4 +150,5 @@ bool RCInput::execute() {
 RCInput::~RCInput() {
 	this->kill();
 	close(devFD);
+	if (myThread) delete myThread;
 }

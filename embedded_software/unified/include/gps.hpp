@@ -52,7 +52,7 @@ class GPSFix : public HackerboatStateStorable {
 		
 		sysclock		gpsTime;	/**< GPS time of fix */
 		
-		NMEAModeEnum	mode;		/**< Mode of the fix */
+		NMEAModeEnum	mode = NMEAModeEnum::NONE;		/**< Mode of the fix */
 		std::string		device;		/**< Name of the device */
 		Location		fix;		/**< Location of the current fix */
 		double			track;		/**< Course over ground, in degrees from north */
@@ -68,13 +68,10 @@ class GPSFix : public HackerboatStateStorable {
 		double			epc;		/**< Climb error, 95% confidence, m/s */
 
 		bool 			fixValid;	/**< Checks whether this fix is valid or not */				
-		static const std::string msgClass;
 		
 	private:
 		bool coreParse (json_t* input);	/**< This is the pieces of the parsing task shared between parse() and parseGpsdPacket() */
 		HackerboatStateStorage *gpsStorage = NULL;
 };
-
-const std::string GPSFix::msgClass = "TPV";
 
 #endif

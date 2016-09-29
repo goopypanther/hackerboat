@@ -34,6 +34,8 @@
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
 
+const std::string AISBase::msgClass = "AIS";
+
 AISShip::AISShip (json_t *packet) {
 	recordTime = std::chrono::system_clock::now();
 	parseGpsdPacket(packet);
@@ -46,7 +48,7 @@ bool AISShip::parseGpsdPacket (json_t *input) {
 	
 	result &= coreParse(input);
 	result &= GET_VAR(time);
-	result &= parseTime(time, this->lastTimeStamp);
+	this->lastTimeStamp = std::chrono::system_clock::now();
 	result &= GET_VAR(lat);
 	result &= GET_VAR(lon);
 	

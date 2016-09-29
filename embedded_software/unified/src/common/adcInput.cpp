@@ -21,10 +21,15 @@
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 #include "hal/inputThread.hpp"
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 #include "hal/adcInput.hpp" 
+ 
+ADCInput::ADCInput(void) {
+	period = IMU_READ_PERIOD;
+}
  
 bool ADCInput::init() {
 	bool result = true;
@@ -44,18 +49,18 @@ bool ADCInput::init() {
 	lower.setReference(ADC128D818_EXTERNAL_REF);
 	
 	// This populates the various maps
-	_raw[ADC_BATMON_NAME] = NAN;
+	_raw[ADC_BATMON_NAME] = -1;
 	_offsets[ADC_BATMON_NAME] = 0.0;
-	_scales[ADC_BATMON_NAME] = 1.0;
+	_scales[ADC_BATMON_NAME] = 0.00043956;			// default is to scale this value to a raw voltage, i.e. 0-4095 => 0-1.8V
 	for (unsigned int i = 0; i < upperChannels.size(); i++) {
-		_raw[upperChannels[i]] = NAN;
+		_raw[upperChannels[i]] = -1;
 		_offsets[upperChannels[i]] = 0.0;
-		_scales[upperChannels[i]] = 1.0;
+		_scales[upperChannels[i]] = 0.001221001;	// default is to scale to raw voltage (0-5V)
 	}
 	for (unsigned int j = 0; j < lowerChannels.size(); j++) {
-		_raw[lowerChannels[j]] = NAN;
+		_raw[lowerChannels[j]] = -1;
 		_offsets[lowerChannels[j]] = 0.0;
-		_scales[lowerChannels[j]] = 1.0;
+		_scales[lowerChannels[j]] = 0.001221001;	// default is to scale to raw voltage (0-5V)
 	}
 	inputsValid = result;
 	return inputsValid;
@@ -79,16 +84,16 @@ bool ADCInput::execute() {
 	this->setLastInputTime();
 	
 	// read in the data
-	std::vector<double> upperInputs = upper.readScaled();
-	std::vector<double> lowerInputs = lower.readScaled();
+	std::vector<int> upperInputs = upper.readAll();
+	std::vector<int> lowerInputs = lower.readAll();
 	std::ifstream ain;
 	char in[5];
 	ain.open(batmonPath);
 	if (ain.is_open()) {
-		ain.get(in, 4);		// value is from 0-1799, so at most four characters
-		_raw["battery_mon"] = atoi(in)/1000;	// convert millivolts to volts for storage
+		ain.get(in, 5);		// value is from 0-4095, so at most four characters, but we have to grab at least 5 to get it all
+		_raw["battery_mon"] = atoi(in);	
 	} else {
-		_raw["battery_mon"] = NAN;
+		_raw["battery_mon"] = -1;
 		result = false;
 	}
 	for (unsigned int i = 0; i < upperChannels.size(); i++) {
@@ -97,6 +102,8 @@ bool ADCInput::execute() {
 	for (unsigned int j = 0; j < lowerChannels.size(); j++) {
 		_raw[lowerChannels[j]] = lowerInputs[j];
 	}
+	
+	lock.unlock();
 	return result;
 }
 
@@ -108,7 +115,7 @@ std::map<std::string, double> ADCInput::getScaledValues (void) {
 	return out;
 }
 
-bool ADCInput::setOffsets (std::map<std::string, double> offsets) {
+bool ADCInput::setOffsets (std::map<std::string, int> offsets) {
 	for (auto const &r : offsets) {
 		_offsets[r.first] = r.second;
 	}

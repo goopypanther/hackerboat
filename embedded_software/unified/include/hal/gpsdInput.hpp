@@ -21,35 +21,46 @@
 #include <chrono>
 #include <vector>
 #include <tuple>
+#include <map>
 #include "hal/config.h"
 #include "gps.hpp"
 #include "ais.hpp"
 #include "hal/inputThread.hpp"
+#include "pstream.h"
+#include "location.hpp"
 
 using namespace std;
 
 class GPSdInput : public InputThread {
 	public:
-		GPSdInput() = default;					
+		GPSdInput();					
 		GPSdInput(string host, int port);			/**< Create a gpsd object pointing at the given host & port combination. */
 		bool setHost (string host);					/**< Point the input listener at the given host. */
 		bool setPort (int port);					/**< Point the input listener at the given port */
 		bool connect ();							/**< Connect to the host */
 		bool disconnect ();							/**< Disconnect from the host. */
 		bool isConnected ();						/**< Returns true if connected. */
+		bool begin();								/**< Start the input thread */
+		bool execute();								/**< Gather input	*/
 		GPSFix* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
-		map<int, AISBase> getData();				/**< Returns all AIS contacts */
-		map<int, AISBase> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
-		AISBase& getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
-		AISBase& getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
-		int pruneAIS();								/**< Call the prune() function of each AIS contact. */
+		std::map<int, AISShip> getData();				/**< Returns all AIS contacts */
+		std::map<int, AISShip> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
+		AISShip getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
+		AISShip getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
+		int pruneAIS(Location loc);					/**< Call the prune() function of each AIS contact. */
 		bool isValid() {return isConnected();};
+		~GPSdInput () {
+			this->kill(); 
+			if (myThread) delete myThread;
+		}
 		
 	private:
-		string 				_host;
-		int 				_port;
+		string 				_host = "127.0.0.1";
+		int 				_port = 3001;
 		GPSFix 				_lastFix;
-		map<int, AISBase>	_aisTargets;
+		std::map<int, AISShip>	_aisTargets;
+		redi::pstreambuf	gpsdstream;
+		std::thread 		*myThread;
 };
 		
 #endif

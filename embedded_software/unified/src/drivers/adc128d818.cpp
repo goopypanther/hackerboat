@@ -22,7 +22,6 @@
 #include <cmath>
 #include "logs.hpp"
 #include "hal/config.h"
-#include "hal/drivers/i2c.hpp"
 #include "hal/drivers/adc128d818.hpp"
 
 #define CONFIG_REG    		((uint8_t)0x00)
@@ -50,7 +49,7 @@
 
 static LogError* mylog = LogError::instance();
 
-ADC128D818::ADC128D818(uint8_t address, I2CBus bus) :
+ADC128D818::ADC128D818(uint8_t address, int bus) :
 	addr(address), _bus(bus), disabled_mask(0), ref_v(ADC128D818_INTERNAL_REF),
 	ref_mode(reference_mode_t::INTERNAL_REF), op_mode(operation_mode_t::SINGLE_ENDED),
 	conv_mode(conv_mode_t::CONTINUOUS) {}
@@ -76,49 +75,44 @@ void ADC128D818::setDisabledMask(uint8_t disabled_mask) {
 }
 
 bool ADC128D818::writeByteRegister(uint8_t reg, uint8_t data) {
-	std::vector<uint8_t> out {2};
-	out[0] = reg;
-	out[1] = data;
-	if ((_bus.openI2C(addr)) && (_bus.writeI2C(out))) {
-		_bus.closeI2C();
-		return true;
-	} else {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("ADC128D818", "Failed to write to ADC register " + reg);
-		mylog->close();
-		_bus.closeI2C();
-		return false;
-	}
-	return false;
+	int handle = i2c_open(_bus);
+	bool result = false;
+	if (handle >= 0) {
+		std::vector<uint16_t> seq;
+		seq.push_back(addr << 1);
+		seq.push_back(reg);
+		seq.push_back(data);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), NULL) >= 0) result = true;
+	} 
+	i2c_close(handle);
+	return result;
 }
 
 bool ADC128D818::readByteRegister(uint8_t reg, uint8_t& data) {
-	std::vector<uint8_t> io {1, reg};
-	// We take advantage of short-circuiting here. Order is guaranteed, per standard.
-	if ((_bus.openI2C(addr)) && (_bus.writeI2C(io)) && (_bus.readI2C(io, 1, 1))) {
-		_bus.closeI2C();
-		data = io[0];	// we use the one vector both coming and going
-		return true;
-	} else {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("ADC128D818", "Failed to connect and/or write to and/or read from ADC register " + reg);
-		mylog->close();
-		_bus.closeI2C();
-		return false;
-	}
-	return false;
+	bool result = false;
+	int handle = i2c_open(_bus);
+	if (handle >= 0) {
+		std::vector<uint16_t> seq;
+		seq.push_back(addr << 1);
+		seq.push_back(reg);
+		seq.push_back(I2C_RESTART);
+		seq.push_back((addr << 1)|1);
+		seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), &data) >= 0) result = true;
+	} 
+	i2c_close(handle);
+	return result;
 }
 
 bool ADC128D818::begin() {
-	uint8_t data { 0xff };				// We initialize the two bytes of this vector to all ones so the while loop fires onces
+	uint8_t data { 0xff };				// We initialize this value to all ones so the while loop fires onces
 	uint8_t reg { BUSY_STATUS_REG };	// This is the first register up, so we might as well start here. 
 	int count = 0;
-	while (data && count < ADC_START_COUNT) { 	// check the ready & busy bits. Once they're all zero, we can proceed 
+	while ((data & 0x02) && (count < ADC_START_COUNT)) { 	// Check that the chip has started. 
 		readByteRegister(reg, data);
 		count++;
 		std::this_thread::sleep_for(ADC_START_PERIOD);
 	}
-	_bus.closeI2C();
 	if (count >= BUSY_STATUS_REG) {
 		mylog->open(HARDWARE_LOGFILE);
 		mylog->write("ADC128D818", "Failed to connect to ADC and/or ADC was stuck in startup or busy mode.");
@@ -146,25 +140,34 @@ bool ADC128D818::begin() {
 
 int16_t ADC128D818::read(uint8_t channel) {
 	if (disabled_mask & (((uint8_t)1)<<channel)) return -1;	// check if this channel has been disabled and bail if it has
-	std::vector<uint8_t> reg {1, (uint8_t)(READ_REG_BASE + channel)};
-	std::vector<uint8_t> data {2};		
-	if ((_bus.openI2C(addr)) && (_bus.writeI2C(reg)) && (_bus.readI2C(data, 2, 2))) {
-		_bus.closeI2C();
-		return (data[1] + (((uint16_t)data[0]) << 8));
+	int result = -1;
+	int handle = i2c_open(_bus);
+	std::vector<uint16_t> seq;
+	std::vector<uint8_t> buf { 4 };
+	if (handle >= 0) {
+		seq.push_back(addr << 1);
+		seq.push_back(READ_REG_BASE + channel);
+		seq.push_back(I2C_RESTART);
+		seq.push_back(((addr << 1)|1));
+		seq.push_back(I2C_READ);
+		seq.push_back(I2C_READ);
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
+			result = (int)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
+		}
 	} else {
 		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("ADC128D818", "Failed to connect to and/or read from ADC register " + reg[0]);
+		mylog->write("ADC128D818", "Failed to connect to and/or read from ADC register " + (READ_REG_BASE + channel));
 		mylog->close();
-		_bus.closeI2C();
-		return -1;
+		result = -1;
 	}
-	return -1;
+	i2c_close(handle);
+	return result;
 }
 
-vector<int16_t> ADC128D818::readAll (void) {
-	std::vector<int16_t> data {8};
+vector<int> ADC128D818::readAll (void) {
+	std::vector<int> data;
 	for (int i = 0; i < 7; i++) {
-		data[i] = this->read(i);
+		data.push_back(this->read(i));
 	}
 	return data;
 }
@@ -178,9 +181,9 @@ double ADC128D818::readScaled(uint8_t channel) {
 }
 
 vector<double> ADC128D818::readScaled (void) {
-	std::vector<double> data {8};
+	std::vector<double> data;
 	for (int i = 0; i < 7; i++) {
-		data[i] = this->readScaled(i);
+		data.push_back(this->readScaled(i));
 	}
 	return data;
 }
