@@ -53,6 +53,7 @@ run: svctree
 .PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= logs.cpp  
+LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= gpsdInput.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
 LIBHACKERBOAT_SRCS+= RCinput.cpp
