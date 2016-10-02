@@ -102,6 +102,7 @@ TEST_OBJS = enumtable_test.o
 TEST_OBJS += twovector_test.o 
 TEST_OBJS += location_test.o 
 TEST_OBJS += orientation_test.o 
+TEST_OBJS += waypoint_test.o 
 #TEST_OBJS += sqliteStorage_test.o 
 #TEST_OBJS += smallJson_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
