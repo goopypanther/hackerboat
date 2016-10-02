@@ -1,6 +1,8 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <jansson.h>
+#include <cmath>
 
 testing::AssertionResult assertJSONEqual(const char *expected_expr, const char *actual_expr,
 					 json_t *expected, json_t *actual);
@@ -11,7 +13,7 @@ testing::AssertionResult assertJSONEqual(const char *expected_expr, const char *
 
 bool inline toleranceEquals (double a, double b, double tolerance) {	/**< Compare two doubles with a tolerance */
 	double diff = a - b;
-	if (abs(diff) < tolerance) {
+	if (fabs(diff) < tolerance) {
 		return true;
 	} else {
 		std::cerr << a << " " << b << " " << diff << std::endl;

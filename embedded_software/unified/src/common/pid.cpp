@@ -15,8 +15,11 @@
 #include <cmath>
 #include <cstdint>
 #include <chrono>
+#include <vector>
+#include <iostream>
 #include "pid.hpp" 
 
+using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
@@ -27,10 +30,9 @@ using namespace std::chrono_literals;
 PID::PID(double* Input, double* Output, double* Setpoint,
         double Kp, double Ki, double Kd, int ControllerDirection) :
 		myOutput(Output), myInput(Input), mySetpoint(Setpoint),
-		inAuto(false)
+		inAuto(false), SampleTime(100), controllerDirection(ControllerDirection)
 {
     PID::SetTunings(Kp, Ki, Kd);
-    PID::SetControllerDirection(ControllerDirection);
 	lastTime = PID_CLOCK::now();
 	lastTime = lastTime - SampleTime;				
 }
@@ -40,14 +42,13 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  *     This, as they say, is where the magic happens.  this function should be called
  *   every time "void loop()" executes.  the function will decide for itself whether a new
  *   pid Output needs to be computed.  returns true when the output is computed,
- *   false when nothing has been done.
+ *   false when nothing has been done. If the loop is not in automatic mode, this will
+ * 	 execute every time it is called. 
  **********************************************************************************/ 
 bool PID::Compute()
 {
-   if(!inAuto) return false;
-   
    time_point<PID_CLOCK> thisTime = PID_CLOCK::now();
-   if((thisTime - lastTime) >= SampleTime)
+   if (((thisTime - lastTime) >= SampleTime) || !inAuto)
    {
       /*Compute all the working error variables*/
 	  double input = *myInput;
@@ -81,15 +82,16 @@ bool PID::Compute()
 void PID::SetTunings(double Kp, double Ki, double Kd)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
+   if (!isfinite(Kp) || !isfinite(Ki) || !isfinite(Kd)) return;
  
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
    
-   double SampleTimeInSec = (duration_cast<milliseconds>(SampleTime).count())/1000;  
+   double SampleTimeInSec = (SampleTime.count())/1000.0;
    kp = Kp;
    ki = Ki * SampleTimeInSec;
    kd = Kd / SampleTimeInSec;
  
-  if(controllerDirection ==REVERSE)
+  if(controllerDirection == REVERSE)
    {
       kp = (0 - kp);
       ki = (0 - ki);
@@ -103,10 +105,10 @@ void PID::SetTunings(double Kp, double Ki, double Kd)
 void PID::SetSampleTime(long int NewSampleTime)
 {
 	if (NewSampleTime > 0) {
-		double ratio = NewSampleTime/SampleTime.count();
+		double ratio = NewSampleTime/(double)(SampleTime.count());
 		ki *= ratio;
 		kd /= ratio;
-		SampleTime = duration<long long int, std::milli>(NewSampleTime);
+		SampleTime = milliseconds(NewSampleTime);
 	}
 }
  
@@ -136,14 +138,14 @@ void PID::SetOutputLimits(double Min, double Max)
 
 /* SetMode(...)****************************************************************
  * Allows the controller Mode to be set to manual (0) or Automatic (non-zero)
- * when the transition from manual to auto occurs, the controller is
+ * when the transition from manual to auto occurs or vice versa, the controller is
  * automatically initialized
  ******************************************************************************/ 
 void PID::SetMode(int Mode)
 {
     bool newAuto = (Mode == AUTOMATIC);
-    if(newAuto == !inAuto)
-    {  /*we just went from manual to auto*/
+    if(newAuto != inAuto)
+    {  /*we just changed modes */
         PID::Initialize();
     }
     inAuto = newAuto;
@@ -169,7 +171,7 @@ void PID::Initialize()
  ******************************************************************************/
 void PID::SetControllerDirection(int Direction)
 {
-   if(inAuto && Direction !=controllerDirection)
+   if(Direction != controllerDirection)
    {
 	  kp = (0 - kp);
       ki = (0 - ki);
@@ -188,3 +190,10 @@ double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
+vector<double> PID::getRealK() {
+	vector<double> k;
+	k.push_back(kp);
+	k.push_back(ki);
+	k.push_back(kd);
+	return k;
+}

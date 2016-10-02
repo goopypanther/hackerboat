@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <chrono>
 #include <string>
+#include <vector>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -71,6 +72,7 @@ class PID {
 	double GetKd();						  // where it's important to know what is actually 
 	int GetMode();						  //  inside the PID.
 	int GetDirection();					  //
+	std::vector<double> getRealK();
 
   private:
 	void Initialize();
@@ -93,7 +95,7 @@ class PID {
 	time_point<PID_CLOCK> lastTime;
 	double ITerm, lastInput;
 
-	duration<long long int, std::milli> SampleTime = 100ms;
+	milliseconds SampleTime;
 	double outMin = 0;
 	double outMax = 255;
 	bool inAuto;
