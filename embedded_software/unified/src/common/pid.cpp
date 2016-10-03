@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <chrono>
 #include <vector>
-#include <iostream>
+#include <tuple>
 #include "pid.hpp" 
 
 using namespace std;
@@ -79,6 +79,10 @@ bool PID::Compute()
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/ 
+void PID::SetTunings(tuple<double, double, double> K) {
+	SetTunings (get<0>(K), get<1>(K), get<2>(K));
+}
+
 void PID::SetTunings(double Kp, double Ki, double Kd)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;

@@ -21,9 +21,9 @@ enum class BoatModeEnum : int {
 	SELFTEST	= 1,  		/**< Initial self-test            		*/
 	DISARMED	= 2,  		/**< Disarmed wait state          		*/  
 	FAULT		= 3,		/**< Beaglebone faulted           		*/ 
-	NAVIGATION	= 5,		/**< Beaglebone armed & navigating		*/ 
-	ARMEDTEST	= 6,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
-	NONE		= 7			/**< State of the Beaglebone is currently unknown	*/
+	NAVIGATION	= 4,		/**< Beaglebone armed & navigating		*/ 
+	ARMEDTEST	= 5,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
+	NONE		= 6			/**< State of the Beaglebone is currently unknown	*/
 };
 
 /**

@@ -74,14 +74,16 @@ bool BoatState::removeFault (const string fault) {
 	size_t index;
 	index = faultString.find(fault);
 	if (index != std::string::npos) {
-		faultString.erase(index, fault.length() + 1);	// captures the trailing colon
+		if (index > 0) index--;
+		faultString.erase(index, fault.length() + 1);	// captures the leading colon
 		return true;
 	} else return false;
 }
 
 int BoatState::faultCount (void) const {
-	size_t index = faultString.find(':');
-	int cnt = 0;
+	if (faultString.size() == 0) return 0;	// if the string is empty, there are no faults
+	int cnt = 1;							// if it's not empty, there's at least one fault here
+	size_t index = faultString.find(':');	// find the first seperator (if any)
 	while (index != std::string::npos) {
 		cnt++;
 		index = faultString.find(':', (index + 1));
@@ -267,7 +269,7 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 }
 
 void BoatState::pushCmd (std::string name, json_t* args) {
-	cmdvec.push_back(Command(this, name, args));
+	cmdvec.emplace_back(Command(this, name, args));
 }
 
 int BoatState::executeCmds (int num) {
@@ -340,28 +342,28 @@ std::string BoatState::getCSVheaders() {
 	return headers;
 }
 
-bool Command::setCommand (std::string cmd, json_t *args) {
-	try {	// check that the requested command exists
-		this->_funcs.at(cmd);
-	} catch (...) {
-		return false;
-	}
-	_cmd = cmd;
-	_args = args;
-	return true;
-}
+//bool Command::setCommand (std::string cmd, json_t *args) {
+//	try {	// check that the requested command exists
+//		this->_funcs.at(cmd);
+//	} catch (...) {
+//		return false;
+//	}
+//	_cmd = cmd;
+//	_args = args;
+//	return true;
+//}
 
-bool Command::setState(BoatState *state) {
-	if (state) {
-		_state = state;
-		return true;
-	} else return false;
-}
+//bool Command::setState(BoatState *state) {
+//	if (state) {
+//		_state = state;
+//		return true;
+//	} else return false;
+//}
 
-bool Command::setArgs(json_t *args) {
-	_args = args;
-	return true;
-}
+//bool Command::setArgs(json_t *args) {
+//	_args = args;
+//	return true;
+//}
 
 bool Command::SetMode(json_t* args, BoatState *state) {
 	if ((!state) || (!args)) return false;
@@ -440,6 +442,7 @@ bool Command::SetWaypointAction(json_t* args, BoatState *state) {
 		WaypointActionEnum action;
 		if (state->waypointList.actionNames.get(modeString, &action)) {
 			state->waypointList.setAction(action);
+			state->action = action;
 			return true;
 		}
 	}
@@ -504,4 +507,38 @@ map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
 	MAKE_FUNC(FetchWaypoints),
 	MAKE_FUNC(PushPath),
 	MAKE_FUNC(SetPID)
+};
+
+const EnumNameTable<BoatModeEnum> BoatState::boatModeNames = {
+	"Start",
+	"SelfTest",
+	"Disarmed",
+	"Fault",
+	"Navigation",
+	"ArmedTest",
+	"None"
+};
+
+const EnumNameTable<NavModeEnum> BoatState::navModeNames = {
+	"Idle",
+	"Fault",
+	"RC",
+	"Autonomous",
+	"None"
+};
+
+const EnumNameTable<AutoModeEnum> BoatState::autoModeNames = {
+	"Idle",
+	"Waypoint",
+	"Return",
+	"Anchor",
+	"None"
+};
+
+const EnumNameTable<RCModeEnum> BoatState::rcModeNames = {
+	"Idle",
+	"Rudder",
+	"Course",
+	"Failsafe",
+	"None"
 };

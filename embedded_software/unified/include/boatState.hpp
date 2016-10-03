@@ -40,15 +40,15 @@ class BoatState;	// forward declaration so this compiles
 
 class Command {
 	public:
-		Command () {};
-		Command (BoatState *state) : _state(state) {};
+		//Command () {};
+		//Command (BoatState *state) : _state(state) {};
 		Command (BoatState *state, std::string cmd, json_t *args = NULL) :
 			_state(state), _cmd(cmd), _args(args) {
 				this->_funcs.at(_cmd);	// force an exception on an invalid command name
 			};
-		bool setCommand (std::string cmd, json_t *args = NULL);
-		bool setState (BoatState *state);
-		bool setArgs (json_t *args);
+		//bool setCommand (std::string cmd, json_t *args = NULL);
+		//bool setState (BoatState *state);
+		//bool setArgs (json_t *args);
 		std::string getCmd() {return _cmd;};
 		json_t *getArgs() {return _args;};
 		bool execute () {return (this->_funcs[_cmd])(_args, _state);};
@@ -146,40 +146,6 @@ class BoatState : public HackerboatStateStorable {
 		AutoModeEnum 	_auto;
 		RCModeEnum 		_rc;
 	
-};
-
-const EnumNameTable<BoatModeEnum> BoatState::boatModeNames = {
-	"Start",
-	"SelfTest",
-	"Disarmed",
-	"Fault",
-	"Navigation",
-	"ArmedTest",
-	"None"
-};
-
-const EnumNameTable<NavModeEnum> BoatState::navModeNames = {
-	"Idle",
-	"Fault",
-	"RC",
-	"Autonomous",
-	"None"
-};
-
-const EnumNameTable<AutoModeEnum> BoatState::autoModeNames = {
-	"Idle",
-	"Waypoint",
-	"Return",
-	"Anchor,"
-	"None"
-};
-
-const EnumNameTable<RCModeEnum> BoatState::rcModeNames = {
-	"Idle",
-	"Rudder",
-	"Course",
-	"Failsafe",
-	"None"
 };
 
 #endif 

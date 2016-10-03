@@ -104,6 +104,7 @@ TEST_OBJS += location_test.o
 TEST_OBJS += orientation_test.o 
 TEST_OBJS += waypoint_test.o 
 TEST_OBJS += pid_test.o 
+TEST_OBJS += boatstate_test.o 
 #TEST_OBJS += sqliteStorage_test.o 
 #TEST_OBJS += smallJson_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o

@@ -20,7 +20,9 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <tuple>
 
+using namespace std;
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
@@ -56,7 +58,8 @@ class PID {
   //available but not commonly used functions ********************************************************
     void SetTunings(double, double,       // * While most users will set the tunings once in the 
                     double);         	  //   constructor, this function gives the user the option
-                                          //   of changing tunings during runtime for Adaptive control
+    void SetTunings(tuple<double, double, //   of changing tunings during runtime for Adaptive control
+					double>);
 	void SetControllerDirection(int);	  // * Sets the Direction, or "Action" of the controller. DIRECT
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed

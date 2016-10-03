@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <gtest/gtest.h>
 #include <chrono>
+#include <tuple>
 #include "pid.hpp"
 #include "test_utilities.hpp"
 
@@ -36,6 +37,12 @@ TEST(PID, Accessors) {
 	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[0], -100.0, TOL));
 	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[1], -0.1, TOL));
 	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[2], -100.0, TOL));
+	std::tuple<double, double, double> K = {10.0, 1.0, 0.1};
+	mypid.SetTunings(K);
+	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[0], -10.0, TOL));
+	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[1], -0.01, TOL));
+	EXPECT_TRUE(toleranceEquals(mypid.getRealK()[2], -10.0, TOL));
+	
 }
 
 TEST(PID, Limits) {
