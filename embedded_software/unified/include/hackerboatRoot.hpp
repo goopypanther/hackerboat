@@ -108,11 +108,19 @@ class HackerboatState {
 			date::parse(input, "%FT%TZ", t);
 			if (input.fail()){
 				input.clear();
-				input.exceptions(std::ios::failbit);
 				input.str(in);
 				date::parse(input, "%FT%T%Ez", t);
 			}
-			//t = time_point_cast<system_clock>(tp);
+			if (input.fail()){
+				input.clear();
+				input.str(in);
+				date::parse(input, "%F %TZ", t);
+			}
+			if (input.fail()){
+				input.clear();
+				input.str(in);
+				date::parse(input, "%F %T%Ez", t);
+			}
 			return true;
 		};
 		

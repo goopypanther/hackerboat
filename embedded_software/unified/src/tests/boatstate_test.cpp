@@ -93,8 +93,113 @@ TEST(BoatStateTest, RCMode) {
 	EXPECT_EQ(me.getRCMode(), RCModeEnum::NONE);
 }
 
+TEST(BoatStateTest, JSON) {
+	BoatState me, you;
+	json_error_t *err;
+	GPSFix testfix;
+	testfix.fix = Location(5.0, 5.0);
+	me.relays = RelayMap::instance();
+	me.recordTime = std::chrono::system_clock::now();
+	me.currentWaypoint = 4;
+	me.waypointStrength = 20.0;
+	me.lastContact = std::chrono::system_clock::now();
+	me.lastRC = std::chrono::system_clock::now();
+	me.launchPoint = Location(10.0, 10.0);
+	me.lastFix = testfix;
+	me.insertFault("test");
+	me.action = WaypointActionEnum::RETURN;
+	me.setBoatMode("Disarmed");
+	me.setNavMode("Fault");
+	me.setAutoMode("Waypoint");
+	me.setRCmode("Rudder");
+	json_t* packed;
+	ASSERT_NO_THROW(packed = me.pack());
+	ASSERT_TRUE(packed);
+	EXPECT_TRUE(you.parse(packed));
+	EXPECT_EQ(me.recordTime, you.recordTime);
+	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
+	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
+	EXPECT_EQ(me.lastContact, you.lastContact);
+	EXPECT_EQ(me.lastRC, you.lastRC);
+	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
+	EXPECT_EQ(me.launchPoint.lon, you.launchPoint.lon);
+	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
+	EXPECT_EQ(me.lastFix.fix.lon, you.lastFix.fix.lon);
+	EXPECT_TRUE(you.hasFault("test"));
+	EXPECT_EQ(me.action, you.action);
+	EXPECT_EQ(me.getBoatMode(), you.getBoatMode());
+	EXPECT_EQ(me.getNavMode(), you.getNavMode());
+	EXPECT_EQ(me.getAutoMode(), you.getAutoMode());
+	EXPECT_EQ(me.getRCMode(), you.getRCMode());
+}
+
+TEST(BoatStateTest, Storage) {
+	BoatState me, you;
+	json_error_t *err;
+	GPSFix testfix;
+	testfix.fix = Location(5.0, 5.0);
+	me.relays = RelayMap::instance();
+	me.recordTime = std::chrono::system_clock::now();
+	me.currentWaypoint = 4;
+	me.waypointStrength = 20.0;
+	me.lastContact = std::chrono::system_clock::now();
+	me.lastRC = std::chrono::system_clock::now();
+	me.launchPoint = Location(10.0, 10.0);
+	me.lastFix = testfix;
+	me.insertFault("test");
+	me.action = WaypointActionEnum::RETURN;
+	me.setBoatMode("Disarmed");
+	me.setNavMode("Fault");
+	me.setAutoMode("Waypoint");
+	me.setRCmode("Rudder");
+	EXPECT_TRUE(me.writeRecord());
+	EXPECT_TRUE(you.getLastRecord());
+	EXPECT_EQ(me.recordTime, you.recordTime);
+	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
+	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
+	EXPECT_EQ(me.lastContact, you.lastContact);
+	EXPECT_EQ(me.lastRC, you.lastRC);
+	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
+	EXPECT_EQ(me.launchPoint.lon, you.launchPoint.lon);
+	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
+	EXPECT_EQ(me.lastFix.fix.lon, you.lastFix.fix.lon);
+	EXPECT_TRUE(you.hasFault("test"));
+	EXPECT_EQ(me.action, you.action);
+	EXPECT_EQ(me.getBoatMode(), you.getBoatMode());
+	EXPECT_EQ(me.getNavMode(), you.getNavMode());
+	EXPECT_EQ(me.getAutoMode(), you.getAutoMode());
+	EXPECT_EQ(me.getRCMode(), you.getRCMode());
+}
+
 TEST(BoatStateTest, Command) {
 	BoatState me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", "{mode:\"Start\"}")
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, err)));
+	EXPECT_EQ(me.commandCnt(), 6);
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::START);
+	EXPECT_EQ(me.commandCnt(), 5);
+	EXPECT_EQ(me.executeCmds(2), 2);
+	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::DISARMED);
+	EXPECT_EQ(me.commandCnt(), 3);
+	EXPECT_EQ(me.executeCmds(0), 3);
+	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::ARMEDTEST);
+	EXPECT_EQ(me.commandCnt(), 0);
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, err)));
+	EXPECT_EQ(me.commandCnt(), 6);
+	EXPECT_NO_THROW(me.flushCmds());
+	EXPECT_EQ(me.commandCnt(), 0);
 }
+
+
 

@@ -12,6 +12,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <list>
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "location.hpp"
@@ -178,9 +179,9 @@ bool BoatState::parse (json_t* input ) {
 	result &= HackerboatState::parseTime(lastContactIn, this->lastContact);
 	result &= HackerboatState::parseTime(lastRCin, this->lastRC);
 	result &= boatModeNames.get(boatMode, &(this->_boat));
-	result &= navModeNames.get(boatMode, &(this->_nav));
-	result &= autoModeNames.get(boatMode, &(this->_auto));
-	result &= rcModeNames.get(boatMode, &(this->_rc));
+	result &= navModeNames.get(navMode, &(this->_nav));
+	result &= autoModeNames.get(autoMode, &(this->_auto));
+	result &= rcModeNames.get(rcMode, &(this->_rc));
 	
 	return result;
 }
@@ -273,12 +274,12 @@ void BoatState::pushCmd (std::string name, json_t* args) {
 }
 
 int BoatState::executeCmds (int num) {
-	if (num == 0) num = this->cmdvec.size();	// If we got a zero, eat everything
+	if (num == 0) num = this->cmdvec.size();		// If we got a zero, eat everything
 	int result = 0;
-	for (int i = 0; i < num; i++) {				// iterate over the given set of commands
-		if (cmdvec.size()) {					// this is here to guard against any modifications elsewhere
-			if (cmdvec[0].execute()) result++;	// execute the command at the head of the queue
-			cmdvec.erase(cmdvec.begin());		// remove the head element
+	for (int i = 0; i < num; i++) {					// iterate over the given set of commands
+		if (cmdvec.size()) {						// this is here to guard against any modifications elsewhere
+			if (cmdvec.front().execute()) result++;	// execute the command at the head of the queue
+			cmdvec.pop_front();			// remove the head element
 		}
 	}
 	return result;
@@ -342,29 +343,16 @@ std::string BoatState::getCSVheaders() {
 	return headers;
 }
 
-//bool Command::setCommand (std::string cmd, json_t *args) {
-//	try {	// check that the requested command exists
-//		this->_funcs.at(cmd);
-//	} catch (...) {
-//		return false;
-//	}
-//	_cmd = cmd;
-//	_args = args;
-//	return true;
-//}
+Command::Command (BoatState *state, std::string cmd, json_t *args) :
+	_state(state), _cmd(cmd), _args(args) {
+		this->_funcs.at(_cmd);	// force an exception on an invalid command name
+	};
 
-//bool Command::setState(BoatState *state) {
-//	if (state) {
-//		_state = state;
-//		return true;
-//	} else return false;
-//}
-
-//bool Command::setArgs(json_t *args) {
-//	_args = args;
-//	return true;
-//}
-
+bool Command::execute () {
+	std::function<bool(json_t*, BoatState*)> cmd = this->_funcs.at(_cmd);
+	return cmd(_args, _state);
+}
+	
 bool Command::SetMode(json_t* args, BoatState *state) {
 	if ((!state) || (!args)) return false;
 	std::string modeString;
@@ -493,7 +481,7 @@ bool Command::SetPID(json_t* args, BoatState *state) {
 	return result;
 }
 
-map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
+const map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
 	MAKE_FUNC(SetMode),
 	MAKE_FUNC(SetNavMode),
 	MAKE_FUNC(SetHome),

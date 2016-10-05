@@ -187,3 +187,11 @@ bool Waypoints::decrement () {
 	_c--;
 	return true;
 }
+
+const EnumNameTable<WaypointActionEnum> Waypoints::actionNames = {
+	"Idle",
+	"Anchor",
+	"Return",
+	"Repeat",
+	"None"
+};

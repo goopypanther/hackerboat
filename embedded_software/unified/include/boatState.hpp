@@ -15,6 +15,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#include <list>
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "location.hpp"
@@ -40,20 +41,12 @@ class BoatState;	// forward declaration so this compiles
 
 class Command {
 	public:
-		//Command () {};
-		//Command (BoatState *state) : _state(state) {};
-		Command (BoatState *state, std::string cmd, json_t *args = NULL) :
-			_state(state), _cmd(cmd), _args(args) {
-				this->_funcs.at(_cmd);	// force an exception on an invalid command name
-			};
-		//bool setCommand (std::string cmd, json_t *args = NULL);
-		//bool setState (BoatState *state);
-		//bool setArgs (json_t *args);
+		Command (BoatState *state, std::string cmd, json_t *args = NULL);
 		std::string getCmd() {return _cmd;};
 		json_t *getArgs() {return _args;};
-		bool execute () {return (this->_funcs[_cmd])(_args, _state);};
+		bool execute ();
 	private:
-		static map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
+		static const map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
 		BoatState 		*_state = NULL;
 		std::string 	_cmd;
 		json_t 			*_args = NULL;
@@ -110,7 +103,7 @@ class BoatState : public HackerboatStateStorable {
 		int commandCnt () {return cmdvec.size();};					/**< Return the number of commands waiting to be executed */
 		void pushCmd (std::string name, json_t* args = NULL);		/**< Add a command to the back of the command queue */
 		void flushCmds () {cmdvec.clear();};						/**< Empty the command queue */
-		int executeCmds (int num);									/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
+		int executeCmds (int num = 0);								/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
 		std::string getCSV();										/**< Export the current state as a line for a CSV file */
 		std::string getCSVheaders();								/**< Generate CSV headers */
 			
@@ -138,7 +131,7 @@ class BoatState : public HackerboatStateStorable {
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		
 	private:
-		std::vector<Command>	cmdvec;
+		std::list<Command>	cmdvec;
 		HackerboatStateStorage *stateStorage = NULL;
 		std::string 	faultString;
 		BoatModeEnum 	_boat;
