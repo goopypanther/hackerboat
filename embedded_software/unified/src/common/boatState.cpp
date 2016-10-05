@@ -56,6 +56,7 @@ BoatState::BoatState () {
 		servoEnable.setDir(false);
 		servoEnable.init();
 	}
+	K = {PID_KP, PID_KI, PID_KD};
 }
 
 bool BoatState::insertFault (const string fault) {
@@ -484,6 +485,7 @@ bool Command::SetPID(json_t* args, BoatState *state) {
 const map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
 	MAKE_FUNC(SetMode),
 	MAKE_FUNC(SetNavMode),
+	MAKE_FUNC(SetAutoMode),
 	MAKE_FUNC(SetHome),
 	MAKE_FUNC(ReverseShell),
 	MAKE_FUNC(SetWaypoint),

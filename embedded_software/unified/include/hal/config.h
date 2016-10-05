@@ -40,6 +40,9 @@
 #define SYSTEM_SERVO_ENB_PIN		(19)
 #define	RUDDER_PORT					(9)
 #define RUDDER_PIN					(16)
+#define PID_KP						(1.0)
+#define PID_KI						(0.1)
+#define PID_KD						(0.0)
 
 // Scales and offsets
 #define IMU_MAG_OFFSET				{{'x',330},{'y',-86},{'z',386}}	

@@ -201,5 +201,80 @@ TEST(BoatStateTest, Command) {
 	EXPECT_EQ(me.commandCnt(), 0);
 }
 
+TEST(BoatStateTest, SetNavMode) {
+	BoatState me;
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetNavMode", json_loads("{\"mode\":\"Autonomous\"}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.getNavMode(), NavModeEnum::AUTONOMOUS);
+}
 
+TEST(BoatStateTest, SetAutoMode) {
+	BoatState me;
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetAutoMode", json_loads("{\"mode\":\"Return\"}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.getAutoMode(), AutoModeEnum::RETURN);
+}
 
+TEST(BoatStateTest, SetHome) {
+	BoatState me;
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lat\":5.0,\"lon\":7.5}}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.launchPoint.lat, 5.0);
+	EXPECT_EQ(me.launchPoint.lon, 7.5);
+	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lon\":7.5}}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 0);
+	EXPECT_EQ(me.launchPoint.lat, 5.0);
+	EXPECT_EQ(me.launchPoint.lon, 7.5);
+}
+
+TEST(BoatStateTest, SetWaypoint) {
+	BoatState me;
+	json_error_t *err;
+	me.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/test_map_1.kml");
+	EXPECT_EQ(me.waypointList.count(), 7);
+	EXPECT_EQ(me.waypointList.current(), 0);
+	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::NONE);
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":4}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.waypointList.current(), 4);
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":8}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.waypointList.current(), 6);
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":-1}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.waypointList.current(), 0);
+}
+
+TEST(BoatStateTest, SetWaypointAction) {
+	BoatState me;
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"Return\"}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"\"}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 0);
+	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
+}
+
+TEST(BoatStateTest, SetPID) {
+	BoatState me;
+	json_error_t *err;
+	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":5.0}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(std::get<0>(me.K), 5.0);
+	EXPECT_EQ(std::get<1>(me.K), 0.1);
+	EXPECT_EQ(std::get<2>(me.K), 0.0);
+	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Ki\":0.5,\"Kd\":0.1}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(std::get<0>(me.K), 5.0);
+	EXPECT_EQ(std::get<1>(me.K), 0.5);
+	EXPECT_EQ(std::get<2>(me.K), 0.1);
+	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":50.0,\"Ki\":5.0,\"Kd\":1.0}", 0, err)));
+	EXPECT_EQ(me.executeCmds(1), 1);
+	EXPECT_EQ(std::get<0>(me.K), 50.0);
+	EXPECT_EQ(std::get<1>(me.K), 5.0);
+	EXPECT_EQ(std::get<2>(me.K), 1.0);
+}
