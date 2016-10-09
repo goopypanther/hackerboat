@@ -84,14 +84,14 @@ bool GPSdInput::execute() {
 	// grab the lock
 	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
 	bool result = true;
-	json_error_t* inerr;
+	json_error_t inerr;
 	string buf = "";
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
 		if (buf.back() == '\r') break;
 	} 
 	if (buf != "") {
-		json_t* input = json_loads(buf.c_str(), JSON_DECODE_ANY | JSON_REJECT_DUPLICATES, inerr);
+		json_t* input = json_loads(buf.c_str(), JSON_DECODE_ANY | JSON_REJECT_DUPLICATES, &inerr);
 		if (input) {
 			buf.clear();
 			json_t* objclass = json_object_get(input, "class");

@@ -20,6 +20,7 @@ CPPFLAGS += -I submodules/include
 CPPFLAGS += -I submodules/lsquaredc
 CPPFLAGS += -I include 
 CPPFLAGS += -I submodules/PixelBone 
+CPPFLAGS += -I submodules/hackerboat-private 
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
 CPPFLAGS += -D _USE_MATH_DEFINES
@@ -53,6 +54,7 @@ run: svctree
 .PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= logs.cpp  
+LIBHACKERBOAT_SRCS+= mqtt.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= gpsdInput.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp

@@ -25,17 +25,27 @@
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"
-#include "MQTTClient.h"
+extern "C" {
+	#include "MQTTClient.h"
+}
+
+#define MQTT_KEEPALIVE_SEC		120
+#define MQTT_CONNECT_TIMEOUT	5
+#define MQTT_RETRY_INTERVAL		5
+#define MQTT_CLIENTID			"TDRoW"
 
 using namespace std;
 
-typedef PubFuncMap map<string, function<void(BoatState*, MQTTClient*)>>;
-typedef SubFuncMap map<string, function<void(BoatState*, string topic, string payload)>>;
-typedef TokenMap map<string, MQTTClient_deliveryToken>;
+typedef map<string, function<void(BoatState*, string topic, MQTTClient*)>> PubFuncMap;
+typedef map<string, function<void(BoatState*, string topic, string payload)>> SubFuncMap;
+
+#define MQTT_QOS 		(1)
+#define MQTT_GROUP 		"hackerboat"
+#define MQTT_DATATYPE	"csv"
 
 class MQTT {
 	public:
-		MQTT (	BoatState *me						/// The BoatState vector that data is taken from and read to
+		MQTT (	BoatState *me,						/// The BoatState vector that data is taken from and read to
 				string host 	= MQTT_HOST,		 
 				int port 		= MQTT_PORT,
 				string username	= MQTT_USERNAME,
@@ -52,30 +62,34 @@ class MQTT {
 		~MQTT();									/// We need an explicit destructor to make sure we clean up everything
 		
 		// publisher functions
-		static void pub_SpeedLocation(BoatState* state, MQTTClient* client);	/// Publish the current GPS speed and location
-		static void pub_Mode(BoatState* state, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
-		static void pub_Bearing(BoatState* state, MQTTClient* client);			/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
-		static void pub_BatteryVoltage(BoatState* state, MQTTClient* client);	/// Publish the current battery voltage
-		static void pub_RudderPosition(BoatState* state, MQTTClient* client);	/// Publish current rudder position
-		static void pub_PID_K(BoatState* state, MQTTClient* client);			/// Publish current PID values
+		void pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client);	/// Publish the current GPS speed and location
+		void pub_Mode(BoatState* state, string topic, MQTTClient* client);			/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
+		void pub_Bearing(BoatState* state, string topic, MQTTClient* client);		/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
+		void pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client);	/// Publish the current battery voltage
+		void pub_RudderPosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current rudder position
+		void pub_PID_K(BoatState* state, string topic, MQTTClient* client);			/// Publish current PID values
 		
 		// subscriber functions
-		static void sub_Command(BoatState*, string topic, string payload);		/// Subscribe to commands from shore
-		static void sub_PID_K(BoatState*, string topic, string payload);		/// Subscribe to PID updates from shore
+		void sub_Command(BoatState*, string topic, string payload);		/// Subscribe to commands from shore
+		void sub_PID_K(BoatState*, string topic, string payload);		/// Subscribe to PID updates from shore
 		
-	private;
-		PubFuncMap *_pub;	// A map of the functions to call to publish different outgoing topics
-		SubFuncMap *_sub;	// A map of functions to call when different topics are received
-		TokenMap tokens;	// Delivery tokens for outbound topics
-		int pubptr = 0;
+	private:
+		BoatState *_state;
+		PubFuncMap *_pub;	/// A map of the functions to call to publish different outgoing topics
+		SubFuncMap *_sub;	/// A map of functions to call when different topics are received
+		MQTTClient_deliveryToken token;	/// Delivery token for the last message
+		PubFuncMap::iterator pubit;	// iterator pointed to next item to publish
 		MQTTClient client;
-		MQTTClient_connectOptions conn_opts;
-		MQTTClient_SSLOptions ssl_opts;
+		MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+		//MQTTClient_SSLOptions ssl_opts;
 		bool connected;
 		string uri;
-		void delivered(void *context, MQTTClient_deliveryToken dt);
-		int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
-		void connlost(void *context, char *cause);
+		string _name;
+		string _key;
+		string clientID;
+		static void delivered(void *context, MQTTClient_deliveryToken dt);
+		static int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
+		static void connlost(void *context, char *cause);
 };
 
 
