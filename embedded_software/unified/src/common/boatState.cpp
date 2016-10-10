@@ -294,10 +294,10 @@ std::string BoatState::getCSV() {
 	csv += ",";
 	csv += std::to_string(waypointStrength);
 	csv += ",";
-	csv	+= HackerboatState::packTime(lastContact);
-	csv += ",";
-	csv += HackerboatState::packTime(lastRC);
-	csv += ",";
+//	csv	+= HackerboatState::packTime(lastContact);
+//	csv += ",";
+//	csv += HackerboatState::packTime(lastRC);
+//	csv += ",";
 	csv += std::to_string(lastFix.fix.lat);
 	csv += ",";
 	csv += std::to_string(lastFix.fix.lon);
@@ -337,7 +337,7 @@ std::string BoatState::getCSV() {
 
 std::string BoatState::getCSVheaders() {
 	std::string headers;
-	headers = "RecordTime,CurrentWaypoint,WaypointStrength,LastContactTime,LastRCTime,";
+	headers = "RecordTime,CurrentWaypoint,WaypointStrength,/*LastContactTime,LastRCTime,*/";
 	headers += "Lat,Lon,Track,Speed,FixValid,StopButtonState,ArmButtonState,ServoEnableState,";
 	headers += "ThrottlePosition,RudderCommand,CurrentHeading,ThrottleInput,CourseInput,RCFailSafe,";
 	headers += "RCMode,RawMotorCurrent,RawBatteryVoltage";

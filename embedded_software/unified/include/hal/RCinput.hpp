@@ -42,7 +42,8 @@ class RCInput : public InputThread {
 		bool isFailSafe () {return failsafe;};	/**< Returns true if in failsafe mode. */
 		bool begin();
 		bool execute();
-			
+		static double map(double x, double in_min, double in_max, double out_min, double out_max);
+		
 		~RCInput();						/**< Explicit destructor to make sure we close out the serial port and kill the thread.	*/
 				
 	private:

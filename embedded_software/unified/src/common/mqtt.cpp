@@ -63,7 +63,7 @@ void MQTT::setPubFuncMap (PubFuncMap *pubmap) {
 }
 
 void MQTT::publishNext() {
-	pubit->second(_state, &client);
+	//pubit->second(_state, &client);
 	if (pubit == _pub->end()) {
 		pubit = _pub->begin();
 	} else pubit++;
@@ -72,7 +72,7 @@ void MQTT::publishNext() {
 int MQTT::publishAll() {
 	int cnt = 0;
 	for (auto& r: *_pub) {
-		r.second(_state, &client);
+//		r.second(_state, &client);
 		cnt++;
 	}
 	return cnt;
@@ -99,7 +99,7 @@ MQTT::~MQTT() {
 void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client) {
 	MQTTClient_message pubmsg = MQTTClient_message_initializer;
 	string payload;
-	payload = 
+//	payload = 
 }
 
 //void MQTT::pub_Mode(BoatState* state, string topic, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
