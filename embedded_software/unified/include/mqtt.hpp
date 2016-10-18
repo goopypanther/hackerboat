@@ -73,6 +73,11 @@ class MQTT {
 		void sub_Command(BoatState*, string topic, string payload);		/// Subscribe to commands from shore
 		void sub_PID_K(BoatState*, string topic, string payload);		/// Subscribe to PID updates from shore
 		
+		// callbacks
+		void delivered(void *context, MQTTClient_deliveryToken dt);
+		int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
+		static void connlost(void *context, char *cause);
+		
 	private:
 		BoatState *_state;
 		PubFuncMap *_pub;	/// A map of the functions to call to publish different outgoing topics
@@ -87,9 +92,6 @@ class MQTT {
 		string _name;
 		string _key;
 		string clientID;
-		static void delivered(void *context, MQTTClient_deliveryToken dt);
-		static int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
-		static void connlost(void *context, char *cause);
 };
 
 

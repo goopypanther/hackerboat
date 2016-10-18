@@ -101,6 +101,7 @@ int main () {
 		} else {
 			state.relays->get("HORN").clear();
 		}
+		state.lastFix = *(state.gps->getFix());
 		string csv = state.getCSV();
 		cout << csv << "," << to_string(get<0>(state.K));
 		cout << "," << to_string(get<1>(state.K)) << ",";

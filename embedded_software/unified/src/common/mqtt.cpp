@@ -26,6 +26,7 @@
 #include "mqtt.hpp"
 
 using namespace std;
+using namespace std::placeholders;
 
 MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
 	_state(me), clientID(MQTT_CLIENTID), _name(username), _key(key) {
@@ -39,7 +40,9 @@ MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
 		conn_opts.retryInterval = MQTT_RETRY_INTERVAL;
 		conn_opts.cleansession = 1;
 		conn_opts.ssl = NULL;
-		MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
+		auto a = bind(&MQTT::msgarrvd, this, _1, _2, _3, _4);
+		auto b = bind(&MQTT::delivered, this, _1, _2);
+		MQTTClient_setCallbacks(client, NULL, connlost, a, b);
 	}
 	
 int MQTT::connect () {
@@ -63,7 +66,7 @@ void MQTT::setPubFuncMap (PubFuncMap *pubmap) {
 }
 
 void MQTT::publishNext() {
-	//pubit->second(_state, &client);
+	pubit->second(_state, pubit->first, &client);
 	if (pubit == _pub->end()) {
 		pubit = _pub->begin();
 	} else pubit++;
@@ -71,19 +74,15 @@ void MQTT::publishNext() {
 
 int MQTT::publishAll() {
 	int cnt = 0;
-	for (auto& r: *_pub) {
-//		r.second(_state, &client);
+	for (auto r: *_pub) {
+		r.second(_state, r.first, &client);
 		cnt++;
 	}
 	return cnt;
 }
 
 bool MQTT::isDelivered(string topic) {
-	try {
-		return (token != 0);
-	} catch (...) {
-		return false;
-	}
+	return (this->token != 0);
 }
 
 void MQTT::setSubFuncMap (SubFuncMap *submap) {
@@ -98,8 +97,13 @@ MQTT::~MQTT() {
 // publisher functions
 void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client) {
 	MQTTClient_message pubmsg = MQTTClient_message_initializer;
-	string payload;
-//	payload = 
+	string payload = to_string(state->lastFix.speed) + ",";
+	payload += to_string(state->lastFix.fix.lat) + ",";
+	payload += to_string(state->lastFix.fix.lon) + ",0.0";
+	this->token = 0;
+	pubmsg.payload = (void*)(payload.c_str());
+	pubmsg.payloadlen = payload.length();
+	MQTTClient_publishMessage(client, topic.c_str(), &pubmsg, &token);
 }
 
 //void MQTT::pub_Mode(BoatState* state, string topic, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
@@ -114,10 +118,18 @@ void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client)
 
 // callback functions
 void MQTT::delivered(void *context, MQTTClient_deliveryToken dt) {
-	
+	this->token = dt;
 }
 
 int MQTT::msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
+	string topic = topicName;
+	string msg = static_cast<char*>(message->payload);
+	try {
+		this->_sub->at(topic)(this->_state, topic, msg);
+		return 0;
+	} catch (...) {
+		return -1;
+	}
 	return -1;
 }
 
