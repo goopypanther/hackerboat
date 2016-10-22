@@ -18,18 +18,21 @@
 #include <cstring>
 #include <string>
 #include <list>
+#include "json_utilities.hpp"
 #include "hal/config.h"
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"
 #include "MQTTClient.h"
 #include "mqtt.hpp"
+#include "logs.hpp"
 
 using namespace std;
-using namespace std::placeholders;
+static LogError *logptr = LogError::instance();
 
 MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
-	_state(me), clientID(MQTT_CLIENTID), _name(username), _key(key) {
+	clientID(MQTT_CLIENTID), _name(username), _key(key) {
+		_state = me;
 		conn_opts.keepAliveInterval = MQTT_KEEPALIVE_SEC;
 		conn_opts.username = _name.c_str();
 		conn_opts.password = _key.c_str();
@@ -40,9 +43,8 @@ MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
 		conn_opts.retryInterval = MQTT_RETRY_INTERVAL;
 		conn_opts.cleansession = 1;
 		conn_opts.ssl = NULL;
-		auto a = bind(&MQTT::msgarrvd, this, _1, _2, _3, _4);
-		auto b = bind(&MQTT::delivered, this, _1, _2);
-		MQTTClient_setCallbacks(client, NULL, connlost, a, b);
+		MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
+		logptr->open(MQTT_LOGFILE);
 	}
 	
 int MQTT::connect () {
@@ -82,7 +84,7 @@ int MQTT::publishAll() {
 }
 
 bool MQTT::isDelivered(string topic) {
-	return (this->token != 0);
+	return (token != 0);
 }
 
 void MQTT::setSubFuncMap (SubFuncMap *submap) {
@@ -92,40 +94,93 @@ void MQTT::setSubFuncMap (SubFuncMap *submap) {
 MQTT::~MQTT() {
     disconnect();
     MQTTClient_destroy(&client);
+	logptr->close();
 }
 
 // publisher functions
-void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client) {
+
+void MQTT::transmit (string topic, string payload, MQTTClient* client) {
 	MQTTClient_message pubmsg = MQTTClient_message_initializer;
-	string payload = to_string(state->lastFix.speed) + ",";
-	payload += to_string(state->lastFix.fix.lat) + ",";
-	payload += to_string(state->lastFix.fix.lon) + ",0.0";
 	this->token = 0;
 	pubmsg.payload = (void*)(payload.c_str());
 	pubmsg.payloadlen = payload.length();
 	MQTTClient_publishMessage(client, topic.c_str(), &pubmsg, &token);
+	string logmsg = "topic: " + topic + "payload: " + payload;
+	logptr->write("MQTT Transmission", logmsg);
 }
 
-//void MQTT::pub_Mode(BoatState* state, string topic, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
-//void MQTT::pub_Bearing(BoatState* state, string topic, MQTTClient* client);			/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
-//void MQTT::pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client);	/// Publish the current battery voltage
-//void MQTT::pub_RudderPosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current rudder position
-//void MQTT::pub_PID_K(BoatState* state, string topic, MQTTClient* client);				/// Publish current PID values
+void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->lastFix.speed) + ",";
+	payload += to_string(state->lastFix.fix.lat) + ",";
+	payload += to_string(state->lastFix.fix.lon) + ",0.0";
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_Mode(BoatState* state, string topic, MQTTClient* client) {
+	string payload = state->boatModeNames.get(state->getBoatMode());
+	payload += ":" + state->navModeNames.get(state->getNavMode());
+	payload += ":" + state->autoModeNames.get(state->getAutoMode());
+	payload += ":" + state->rcModeNames.get(state->getRCMode());
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_Bearing(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->orient->getOrientation()->heading);
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->health->batteryMon);
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_RudderPosition(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->rudder->read());
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_ThrottlePosition(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->throttle->getThrottle());
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_PID_K(BoatState* state, string topic, MQTTClient* client) {
+	string payload = "{\"Kp\":" + to_string(get<0>(state->K));
+	payload += ",\"Ki\":" + to_string(get<1>(state->K));
+	payload += ",\"Kd\":" + to_string(get<2>(state->K)) + "}";
+	transmit(topic, payload, client);
+}
+
+void MQTT::pub_Course(BoatState* state, string topic, MQTTClient* client) {
+	string payload = to_string(state->lastFix.track);
+	transmit(topic, payload, client);
+}
 
 // subscriber functions
-//void MQTT::sub_Command(BoatState*, string topic, string payload);		/// Subscribe to commands from shore
-//void MQTT::sub_PID_K(BoatState*, string topic, string payload);		/// Subscribe to PID updates from shore
+
+void MQTT::sub_Command(BoatState* state, string topic, string payload) {
+	json_error_t err;
+	json_t *args, *input = json_loads(payload.c_str(), 0, &err);
+	if (input) {
+		string name = json_string_value(json_object_get(input, "Command"));
+		args = json_object_get(input, "Argument");
+		state->pushCmd(name, args);
+		json_decref(input);
+	}
+}
 
 // callback functions
 void MQTT::delivered(void *context, MQTTClient_deliveryToken dt) {
-	this->token = dt;
+	token = dt;
 }
 
 int MQTT::msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
 	string topic = topicName;
 	string msg = static_cast<char*>(message->payload);
+	string logmsg = "topic: " + topic + "payload: " + msg;
+	logptr->write("MQTT Reception", logmsg);
 	try {
-		this->_sub->at(topic)(this->_state, topic, msg);
+		_sub->at(topic)(_state, topic, msg);
 		return 0;
 	} catch (...) {
 		return -1;

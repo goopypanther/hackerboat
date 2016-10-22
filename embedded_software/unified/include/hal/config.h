@@ -91,6 +91,7 @@
 // Log file names
 #define MAIN_LOGFILE		"main.log"
 #define HARDWARE_LOGFILE	"hardware.log"
+#define MQTT_LOGFILE		"mqtt.log"
 
 // Relay map initializer
 #define RELAY_MAP_INITIALIZER	{ { "RED", Relay("RED", new Pin(8, 3, true), new Pin(8, 4, false)) }, \

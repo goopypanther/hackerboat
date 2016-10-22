@@ -62,27 +62,32 @@ class MQTT {
 		~MQTT();									/// We need an explicit destructor to make sure we clean up everything
 		
 		// publisher functions
-		void pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client);	/// Publish the current GPS speed and location
-		void pub_Mode(BoatState* state, string topic, MQTTClient* client);			/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
-		void pub_Bearing(BoatState* state, string topic, MQTTClient* client);		/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
+		void pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client);		/// Publish the current GPS speed and location
+		void pub_Mode(BoatState* state, string topic, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
+		void pub_Bearing(BoatState* state, string topic, MQTTClient* client);			/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
 		void pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client);	/// Publish the current battery voltage
 		void pub_RudderPosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current rudder position
-		void pub_PID_K(BoatState* state, string topic, MQTTClient* client);			/// Publish current PID values
+		void pub_ThrottlePosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current throttle position
+		void pub_PID_K(BoatState* state, string topic, MQTTClient* client);				/// Publish current PID values
+		void pub_Course(BoatState* state, string topic, MQTTClient* client);			/// Publish GPS heading
 		
 		// subscriber functions
-		void sub_Command(BoatState*, string topic, string payload);		/// Subscribe to commands from shore
-		void sub_PID_K(BoatState*, string topic, string payload);		/// Subscribe to PID updates from shore
+		void sub_Command(BoatState* state, string topic, string payload);		/// Subscribe to commands from shore
 		
-		// callbacks
-		void delivered(void *context, MQTTClient_deliveryToken dt);
-		int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
-		static void connlost(void *context, char *cause);
 		
 	private:
-		BoatState *_state;
+		// transmission function
+		void transmit(string topic, string payload, MQTTClient* client);
+	
+		// callbacks
+		static void delivered(void *context, MQTTClient_deliveryToken dt);
+		static int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
+		static void connlost(void *context, char *cause);
+		
+		static BoatState *_state;
 		PubFuncMap *_pub;	/// A map of the functions to call to publish different outgoing topics
-		SubFuncMap *_sub;	/// A map of functions to call when different topics are received
-		MQTTClient_deliveryToken token;	/// Delivery token for the last message
+		static SubFuncMap *_sub;	/// A map of functions to call when different topics are received
+		static MQTTClient_deliveryToken token;	/// Delivery token for the last message
 		PubFuncMap::iterator pubit;	// iterator pointed to next item to publish
 		MQTTClient client;
 		MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
