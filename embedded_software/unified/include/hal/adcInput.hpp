@@ -25,7 +25,10 @@
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 
+class HalTestHarness;
+
 class ADCInput : public InputThread {
+	friend class HalTestHarness;
 	public:
 		ADCInput(void); 
 		

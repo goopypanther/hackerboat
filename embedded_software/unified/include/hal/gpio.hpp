@@ -23,9 +23,12 @@
 #include <fstream>
 #include "hal/config.h"
 
+class HalTestHarness;
+
 //typedef tuple<int, int, bool> pinDef;	/**< Pin port, pin, and direction, respectively */
 
 class Pin {
+	friend class HalTestHarness;
 	public:
 		Pin () = default;
 		Pin (int port, int pin, bool dir, bool state = false) : 

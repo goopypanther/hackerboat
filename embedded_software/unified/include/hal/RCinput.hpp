@@ -26,11 +26,14 @@
 #include "hal/config.h"
 #include "hal/inputThread.hpp"
 
+class HalTestHarness;
+
 #define SBUS_STARTBYTE			0x0f
 #define SBUS_ENDBYTE			0x00
 #define SBUS_BUF_LEN			25 
  
 class RCInput : public InputThread {
+	friend class HalTestHarness;
 	public:
 		RCInput (std::string devpath = RC_SERIAL_PATH);	/**< Create a rcInput reader attached to serial port devpath 		*/
 		int getThrottle ();				/**< Get the last throttle position from the RC input 				*/

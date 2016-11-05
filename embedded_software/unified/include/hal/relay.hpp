@@ -26,9 +26,12 @@
 #include <jansson.h>
 #include "json_utilities.hpp"
 
+class HalTestHarness;
+
 typedef std::tuple<double, bool, bool> RelayTuple;
 
 class Relay {
+	friend class HalTestHarness;
 	public:
 		Relay () = default;
 		Relay (std::string name, Pin output, Pin fault, ADCInput* adc = NULL, bool state = false) :

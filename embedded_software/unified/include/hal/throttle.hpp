@@ -21,7 +21,10 @@
 #include "hal/config.h"
 #include "hal/relay.hpp"
 
+class HalTestHarness;
+
 class Throttle {
+	friend class HalTestHarness;
 	public:
 		Throttle() = default;						
 		Throttle(ADCInput* adc) : _adc(adc) {};	/**< Create a motor device with a reference to an ADC input instance for motor current & voltage */

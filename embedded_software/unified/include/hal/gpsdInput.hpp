@@ -29,9 +29,12 @@
 #include "pstream.h"
 #include "location.hpp"
 
+class HalTestHarness;
+
 using namespace std;
 
 class GPSdInput : public InputThread {
+	friend class HalTestHarness;
 	public:
 		GPSdInput();					
 		GPSdInput(string host, int port);			/**< Create a gpsd object pointing at the given host & port combination. */

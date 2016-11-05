@@ -25,6 +25,8 @@
 #include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
 
+class HalTestHarness;
+
 using namespace std;
 
 enum class SensorOrientation : char {	/**< Choose the axis parallel to gravity when the system is level */
@@ -37,6 +39,7 @@ enum class SensorOrientation : char {	/**< Choose the axis parallel to gravity w
 };
 
 class OrientationInput : public InputThread {
+	friend class HalTestHarness;
 	public:	
 		OrientationInput(SensorOrientation axis = SensorOrientation::SENSOR_AXIS_Z_UP);
 		Orientation* getOrientation() {							/**< Get the last orientation recorded */

@@ -17,7 +17,10 @@
 #include "enumdefs.hpp"
 #include "pixel.hpp"
 
+class HalTestHarness;
+
 class Lights {
+	friend class HalTestHarness;
 	public:
 		Lights() = default;
 		void setBrightness(int bright);		/**< Set the brightness of the whole string */
