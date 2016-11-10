@@ -23,7 +23,8 @@ enum class BoatModeEnum : int {
 	FAULT		= 3,		/**< Beaglebone faulted           		*/ 
 	NAVIGATION	= 4,		/**< Beaglebone armed & navigating		*/ 
 	ARMEDTEST	= 5,		/**< Beaglebone accepts all commands that would be valid in any unsafe state */
-	NONE		= 6			/**< State of the Beaglebone is currently unknown	*/
+	LOWBATTERY	= 6,		/**< Boat's main battery voltage is too low for operations */
+	NONE		= 7			/**< State of the Beaglebone is currently unknown	*/
 };
 
 /**

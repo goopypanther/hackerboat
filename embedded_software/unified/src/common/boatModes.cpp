@@ -59,9 +59,9 @@ BoatModeBase* BoatStartMode::execute() {
 BoatModeBase* BoatSelfTestMode::execute() {
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	
-	if (this->callCount == 0) {				// Some housekeeping is in order if we just started up...
-		oldState = _state;					// Copy the old state so we can exit into the correct mode. 
+	if (this->callCount == 0) {				// Some housekeeping is in order if we just started up... 
 		_state.clearFaults();
+		oldState = _state;					// Copy the old state so we can exit into the correct mode.
 	}	
 	this->callCount++;
 	_state.servoEnable.set();
@@ -81,9 +81,16 @@ BoatModeBase* BoatSelfTestMode::execute() {
 		if (r.second.isFaulted()) _state.insertFault("Relay " + r.first + " is faulted");
 	}
 	
+	// Check for things that might clear
+	if (_state.lastFix.isValid()) _state.removeFault("Last GPS fix invalid");
+	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
+	
 	// Are we done?
 	if (_state.recordTime > (start + SELFTEST_DELAY)) {
 		if (_state.faultCount()) {
+			if (_state.hasFault("Low Battery") && (_state.faultCount() == 1)) {
+				return new BoatLowBatteryMode(_state, oldState.getBoatMode());
+			}
 			return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 		} else {
 			if ((oldState.getBoatMode() == BoatModeEnum::NAVIGATION) && (_state.armInput.get() > 0)) {
@@ -116,7 +123,7 @@ BoatModeBase* BoatDisarmedMode::execute() {
 			_state.relays->get("ENABLE").set();
 			std::this_thread::sleep_for(ARM_PULSE_LEN);
 			_state.relays->get("ENABLE").clear();
-			return BoatModeBase::factory(_state, newmode);
+			_state.setBoatMode(BoatModeEnum::DISARMED);
 		} else _state.setBoatMode(BoatModeEnum::DISARMED);
 	} 
 	
@@ -132,6 +139,9 @@ BoatModeBase* BoatDisarmedMode::execute() {
 			hornStartTime = std::chrono::system_clock::now();
 			_state.relays->get("HORN").set();
 		}
+	} else {
+		hornOn = false;
+		_state.relays->get("HORN").clear();
 	}
 	
 	// check if we've got a fault
@@ -184,6 +194,8 @@ BoatModeBase* BoatNavigationMode::execute() {
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
 	
+	_state.servoEnable.set();
+	
 	// read the next command
 	BoatModeEnum newmode = _state.getBoatMode();
 	if (newmode != BoatModeEnum::NAVIGATION) {
@@ -202,8 +214,14 @@ BoatModeBase* BoatNavigationMode::execute() {
 	_navMode = _navMode->execute();
 	if (_navMode != _oldNavMode) delete _oldNavMode;
 
+	// check the battery
+	if (_state.health->batteryMon < SYSTEM_LOW_BATTERY_CUTOFF) _state.insertFault("Low Battery");
+	
 	// check if we have a fault or a disarm signal
 	if (_state.faultCount() || (_state.getNavMode() == NavModeEnum::FAULT)) {
+		if (_state.hasFault("Low Battery") && (_state.faultCount() == 1)) {
+			return new BoatLowBatteryMode(_state, BoatModeEnum::NAVIGATION);
+		}
 		_state.setNavMode(NavModeEnum::FAULT);
 		delete _navMode;
 		_navMode = NavModeBase::factory(_state, NavModeEnum::FAULT);
@@ -219,4 +237,24 @@ BoatModeBase* BoatNavigationMode::execute() {
 BoatModeBase* BoatArmedTestMode::execute() {
 	this->callCount++;
 	return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
+}
+
+BoatModeBase* BoatLowBatteryMode::execute() {
+	_state.servoEnable.clear();
+	_state.throttle->setThrottle(0);
+	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
+	if (_state.faultCount() > 1) {
+		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
+	} else {
+		if ((_lastMode == BoatModeEnum::NAVIGATION) && (_state.armInput.get() > 0)) {
+			return new BoatNavigationMode(_state, _lastMode, _state.getNavMode());
+		} else {
+			_state.relays->get("DISARM").set();
+			std::this_thread::sleep_for(DISARM_PULSE_LEN);
+			_state.relays->get("DISARM").clear();
+			_state.servoEnable.clear();
+			return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
+		}
+	}
+	return this;
 }

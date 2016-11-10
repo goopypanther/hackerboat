@@ -89,6 +89,15 @@ class BoatNavigationMode : public BoatModeBase {
 		NavModeBase* _oldNavMode;
 };
 
+class BoatLowBatteryMode : public BoatModeBase {
+	public:
+		BoatLowBatteryMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE) : 
+			BoatModeBase(state, last, BoatModeEnum::LOWBATTERY) {
+				state.setBoatMode(BoatModeEnum::LOWBATTERY);
+			};
+		BoatModeBase* execute();							/**< Execute the current state */
+};
+
 class BoatArmedTestMode : public BoatModeBase {
 	public:
 		BoatArmedTestMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE) : 

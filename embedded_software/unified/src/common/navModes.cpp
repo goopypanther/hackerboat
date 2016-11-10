@@ -51,6 +51,11 @@ NavModeBase *NavIdleMode::execute () {
 	(!_state.gps->isValid()) ? _state.insertFault("GPS Invalid") : _state.removeFault("GPS Invalid");
 	if (_state.faultCount()) return NavModeBase::factory(_state, NavModeEnum::FAULT);
 	
+	// Write the outgoing rudder command
+	_state.rudder->write(0);
+	// Set the throttle
+	_state.throttle->setThrottle(0);
+	
 	// read the next command
 	NavModeEnum newmode = _state.getNavMode();
 	if (newmode != NavModeEnum::IDLE) {
@@ -75,16 +80,10 @@ NavModeBase *NavFaultMode::execute () {
 	(!_state.gps->isValid()) ? _state.insertFault("GPS Invalid") : _state.removeFault("GPS Invalid");
 	if (!_state.faultCount()) return NavModeBase::factory(_state, NavModeEnum::IDLE);
 	
-	// read the next command
-	NavModeEnum newmode = _state.getNavMode();
-	if (newmode != NavModeEnum::FAULT) {
-		return NavModeBase::factory(_state, newmode);
-	}
-	
-	// check for RC mode switch
-	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
-		return NavModeBase::factory(_state, NavModeEnum::RC);
-	}
+	// Write the outgoing rudder command
+	_state.rudder->write(0);
+	// Set the throttle
+	_state.throttle->setThrottle(0);
 	
 	return this;
 }

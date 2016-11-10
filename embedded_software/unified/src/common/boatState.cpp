@@ -431,7 +431,6 @@ bool Command::SetWaypointAction(json_t* args, BoatState *state) {
 		WaypointActionEnum action;
 		if (state->waypointList.actionNames.get(modeString, &action)) {
 			state->waypointList.setAction(action);
-			state->action = action;
 			return true;
 		}
 	}
@@ -506,6 +505,7 @@ const EnumNameTable<BoatModeEnum> BoatState::boatModeNames = {
 	"Fault",
 	"Navigation",
 	"ArmedTest",
+	"LowBattery",
 	"None"
 };
 

@@ -41,22 +41,44 @@ class AutoIdleMode : public AutoModeBase {
 class AutoWaypointMode : public AutoModeBase {
 	public:
 		AutoWaypointMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
-			AutoModeBase(state, last, AutoModeEnum::WAYPOINT) {}; 
+			AutoModeBase(state, last, AutoModeEnum::WAYPOINT), 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
+	private:
+		PID helm;
+		double in;
+		double out;
+		double setpoint = 0;
+		int throttleSetting = AUTO_DEFAULT_THROTTLE;
 };
 
 class AutoReturnMode : public AutoModeBase {
 	public:
 		AutoReturnMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
-			AutoModeBase(state, last, AutoModeEnum::RETURN) {}; 
+			AutoModeBase(state, last, AutoModeEnum::RETURN), 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
+	private:
+		PID helm;
+		double in;
+		double out;
+		double setpoint = 0;
+		int throttleSetting = AUTO_DEFAULT_THROTTLE;
 };
 
 class AutoAnchorMode : public AutoModeBase {
 	public:
 		AutoAnchorMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
-			AutoModeBase(state, last, AutoModeEnum::ANCHOR) {}; 
+			AutoModeBase(state, last, AutoModeEnum::ANCHOR), 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
+	private:
+		Location anchorPoint;
+		PID helm;
+		double in;
+		double out;
+		double setpoint = 0;
+		int throttleSetting = 0;
 };
 
 #endif

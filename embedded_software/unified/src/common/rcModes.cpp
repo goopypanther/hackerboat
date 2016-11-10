@@ -77,6 +77,7 @@ RCModeBase *RCCourseMode::execute() {
 		helm.SetControllerDirection(RUDDER_DIRECTION);
 		helm.SetSampleTime(RUDDER_PERIOD);
 	}
+	callCount++;
 	// Grab the current orientation and find the heading error for the PID loop
 	in = _state.orient->getOrientation()->headingError(_state.rc->getCourse());
 	// Execute the PID process

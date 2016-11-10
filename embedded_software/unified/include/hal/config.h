@@ -62,6 +62,12 @@
 #define RC_CHANNEL_COUNT			(18)
 #define RC_HORN_SWITCH				(7)
 
+// Autonomous definitions
+#define AUTO_DEFAULT_THROTTLE 	(5)
+#define AUTO_WAYPOINT_TOL		(50.0)
+#define ANCHOR_DEADBAND			(5.0)
+#define ANCHOR_THROTTLE_GAIN	(1/20)
+
 // Timeouts
 
 #define GPS_SENSE_TIMEOUT	(5s)
@@ -87,6 +93,7 @@
 // Voltage/current limits
 
 #define SYSTEM_START_BATTERY_MIN	(12.0)
+#define SYSTEM_LOW_BATTERY_CUTOFF	(10.0)
 
 // Log file names
 #define MAIN_LOGFILE		"main.log"
