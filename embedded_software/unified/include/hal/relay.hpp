@@ -70,6 +70,7 @@ class Relay {
 };
 
 class RelayMap {
+	friend class HalTestHarness;
 	public:
 		static RelayMap* instance ();						/**< Returns a pointer to the object */
 		bool init ();										/**< Initialize all relays */
@@ -78,7 +79,7 @@ class RelayMap {
 		bool adc(ADCInput* adc);							/**< Set the ADC for all relays */
 		std::map<std::string, Relay> *getmap () {return relays;};
 		
-	private:
+	protected:
 		RelayMap ();										/**< Hark, a singleton! */
 		RelayMap (RelayMap const&) = delete;				/**< Hark, a singleton! */
 		RelayMap& operator=(RelayMap const&) = delete;		/**< Hark, a singleton! */

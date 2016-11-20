@@ -53,7 +53,7 @@ class OrientationInput : public InputThread {
 		SensorOrientation getAxis () {return _axis;};			/**< Get the gravity axis */
 		~OrientationInput () {
 			this->kill(); 
-			if (myThread) delete myThread;
+			//if (myThread) delete myThread;
 		}
 		LSM303 compass { IMU_I2C_BUS };
 	

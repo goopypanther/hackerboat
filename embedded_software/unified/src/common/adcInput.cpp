@@ -51,7 +51,8 @@ bool ADCInput::init() {
 	// This populates the various maps
 	_raw[ADC_BATMON_NAME] = -1;
 	_offsets[ADC_BATMON_NAME] = 0.0;
-	_scales[ADC_BATMON_NAME] = 0.00043956;			// default is to scale this value to a raw voltage, i.e. 0-4095 => 0-1.8V
+	_scales[ADC_BATMON_NAME] = 0.0043956;			// default is to scale this value to a battery voltage, i.e. 0-4095 => 0-18V
+													// Note that this needs to be calibrated
 	for (unsigned int i = 0; i < upperChannels.size(); i++) {
 		_raw[upperChannels[i]] = -1;
 		_offsets[upperChannels[i]] = 0.0;

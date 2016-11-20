@@ -54,7 +54,7 @@ class GPSdInput : public InputThread {
 		bool isValid() {return isConnected();};
 		~GPSdInput () {
 			this->kill(); 
-			if (myThread) delete myThread;
+			//if (myThread) delete myThread;
 		}
 		
 	private:

@@ -29,49 +29,37 @@ class HalTestHarness {
 	public:
 		HalTestHarness () = default;
 		void accessADC (ADCInput *adc, std::map<std::string, int> **raw, bool **valid) {
-			*raw = &(adc->_raw);
-			*valid = &(adc->inputsValid);
+			if (raw) *raw = &(adc->_raw);
+			if (valid) *valid = &(adc->inputsValid);
 		}
 		
 		void accessGPSd (GPSdInput *gps, GPSFix **fix, std::map<int, AISShip> **targets) {
-			*fix = &(gps->_lastFix);
-			*target = &(gps->_aisTargets);
+			if (fix) *fix = &(gps->_lastFix);
+			if (targets) *targets = &(gps->_aisTargets);
 		}
 		
 		void accessOrientation (OrientationInput *orient, Orientation **current, bool **valid) {
-			*current = &(orient->_current);
-			*valid = &(orient->sensorsValid);
+			if (current) *current = &(orient->_current);
+			if (valid) *valid = &(orient->sensorsValid);
 		}
 		
 		void accessRC (RCInput *rc, int **throttle, double **rudder, bool **failsafe, bool **valid,
 						std::vector<uint16_t> **channels, std::string **buf, int **errs, int **good) {
-							*throttle = &(rc->_throttle);
-							*rudder = &(rc->_rudder);
-							*failsafe = &(rc->failsafe);
-							*valid = &(rc->_valid);
-							*channels = &(rc->rawChannels);
-							*buf = &(rc->inbuf);
-							*errs = &(rc->_errorFrames);
-							*good = &(rc->_goodFrames);
+							if (throttle) *throttle = &(rc->_throttle);
+							if (rudder) *rudder = &(rc->_rudder);
+							if (failsafe) *failsafe = &(rc->failsafe);
+							if (valid) *valid = &(rc->_valid);
+							if (channels) *channels = &(rc->rawChannels);
+							if (buf) *buf = &(rc->inbuf);
+							if (errs) *errs = &(rc->_errorFrames);
+							if (good) *good = &(rc->_goodFrames);
 						}
 						
 		void accessRelay (Relay *me, Pin **drive, Pin **fault) {
-			*drive = me->_drive;
-			*fault = me->_fault;
+			if (drive) *drive = me->_drive;
+			if (fault) *fault = me->_fault;
 		}
-		
-		void initGPIOTest (Pin *me, string path, string pin) {
-			
-		}
-		
-		void writeGPIOTest (Pin *me, int state) {
-			
-		}
-		
-		int readGPIOTest (Pin *me) {
-			
-		}
-}
+};
 
 #endif
  

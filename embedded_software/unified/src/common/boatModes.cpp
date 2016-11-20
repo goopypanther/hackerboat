@@ -44,6 +44,9 @@ BoatModeBase* BoatModeBase::factory(BoatState& state, BoatModeEnum mode) {
 		case BoatModeEnum::ARMEDTEST:
 			return new BoatArmedTestMode(state, state.getBoatMode());
 			break;
+		case BoatModeEnum::LOWBATTERY:
+			return new BoatLowBatteryMode(state, state.getBoatMode());
+			break;
 		case BoatModeEnum::NONE:
 		default:
 			return new BoatStartMode(state, state.getBoatMode());
