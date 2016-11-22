@@ -78,6 +78,22 @@ bool Pin::setPin (int pin) {
 	return false;
 }
 
+bool Pin::setDir (bool dir) {
+	_dir = dir;
+	ofstream direction;
+	direction.open(path + "/direction");
+	if (direction.is_open()) {
+		if (_dir) {
+			direction << "out";
+		} else {
+			direction << "in";
+		}
+		bool result = direction.good();
+		direction.close();
+		return result;
+	} else return false;
+}
+
 bool Pin::writePin (bool val) {
 	ofstream value;
 	_state = val;
@@ -88,8 +104,9 @@ bool Pin::writePin (bool val) {
 		} else {
 			value << "0";
 		}
+		bool result = value.good();
 		value.close();
-		return value.good();
+		return result;
 	} else return false;
 }
 		

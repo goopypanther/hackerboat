@@ -67,7 +67,7 @@ bool GPSdInput::disconnect () {
 }
 
 bool GPSdInput::isConnected () {
-	if (gpsdstream.is_open() && (gpsdstream.exited() == 0)) return true;
+	if (/*gpsdstream.is_open() && */(!gpsdstream.exited())) return true;
 	return false;
 }
 

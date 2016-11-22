@@ -41,7 +41,7 @@ class Pin {
 		bool init ();							/**< Initialize the pin. _port and _pin must be set or this returns false. Must be called any time the configuration is changed. */
 		bool setPort (int port);				/**< Set the port -- either 8 or 9 */
 		bool setPin (int pin);					/**< Set the number of the pin to use */
-		void setDir (bool dir) {_dir=dir;};		/**< Set direction -- true is output, false is input. */
+		bool setDir (bool dir);					/**< Set direction -- true is output, false is input. */
 		bool writePin (bool state);				/**< Write the pin. Returns true if successful  */
 		int readPin () {return this->get();};
 		bool set() {return writePin(true);};	/**< Returns true if pin is writeable and write is successful */

@@ -163,6 +163,7 @@ BoatModeBase* BoatFaultMode::execute() {
 	}
 	this->callCount++;
 	_state.throttle->setThrottle(0);
+	_state.servoEnable.clear();
 	
 	// read the command stack
 	BoatModeEnum newmode = _state.getBoatMode();
@@ -197,18 +198,18 @@ BoatModeBase* BoatNavigationMode::execute() {
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	this->callCount++;
 	
-	_state.servoEnable.set();
+	//_state.servoEnable.set();
 	
 	// read the next command
 	BoatModeEnum newmode = _state.getBoatMode();
 	if (newmode != BoatModeEnum::NAVIGATION) {
 		if (newmode == BoatModeEnum::SELFTEST) {
-			return BoatModeBase::factory(_state, newmode);
+			return new BoatSelfTestMode(_state, BoatModeEnum::NAVIGATION);
 		} else if (newmode == BoatModeEnum::DISARMED) {
 			_state.relays->get("DISARM").set();
 			std::this_thread::sleep_for(DISARM_PULSE_LEN);
 			_state.relays->get("DISARM").clear();
-			return BoatModeBase::factory(_state, newmode);
+			return new BoatDisarmedMode(_state, BoatModeEnum::NAVIGATION);
 		} else _state.setBoatMode(BoatModeEnum::NAVIGATION);
 	} 
 	
@@ -218,16 +219,18 @@ BoatModeBase* BoatNavigationMode::execute() {
 	if (_navMode != _oldNavMode) delete _oldNavMode;
 
 	// check the battery
-	if (_state.health->batteryMon < SYSTEM_LOW_BATTERY_CUTOFF) _state.insertFault("Low Battery");
+	if (_state.health->batteryMon < SYSTEM_LOW_BATTERY_CUTOFF) {
+		_state.insertFault("Low Battery");
+		return new BoatLowBatteryMode(_state, BoatModeEnum::NAVIGATION);
+	}
 	
 	// check if we have a fault or a disarm signal
 	if (_state.faultCount() || (_state.getNavMode() == NavModeEnum::FAULT)) {
-		if (_state.hasFault("Low Battery") && (_state.faultCount() == 1)) {
-			return new BoatLowBatteryMode(_state, BoatModeEnum::NAVIGATION);
-		}
 		_state.setNavMode(NavModeEnum::FAULT);
-		delete _navMode;
+		_oldNavMode = _navMode;
 		_navMode = NavModeBase::factory(_state, NavModeEnum::FAULT);
+		delete _oldNavMode;
+		printf("Fault string: %s\n", _state.getFaultString().c_str());
 		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}
 	if ((_state.disarmInput.get() == 1) || (_state.armInput.get() != 1)) {

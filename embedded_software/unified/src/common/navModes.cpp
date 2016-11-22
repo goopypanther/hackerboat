@@ -42,6 +42,7 @@ NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 }
 
 NavModeBase *NavIdleMode::execute () {
+	this->callCount++;
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	(!_state.throttle->setThrottle(0)) ? _state.insertFault("Throttle Fault") : _state.removeFault("Throttle Fault");
 	(!_state.rudder->write(0)) ? _state.insertFault("Rudder Fault") : _state.removeFault("Rudder Fault");
@@ -71,6 +72,7 @@ NavModeBase *NavIdleMode::execute () {
 }
 
 NavModeBase *NavFaultMode::execute () {
+	this->callCount++;
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	(!_state.throttle->setThrottle(0)) ? _state.insertFault("Throttle Fault") : _state.removeFault("Throttle Fault");
 	(!_state.rudder->write(0)) ? _state.insertFault("Rudder Fault") : _state.removeFault("Rudder Fault");
@@ -89,6 +91,7 @@ NavModeBase *NavFaultMode::execute () {
 }
 
 NavModeBase *NavRCMode::execute () {
+	this->callCount++;
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	(!_state.servoEnable.set()) ? _state.insertFault("Servo Enable Fault") : _state.removeFault("Servo Enable Fault");
 	(!_state.adc->isValid()) ? _state.insertFault("ADC Invalid") : _state.removeFault("ADC Invalid");
@@ -111,6 +114,7 @@ NavModeBase *NavRCMode::execute () {
 }
 
 NavModeBase *NavAutoMode::execute () {
+	this->callCount++;
 	_state.recordTime = std::chrono::system_clock::now();		// Get a consistent time for everything in this invocation
 	(!_state.servoEnable.set()) ? _state.insertFault("Servo Enable Fault") : _state.removeFault("Servo Enable Fault");
 	(!_state.adc->isValid()) ? _state.insertFault("ADC Invalid") : _state.removeFault("ADC Invalid");

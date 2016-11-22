@@ -33,6 +33,7 @@ template <typename T, typename U> class StateMachineBase {
 		U& getState() {return _state;}						/**< Get the state vector */
 		T getMode() {return _thisMode;}						/**< Get the current mode */
 		T getLastMode() {return _lastMode;}					/**< Get the last mode */
+		int getCount() {return callCount;}
 		virtual ~StateMachineBase () {};					
 		
 	protected:

@@ -25,6 +25,7 @@ CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
+CPPFLAGS += -fno-inline-small-functions
 
 LDFLAGS  += -L /usr/local/lib
 

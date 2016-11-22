@@ -61,7 +61,155 @@ TEST(BoatModeTest, BoatModeStart) {
 class BoatModeSelfTest : public ::testing::Test {
 	public:
 		BoatModeSelfTest () {
+			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = BoatModeBase::factory(me, BoatModeEnum::SELFTEST);
+			start = std::chrono::system_clock::now();
+			me.health = &health;
+			health.setADCdevice(&adc);
+			me.rudder = &rudder;
+			me.throttle = &throttle;
+			me.rc = &rc;
+			me.adc = &adc;
+			me.gps = &gps;
+			me.orient = &orient;
+			me.relays = RelayMap::instance();
+			adc.init();
+			me.relays->init();
+			harness.accessADC(&adc, &adcraw, &adcvalid);
+			harness.accessRC(&rc, NULL, NULL, &rcfailsafe, &rcvalid, NULL, NULL, NULL, NULL);
+			harness.accessGPSd(&gps, &fix, NULL);
+			harness.accessOrientation(&orient, &orientvalue, &orientvalid);
+			for (auto r: *me.relays->getmap()) {
+				Pin *drive;
+				Pin *fault;
+				harness.accessRelay(&(r.second), &drive, &fault);
+				fault->setDir(true);
+				fault->init();
+				fault->clear();
+			}
+			fix->fixValid = true;
+			fix->speed = 0;
+			fix->track = 0;
+			fix->fix.lat = 48.0;
+			fix->fix.lon = -114.0;
+			me.lastFix = *fix;
+			me.disarmInput.setDir(true);
+			me.disarmInput.init();
+			me.disarmInput.set();
+			me.armInput.setDir(true);
+			me.armInput.init();
+			me.armInput.clear();
+			*adcvalid = true;
+			*rcvalid = true;
+			*rcfailsafe = false;
+			*orientvalid = true;
+			adcraw->at("battery_mon") = 3000;
+			health.readHealth();
+		}
+		
+		BoatState 			me;
+		BoatModeBase 		*mode;
+		std::chrono::system_clock::time_point start;
+		HealthMonitor 		health;
+		Servo 				rudder;
+		Throttle 			throttle;
+		RCInput 			rc;
+		ADCInput 			adc;
+		GPSdInput 			gps;
+		OrientationInput 	orient;
+		HalTestHarness		harness;
+		bool 				*adcvalid;
+		bool				*rcvalid;
+		bool				*rcfailsafe;
+		bool				*orientvalid;
+		GPSFix				*fix;
+		Orientation			*orientvalue;
+		std::map<std::string, int> *adcraw;
+		
+};
+
+TEST_F(BoatModeSelfTest, Pass) {
+	while (mode->getMode() == BoatModeEnum::SELFTEST) {
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+			ADD_FAILURE();
+			break;
+		}
+		health.readHealth();
+		mode = mode->execute();
+	}
+	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
+	printf("%s\n", me.getFaultString().c_str());
+}
+
+TEST_F(BoatModeSelfTest, LowBattery) {
+	adcraw->at("battery_mon") = 100;
+	while (mode->getMode() == BoatModeEnum::SELFTEST) {
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+			ADD_FAILURE();
+			break;
+		}
+		health.readHealth();
+		mode = mode->execute();
+	}
+	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::LOWBATTERY);
+	printf("%s\n", me.getFaultString().c_str());
+}
+
+TEST_F(BoatModeSelfTest, LowBatteryRecovery) {
+	adcraw->at("battery_mon") = 100;
+	while (mode->getMode() == BoatModeEnum::SELFTEST) {
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY - 10s) {
+			adcraw->at("battery_mon") = 3000;
+		}
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+			ADD_FAILURE();
+			break;
+		}
+		health.readHealth();
+		mode = mode->execute();
+	}
+	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
+	printf("%s\n", me.getFaultString().c_str());
+}
+
+TEST_F(BoatModeSelfTest, ArmFailLow) {
+	me.disarmInput.clear();
+	while (mode->getMode() == BoatModeEnum::SELFTEST) {
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+			ADD_FAILURE();
+			break;
+		}
+		health.readHealth();
+		mode = mode->execute();
+	}
+	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
+	printf("%s\n", me.getFaultString().c_str());
+}
+
+TEST_F(BoatModeSelfTest, ArmFailHigh) {
+	me.armInput.set();
+	while (mode->getMode() == BoatModeEnum::SELFTEST) {
+		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+			ADD_FAILURE();
+			break;
+		}
+		health.readHealth();
+		mode = mode->execute();
+	}
+	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
+	printf("%s\n", me.getFaultString().c_str());
+}
+
+class BoatModeDisarmedTest : public ::testing::Test {
+	public:
+		BoatModeDisarmedTest () {
+			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
+			mode = BoatModeBase::factory(me, BoatModeEnum::DISARMED);
 			start = std::chrono::system_clock::now();
 			me.health = &health;
 			health.setADCdevice(&adc);
@@ -117,19 +265,192 @@ class BoatModeSelfTest : public ::testing::Test {
 		bool				*orientvalid;
 		GPSFix				*fix;
 		Orientation			*orientvalue;
-		std::map<std::string, int> *adcraw;
-		
+		std::map<std::string, int> *adcraw;	
 };
 
-TEST_F(BoatModeSelfTest, Pass) {
-	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+TEST_F(BoatModeDisarmedTest, Horn) {
+	mode = mode->execute();
+	EXPECT_EQ(me.servoEnable.get(), 0);
+	EXPECT_EQ(me.throttle->getThrottle(), 0);
+	me.disarmInput.clear();
+	me.armInput.set();
+	start = std::chrono::system_clock::now();
+	mode = mode->execute();
+	while (mode->getMode() == BoatModeEnum::DISARMED) {
+		if (std::chrono::system_clock::now() > start + HORN_TIME + 100ms) {
 			ADD_FAILURE();
 			break;
 		}
+		EXPECT_EQ(me.relays->get("HORN").output()->get(), 1);
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(me.relays->get("HORN").output()->get(), 0);
+}
+
+class BoatModeNavTest : public ::testing::Test {
+	public:
+		BoatModeNavTest () {
+			start = std::chrono::system_clock::now();
+			me.health = &health;
+			health.setADCdevice(&adc);
+			me.rudder = &rudder;
+			me.throttle = &throttle;
+			me.rc = &rc;
+			me.adc = &adc;
+			me.gps = &gps;
+			me.orient = &orient;
+			me.relays = RelayMap::instance();
+			adc.init();
+			me.relays->init();
+			harness.accessADC(&adc, &adcraw, &adcvalid);
+			harness.accessRC(&rc, NULL, NULL, &rcfailsafe, &rcvalid, NULL, NULL, NULL, NULL);
+			harness.accessGPSd(&gps, &fix, NULL);
+			harness.accessOrientation(&orient, &orientvalue, &orientvalid);
+			for (auto r: *me.relays->getmap()) {
+				Pin *drive;
+				Pin *fault;
+				harness.accessRelay(&(r.second), &drive, &fault);
+				fault->setDir(true);
+				fault->init();
+				fault->clear();
+			}
+			me.disarmInput.setDir(true);
+			me.disarmInput.init();
+			me.disarmInput.clear();
+			me.armInput.setDir(true);
+			me.armInput.init();
+			me.armInput.set();
+			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			*adcvalid = true;
+			*rcvalid = true;
+			*rcfailsafe = false;
+			*orientvalid = true;
+			adcraw->at("battery_mon") = 3000;
+			health.readHealth();
+		}
+		
+		BoatState 			me;
+		BoatModeBase 		*mode;
+		std::chrono::system_clock::time_point start;
+		HealthMonitor 		health;
+		Servo 				rudder;
+		Throttle 			throttle;
+		RCInput 			rc;
+		ADCInput 			adc;
+		GPSdInput 			gps;
+		OrientationInput 	orient;
+		HalTestHarness		harness;
+		bool 				*adcvalid;
+		bool				*rcvalid;
+		bool				*rcfailsafe;
+		bool				*orientvalid;
+		GPSFix				*fix;
+		Orientation			*orientvalue;
+		std::map<std::string, int> *adcraw;	
+};
+
+TEST_F(BoatModeNavTest, Factory) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	BoatNavigationMode *mynav = (BoatNavigationMode*)mode;
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+	me.setNavMode(NavModeEnum::FAULT);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	mynav = (BoatNavigationMode*)mode;
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::FAULT);
+	me.setNavMode(NavModeEnum::RC);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	mynav = (BoatNavigationMode*)mode;
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::RC);
+	me.setNavMode(NavModeEnum::AUTONOMOUS);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	mynav = (BoatNavigationMode*)mode;
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::AUTONOMOUS);
+	me.setNavMode(NavModeEnum::NONE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	mynav = (BoatNavigationMode*)mode;
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+}
+
+TEST_F(BoatModeNavTest, ModeCommandSelfTest) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	me.setBoatMode(BoatModeEnum::SELFTEST);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::SELFTEST);
+	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
+}
+
+TEST_F(BoatModeNavTest, ModeCommandDisarm) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	me.setBoatMode(BoatModeEnum::DISARMED);
+	start = std::chrono::system_clock::now();
+	mode = mode->execute();
+	EXPECT_GT(std::chrono::system_clock::now(), start + DISARM_PULSE_LEN);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
-	printf("%s\n", me.getFaultString().c_str());
+	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
+}
+
+TEST_F(BoatModeNavTest, LowBattery) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	adcraw->at("battery_mon") = 10;
+	health.readHealth();
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::LOWBATTERY);
+	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
+}
+
+TEST_F(BoatModeNavTest, NavModeExecute) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	BoatNavigationMode *mynav = (BoatNavigationMode*)mode;
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mode->getCount(), 1);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+	EXPECT_EQ(mynav->getNavMode()->getCount(), 1);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mode->getCount(), 2);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+	EXPECT_EQ(mynav->getNavMode()->getCount(), 2);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mode->getCount(), 3);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+	EXPECT_EQ(mynav->getNavMode()->getCount(), 3);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
+	EXPECT_EQ(mode->getCount(), 4);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::IDLE);
+	EXPECT_EQ(mynav->getNavMode()->getCount(), 4);
+}
+
+TEST_F(BoatModeNavTest, Disarm) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	me.armInput.clear();
+	me.disarmInput.set();
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
+	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
+}
+
+TEST_F(BoatModeNavTest, Fault) {
+	me.setNavMode(NavModeEnum::IDLE);
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
+	BoatNavigationMode *mynav = (BoatNavigationMode*)mode;
+	me.insertFault("Test Fault");
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
+	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::FAULT);
+	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
 }

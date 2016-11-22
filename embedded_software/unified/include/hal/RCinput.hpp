@@ -36,11 +36,11 @@ class RCInput : public InputThread {
 	friend class HalTestHarness;
 	public:
 		RCInput (std::string devpath = RC_SERIAL_PATH);	/**< Create a rcInput reader attached to serial port devpath 		*/
-		int getThrottle ();				/**< Get the last throttle position from the RC input 				*/
-		double getRudder ();			/**< Get the last rudder position from the RC input 				*/
-		double getCourse ();			/**< Get the last course command, in degrees. */	
-		RCModeEnum getMode();			/**< Returns the correct RC mode, given the current state of the inputs */
-		int getChannel (int channel);	/**< Return the raw value of the given channel */
+		int getThrottle ();					/**< Get the last throttle position from the RC input 				*/
+		double getRudder ();				/**< Get the last rudder position from the RC input 				*/
+		double getCourse ();				/**< Get the last course command, in degrees. */	
+		RCModeEnum getMode();				/**< Returns the correct RC mode, given the current state of the inputs */
+		int getChannel (int channel);		/**< Return the raw value of the given channel */
 		bool isValid () {return _valid;};
 		bool isFailSafe () {return failsafe;};	/**< Returns true if in failsafe mode. */
 		bool begin();

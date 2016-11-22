@@ -150,5 +150,5 @@ bool RCInput::execute() {
 RCInput::~RCInput() {
 	this->kill();
 	close(devFD);
-	if (myThread) delete myThread;
+	//if (myThread) delete myThread;
 }
