@@ -34,7 +34,9 @@ class AutoModeBase : public StateMachineBase<AutoModeEnum, BoatState> {
 class AutoIdleMode : public AutoModeBase {
 	public:
 		AutoIdleMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
-			AutoModeBase(state, last, AutoModeEnum::IDLE) {};
+			AutoModeBase(state, last, AutoModeEnum::IDLE) {
+				state.setAutoMode(AutoModeEnum::IDLE);
+			};
 		AutoModeBase* execute ();							/**< Execute the current state */
 };
 
@@ -42,7 +44,9 @@ class AutoWaypointMode : public AutoModeBase {
 	public:
 		AutoWaypointMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
 			AutoModeBase(state, last, AutoModeEnum::WAYPOINT), 
-			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
+				state.setAutoMode(AutoModeEnum::WAYPOINT);
+			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
 		PID helm;
@@ -56,7 +60,9 @@ class AutoReturnMode : public AutoModeBase {
 	public:
 		AutoReturnMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
 			AutoModeBase(state, last, AutoModeEnum::RETURN), 
-			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
+				state.setAutoMode(AutoModeEnum::RETURN);
+			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
 		PID helm;
@@ -70,7 +76,9 @@ class AutoAnchorMode : public AutoModeBase {
 	public:
 		AutoAnchorMode (BoatState& state, AutoModeEnum last = AutoModeEnum::NONE) : 
 			AutoModeBase(state, last, AutoModeEnum::ANCHOR), 
-			helm(&in, &out, &setpoint, 0, 0, 0, 0) {}; 
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
+				state.setAutoMode(AutoModeEnum::ANCHOR);
+			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
 		Location anchorPoint;

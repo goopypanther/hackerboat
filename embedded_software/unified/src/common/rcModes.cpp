@@ -42,6 +42,7 @@ RCModeBase *RCModeBase::factory(BoatState& state, RCModeEnum mode) {
 }
 
 RCModeBase *RCIdleMode::execute() {
+	callCount++;
 	// Write the outgoing rudder command
 	_state.rudder->write(0);
 	// Set the throttle
@@ -54,6 +55,7 @@ RCModeBase *RCIdleMode::execute() {
 }
 
 RCModeBase *RCRudderMode::execute() {
+	callCount++;
 	// Write the outgoing rudder command
 	_state.rudder->write(_state.rc->getRudder());
 	// Set the throttle
@@ -94,6 +96,7 @@ RCModeBase *RCCourseMode::execute() {
 }
 
 RCModeBase *RCFailsafeMode::execute() {
+	callCount++;
 	// Write the outgoing rudder command
 	_state.rudder->write(0);
 	// Set the throttle

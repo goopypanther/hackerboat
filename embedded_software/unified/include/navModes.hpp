@@ -37,14 +37,18 @@ class NavModeBase : public StateMachineBase<NavModeEnum, BoatState> {
 class NavIdleMode : public NavModeBase {
 	public:
 		NavIdleMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE) : 
-			NavModeBase(state, last, NavModeEnum::IDLE) {};
+			NavModeBase(state, last, NavModeEnum::IDLE) {
+				state.setNavMode(NavModeEnum::IDLE);
+			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 };
 
 class NavFaultMode : public NavModeBase {
 	public:
 		NavFaultMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE) : 
-			NavModeBase(state, last, NavModeEnum::FAULT) {};
+			NavModeBase(state, last, NavModeEnum::FAULT) {
+				state.setNavMode(NavModeEnum::FAULT);
+			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 };
 
@@ -52,7 +56,9 @@ class NavRCMode : public NavModeBase {
 	public:
 		NavRCMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE, RCModeEnum submode = RCModeEnum::IDLE) : 
 			NavModeBase(state, last, NavModeEnum::RC),
-			_rcMode(RCModeBase::factory(state, submode)) {};
+			_rcMode(RCModeBase::factory(state, submode)) {
+				state.setNavMode(NavModeEnum::RC);
+			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		RCModeBase* getRCMode () {return _rcMode;};							/**< Get the current RC mode object */
 		~NavRCMode () {delete _rcMode; delete _oldRCmode;};					/**< Explicit destructor to make sure we take care of the submode */
@@ -65,7 +71,9 @@ class NavAutoMode : public NavModeBase {
 	public:
 		NavAutoMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE, AutoModeEnum submode = AutoModeEnum::IDLE) : 
 			NavModeBase(state, last, NavModeEnum::AUTONOMOUS),
-			_autoMode(AutoModeBase::factory(state, submode)) {};
+			_autoMode(AutoModeBase::factory(state, submode)) {
+				state.setNavMode(NavModeEnum::AUTONOMOUS);
+			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		AutoModeBase* getAutoMode () {return _autoMode;};					/**< Get the current autonomous mode object */
 		~NavAutoMode () {delete _autoMode; delete _oldAutoMode;};			/**< Explicit destructor to make sure we take care of the submode */

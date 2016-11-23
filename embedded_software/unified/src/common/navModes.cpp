@@ -34,6 +34,7 @@ NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 			break;
 		case NavModeEnum::AUTONOMOUS:
 			return new NavAutoMode(state, state.getNavMode());
+			break;
 		case NavModeEnum::NONE:
 		default:
 			return new NavIdleMode(state, state.getNavMode());
@@ -65,6 +66,7 @@ NavModeBase *NavIdleMode::execute () {
 	
 	// check for RC mode switch
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
+		printf("Switching to RC mode in response to mode switch\n");
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}
 	
@@ -99,6 +101,13 @@ NavModeBase *NavRCMode::execute () {
 	(!_state.gps->isValid()) ? _state.insertFault("GPS Invalid") : _state.removeFault("GPS Invalid");
 	if (_state.faultCount()) return NavModeBase::factory(_state, NavModeEnum::FAULT);
 	
+	// read the next command
+	NavModeEnum newmode = _state.getNavMode();
+	if (newmode != NavModeEnum::RC) {
+		return NavModeBase::factory(_state, newmode);
+	}
+	_state.setNavMode(NavModeEnum::RC);	// Overwrites any improper commands
+	
 	// check the auto/rc mode switch (nav mode commands will be ignored)
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) < RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
 		return NavModeBase::factory(_state, NavModeEnum::AUTONOMOUS);
@@ -127,6 +136,7 @@ NavModeBase *NavAutoMode::execute () {
 	if (newmode != NavModeEnum::AUTONOMOUS) {
 		return NavModeBase::factory(_state, newmode);
 	}
+	_state.setNavMode(NavModeEnum::AUTONOMOUS);	// Overwrites any improper commands
 	
 	// check for RC mode switch
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode

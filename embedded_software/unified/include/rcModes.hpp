@@ -35,14 +35,18 @@ class RCModeBase : public StateMachineBase<RCModeEnum, BoatState> {
 class RCIdleMode : public RCModeBase {
 	public:
 		RCIdleMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :		/**< Create a mode object of this type. */
-			RCModeBase(state, last, RCModeEnum::IDLE) {};					
+			RCModeBase(state, last, RCModeEnum::IDLE) {
+				state.setRCmode(RCModeEnum::IDLE);
+			};					
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 };
 
 class RCRudderMode : public RCModeBase {
 	public:
 		RCRudderMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :	/**< Create a mode object of this type. */
-			RCModeBase(state, last, RCModeEnum::RUDDER) {};
+			RCModeBase(state, last, RCModeEnum::RUDDER) {
+				state.setRCmode(RCModeEnum::RUDDER);
+			};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 };
 
@@ -50,7 +54,9 @@ class RCCourseMode : public RCModeBase {
 	public:
 		RCCourseMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :	/**< Create a mode object of this type. */
 			RCModeBase(state, last, RCModeEnum::COURSE),
-			helm(&in, &out, &setpoint, 0, 0, 0, 0) {};
+			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
+				state.setRCmode(RCModeEnum::COURSE);
+			};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 	private:
 		PID helm;
@@ -62,7 +68,9 @@ class RCCourseMode : public RCModeBase {
 class RCFailsafeMode : public RCModeBase {
 	public:
 		RCFailsafeMode (BoatState& state, RCModeEnum last = RCModeEnum::NONE) :	/**< Create a mode object of this type. */
-			RCModeBase(state, last, RCModeEnum::FAILSAFE) {};
+			RCModeBase(state, last, RCModeEnum::FAILSAFE) {
+				state.setRCmode(RCModeEnum::FAILSAFE);
+			};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 };
 #endif

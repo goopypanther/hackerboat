@@ -45,6 +45,7 @@ AutoModeBase* AutoModeBase::factory(BoatState& state, AutoModeEnum mode) {
 }
 
 AutoModeBase* AutoIdleMode::execute() {
+	callCount++;
 	// Write the outgoing rudder command
 	_state.rudder->write(0);
 	// Set the throttle

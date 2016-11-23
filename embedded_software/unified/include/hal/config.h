@@ -58,6 +58,7 @@
 #define RC_MIN						(171)
 #define RC_MAX						(1811)
 #define RC_MIDDLE_POSN				(1028)
+#define RC_MIDDLE_TOL				(200)
 #define RC_SERIAL_PATH				"/dev/ttyS5"
 #define RC_CHANNEL_COUNT			(18)
 #define RC_HORN_SWITCH				(7)
