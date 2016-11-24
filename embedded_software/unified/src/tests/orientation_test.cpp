@@ -60,6 +60,8 @@ TEST (Orientation, HeadingError) {
 	EXPECT_TRUE(toleranceEquals(x.headingError(180.0), 170.0, TOL));
 	EXPECT_TRUE(toleranceEquals(x.headingError(370.0), 0.0, TOL));
 	EXPECT_TRUE(toleranceEquals(x.headingError(-10.0), -20.0, TOL));
+	Orientation y { 20.0, -15.0, 180.0 };
+	EXPECT_TRUE(toleranceEquals(y.headingError(181.0), 1.0, TOL));
 }
 
 TEST (Orientation, MakeTrue) {

@@ -60,8 +60,8 @@ int RCInput::getChannel (int channel) {
 
 RCModeEnum RCInput::getMode() {
 	if (this->isFailSafe()) return RCModeEnum::FAILSAFE;
-	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-100)) return RCModeEnum::RUDDER;
-	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+100)) return RCModeEnum::COURSE;
+	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-RC_MIDDLE_TOL)) return RCModeEnum::RUDDER;
+	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+RC_MIDDLE_TOL)) return RCModeEnum::COURSE;
 	return RCModeEnum::IDLE;
 }
 

@@ -56,6 +56,10 @@ class RCCourseMode : public RCModeBase {
 			RCModeBase(state, last, RCModeEnum::COURSE),
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setRCmode(RCModeEnum::COURSE);
+				helm.SetMode(AUTOMATIC);
+				helm.SetControllerDirection(RUDDER_DIRECTION);
+				helm.SetSampleTime(RUDDER_PERIOD);
+				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 	private:

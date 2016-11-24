@@ -75,10 +75,11 @@ RCModeBase *RCCourseMode::execute() {
 							std::get<1>(_state.K), 
 							std::get<2>(_state.K));
 		}
-	if (!callCount) {
+	/*if (!callCount) {
+		helm.SetMode(AUTOMATIC);
 		helm.SetControllerDirection(RUDDER_DIRECTION);
 		helm.SetSampleTime(RUDDER_PERIOD);
-	}
+	}*/
 	callCount++;
 	// Grab the current orientation and find the heading error for the PID loop
 	in = _state.orient->getOrientation()->headingError(_state.rc->getCourse());
