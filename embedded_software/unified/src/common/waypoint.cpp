@@ -156,12 +156,12 @@ Location Waypoints::getWaypoint (unsigned int waypoint) {
 }
 
 Location Waypoints::getWaypoint () {
-	if ((waypoints.size() == 0) || (action == WaypointActionEnum::IDLE)) {
+	if (waypoints.size() == 0) {
 		Location wp;
 		return wp;
 	}
 	if (_c >= waypoints.size()) _c = (waypoints.size() - 1);
-	return waypoints.at(_c);
+	return getWaypoint(_c);
 }
 
 void Waypoints::setCurrent (unsigned int waypoint) {

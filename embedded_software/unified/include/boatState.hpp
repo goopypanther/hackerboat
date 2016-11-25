@@ -114,7 +114,7 @@ class BoatState : public HackerboatStateStorable {
 		GPSFix					lastFix;			/**< Location of the last GPS fix */
 		Location				launchPoint;		/**< Location of the launch point */
 		Waypoints				waypointList;		/**< Waypoints to follow */
-		WaypointActionEnum		action;				/**< Action to take at the last waypoint */
+		//WaypointActionEnum		action;				/**< Action to take at the last waypoint */
 		Dodge*					diversion;			/**< Avoid obstacles! */
 		HealthMonitor*			health;				/**< Current state of the boat's health */
 		Pin						disarmInput;		/**< Disarm input from power distribution box */

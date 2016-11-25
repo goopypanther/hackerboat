@@ -107,7 +107,6 @@ TEST(BoatStateTest, JSON) {
 	me.launchPoint = Location(10.0, 10.0);
 	me.lastFix = testfix;
 	me.insertFault("test");
-	me.action = WaypointActionEnum::RETURN;
 	me.setBoatMode("Disarmed");
 	me.setNavMode("Fault");
 	me.setAutoMode("Waypoint");
@@ -126,7 +125,6 @@ TEST(BoatStateTest, JSON) {
 	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
 	EXPECT_EQ(me.lastFix.fix.lon, you.lastFix.fix.lon);
 	EXPECT_TRUE(you.hasFault("test"));
-	EXPECT_EQ(me.action, you.action);
 	EXPECT_EQ(me.getBoatMode(), you.getBoatMode());
 	EXPECT_EQ(me.getNavMode(), you.getNavMode());
 	EXPECT_EQ(me.getAutoMode(), you.getAutoMode());
@@ -147,7 +145,6 @@ TEST(BoatStateTest, Storage) {
 	me.launchPoint = Location(10.0, 10.0);
 	me.lastFix = testfix;
 	me.insertFault("test");
-	me.action = WaypointActionEnum::RETURN;
 	me.setBoatMode("Disarmed");
 	me.setNavMode("Fault");
 	me.setAutoMode("Waypoint");
@@ -164,7 +161,6 @@ TEST(BoatStateTest, Storage) {
 	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
 	EXPECT_EQ(me.lastFix.fix.lon, you.lastFix.fix.lon);
 	EXPECT_TRUE(you.hasFault("test"));
-	EXPECT_EQ(me.action, you.action);
 	EXPECT_EQ(me.getBoatMode(), you.getBoatMode());
 	EXPECT_EQ(me.getNavMode(), you.getNavMode());
 	EXPECT_EQ(me.getAutoMode(), you.getAutoMode());

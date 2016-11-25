@@ -118,7 +118,7 @@ TEST_F (WaypointTest, GetSetAction) {
 	ASSERT_TRUE(mywaypoint->loadKML());
 	Location wp;
 	mywaypoint->setAction(WaypointActionEnum::IDLE);
-	EXPECT_FALSE(mywaypoint->getWaypoint().isValid());
+	EXPECT_TRUE(mywaypoint->getWaypoint().isValid());
 	EXPECT_EQ(mywaypoint->getAction(), WaypointActionEnum::IDLE);
 	EXPECT_FALSE(mywaypoint->increment());
 	EXPECT_FALSE(mywaypoint->decrement());

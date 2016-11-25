@@ -147,7 +147,7 @@ json_t* BoatState::pack () const {
 	packResult += json_object_set_new(output, "lastRC", json(HackerboatState::packTime(this->lastRC)));
 	packResult += json_object_set_new(output, "lastFix", this->lastFix.pack());
 	packResult += json_object_set_new(output, "launchPoint", this->launchPoint.pack());
-	packResult += json_object_set_new(output, "action", json(Waypoints::actionNames.get(action)));
+	//packResult += json_object_set_new(output, "action", json(Waypoints::actionNames.get(action)));
 	packResult += json_object_set_new(output, "faultString", json(this->faultString));
 	packResult += json_object_set_new(output, "boatMode", json(boatModeNames.get(_boat)));
 	packResult += json_object_set_new(output, "navMode", json(navModeNames.get(_nav)));
@@ -198,7 +198,7 @@ HackerboatStateStorage &BoatState::storage () {
 							  { "lastRC", "TEXT" },
 							  { "lastFix", "TEXT" },
 							  { "launchPoint", "TEXT" },
-							  { "action", "TEXT" },
+//							  { "action", "TEXT" },
 							  { "faultString", "TEXT" },
 							  { "boatMode", "TEXT" },
 							  { "navMode", "TEXT" },
@@ -225,7 +225,7 @@ bool BoatState::fillRow(SQLiteParameterSlice row) const {
 	out  = this->launchPoint.pack();
 	row.bind(6, json_dumps(out,0));
 	json_decref(out);
-	row.bind(7, Waypoints::actionNames.get(action));
+//	row.bind(7, Waypoints::actionNames.get(action));
 	row.bind(8, faultString);
 	row.bind(9, boatModeNames.get(_boat));
 	row.bind(10, navModeNames.get(_nav));
@@ -256,7 +256,7 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 	str = row.string_field(6);
 	result &= this->launchPoint.parse(json_loads(str.c_str(), str.size(), NULL));
 	str = row.string_field(7);
-	result &= Waypoints::actionNames.get(str, &(this->action));
+//	result &= Waypoints::actionNames.get(str, &(this->action));
 	this->faultString = row.string_field(8);
 	str = row.string_field(9);
 	result &= boatModeNames.get(str, &(this->_boat));

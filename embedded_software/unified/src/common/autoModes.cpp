@@ -65,10 +65,6 @@ AutoModeBase* AutoWaypointMode::execute() {
 							std::get<1>(_state.K), 
 							std::get<2>(_state.K));
 		}
-	if (!callCount) {
-		helm.SetControllerDirection(RUDDER_DIRECTION);
-		helm.SetSampleTime(RUDDER_PERIOD);
-	}
 	callCount++;
 	
 	// get course to next waypoint
@@ -119,10 +115,6 @@ AutoModeBase* AutoReturnMode::execute() {
 							std::get<1>(_state.K), 
 							std::get<2>(_state.K));
 		}
-	if (!callCount) {
-		helm.SetControllerDirection(RUDDER_DIRECTION);
-		helm.SetSampleTime(RUDDER_PERIOD);
-	}
 	callCount++;
 	
 	// get course to next waypoint
@@ -163,8 +155,6 @@ AutoModeBase* AutoAnchorMode::execute() {
 		}
 	if (!callCount) {
 		anchorPoint = _state.lastFix.fix;
-		helm.SetControllerDirection(RUDDER_DIRECTION);
-		helm.SetSampleTime(RUDDER_PERIOD);
 	}
 	callCount++;
 	

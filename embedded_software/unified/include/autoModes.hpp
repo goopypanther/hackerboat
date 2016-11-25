@@ -46,6 +46,10 @@ class AutoWaypointMode : public AutoModeBase {
 			AutoModeBase(state, last, AutoModeEnum::WAYPOINT), 
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::WAYPOINT);
+				helm.SetMode(AUTOMATIC);
+				helm.SetControllerDirection(RUDDER_DIRECTION);
+				helm.SetSampleTime(RUDDER_PERIOD);
+				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
@@ -62,6 +66,10 @@ class AutoReturnMode : public AutoModeBase {
 			AutoModeBase(state, last, AutoModeEnum::RETURN), 
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::RETURN);
+				helm.SetMode(AUTOMATIC);
+				helm.SetControllerDirection(RUDDER_DIRECTION);
+				helm.SetSampleTime(RUDDER_PERIOD);
+				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
@@ -78,8 +86,13 @@ class AutoAnchorMode : public AutoModeBase {
 			AutoModeBase(state, last, AutoModeEnum::ANCHOR), 
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::ANCHOR);
+				helm.SetMode(AUTOMATIC);
+				helm.SetControllerDirection(RUDDER_DIRECTION);
+				helm.SetSampleTime(RUDDER_PERIOD);
+				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
+		Location getAnchorPoint() {return anchorPoint;};
 	private:
 		Location anchorPoint;
 		PID helm;
