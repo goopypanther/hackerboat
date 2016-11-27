@@ -55,7 +55,6 @@ TEST(BoatModeTest, BoatModeStart) {
 	EXPECT_NE(mode, lastMode);
 	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::SELFTEST);
 	EXPECT_EQ(me.getBoatMode(), mode->getMode());
-	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::START);
 }
 
 class BoatModeSelfTest : public ::testing::Test {
@@ -139,7 +138,6 @@ TEST_F(BoatModeSelfTest, Pass) {
 	}
 	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
-	printf("%s\n", me.getFaultString().c_str());
 }
 
 TEST_F(BoatModeSelfTest, LowBattery) {
@@ -154,7 +152,6 @@ TEST_F(BoatModeSelfTest, LowBattery) {
 	}
 	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::LOWBATTERY);
-	printf("%s\n", me.getFaultString().c_str());
 }
 
 TEST_F(BoatModeSelfTest, LowBatteryRecovery) {
@@ -172,7 +169,6 @@ TEST_F(BoatModeSelfTest, LowBatteryRecovery) {
 	}
 	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
-	printf("%s\n", me.getFaultString().c_str());
 }
 
 TEST_F(BoatModeSelfTest, ArmFailLow) {
@@ -187,7 +183,6 @@ TEST_F(BoatModeSelfTest, ArmFailLow) {
 	}
 	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
-	printf("%s\n", me.getFaultString().c_str());
 }
 
 TEST_F(BoatModeSelfTest, ArmFailHigh) {
@@ -202,7 +197,6 @@ TEST_F(BoatModeSelfTest, ArmFailHigh) {
 	}
 	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
-	printf("%s\n", me.getFaultString().c_str());
 }
 
 class BoatModeDisarmedTest : public ::testing::Test {

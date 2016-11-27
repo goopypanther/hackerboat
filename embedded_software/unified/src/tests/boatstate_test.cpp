@@ -149,7 +149,8 @@ TEST(BoatStateTest, Storage) {
 	me.setNavMode("Fault");
 	me.setAutoMode("Waypoint");
 	me.setRCmode("Rudder");
-	EXPECT_TRUE(me.writeRecord());
+	EXPECT_GT(me.countRecords(), -1);
+	EXPECT_TRUE(me.appendRecord());
 	EXPECT_TRUE(you.getLastRecord());
 	EXPECT_EQ(me.recordTime, you.recordTime);
 	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);

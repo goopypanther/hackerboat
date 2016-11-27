@@ -174,7 +174,7 @@ AutoModeBase* AutoAnchorMode::execute() {
 		}
 		if (abs(headingError) < 90.0) {
 			this->in = headingError;
-		} else if (headingError > 0) {
+		} else if (headingError > 0.0) {
 			this->in = headingError - 180.0;	// reverse course, since we'll be backing up
 			this->throttleSetting *= -1;		// reverse the throttle
 		} else {

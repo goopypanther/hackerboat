@@ -64,8 +64,8 @@ class RCCourseMode : public RCModeBase {
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 	private:
 		PID helm;
-		double in;
-		double out;
+		double in = 0;
+		double out = 0;
 		double setpoint = 0;
 };
 

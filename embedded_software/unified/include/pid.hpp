@@ -96,7 +96,8 @@ class PID {
                                   //   what these values are.  with pointers we'll just know.
 			  
 	time_point<PID_CLOCK> lastTime;
-	double ITerm, lastInput;
+	double ITerm = 0.0;
+	double lastInput = 0.0;
 
 	milliseconds SampleTime;
 	double outMin = 0;

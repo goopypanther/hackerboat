@@ -216,16 +216,13 @@ TEST_F(AutoModeWaypointTest, CourseSelection) {
 	me.lastFix.fix.lon = -122.3799706;
 	me.waypointList.setCurrent(0);		// make sure we're on the first waypoint
 	orientvalue->updateDeclination(me.lastFix.fix);
-	orientvalue->roll = 0.0;
-	orientvalue->pitch = 0.0;
-	orientvalue->heading = 180.0;
-	orientvalue->makeTrue();
-	orientvalue->heading = 181.0;
-	orientvalue->makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	Orientation trueorientation {0, 0, 185.0, false};
+	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
 	mode = mode->execute();
+	EXPECT_TRUE(orientvalue->isMagnetic());
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 16.8, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 5, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
@@ -397,21 +394,17 @@ TEST_F(AutoModeReturnTest, CourseSelection) {
 	me.launchPoint.lat = 47.5906518;
 	me.launchPoint.lon = -122.3799706;
 	orientvalue->updateDeclination(me.lastFix.fix);
-	orientvalue->roll = 0.0;
-	orientvalue->pitch = 0.0;
-	orientvalue->heading = 180.0;
-	orientvalue->makeTrue();
-	orientvalue->heading = 181.0;
-	orientvalue->makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	Orientation trueorientation {0, 0, 176.0, false};
+	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
 	mode = mode->execute();
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 16.8, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -4, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeReturnTest, ReturnAnchor) {
-	me.lastFix.fix.lat = 47.5906518;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	me.lastFix.fix.lat = 47.5906518;	
 	me.lastFix.fix.lon = -122.3799706;
 	me.launchPoint.lat = 47.5907;
 	me.launchPoint.lon = -122.3800;
@@ -513,3 +506,36 @@ TEST_F(AutoModeAnchorTest, CommandWaypointTransition) {
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 }
 
+TEST_F(AutoModeAnchorTest, Forward) {
+	me.lastFix.fix.lat = 47.5907;	
+	me.lastFix.fix.lon = -122.3800;
+	orientvalue->updateDeclination(me.lastFix.fix);
+	Orientation trueorientation {0, 0, 190.0, false};
+	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	mode = mode->execute();
+	me.lastFix.fix.lat = 47.5912;
+	me.lastFix.fix.lon = -122.3800;
+	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
+	std::this_thread::sleep_for(100ms);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10, 0.1));
+	EXPECT_EQ(me.throttle->getThrottle(), 5);
+}
+
+TEST_F(AutoModeAnchorTest, Reverse) {
+	me.lastFix.fix.lat = 47.5907;	
+	me.lastFix.fix.lon = -122.3800;
+	orientvalue->updateDeclination(me.lastFix.fix);
+	Orientation trueorientation {0, 0, 175.0, false};
+	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	mode = mode->execute();
+	me.lastFix.fix.lat = 47.5902;
+	me.lastFix.fix.lon = -122.3800;
+	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
+	std::this_thread::sleep_for(100ms);
+	mode = mode->execute();
+	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -5, 0.1));
+	EXPECT_EQ(me.throttle->getThrottle(), -5);
+}

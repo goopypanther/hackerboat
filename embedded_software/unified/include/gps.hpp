@@ -53,21 +53,21 @@ class GPSFix : public HackerboatStateStorable {
 		sysclock		gpsTime;	/**< GPS time of fix */
 		
 		NMEAModeEnum	mode = NMEAModeEnum::NONE;		/**< Mode of the fix */
-		std::string		device;		/**< Name of the device */
-		Location		fix;		/**< Location of the current fix */
-		double			track;		/**< Course over ground, in degrees from north */
-		double			speed;		/**< Speed over the ground in m/s */
-		double 			alt;		/**< Altitude, meters */
-		double			climb;		/**< Climb or sink rate, m/s */
-		double			epx;		/**< Longitude error, 95% confidence, meters */			
-		double			epy;		/**< Latitude error, 95% confidence, meters */
-		double 			epd;		/**< Track error, 95% confidence, degrees */	
-		double			eps;		/**< Speed error, 95% confidence, m/s */
-		double			ept;		/**< Timestamp error, 95% confidence, seconds */
-		double 			epv;		/**< Vertical error, 95% confidence, meters */
-		double			epc;		/**< Climb error, 95% confidence, m/s */
+		std::string		device = "";	/**< Name of the device */
+		Location		fix;			/**< Location of the current fix */
+		double			track = 0;		/**< Course over ground, in degrees from north */
+		double			speed = 0;		/**< Speed over the ground in m/s */
+		double 			alt = 0;		/**< Altitude, meters */
+		double			climb = 0;		/**< Climb or sink rate, m/s */
+		double			epx = 0;		/**< Longitude error, 95% confidence, meters */			
+		double			epy = 0;		/**< Latitude error, 95% confidence, meters */
+		double 			epd = 0;		/**< Track error, 95% confidence, degrees */	
+		double			eps = 0;		/**< Speed error, 95% confidence, m/s */
+		double			ept = 0;		/**< Timestamp error, 95% confidence, seconds */
+		double 			epv = 0;		/**< Vertical error, 95% confidence, meters */
+		double			epc = 0;		/**< Climb error, 95% confidence, m/s */
 
-		bool 			fixValid;	/**< Checks whether this fix is valid or not */				
+		bool 			fixValid = false;	/**< Checks whether this fix is valid or not */				
 		
 	private:
 		bool coreParse (json_t* input);	/**< This is the pieces of the parsing task shared between parse() and parseGpsdPacket() */

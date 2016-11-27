@@ -67,7 +67,7 @@
 #define AUTO_DEFAULT_THROTTLE 	(5)
 #define AUTO_WAYPOINT_TOL		(50.0)
 #define ANCHOR_DEADBAND			(5.0)
-#define ANCHOR_THROTTLE_GAIN	(1/20)
+#define ANCHOR_THROTTLE_GAIN	(0.1)
 
 // Timeouts
 

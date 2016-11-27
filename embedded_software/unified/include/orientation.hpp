@@ -53,13 +53,13 @@ class Orientation : public HackerboatState {
 
 	private:
 		double normAxis (double val, const double max, const double min) const;		/**< Normalize given axis */
-		static double declination;
-		static const double constexpr	maxRoll = 180.0;
-		static const double constexpr	minRoll = -180.0;
-		static const double constexpr	maxPitch = 180.0;
-		static const double constexpr	minPitch = -180.0;
-		static const double constexpr	maxHeading = 360.0;
-		static const double constexpr	minHeading = 0.0;
+		static double 					declination;
+		static const double constexpr	maxRoll 		= 180.0;
+		static const double constexpr	minRoll 		= -180.0;
+		static const double constexpr	maxPitch 		= 180.0;
+		static const double constexpr	minPitch 		= -180.0;
+		static const double constexpr	maxHeading 		= 360.0;
+		static const double constexpr	minHeading 		= 0.0;
 	
 };
 

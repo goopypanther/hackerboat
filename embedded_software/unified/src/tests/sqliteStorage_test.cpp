@@ -30,7 +30,7 @@ static bool table_exists(shared_dbh& dbh, const char *tablename)
 
 TEST(StorageTest, Creation) {
 
-	shared_dbh dbh = HackerBoatStateStorage::databaseConnection("test0");
+	shared_dbh dbh = HackerboatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
 
 	if (table_exists(dbh, "FOO")) {
@@ -39,7 +39,7 @@ TEST(StorageTest, Creation) {
 		EXPECT_FALSE(table_exists(dbh, "FOO"));
 	}
 
-	HackerBoatStateStorage storage(dbh, "FOO", { { "thing", "INTEGER" },
+	HackerboatStateStorage storage(dbh, "FOO", { { "thing", "INTEGER" },
 						     { "whatsit", "TEXT" } });
 
 	EXPECT_FALSE(table_exists(dbh, "FOO"));
@@ -47,7 +47,7 @@ TEST(StorageTest, Creation) {
 	EXPECT_TRUE(table_exists(dbh, "FOO"));
 }
 
-class simpleValues : public HackerBoatStateStorable {
+class simpleValues : public HackerboatStateStorable {
 
 public:
 	simpleValues(shared_dbh& dbh);
@@ -57,19 +57,19 @@ public:
 	std::string s;
 
 	/* Stub impls */
-	bool parse(json_t* s, bool q) {
+	bool parse(json_t* s) {
 		return false;
 	}
 	bool isValid() const {
 		return true;
 	}
-	json_t *pack(bool q) const {
+	json_t *pack() const {
 		return NULL;
 	}
 
 protected:
-	HackerBoatStateStorage _storage;
-	HackerBoatStateStorage& storage(void);
+	HackerboatStateStorage _storage;
+	HackerboatStateStorage& storage(void);
 	bool fillRow(SQLiteParameterSlice) const;
 	bool readFromRow(SQLiteRowReference, sequence);
 };
@@ -83,7 +83,7 @@ simpleValues::simpleValues(shared_dbh& dbh)
 	_storage.createTable();
 }
 
-HackerBoatStateStorage& simpleValues::storage()
+HackerboatStateStorage& simpleValues::storage()
 {
 	return _storage;
 }
@@ -106,7 +106,7 @@ bool simpleValues::readFromRow(SQLiteRowReference row, sequence seq)
 }
 
 TEST(StorageTest, SimpleValues) {
-	shared_dbh dbh = HackerBoatStateStorage::databaseConnection("test0");
+	shared_dbh dbh = HackerboatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
 
 	simpleValues::sequence oid1, oid2;

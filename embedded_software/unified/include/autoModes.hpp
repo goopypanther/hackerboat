@@ -54,8 +54,8 @@ class AutoWaypointMode : public AutoModeBase {
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
 		PID helm;
-		double in;
-		double out;
+		double in = 0;
+		double out = 0;
 		double setpoint = 0;
 		int throttleSetting = AUTO_DEFAULT_THROTTLE;
 };
@@ -74,8 +74,8 @@ class AutoReturnMode : public AutoModeBase {
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
 		PID helm;
-		double in;
-		double out;
+		double in = 0;
+		double out = 0;
 		double setpoint = 0;
 		int throttleSetting = AUTO_DEFAULT_THROTTLE;
 };
@@ -96,8 +96,8 @@ class AutoAnchorMode : public AutoModeBase {
 	private:
 		Location anchorPoint;
 		PID helm;
-		double in;
-		double out;
+		double in = 0;
+		double out = 0;
 		double setpoint = 0;
 		int throttleSetting = 0;
 };

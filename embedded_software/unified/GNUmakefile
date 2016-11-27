@@ -113,8 +113,7 @@ TEST_OBJS += rcmode_test.o
 TEST_OBJS += automode_test.o
 TEST_OBJS += boatstate_test.o 
 TEST_OBJS += boatmode_test.o 
-#TEST_OBJS += sqliteStorage_test.o 
-#TEST_OBJS += smallJson_test.o 
+TEST_OBJS += sqliteStorage_test.o 
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
 unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a

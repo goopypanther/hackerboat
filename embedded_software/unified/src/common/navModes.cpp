@@ -66,7 +66,6 @@ NavModeBase *NavIdleMode::execute () {
 	
 	// check for RC mode switch
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
-		printf("Switching to RC mode in response to mode switch\n");
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}
 	
