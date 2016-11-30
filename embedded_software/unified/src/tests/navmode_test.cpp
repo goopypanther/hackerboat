@@ -8,6 +8,7 @@
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
 #include <jansson.h>
+#include "easylogging++.h"
 
 class NavModeIdleTest : public ::testing::Test {
 	public:
@@ -82,27 +83,44 @@ class NavModeIdleTest : public ::testing::Test {
 };
 
 TEST_F(NavModeIdleTest, CommandFault) {
+	VLOG(1) << "===Nav Mode Idle Test, Command Fault===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::FAULT);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
 }
 
 TEST_F(NavModeIdleTest, CommandRC) {
+	VLOG(1) << "===Nav Mode Idle Test, Command RC===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::RC);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 }
 
 TEST_F(NavModeIdleTest, CommandAuto) {
+	VLOG(1) << "===Nav Mode Idle Test, Command Auto===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::AUTONOMOUS);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 }
 
 TEST_F(NavModeIdleTest, SwitchRC) {
+	VLOG(1) << "===Nav Mode Idle Test, Switch RC===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 }
 
@@ -179,45 +197,75 @@ class NavModeFaultTest : public ::testing::Test {
 };
 
 TEST_F(NavModeFaultTest, Entry) {
+	VLOG(1) << "===Nav Mode Fault Test, Entry===";
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	me.rudder->write(50.0);
 	me.throttle->setThrottle(5);
+	VLOG(2) << "Rudder setting: " << me.rudder->read() << " throttle setting: " << me.throttle->getThrottle();
 	me.insertFault("Test Fault");
+	VLOG(2) << "Fault string: " << me.getFaultString();
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "Rudder setting: " << me.rudder->read() << " throttle setting: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 0);
 	EXPECT_EQ(me.throttle->getThrottle(), 0);
 }
 
 TEST_F(NavModeFaultTest, Exit) {
+	VLOG(1) << "===Nav Mode Fault Test, Exit===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 	me.insertFault("Test Fault");
+	VLOG(2) << "Fault string: " << me.getFaultString();
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
+	VLOG(2) << "Clearing faults...";
 	me.clearFaults();
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
 }
 
 TEST_F(NavModeFaultTest, CommandIdle) {
+	VLOG(1) << "===Nav Mode Fault Test, Command Idle===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::IDLE);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 }
 
 TEST_F(NavModeFaultTest, CommandRC) {
+	VLOG(1) << "===Nav Mode Fault Test, Command RC===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::RC);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 }
 
 TEST_F(NavModeFaultTest, CommandAuto) {
+	VLOG(1) << "===Nav Mode Fault Test, Command Auto===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	me.setNavMode(NavModeEnum::AUTONOMOUS);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 }
 
@@ -294,42 +342,77 @@ class NavModeRCTest : public ::testing::Test {
 };
 
 TEST_F(NavModeRCTest, AutoSwitchExit) {
+	VLOG(1) << "===Nav Mode RC Test, Switch Auto===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 }
 
 TEST_F(NavModeRCTest, Fault) {
+	VLOG(1) << "===Nav Mode RC Test, Fault===";
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	me.insertFault("Test Fault");
+	VLOG(2) << "Fault string: " << me.getFaultString();
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
 }
 
 TEST_F(NavModeRCTest, RCModeExecute) {
+	VLOG(1) << "===Nav Mode RC Test, Execute===";
 	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(2) << "Setting RC mode switch to " << rcchannels->at(RC_MODE_SWITCH);
 	NavRCMode *myrc = (NavRCMode*)mode;
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New rc mode set to " << me.rcModeNames.get(myrc->getRCMode()->getMode());
+	VLOG(2) << "RC mode count is " << myrc->getRCMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	EXPECT_EQ(mode->getCount(), 1);
 	EXPECT_EQ(myrc->getRCMode()->getMode(), RCModeEnum::IDLE);
 	EXPECT_EQ(myrc->getRCMode()->getCount(), 1);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New rc mode set to " << me.rcModeNames.get(myrc->getRCMode()->getMode());
+	VLOG(2) << "RC mode count is " << myrc->getRCMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	EXPECT_EQ(mode->getCount(), 2);
 	EXPECT_EQ(myrc->getRCMode()->getMode(), RCModeEnum::IDLE);
 	EXPECT_EQ(myrc->getRCMode()->getCount(), 2);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New rc mode set to " << me.rcModeNames.get(myrc->getRCMode()->getMode());
+	VLOG(2) << "RC mode count is " << myrc->getRCMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	EXPECT_EQ(mode->getCount(), 3);
 	EXPECT_EQ(myrc->getRCMode()->getMode(), RCModeEnum::IDLE);
 	EXPECT_EQ(myrc->getRCMode()->getCount(), 3);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New rc mode set to " << me.rcModeNames.get(myrc->getRCMode()->getMode());
+	VLOG(2) << "RC mode count is " << myrc->getRCMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	EXPECT_EQ(mode->getCount(), 4);
 	EXPECT_EQ(myrc->getRCMode()->getMode(), RCModeEnum::IDLE);
@@ -337,23 +420,38 @@ TEST_F(NavModeRCTest, RCModeExecute) {
 }
 
 TEST_F(NavModeRCTest, CommandIdle) {
+	VLOG(1) << "===Nav Mode RC Test, Command Idle===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
 	me.setNavMode(NavModeEnum::IDLE);
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 }
 
 TEST_F(NavModeRCTest, CommandFault) {
+	VLOG(1) << "===Nav RC Fault Test, Command Fault===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
 	me.setNavMode(NavModeEnum::FAULT);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
 }
 
 TEST_F(NavModeRCTest, CommandAuto) {
+	VLOG(1) << "===Nav RC Fault Test, Command Auto===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
 	me.setNavMode(NavModeEnum::AUTONOMOUS);
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 }
 
@@ -431,59 +529,103 @@ class NavModeAutoTest : public ::testing::Test {
 };
 
 TEST_F(NavModeAutoTest, RCSwitchExit) {
+	VLOG(1) << "===Nav Mode Auto Test, Switch RC===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 }
 
 TEST_F(NavModeAutoTest, Fault) {
+	VLOG(1) << "===Nav Mode Auto Test, Fault===";
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	me.insertFault("Test Fault");
+	VLOG(2) << "Fault string: " << me.getFaultString();
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
 }
 
 TEST_F(NavModeAutoTest, CommandIdle) {
+	VLOG(1) << "===Nav Mode Auto Test, Command Idle===";
+	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	me.setNavMode(NavModeEnum::IDLE);
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 }
 
 TEST_F(NavModeAutoTest, CommandRC) {
+	VLOG(1) << "===Nav Mode Auto Test, Command RC===";
 	me.setNavMode(NavModeEnum::RC);
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 }
 
 TEST_F(NavModeAutoTest, CommandFault) {
+	VLOG(1) << "===Nav Mode Auto Test, Command Fault===";
 	me.setNavMode(NavModeEnum::FAULT);
+	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	mode = mode->execute();
+	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::FAULT);
 }
 
 TEST_F(NavModeAutoTest, AutoModeExecute) {
+	VLOG(1) << "===Nav Mode Auto Test, Execute===";
 	NavAutoMode *myauto = (NavAutoMode*)mode;
 	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New auto mode set to " << me.autoModeNames.get(myauto->getAutoMode()->getMode());
+	VLOG(2) << "Auto mode count is " << myauto->getAutoMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 	EXPECT_EQ(mode->getCount(), 1);
 	EXPECT_EQ(myauto->getAutoMode()->getMode(), AutoModeEnum::IDLE);
 	EXPECT_EQ(myauto->getAutoMode()->getCount(), 1);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New auto mode set to " << me.autoModeNames.get(myauto->getAutoMode()->getMode());
+	VLOG(2) << "Auto mode count is " << myauto->getAutoMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 	EXPECT_EQ(mode->getCount(), 2);
 	EXPECT_EQ(myauto->getAutoMode()->getMode(), AutoModeEnum::IDLE);
 	EXPECT_EQ(myauto->getAutoMode()->getCount(), 2);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New auto mode set to " << me.autoModeNames.get(myauto->getAutoMode()->getMode());
+	VLOG(2) << "Auto mode count is " << myauto->getAutoMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 	EXPECT_EQ(mode->getCount(), 3);
 	EXPECT_EQ(myauto->getAutoMode()->getMode(), AutoModeEnum::IDLE);
 	EXPECT_EQ(myauto->getAutoMode()->getCount(), 3);
+	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
+	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());
+	VLOG(2) << "New auto mode set to " << me.autoModeNames.get(myauto->getAutoMode()->getMode());
+	VLOG(2) << "Auto mode count is " << myauto->getAutoMode()->getCount();
+	VLOG(2) << "Nav mode count is " << mode->getCount();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
 	EXPECT_EQ(mode->getCount(), 4);
 	EXPECT_EQ(myauto->getAutoMode()->getMode(), AutoModeEnum::IDLE);

@@ -38,6 +38,7 @@ class Waypoints {
 		bool loadKML (std::string kmlFile);			/**< Changes the stored KML path to kmlFile and loads it. Returns false if it cannot be loaded. */
 		bool fetchKML (std::string url);			/**< Fetch KML file from remote source and store it in the location pointed at by kmlPath. */
 		bool setKMLPath (std::string kmlFile);		/**< Set the KML file location but do not load it */
+		std::string getKMLPath () {return kmlPath;};
 		Location getWaypoint (unsigned int waypoint);	/**< Retrieve the given waypoint. */
 		Location getWaypoint ();					/**< Retrieve the current waypoint */
 		void setCurrent (unsigned int waypoint);		/**< Set the current waypoint */

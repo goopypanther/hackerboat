@@ -23,3 +23,6 @@
 [submodule "embedded_software/unified/submodules/hackerboat-private"]
 	path = embedded_software/unified/submodules/hackerboat-private
 	url = https://github.com/logos-electromechanical/hackerboat-private.git
+[submodule "embedded_software/unified/submodules/easyloggingpp"]
+	path = embedded_software/unified/submodules/easyloggingpp
+	url = https://github.com/logos-electromechanical/easyloggingpp.git

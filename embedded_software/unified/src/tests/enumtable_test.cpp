@@ -3,6 +3,7 @@
 #include "enumtable.hpp"
 #include <stdexcept>
 #include <gtest/gtest.h>
+#include "easylogging++.h"
 
 enum class silly : short { ALPHA, BETA, GAMMA, DELTA };
 

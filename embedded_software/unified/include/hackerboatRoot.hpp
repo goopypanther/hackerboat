@@ -128,6 +128,7 @@ class HackerboatState {
 		HackerboatState(void) {};
 };
 
+std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
 
 
 /**

@@ -23,6 +23,7 @@ CPPFLAGS += -I submodules/PixelBone
 CPPFLAGS += -I submodules/hackerboat-private 
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
+CPPFLAGS += -I submodules/easyloggingpp/src
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
 CPPFLAGS += -fno-inline-small-functions
@@ -126,8 +127,9 @@ unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboat.a
 # those in.
 gtest.o: $(GTEST_DIR) $(GTEST_INC)
 	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -I $(GTEST_DIR) -c -o $@ $(GTEST_DIR)/src/gtest-all.cc
-gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
-	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -c -o $@ $^
+#gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
+gtest_main.o: gtest_main.cc
+	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -I submodules/easyloggingpp/src -c -o $@ $^
 
 submodules:
 	@$(MAKE) -C submodules

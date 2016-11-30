@@ -6,6 +6,7 @@ extern "C" {
 #include <sqlite3.h>
 }
 #include "hackerboatRoot.hpp"
+#include "easylogging++.h"
 
 static bool table_exists(shared_dbh& dbh, const char *tablename)
 {
@@ -29,20 +30,22 @@ static bool table_exists(shared_dbh& dbh, const char *tablename)
 
 
 TEST(StorageTest, Creation) {
-
+	VLOG(1) << "===Storage Table Creation Test===";
 	shared_dbh dbh = HackerboatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
-
 	if (table_exists(dbh, "FOO")) {
+		VLOG(2) << "Table FOO exists beforehand; deleting";
 		int err = sqlite3_exec(dbh.get(), "DROP TABLE FOO", NULL, NULL, NULL);
 		EXPECT_EQ(err, SQLITE_OK);
 		EXPECT_FALSE(table_exists(dbh, "FOO"));
 	}
 
+	VLOG(2) << "Setting up table FOO";
 	HackerboatStateStorage storage(dbh, "FOO", { { "thing", "INTEGER" },
 						     { "whatsit", "TEXT" } });
 
 	EXPECT_FALSE(table_exists(dbh, "FOO"));
+	VLOG(2) << "Creating table FOO";
 	storage.createTable();
 	EXPECT_TRUE(table_exists(dbh, "FOO"));
 }
@@ -106,6 +109,8 @@ bool simpleValues::readFromRow(SQLiteRowReference row, sequence seq)
 }
 
 TEST(StorageTest, SimpleValues) {
+	VLOG(1) << "===Storage SimpleValues Test===";
+	VLOG(2) << "Connecting to test0 database";
 	shared_dbh dbh = HackerboatStateStorage::databaseConnection("test0");
 	ASSERT_TRUE(bool(dbh));
 

@@ -8,6 +8,7 @@
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
 #include <jansson.h>
+#include "easylogging++.h"
 
 #define TOL 0.000001
 

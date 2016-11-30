@@ -6,6 +6,7 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include <jansson.h>
+#include "easylogging++.h"
 
 #define TOL 0.000001
 
