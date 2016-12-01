@@ -45,6 +45,7 @@ class Command {
 		std::string getCmd() {return _cmd;};
 		json_t *getArgs() {return _args;};
 		bool execute ();
+		json_t* pack () const;
 	private:
 		static const map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
 		BoatState 		*_state = NULL;
@@ -66,6 +67,8 @@ class Command {
 		static bool PushPath(json_t* args, BoatState *state);
 		static bool SetPID(json_t* args, BoatState *state);
 };
+
+std::ostream& operator<< (std::ostream& stream, const Command& state);
 
 class BoatState : public HackerboatStateStorable {
 	public:
@@ -100,7 +103,7 @@ class BoatState : public HackerboatStateStorable {
 		bool setRCmode (RCModeEnum m) {_rc = m; return true;};		/**< Set RC mode to the given value */
 		bool setRCmode (std::string mode);							/**< Set RC mode to the given value */
 		RCModeEnum getRCMode () {return _rc;};
-		int commandCnt () {return cmdvec.size();};					/**< Return the number of commands waiting to be executed */
+		int commandCnt () const {return cmdvec.size();};			/**< Return the number of commands waiting to be executed */
 		void pushCmd (std::string name, json_t* args = NULL);		/**< Add a command to the back of the command queue */
 		void flushCmds () {cmdvec.clear();};						/**< Empty the command queue */
 		int executeCmds (int num = 0);								/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
@@ -114,19 +117,18 @@ class BoatState : public HackerboatStateStorable {
 		GPSFix					lastFix;			/**< Location of the last GPS fix */
 		Location				launchPoint;		/**< Location of the launch point */
 		Waypoints				waypointList;		/**< Waypoints to follow */
-		//WaypointActionEnum		action;				/**< Action to take at the last waypoint */
 		Dodge*					diversion;			/**< Avoid obstacles! */
 		HealthMonitor*			health;				/**< Current state of the boat's health */
 		Pin						disarmInput;		/**< Disarm input from power distribution box */
 		Pin						armInput;			/**< Arm input from power distribution box */
 		Pin						servoEnable;		/**< Pin to turn on the servo power output */
-		Servo*					rudder;				/**< Rudder servo */
-		Throttle*				throttle;			/**< Throttle object */
-		RCInput*				rc;					/**< RC input thread */
-		ADCInput*				adc;				/**< ADC input thread */
-		GPSdInput*				gps;				/**< GPS input thread */
-		OrientationInput*		orient;				/**< Orientation input thread */
-		RelayMap*				relays;				/**< Pointer to relay singleton */
+		Servo*					rudder = 0;			/**< Rudder servo */
+		Throttle*				throttle = 0;		/**< Throttle object */
+		RCInput*				rc = 0;				/**< RC input thread */
+		ADCInput*				adc = 0;			/**< ADC input thread */
+		GPSdInput*				gps = 0;			/**< GPS input thread */
+		OrientationInput*		orient = 0;			/**< Orientation input thread */
+		RelayMap*				relays = 0;			/**< Pointer to relay singleton */
 		
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
 		

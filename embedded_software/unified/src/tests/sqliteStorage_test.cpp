@@ -125,10 +125,14 @@ TEST(StorageTest, SimpleValues) {
 		row1.s = "Hoopy Frood";
 
 		count0 = row1.countRecords();
+		VLOG(2) << "Record count: " << count0;
 		EXPECT_TRUE(count0 >= 0);
 
+		VLOG(2) << "row1 sequence number: " << row1.getSequenceNum();
 		EXPECT_EQ(row1.getSequenceNum(), -1);
+		VLOG(2) << "Appending record...";
 		row1.appendRecord();
+		VLOG(2) << "row1 sequence number: " << row1.getSequenceNum();
 		EXPECT_NE(row1.getSequenceNum(), -1);
 		oid1 = row1.getSequenceNum();
 	}
@@ -136,6 +140,7 @@ TEST(StorageTest, SimpleValues) {
 	{
 		simpleValues row1(dbh);
 		row1.getLastRecord();
+		VLOG(2) << "row1 sequence number: " << row1.getSequenceNum() << ", oid1: " << oid1;
 		EXPECT_EQ(row1.getSequenceNum(), oid1);
 
 		EXPECT_EQ(row1.i, 42);
@@ -143,6 +148,7 @@ TEST(StorageTest, SimpleValues) {
 		EXPECT_EQ(row1.s, "Hoopy Frood");
 
 		count1 = row1.countRecords();
+		VLOG(2) << "Record count: " << row1.countRecords();
 		EXPECT_EQ(count1, count0 + 1);
 
 		simpleValues row2(dbh);
@@ -150,12 +156,18 @@ TEST(StorageTest, SimpleValues) {
 		row2.f = 7;
 		row2.s = "Sacred Chao";
 
+		VLOG(2) << "row2 sequence number: " << row2.getSequenceNum();
 		EXPECT_EQ(row2.getSequenceNum(), -1);
+		VLOG(2) << "Appending record...";
 		row2.appendRecord();
+		VLOG(2) << "row2 sequence number: " << row2.getSequenceNum();
 		oid2 = row2.getSequenceNum();
+		VLOG(2) << "row1 sequence number: " << row1.getSequenceNum() << ", oid1: " << oid1;
+		VLOG(2) << "row2 sequence number: " << row2.getSequenceNum() << ", oid2: " << oid1;
 		EXPECT_NE(oid2, -1);
 		EXPECT_TRUE(oid2 > oid1);
 
+		VLOG(2) << "Record count: " << row2.countRecords();
 		count2 = row1.countRecords();
 		EXPECT_EQ(count2, count1 + 1);
 

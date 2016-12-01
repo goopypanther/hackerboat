@@ -27,6 +27,7 @@
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "waypoint.hpp"
+#include "easylogging++.h"
 
 using namespace std;
 
@@ -41,6 +42,7 @@ bool Waypoints::fetchKML (std::string url) {
 	std::string cmd = "/usr/bin/curl -f -o ";			// call cURL with error messages suppressed and output to a given file
 	cmd += kmlPath;
 	cmd += " " + url;
+	LOG(INFO) << "Fetching KML file with following command: " << cmd;
 	if (system(cmd.c_str())) return false;				// call curl and return false if it fails
 	return true;
 }
@@ -53,6 +55,7 @@ bool Waypoints::loadKML () {
 	bool gotName = false;
 	bool gotLineString = false;
 	bool result = false;
+	LOG(INFO) << "Loading KML file " << kmlPath;
 	in.open(kmlPath);
 	if (in.is_open()) {																				// if we successfully opened the file, proceed 
 		while (in.good() && !gotLineString) {														// search through the file while it's still good and we haven't found a LineString object
@@ -120,6 +123,7 @@ bool Waypoints::loadKML () {
 						coordinates.erase(0, endofnum);							// and erase it
 						waypoints.emplace_back(Location(tmplat, tmplon));		// Add the new waypoint to the list
 						result = true;											// Returns true as long as we get at least one good point
+						VLOG(2) << "Got waypoint: " << waypoints.back();
 					} catch (...) {												// if we throw an exception here, it's likely because we are done
 						done = true;
 					}
@@ -134,7 +138,7 @@ bool Waypoints::loadKML () {
 
 bool Waypoints::loadKML (std::string kmlFile) {
 	if (access(kmlFile.c_str(), R_OK)) { 	// Make sure the file exists and is readable; otherwise, exit
-		cout << "Can't read file: " << kmlFile << endl;
+		LOG(ERROR) << "Can't read file: " << kmlFile << endl;
 		return false; 
 	}
 	kmlPath = kmlFile;
@@ -143,6 +147,7 @@ bool Waypoints::loadKML (std::string kmlFile) {
 
 bool Waypoints::setKMLPath (std::string kmlFile) {
 	kmlPath = kmlFile;
+	VLOG(2) << "New KML file is: " << kmlPath;
 	return true;
 }
 
@@ -173,6 +178,7 @@ bool Waypoints::increment () {
 	if (action == WaypointActionEnum::IDLE) return false;
 	if ((_c + 1) == waypoints.size()) {
 		if (action == WaypointActionEnum::REPEAT) {
+			LOG(INFO) << "Repeating waypoints...";
 			_c = 0;
 			return true;
 		} else return false;

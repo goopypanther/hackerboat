@@ -83,33 +83,55 @@ class AutoModeIdleTest : public ::testing::Test {
 };
 
 TEST_F(AutoModeIdleTest, Outputs) {
+	VLOG(1) << "===Auto Mode Idle Test, Outputs===";
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
 	EXPECT_EQ(me.rudder->read(), 0);
 	EXPECT_EQ(me.throttle->getThrottle(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 }
 
 TEST_F(AutoModeIdleTest, WaypointTransition) {
+	VLOG(1) << "===Auto Mode Idle Test, Waypoint Command===";
 	me.setAutoMode(AutoModeEnum::WAYPOINT);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 }
 
 TEST_F(AutoModeIdleTest, ReturnTransition) {
+	VLOG(1) << "===Auto Mode Idle Test, Return Command===";
 	me.setAutoMode(AutoModeEnum::RETURN);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
 }
 
 TEST_F(AutoModeIdleTest, AnchorTransition) {
+	VLOG(1) << "===Auto Mode Idle Test, Anchor Command===";
 	me.setAutoMode(AutoModeEnum::ANCHOR);
 	me.lastFix.fix.lat = 47.6906518;	
 	me.lastFix.fix.lon = -122.3799706;
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
 }
@@ -190,36 +212,60 @@ class AutoModeWaypointTest : public ::testing::Test {
 };
 
 TEST_F(AutoModeWaypointTest, CommandIdleTransition) {
+	VLOG(1) << "===Auto Mode Waypoint Test, Idle Command===";
 	me.setAutoMode(AutoModeEnum::IDLE);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 }
 
 TEST_F(AutoModeWaypointTest, CommandReturnTransition) {
+	VLOG(1) << "===Auto Mode Waypoint Test, Return Command===";
 	me.setAutoMode(AutoModeEnum::RETURN);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
 }
 
 TEST_F(AutoModeWaypointTest, CommandAnchorTransition) {
+	VLOG(1) << "===Auto Mode Waypoint Test, Anchor Command===";
 	me.setAutoMode(AutoModeEnum::ANCHOR);
 	me.lastFix.fix.lat = 47.6906518;	
 	me.lastFix.fix.lon = -122.3799706;
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, CourseSelection) {
+	VLOG(1) << "===Auto Mode Waypoint Test, Course Selection===";
 	me.lastFix.fix.lat = 47.6906518;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
 	me.lastFix.fix.lon = -122.3799706;
 	me.waypointList.setCurrent(0);		// make sure we're on the first waypoint
 	orientvalue->updateDeclination(me.lastFix.fix);
 	Orientation trueorientation {0, 0, 185.0, false};
 	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
 	EXPECT_TRUE(orientvalue->isMagnetic());
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
@@ -228,65 +274,107 @@ TEST_F(AutoModeWaypointTest, CourseSelection) {
 }
 
 TEST_F(AutoModeWaypointTest, WaypointAdvance) {
-	me.lastFix.fix.lat = 47.59066;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint Advance===";
+	me.lastFix.fix.lat = 47.59066;		// Near the first waypoint
 	me.lastFix.fix.lon = -122.3799706;
 	me.waypointList.setCurrent(0);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	EXPECT_EQ(me.waypointList.current(), 1);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeWaypointTest, WaypointRepeat) {
-	me.lastFix.fix.lat = 47.59436;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint Repeat===";
+	me.lastFix.fix.lat = 47.59436;	
 	me.lastFix.fix.lon = -122.37912;
 	me.waypointList.setAction(WaypointActionEnum::REPEAT);
 	me.waypointList.setCurrent(6);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeWaypointTest, WaypointReturn) {
-	me.lastFix.fix.lat = 47.59436;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint Return===";
+	me.lastFix.fix.lat = 47.59436;	
 	me.lastFix.fix.lon = -122.37912;
 	me.waypointList.setAction(WaypointActionEnum::RETURN);
 	me.waypointList.setCurrent(6);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeWaypointTest, WaypointAnchor) {
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint Anchor===";
 	me.lastFix.fix.lat = 47.59436;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
 	me.lastFix.fix.lon = -122.37912;
 	me.waypointList.setAction(WaypointActionEnum::ANCHOR);
 	me.waypointList.setCurrent(6);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.59436, 0.0001));
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.37912, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, WaypointIdle) {
-	me.lastFix.fix.lat = 47.59436;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint Idle===";
+	me.lastFix.fix.lat = 47.59436;	
 	me.lastFix.fix.lon = -122.37912;
 	me.waypointList.setAction(WaypointActionEnum::IDLE);
 	me.waypointList.setCurrent(6);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeWaypointTest, WaypointNone) {
-	me.lastFix.fix.lat = 47.59436;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
+	VLOG(1) << "===Auto Mode Waypoint Test, Waypoint None===";
+	me.lastFix.fix.lat = 47.59436;	
 	me.lastFix.fix.lon = -122.37912;
 	me.waypointList.setAction(WaypointActionEnum::NONE);
 	me.waypointList.setCurrent(6);		// make sure we're on the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Target Waypoint: " << me.waypointList.current() << ", " << me.waypointList.getWaypoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
@@ -367,29 +455,49 @@ class AutoModeReturnTest : public ::testing::Test {
 };
 
 TEST_F(AutoModeReturnTest, CommandIdleTransition) {
+	VLOG(1) << "===Auto Mode Return Test, Idle Command===";
 	me.setAutoMode(AutoModeEnum::IDLE);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 }
 
-TEST_F(AutoModeReturnTest, CommandReturnTransition) {
+TEST_F(AutoModeReturnTest, CommandWaypointTransition) {
+	VLOG(1) << "===Auto Mode Return Test, Waypoint Command===";
 	me.setAutoMode(AutoModeEnum::WAYPOINT);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 }
 
 TEST_F(AutoModeReturnTest, CommandAnchorTransition) {
+	VLOG(1) << "===Auto Mode Return Test, Anchor Command===";
 	me.setAutoMode(AutoModeEnum::ANCHOR);
 	me.lastFix.fix.lat = 47.6906518;	
 	me.lastFix.fix.lon = -122.3799706;
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
 	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeReturnTest, CourseSelection) {
+	VLOG(1) << "===Auto Mode Anchor Test, Course Selection===";
 	me.lastFix.fix.lat = 47.6906518;	// this location is 0.1 degrees (about six nm) due north of the first waypoint
 	me.lastFix.fix.lon = -122.3799706;
 	me.launchPoint.lat = 47.5906518;
@@ -397,7 +505,11 @@ TEST_F(AutoModeReturnTest, CourseSelection) {
 	orientvalue->updateDeclination(me.lastFix.fix);
 	Orientation trueorientation {0, 0, 176.0, false};
 	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
+	VLOG(2) << "Target: " << me.launchPoint;
 	mode = mode->execute();
+	VLOG(2) << me;
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
 	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -4, 0.1));
@@ -405,11 +517,18 @@ TEST_F(AutoModeReturnTest, CourseSelection) {
 }
 
 TEST_F(AutoModeReturnTest, ReturnAnchor) {
+	VLOG(1) << "===Auto Mode Anchor Test, Anchor===";
 	me.lastFix.fix.lat = 47.5906518;	
 	me.lastFix.fix.lon = -122.3799706;
 	me.launchPoint.lat = 47.5907;
 	me.launchPoint.lon = -122.3800;
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
@@ -490,52 +609,85 @@ class AutoModeAnchorTest : public ::testing::Test {
 };
 
 TEST_F(AutoModeAnchorTest, CommandIdleTransition) {
+	VLOG(1) << "===Auto Mode Anchor Test, Idle Command===";
 	me.setAutoMode(AutoModeEnum::IDLE);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::IDLE);
 }
 
 TEST_F(AutoModeAnchorTest, CommandReturnTransition) {
-	me.setAutoMode(AutoModeEnum::WAYPOINT);
+	VLOG(1) << "===Auto Mode Anchor Test, Return Command===";
+	me.setAutoMode(AutoModeEnum::RETURN);
+	VLOG(2) << me;
 	mode = mode->execute();
-	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
+	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
 }
 
 TEST_F(AutoModeAnchorTest, CommandWaypointTransition) {
+	VLOG(1) << "===Auto Mode Anchor Test, Waypoint Command===";
 	me.setAutoMode(AutoModeEnum::WAYPOINT);
+	VLOG(2) << me;
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
 }
 
 TEST_F(AutoModeAnchorTest, Forward) {
+	VLOG(1) << "===Auto Mode Anchor Test, Forward===";
 	me.lastFix.fix.lat = 47.5907;	
 	me.lastFix.fix.lon = -122.3800;
 	orientvalue->updateDeclination(me.lastFix.fix);
 	Orientation trueorientation {0, 0, 190.0, false};
 	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
 	mode = mode->execute();
 	me.lastFix.fix.lat = 47.5912;
 	me.lastFix.fix.lon = -122.3800;
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	std::this_thread::sleep_for(100ms);
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
 TEST_F(AutoModeAnchorTest, Reverse) {
+	VLOG(1) << "===Auto Mode Anchor Test, Reverse===";
 	me.lastFix.fix.lat = 47.5907;	
 	me.lastFix.fix.lon = -122.3800;
 	orientvalue->updateDeclination(me.lastFix.fix);
 	Orientation trueorientation {0, 0, 175.0, false};
 	*orientvalue = trueorientation.makeMag();				// the intent here is to get the magnetic bearing equivalent to 1 degree off the true bearing to the first waypoint
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
 	mode = mode->execute();
 	me.lastFix.fix.lat = 47.5902;
 	me.lastFix.fix.lon = -122.3800;
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	std::this_thread::sleep_for(100ms);
+	VLOG(2) << me;
+	VLOG(2) << "Orientation: " << *orientvalue;
+	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
 	mode = mode->execute();
+	VLOG(2) << me;
+	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
+			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
 	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -5, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), -5);

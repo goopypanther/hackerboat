@@ -230,7 +230,6 @@ BoatModeBase* BoatNavigationMode::execute() {
 		_oldNavMode = _navMode;
 		_navMode = NavModeBase::factory(_state, NavModeEnum::FAULT);
 		delete _oldNavMode;
-		printf("Fault string: %s\n", _state.getFaultString().c_str());
 		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}
 	if ((_state.disarmInput.get() == 1) || (_state.armInput.get() != 1)) {

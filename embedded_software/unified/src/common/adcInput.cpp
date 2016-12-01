@@ -26,6 +26,7 @@
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 #include "hal/adcInput.hpp" 
+#include "easylogging++.h"
  
 ADCInput::ADCInput(void) {
 	period = IMU_READ_PERIOD;
@@ -73,6 +74,7 @@ bool ADCInput::begin() {
 		myThread->detach();
 		return true;
 	}
+	LOG(FATAL) << 
 	return false;
 }
 

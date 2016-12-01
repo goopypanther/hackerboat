@@ -14,6 +14,7 @@
 #include <cmath> 
 #include "hackerboatRoot.hpp"
 #include "twovector.hpp"
+#include "easylogging++.h"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
