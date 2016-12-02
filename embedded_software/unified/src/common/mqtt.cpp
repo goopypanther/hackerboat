@@ -25,10 +25,8 @@
 #include "boatState.hpp"
 #include "MQTTClient.h"
 #include "mqtt.hpp"
-#include "logs.hpp"
 
 using namespace std;
-static LogError *logptr = LogError::instance();
 
 MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
 	clientID(MQTT_CLIENTID), _name(username), _key(key) {
@@ -44,7 +42,6 @@ MQTT::MQTT (BoatState *me, string host, int port, string username, string key) :
 		conn_opts.cleansession = 1;
 		conn_opts.ssl = NULL;
 		MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
-		logptr->open(MQTT_LOGFILE);
 	}
 	
 int MQTT::connect () {
@@ -94,7 +91,6 @@ void MQTT::setSubFuncMap (SubFuncMap *submap) {
 MQTT::~MQTT() {
     disconnect();
     MQTTClient_destroy(&client);
-	logptr->close();
 }
 
 // publisher functions
@@ -106,7 +102,6 @@ void MQTT::transmit (string topic, string payload, MQTTClient* client) {
 	pubmsg.payloadlen = payload.length();
 	MQTTClient_publishMessage(client, topic.c_str(), &pubmsg, &token);
 	string logmsg = "topic: " + topic + "payload: " + payload;
-	logptr->write("MQTT Transmission", logmsg);
 }
 
 void MQTT::pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client) {
@@ -178,7 +173,6 @@ int MQTT::msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_mess
 	string topic = topicName;
 	string msg = static_cast<char*>(message->payload);
 	string logmsg = "topic: " + topic + "payload: " + msg;
-	logptr->write("MQTT Reception", logmsg);
 	try {
 		_sub->at(topic)(_state, topic, msg);
 		return 0;

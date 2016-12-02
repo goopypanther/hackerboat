@@ -18,9 +18,7 @@
 #include <inttypes.h>
 #include "hal/config.h"
 #include "hal/servo.hpp"
-#include "logs.hpp"
 
-static LogError* mylog = LogError::instance();
 static const std::string basepath = "/sys/class/pwm/pwmchip";
 
 using namespace std;
@@ -53,17 +51,13 @@ bool Servo::attach (int port, int pin, long min, long max, long freq) {
 	// check if the export exists before attempting to export it to avoid errors
 	if (access(path.c_str(), F_OK)) {
 		if (system(exportcmd.c_str()) != 0)  {
-			mylog->open(HARDWARE_LOGFILE);
-			mylog->write("SERVO", "Unable to export pwm channel for " + path);
-			mylog->close();
+			//mylog->write("SERVO", "Unable to export pwm channel for " + path);
 			return false;
 		}	
 	}
 	system(chmodcmd.c_str());
 	if (access(path.c_str(), W_OK)) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to write to pwm channel for " + path);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to write to pwm channel for " + path);
 		return false;
 	}
 	
@@ -72,9 +66,7 @@ bool Servo::attach (int port, int pin, long min, long max, long freq) {
 	std::string pinmux = CONFIG_PIN_PATH;
 	pinmux += " " + pinname + " pwm\n";
 	if (system(pinmux.c_str()) != 0) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to enable pinmux for " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to enable pinmux for " + pinname);
 		return false;
 	}
 	
@@ -91,9 +83,7 @@ bool Servo::attach (int port, int pin, long min, long max, long freq) {
 		enable.close();
 	} else {
 		detach();
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to enable specified pwm channel or pin " + path + " " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to enable specified pwm channel or pin " + path + " " + pinname);
 		return false;
 	}
 	attached = true;
@@ -114,9 +104,7 @@ void Servo::detach () {
 	std::string pinmux = CONFIG_PIN_PATH; 
 	pinmux += " " + pinname + " default\n";
 	if (system(pinmux.c_str()) != 0) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to disable pinmux for " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to disable pinmux for " + pinname);
 	}
 	attached = false;
 }
@@ -154,15 +142,11 @@ bool Servo::writeMicroseconds () {
 		duty << to_string(_val);
 		duty.close();
 	} else {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to open duty_cycle for " + path + " " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to open duty_cycle for " + path + " " + pinname);
 		return false;
 	}
 	if (duty.bad()) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to write duty_cycle for " + path + " " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to write duty_cycle for " + path + " " + pinname);
 		return false;
 	}
 	return true;
@@ -175,15 +159,11 @@ bool Servo::setFrequency () {
 		freq << to_string(_freq);
 		freq.close();
 	} else {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to open period for " + path + " " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to open period for " + path + " " + pinname);
 		return false;
 	}
 	if (freq.bad()) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("SERVO", "Unable to write period for " + path + " " + pinname);
-		mylog->close();
+		//mylog->write("SERVO", "Unable to write period for " + path + " " + pinname);
 		return false;
 	}
 	return true;

@@ -26,6 +26,7 @@
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "ais.hpp"
+#include "easylogging++.h"
 
 #define METERS_PER_KNOT		(1852)
 #define SECONDS_PER_HOUR	(3600)
@@ -37,6 +38,7 @@ using namespace std::literals::chrono_literals;
 const std::string AISBase::msgClass = "AIS";
 
 AISShip::AISShip (json_t *packet) {
+	VLOG(2) << "Creating new AIS object";
 	recordTime = std::chrono::system_clock::now();
 	parseGpsdPacket(packet);
 }			
@@ -51,6 +53,9 @@ bool AISShip::parseGpsdPacket (json_t *input) {
 	this->lastTimeStamp = std::chrono::system_clock::now();
 	result &= GET_VAR(lat);
 	result &= GET_VAR(lon);
+	
+	LOG_IF((!result && input), ERROR) << "Parsing AIS input from gpsd failed: " << input;
+	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in AISShip.parseGpsdPacket()";
 	
 	if (result) return this->isValid();
 	return result;
@@ -69,6 +74,9 @@ bool AISShip::parse (json_t *input) {
 	result &= parseTime(lastTime, this->lastTimeStamp);
 	result &= fix.parse(inFix);
 	json_decref(inFix);
+	LOG_IF((!result && input), ERROR) << "Parsing AIS input failed: " << input;
+	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in AISShip.parse()";
+
 	
 	if (result) return this->isValid();
 	return result;
@@ -141,9 +149,11 @@ bool AISShip::prune (Location& current) {
 	if ((!this->isValid()) || 
 		(current.isValid() && (fix.distance(current) > AIS_MAX_DISTANCE)) ||
 		((std::chrono::system_clock::now() - lastTimeStamp) > timeout)) {
-		removeEntry();
-		return true;
-	} else return false;
+			LOG(INFO) << "Trimming target " << this->mmsi;
+			LOG(DEBUG) << "Trimmed target " << *this;
+			removeEntry();
+			return true;
+		} else return false;
 	return false;
 }
 
@@ -171,6 +181,11 @@ json_t *AISShip::pack () const {
 	packResult += json_object_set_new(output, "epfd", json_integer(static_cast<int>(this->epfd)));
 	
 	if (packResult != 0) {
+		if (output) {
+			LOG(ERROR) << "AIS pack failed: " << output;
+		} else {
+			LOG(WARNING) << "AIS pack failed, no output";
+		}
 		json_decref(output);
 		return NULL;
 	}
@@ -188,6 +203,7 @@ bool AISShip::isValid () const {
 
 HackerboatStateStorage& AISShip::storage() {
 	if (!aisShipStorage) {
+		LOG(INFO) << "Creating AIS database table";
 		aisShipStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(AIS_DB_FILE),
 							"AIS_SHIP",
 							{ { "mmsi", "INTEGER"},
@@ -218,6 +234,8 @@ HackerboatStateStorage& AISShip::storage() {
 
 bool AISShip::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(20);
+	LOG_EVERY_N(10, INFO) << "Storing AIS object to the database" << *this;
+	LOG(DEBUG) << "Storing AIS object to the database" << *this;
 	row.bind(0, mmsi);
 	row.bind(1, HackerboatState::packTime(recordTime));
 	row.bind(2, HackerboatState::packTime(lastTimeStamp));
@@ -268,6 +286,7 @@ bool AISShip::readFromRow(SQLiteRowReference row, sequence seq) {
 	this->to_port = row.int64_field(17);
 	this->to_starboard = row.int64_field(18);
 	this->epfd = static_cast<AISEPFDType>(row.int64_field(19));
+	LOG(DEBUG) << "Populated AIS object from DB " << *this;
 	
 	return this->isValid();
 }
@@ -289,6 +308,7 @@ bool AISShip::merge(AISShip* other) {
 	}
 	this->recordTime 	= std::chrono::system_clock::now();
 	this->lastTimeStamp = a->lastTimeStamp;
+	LOG(DEBUG) << "Merging AIS contacts with MMSI: " << this->mmsi;
 	
 	// Check the newer version for validity and if it's valid, use it; otherwise, use the older one
 	this->fix 			= (a->fix.isValid()) ? a->fix : b->fix;
@@ -309,4 +329,16 @@ bool AISShip::merge(AISShip* other) {
 	this->epfd			= (a->epfd != AISEPFDType::UNDEFINED) ? a->epfd : b->epfd;
 	
 	return true;
+}
+
+std::ostream& operator<< (std::ostream& stream, const AISShip& state) {
+	json_t* json;
+	json = state.pack();
+	if (json) {
+		stream << json;
+		json_decref(json);
+	} else {
+		stream << "{}";
+	}
+	return stream;
 }

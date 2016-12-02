@@ -20,7 +20,6 @@
 #include <fstream>
 #include <string>
 #include <unistd.h>
-#include "logs.hpp"
 #include "location.hpp"
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"

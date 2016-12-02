@@ -130,7 +130,6 @@ class HackerboatState {
 
 std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
 
-
 /**
  * @class HackerboatStateStorable
  *

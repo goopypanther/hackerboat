@@ -55,8 +55,7 @@ run: svctree
 	svscan $(SVCTREE)
 .PHONY: svctree run
 
-LIBHACKERBOAT_SRCS= logs.cpp   
-LIBHACKERBOAT_SRCS+= autoModes.cpp 
+LIBHACKERBOAT_SRCS= autoModes.cpp 
 LIBHACKERBOAT_SRCS+= mqtt.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= gpsdInput.cpp

@@ -25,19 +25,25 @@
 #include "hal/inputThread.hpp"
 #include "hal/gpsdInput.hpp"
 #include "pstream.h"
+#include "easylogging++.h"
 
 using namespace std;
 using namespace redi;
 
 GPSdInput::GPSdInput (string host, int port) :
-	_host(host), _port(port) {};
+	_host(host), _port(port) {
+		LOG(DEBUG) << "Creating GPSdInput object with specified target " << _host << ":" << _port;
+	};
 	
 GPSdInput::GPSdInput () :
-	_host("127.0.0.1"), _port(3001) {};
+	_host("127.0.0.1"), _port(3001) {
+		LOG(DEBUG) << "Creating GPSdInput object with default target " << _host << ":" << _port;
+	};
 
 bool GPSdInput::setHost (string host) {
 	if (host != "") {
 		_host = host;
+		LOG(DEBUG) << "Setting new host " << _host;
 		return true;
 	}
 	return false;
@@ -46,6 +52,7 @@ bool GPSdInput::setHost (string host) {
 bool GPSdInput::setPort (int port) {
 	if ((port > 0) && (port < 65535)) {
 		_port = port;
+		LOG(DEBUG) << "Setting new port " << _port;
 		return true;
 	}
 	return false;
@@ -55,7 +62,9 @@ bool GPSdInput::connect () {
 	if ((_port > 0) && (_port < 65535) && (_host != "")) {
 		string cmd = "/usr/bin/gpspipe -w " + _host + ":" + to_string(_port);
 		gpsdstream.open(cmd, pstreams::pstdout | pstreams::pstderr);
+		LOG(DEBUG) << "Connecting to gpsd with command " << cmd;
 		std::this_thread::sleep_for(1ms);
+		LOG_IF(!isConnected(), ERROR) << "Failed to connect to gpsd with command " << cmd;
 		return (isConnected());
 	}
 	return false;
@@ -75,8 +84,10 @@ bool GPSdInput::begin() {
 	if (this->connect()) {
 		this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 		myThread->detach();
+		LOG(INFO) << "GPS subsystem started";
 		return true;
 	}
+	LOG(FATAL) << "Unable to initialize GPS subsystem";
 	return false;
 }
 
@@ -101,11 +112,11 @@ bool GPSdInput::execute() {
 				size_t l = json_string_length(objclass);
 				s.assign(p, l);
 				if (s == "TPV") {
-					cout << "Got GPS packet" << endl;
+					LOG(INFO) << "Got GPS packet";
 					result = _lastFix.parseGpsdPacket(input);
 				} else if (s == "AIS") {
 					AISShip newship;
-					cout << "Got AIS packet" << endl;
+					LOG(INFO) << "Got AIS packet";
 					if (newship.parseGpsdPacket(input)) {
 						_aisTargets.emplace(newship.getMMSI(), newship);
 						result = true;
@@ -119,6 +130,8 @@ bool GPSdInput::execute() {
 		} result = false;
 	} else result = false;
 	
+	LOG_IF(strlen(inerr.text), ERROR) << "JSON loading error: " << inerr.text << " from " << inerr.source 
+									<< " at line " << inerr.line << ", column " << inerr.column;
 	lock.unlock();
 	return result;
 }

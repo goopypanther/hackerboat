@@ -17,7 +17,6 @@
 #include <vector>
 #include <tuple>
 #include <map>
-#include "logs.hpp"
 #include "location.hpp"
 #include "ais.hpp"
 #include "gps.hpp"

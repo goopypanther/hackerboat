@@ -18,10 +18,7 @@
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"
 #include "hal/adcInput.hpp"
-#include "logs.hpp"
 #include "healthMonitor.hpp"
-
-static LogError* mylog = LogError::instance();
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 #define PACK_VAR(var) json_object_set_new(output, #var, json(var))
@@ -29,9 +26,6 @@ static LogError* mylog = LogError::instance();
 bool HealthMonitor::readHealth () {
 	// attempt to grab a lock over the adc input in order to make sure we're copying consistent data
 	if (!_adc->lock.try_lock_for(ADC_LOCK_TIMEOUT)) {
-		mylog->open(MAIN_LOGFILE);
-		mylog->write("HEALTH_MON", "Failed to obtain ADC lock");
-		mylog->close();
 		return false;
 	}
 	std::map<std::string, double> data = _adc->getScaledValues();	

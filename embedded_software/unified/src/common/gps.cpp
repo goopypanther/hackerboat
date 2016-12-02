@@ -20,6 +20,7 @@
 #include "json_utilities.hpp"
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
+#include "easylogging++.h"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
@@ -31,6 +32,7 @@ const EnumNameTable<NMEAModeEnum> GPSFix::NMEAModeNames = {
 };
 
 GPSFix::GPSFix() {
+	LOG(DEBUG) << "Creating new blank GPSFix object";
 	recordTime = std::chrono::system_clock::now();
 	gpsTime = recordTime;
 	fix = Location(47.560644, -122.338816);	// location of HBL
@@ -38,6 +40,7 @@ GPSFix::GPSFix() {
 }
 
 GPSFix::GPSFix(json_t *packet) {
+	LOG(DEBUG) << "Creating new GPSFix object from packet " << packet;
 	fixValid = this->parseGpsdPacket(packet); 
 }
 
@@ -63,6 +66,11 @@ json_t *GPSFix::pack () const {
 	packResult += json_object_set_new(output, "fixValid", json_boolean(fixValid));
 
 	if (packResult != 0) {
+		if (output) {
+			LOG(ERROR) << "GPSFix pack failed: " << output;
+		} else {
+			LOG(WARNING) << "GPSFix pack failed, no output";
+		}
 		json_decref(output);
 		return NULL;
 	}
@@ -110,6 +118,9 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 	this->recordTime = std::chrono::system_clock::now();
 	json_decref(gpsMode);
 	
+	LOG_IF((!result && input), ERROR) << "Parsing GPSFix packet input failed: " << input;
+	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parseGpsdPacket()";
+	
 	if (result) return this->isValid();
 	return false;
 }
@@ -131,6 +142,9 @@ bool GPSFix::parse (json_t *input) {
 	result &= NMEAModeNames.get(tmp, &mode);
 	json_decref(inFix);
 	
+	LOG_IF((!result && input), ERROR) << "Parsing GPSFix input failed: " << input;
+	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parse()";
+	
 	if (result) return this->isValid();
 	return false;
 }
@@ -145,6 +159,7 @@ bool GPSFix::isValid (void) const {
 HackerboatStateStorage &GPSFix::storage() {
 
 	if (!gpsStorage) {
+		LOG(INFO) << "Creating GPSFix database table";
 		gpsStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
 							{ { "recordTime", "TEXT" },
@@ -172,6 +187,8 @@ HackerboatStateStorage &GPSFix::storage() {
 
 bool GPSFix::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(17);
+	LOG_EVERY_N(10, INFO) << "Storing GPSFix object to the database" << *this;
+	LOG(DEBUG) << "Storing GPSFix object to the database" << *this;
 	row.bind(0, HackerboatState::packTime(recordTime));
 	row.bind(1, HackerboatState::packTime(gpsTime));
 	row.bind(2, fix.lat);
@@ -217,6 +234,7 @@ bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
 	this->epc = row.double_field(14);
 	this->device = row.string_field(15);
 	this->fixValid = row.bool_field(16);
+	LOG(DEBUG) << "Populated GPSFix object from DB " << *this;
 	
 	if (fixValid && result) return this->isValid();
 	return false;

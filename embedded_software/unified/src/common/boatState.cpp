@@ -19,7 +19,6 @@
 #include "gps.hpp"
 #include "sqliteStorage.hpp"
 #include "hal/config.h"
-#include "logs.hpp"
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"
 #include "waypoint.hpp"
@@ -183,9 +182,7 @@ json_t* BoatState::pack () const {
 	}
 	if (packResult != 0) {
 		if (output) {
-			char* outdump = json_dumps(output, JSON_INDENT(4));
-			LOG(ERROR) << "BoatState pack failed: " << outdump;
-			free(outdump);
+			LOG(ERROR) << "BoatState pack failed: " << output;
 		} else {
 			LOG(WARNING) << "BoatState pack failed, no output";
 		}
@@ -219,7 +216,7 @@ bool BoatState::parse (json_t* input ) {
 	result &= autoModeNames.get(autoMode, &(this->_auto));
 	result &= rcModeNames.get(rcMode, &(this->_rc));
 	
-	LOG_IF((!result && input), ERROR) << "Parsing BoatState input failed: " << json_dumps(input, JSON_INDENT(4));
+	LOG_IF((!result && input), ERROR) << "Parsing BoatState input failed: " << input;
 	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in BoatState.parse()";
 
 	return result;
@@ -306,7 +303,7 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 
 void BoatState::pushCmd (std::string name, json_t* args) {
 	cmdvec.emplace_back(Command(this, name, args));
-	LOG_IF(args, DEBUG) << "Emplacing command [" << name << "] with arguments: " << json_dumps(args, JSON_INDENT(4));
+	LOG_IF(args, DEBUG) << "Emplacing command [" << name << "] with arguments: " << args;
 	LOG_IF(!args, DEBUG) << "Emplacing command [" << name << "] with no arguments";
 }
 
@@ -588,10 +585,7 @@ std::ostream& operator<< (std::ostream& stream, const Command& cmd) {
 	json_t* json;
 	json = cmd.pack();
 	if (json) {
-		char* output = json_dumps(json, 0);
-		stream << output;
-		json_decref(json);
-		free(output);
+		stream << json;
 	} else {
 		stream << "{}";
 	}

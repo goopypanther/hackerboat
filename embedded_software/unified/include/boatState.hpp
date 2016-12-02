@@ -22,7 +22,7 @@
 #include "gps.hpp"
 #include "sqliteStorage.hpp"
 #include "hal/config.h"
-#include "logs.hpp"
+#include "easylogging++.h"
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"
 #include "waypoint.hpp"
@@ -135,11 +135,11 @@ class BoatState : public HackerboatStateStorable {
 	private:
 		std::list<Command>	cmdvec;
 		HackerboatStateStorage *stateStorage = NULL;
-		std::string 	faultString;
-		BoatModeEnum 	_boat;
-		NavModeEnum		_nav;
-		AutoModeEnum 	_auto;
-		RCModeEnum 		_rc;
+		std::string 	faultString = "";
+		BoatModeEnum 	_boat = BoatModeEnum::NONE;
+		NavModeEnum		_nav = NavModeEnum::NONE;
+		AutoModeEnum 	_auto= AutoModeEnum::NONE;
+		RCModeEnum 		_rc = RCModeEnum::NONE;
 	
 };
 

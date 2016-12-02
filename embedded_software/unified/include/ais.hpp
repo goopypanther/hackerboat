@@ -168,4 +168,7 @@ class AISShip : AISBase {
 	
 };
 
+// This is here because I am having dumb inheritance issues
+std::ostream& operator<< (std::ostream& stream, const AISShip& state);
+
 #endif

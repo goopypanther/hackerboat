@@ -20,7 +20,6 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
-#include "logs.hpp"
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 
@@ -47,7 +46,7 @@
 #define BUSY_BIT 0
 #define NOT_READY_BIT 1
 
-static LogError* mylog = LogError::instance();
+using namespace std;
 
 ADC128D818::ADC128D818(uint8_t address, int bus) :
 	addr(address), _bus(bus), disabled_mask(0), ref_v(ADC128D818_INTERNAL_REF),
@@ -114,9 +113,7 @@ bool ADC128D818::begin() {
 		std::this_thread::sleep_for(ADC_START_PERIOD);
 	}
 	if (count >= BUSY_STATUS_REG) {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("ADC128D818", "Failed to connect to ADC and/or ADC was stuck in startup or busy mode.");
-		mylog->close();
+		//mylog->write("ADC128D818", "Failed to connect to ADC and/or ADC was stuck in startup or busy mode.");
 		return false;
 	}
 	
@@ -155,9 +152,7 @@ int16_t ADC128D818::read(uint8_t channel) {
 			result = (int)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
 		}
 	} else {
-		mylog->open(HARDWARE_LOGFILE);
-		mylog->write("ADC128D818", "Failed to connect to and/or read from ADC register " + (READ_REG_BASE + channel));
-		mylog->close();
+		//mylog->write("ADC128D818", "Failed to connect to and/or read from ADC register " + (READ_REG_BASE + channel));
 		result = -1;
 	}
 	i2c_close(handle);

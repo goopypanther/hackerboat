@@ -607,6 +607,5 @@ TEST_F(BoatModeNavTest, Fault) {
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
 			<< " Last mode: " << me.boatModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::FAULT);
-	EXPECT_EQ(mynav->getNavMode()->getMode(), NavModeEnum::FAULT);
 	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
 }

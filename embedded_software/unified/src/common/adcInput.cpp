@@ -35,19 +35,23 @@ ADCInput::ADCInput(void) {
 bool ADCInput::init() {
 	bool result = true;
 	
+	LOG(INFO) << "Initializing ADC subsystem";
 	// set up any internal ADCs and check that we can access the relevant files
 	batmonPath = ADC_BATMON_PATH;
 	result &= ((access(batmonPath.c_str(), F_OK)) == 0); // check for the existence of the relevant file
+	LOG(DEBUG) << "Result of initializing battery monitor; " << result;
 	
 	// set up the upper external ADC bank
 	result &= upper.begin();
 	upper.setReferenceMode(reference_mode_t::EXTERNAL_REF);
 	upper.setReference(ADC128D818_EXTERNAL_REF);
+	LOG(DEBUG) << "Result of initializing upper ADC bank; " << result;
 	
 	// set up the lower external ADC bank
 	result &= lower.begin();
 	lower.setReferenceMode(reference_mode_t::EXTERNAL_REF);
 	lower.setReference(ADC128D818_EXTERNAL_REF);
+	LOG(DEBUG) << "Result of initializing lower ADC bank; " << result;
 	
 	// This populates the various maps
 	_raw[ADC_BATMON_NAME] = -1;
@@ -72,9 +76,10 @@ bool ADCInput::begin() {
 	if (this->init()) {
 		this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 		myThread->detach();
+		LOG(INFO) << "ADC subsystem started";
 		return true;
 	}
-	LOG(FATAL) << 
+	LOG(FATAL) << "Unable to initialize ADC subsystem";
 	return false;
 }
 

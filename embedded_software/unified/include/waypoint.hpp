@@ -21,7 +21,6 @@
 #include <map>
 #include <iostream>
 #include <string>
-#include "logs.hpp"
 #include "location.hpp"
 #include "hackerboatRoot.hpp"
 #include "hal/config.h"

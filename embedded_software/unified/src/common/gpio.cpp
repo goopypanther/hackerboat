@@ -22,13 +22,17 @@
 #include <fcntl.h>  
 #include <unistd.h>
 #include <fstream>
+#include "easylogging++.h"
 
 using namespace std;
 
 bool Pin::init () {
 	if (_init) return true;
 	_gpio = getGPIO(_port, _pin);
-	if (_gpio < 0) return false;
+	if (_gpio < 0) {
+		LOG(WARNING) << "Selected pin does not exist or is not available P" << _port << "_" << _pin;
+		return false;
+	}
 	
 	pinName = "P" + to_string(_port);
 	pinName += "_" + to_string(_pin);
@@ -36,14 +40,24 @@ bool Pin::init () {
 	// use config-pin to set the pinmux & direction
 	std::string pinmux = CONFIG_PIN_PATH; 
 	pinmux += " " + pinName + " " + function + "\n";
-	if (system(pinmux.c_str()) != 0) return false;
+	LOG(DEBUG) << "Initializing pin with command " << pinmux;
+	if (system(pinmux.c_str()) != 0) {
+		LOG(WARNING) << "Failed to initialize pin with command " << pinmux;
+		return false;
+	}
 	
 	// assemble & test path
 	path = "/sys/class/gpio/gpio" + to_string(_gpio);
+	LOG(DEBUG) << "Pin path is " << path;
 	if (access(path.c_str(), F_OK)) {      // check if the file exists & export if necessary
 		string cmd = "echo " + to_string(_gpio);
 		cmd += " > /sys/class/gpio/export\n";
-		if (system(cmd.c_str()) != 0) return false;
+		if (system(cmd.c_str()) != 0) {
+			LOG(WARNING) << "Failed to access pin at " << path << " with cmd " << cmd;
+			return false;
+		}
+	} else {
+		LOG(WARNING) << "Failed to access pin at " << path;
 	}
 	
 	_init = true;
@@ -55,6 +69,7 @@ bool Pin::setPort (int port) {
 	if ((port != 8) && (port != 9)) return false;
 	_port = port;
 	_init = false;
+	VLOG(3) << "Set port to " << port;
 	return true;
 }	
 
@@ -64,14 +79,17 @@ bool Pin::setPin (int pin) {
 	if (_port == 8) {
 		if ((pin > 2) && (pin < 47)) {
 			_pin = pin;
+			VLOG(3) << "Set pin to " << pin << " on port 8";
 			return true;
 		} 
 	} else if (_port == 0) {
 		if ((pin > 10) && (pin < 32)) {
 			_pin = pin;
+			VLOG(3) << "Set pin to " << pin << " on port 9";
 			return true;
 		} else if ((pin > 40) && (pin < 43)) {
 			_pin = pin;
+			VLOG(3) << "Set pin to " << pin << " on port 9";
 			return true;
 		}
 	}
@@ -91,7 +109,10 @@ bool Pin::setDir (bool dir) {
 		bool result = direction.good();
 		direction.close();
 		return result;
-	} else return false;
+	} else {
+		LOG(ERROR) << "Unable to set pin direction";
+		return false;
+	}
 }
 
 bool Pin::writePin (bool val) {
@@ -107,7 +128,10 @@ bool Pin::writePin (bool val) {
 		bool result = value.good();
 		value.close();
 		return result;
-	} else return false;
+	} else {
+		LOG(ERROR) << "Unable to write to pin" << path;
+		return false;
+	}
 }
 		
 int Pin::get() {
@@ -125,7 +149,8 @@ int Pin::get() {
 				result = 0;
 			} 
 		} 
-	} 
+	}
+	LOG_IF((result == -1), ERROR) << "Failed to open value for pin " << path;
 	value.close();
 	return result;
 }
@@ -136,7 +161,10 @@ bool Pin::pullUp () {
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
 		pinmux += " " + pinName + " " + function + "\n";
-		if (system(pinmux.c_str()) != 0) return false;
+		if (system(pinmux.c_str()) != 0) {
+			LOG(ERROR) << "Unable to set pull-up with " << pinmux;
+			return false;
+		}
 	}
 	return true;
 }
@@ -147,7 +175,10 @@ bool Pin::pullDown () {
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
 		pinmux += " " + pinName + " " + function + "\n";
-		if (system(pinmux.c_str()) != 0) return false;
+		if (system(pinmux.c_str()) != 0) {
+			LOG(ERROR) << "Unable to set pull-down with " << pinmux;
+			return false;
+		}
 	}
 	return true;
 }
@@ -158,7 +189,10 @@ bool Pin::floating () {
 	if (_init) {
 		std::string pinmux = CONFIG_PIN_PATH; 
 		pinmux += " " + pinName + function + "\n";
-		if (system(pinmux.c_str()) != 0) return false;
+		if (system(pinmux.c_str()) != 0) {
+			LOG(ERROR) << "Unable to set floating with " << pinmux;
+			return false;
+		}
 	}
 	return true;
 }

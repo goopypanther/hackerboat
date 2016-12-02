@@ -8,7 +8,6 @@
 
 #include "sqliteStorage.hpp"
 #include "hackerboatRoot.hpp"
-#include "logs.hpp"
 #include "hal/config.h"
 
 #include <string>
