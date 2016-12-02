@@ -18,10 +18,20 @@
 #include <iostream>
 #include <jansson.h>
 #include "hal/relay.hpp"
+#include "easylogging++.h"
+
+#define ELPP_STL_LOGGING 
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 
-int main () {
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+    // Load configuration from file
+    el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
+    // Actually reconfigure all loggers instead
+    el::Loggers::reconfigureAllLoggers(conf);
 	RelayMap* relays = RelayMap::instance();
 	cout << "Initializing relays...";
 	if (relays->init()) {

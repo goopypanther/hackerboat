@@ -19,10 +19,20 @@
 #include <iomanip>
 #include "hal/RCinput.hpp"
 #include "boatState.hpp"
+#include "easylogging++.h"
+
+#define ELPP_STL_LOGGING 
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 
-int main () {
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+    // Load configuration from file
+    el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
+    // Actually reconfigure all loggers instead
+    el::Loggers::reconfigureAllLoggers(conf);
 	RCInput rc;
 	cout << "Starting RC subsystem: " << rc.begin() << endl;
 	cout << "Throttle\tRudder\t\tCourse\t\tMode";

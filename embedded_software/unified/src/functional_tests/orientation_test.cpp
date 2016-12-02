@@ -18,7 +18,11 @@
 #include <iostream>
 #include "orientation.hpp"
 #include "hal/orientationInput.hpp"
+#include "easylogging++.h"
 
+#define ELPP_STL_LOGGING 
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 
@@ -71,7 +75,12 @@ void runMagExtrema (OrientationInput *orient) {
 	}
 }
 
-int main () {
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+    // Load configuration from file
+    el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
+    // Actually reconfigure all loggers instead
+    el::Loggers::reconfigureAllLoggers(conf);
 	OrientationInput orient(SensorOrientation::SENSOR_AXIS_Z_UP);
 	if (orient.begin() && orient.isValid()) {
 		cout << "Initialization successful" << endl;

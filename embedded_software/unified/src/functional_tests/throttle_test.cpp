@@ -18,8 +18,18 @@
 #include <iostream>
 #include <thread>
 #include "hal/throttle.hpp"
+#include "easylogging++.h"
 
-int main () {
+#define ELPP_STL_LOGGING 
+
+INITIALIZE_EASYLOGGINGPP
+
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+    // Load configuration from file
+    el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
+    // Actually reconfigure all loggers instead
+    el::Loggers::reconfigureAllLoggers(conf);
 	Throttle throttle;
 	for (int i = throttle.getMinThrottle(); i <= throttle.getMaxThrottle(); i++) {
 		std::cout << "Setting throttle to " << std::to_string(i) << std::endl;

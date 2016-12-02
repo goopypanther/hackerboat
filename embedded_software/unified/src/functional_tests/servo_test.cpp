@@ -19,10 +19,20 @@
 #include <thread>
 #include "hal/servo.hpp"
 #include "hal/gpio.hpp"
+#include "easylogging++.h"
+
+#define ELPP_STL_LOGGING 
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace std::chrono_literals;
 
-int main () {
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+    // Load configuration from file
+    el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
+    // Actually reconfigure all loggers instead
+    el::Loggers::reconfigureAllLoggers(conf);
 	Servo rudder;
 	Pin enable(SYSTEM_SERVO_ENB_PORT, SYSTEM_SERVO_ENB_PIN, true, true);
 	if (!rudder.attach(RUDDER_PORT, RUDDER_PIN)) {
