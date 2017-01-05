@@ -19,6 +19,7 @@
 #include "hal/config.h"
 #include "hal/adcInput.hpp"
 #include "healthMonitor.hpp"
+#include "easylogging++.h"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 #define PACK_VAR(var) json_object_set_new(output, #var, json(var))
@@ -45,6 +46,7 @@ bool HealthMonitor::readHealth () {
 	this->rcRssi		= (int)data["rc_rssi_input"];
 	this->cellRssi		= 0;	// Data fetch not yet implemented
 	this->wifiRssi		= 0;	// Data fetch not yet implemented
+	LOG_EVERY_N(100, INFO) << "Pulling health information: " << this;
 	return true;
 }
 

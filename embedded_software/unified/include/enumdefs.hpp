@@ -72,4 +72,14 @@ enum class WaypointActionEnum : int {
 	NONE		/**< No action specified */
 };
 
+/**
+ * @brief State of the arm/disarm buttons
+ */
+
+enum class ArmButtonStateEnum : int {
+	ARM,		/**< Button state is armed 		*/
+	DISARM,		/**< Button state is disarmed	*/ 
+	INVALID	/**< Button state is invalid, i.e. faulted. */
+};
+
 #endif

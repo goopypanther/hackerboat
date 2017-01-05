@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
+#include "easylogging++.h"
 
 extern "C" {
 #include <err.h>
@@ -74,22 +75,26 @@ void HackerboatStateStorage::prepare(shared_stmt& sth, const std::string& sql)
 
 void HackerboatStateStorage::LogError(void)
 {
-	warnx("sqlite error (%p, %s): (%d) %s",
-	      dbh.get(), tableName.c_str(),
-	      sqlite3_extended_errcode(dbh.get()),
-	      sqlite3_errmsg(dbh.get()));
+	LOG(ERROR) << "SQLite 3 error (" << dbh.get() << ", " << tableName << "): (" << std::to_string(sqlite3_extended_errcode(dbh.get())) 
+				<< ") " << sqlite3_errmsg(dbh.get());
+//	warnx("sqlite error (%p, %s): (%d) %s",
+//	      dbh.get(), tableName.c_str(),
+//	      sqlite3_extended_errcode(dbh.get()),
+//	      sqlite3_errmsg(dbh.get()));
 }
 
 void HackerboatStateStorage::LogError(const std::string& sql)
 {
-	warnx("SQL: %s", sql.c_str());
+	LOG(ERROR) << "SQL: " << sql;
+	//warnx("SQL: %s", sql.c_str());
 	LogError();
 }
 
 void HackerboatStateStorage::LogError(shared_stmt& sth)
 {
-	const char *txt = sqlite3_sql(sth.get());
-	warnx("SQL: %s", txt);
+	//const char *txt = sqlite3_sql(sth.get());
+	//warnx("SQL: %s", txt);
+	LOG(ERROR) << "SQL: " << sqlite3_sql(sth.get());
 	LogError();
 }
 

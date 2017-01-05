@@ -29,6 +29,9 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <asm/termbits.h>
+#include "easylogging++.h"
+
+using namespace std;
 
 // nicked from Arduino and changed to take doubles
 double RCInput::map(double x, double in_min, double in_max, double out_min, double out_max)
@@ -38,20 +41,27 @@ double RCInput::map(double x, double in_min, double in_max, double out_min, doub
 
 RCInput::RCInput (std::string devpath) : 
 	_path(devpath) {
+		LOG(INFO) << "Creating new RCInput object";
 		rawChannels.assign(RC_CHANNEL_COUNT, 0);
 		period = RC_READ_PERIOD;
 	}
 
 int RCInput::getThrottle () {
-	return round(map(static_cast<double>(rawChannels[RC_THROTTLE_CH]), RC_MIN, RC_MAX, THROTTLE_MIN, THROTTLE_MAX));
+	int throttle = round(map(static_cast<double>(rawChannels[RC_THROTTLE_CH]), RC_MIN, RC_MAX, THROTTLE_MIN, THROTTLE_MAX));
+	VLOG(3) << "Throttle setting is " << throttle;
+	return throttle;
 }
 
 double RCInput::getRudder () {
-	return map(static_cast<double>(rawChannels[RC_RUDDER_CH]), RC_MIN, RC_MAX, RUDDER_MIN, RUDDER_MAX); 
+	double rudder = map(static_cast<double>(rawChannels[RC_RUDDER_CH]), RC_MIN, RC_MAX, RUDDER_MIN, RUDDER_MAX); 
+	VLOG(3) << "Rudder setting is " << rudder;
+	return rudder;
 }
 
 double RCInput::getCourse () {
-	return map(static_cast<double>(rawChannels[RC_COURSE_SELECTOR]), RC_MIN, RC_MAX, COURSE_MIN, COURSE_MAX); 
+	double course = map(static_cast<double>(rawChannels[RC_COURSE_SELECTOR]), RC_MIN, RC_MAX, COURSE_MIN, COURSE_MAX); 
+	VLOG(3) << "Course setting is " << course;
+	return course;
 }
 
 int RCInput::getChannel (int channel) {
@@ -59,9 +69,19 @@ int RCInput::getChannel (int channel) {
 }
 
 RCModeEnum RCInput::getMode() {
-	if (this->isFailSafe()) return RCModeEnum::FAILSAFE;
-	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-RC_MIDDLE_TOL)) return RCModeEnum::RUDDER;
-	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+RC_MIDDLE_TOL)) return RCModeEnum::COURSE;
+	if (this->isFailSafe()) {
+		VLOG(3) << "RC switch mode is failsafe";
+		return RCModeEnum::FAILSAFE;
+	}
+	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-RC_MIDDLE_TOL)) {
+		VLOG(3) << "RC switch mode is rudder";
+		return RCModeEnum::RUDDER;
+	}
+	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+RC_MIDDLE_TOL)) {
+		VLOG(3) << "RC switch mode is course";
+		return RCModeEnum::COURSE;
+	}
+	VLOG(3) << "RC switch mode is idle";
 	return RCModeEnum::IDLE;
 }
 
@@ -69,8 +89,14 @@ bool RCInput::begin() {
 	// the serial port is opened in a pretty distinctly C-ish way. 
 	struct termios2 attrib;
 	devFD = open(_path.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
-	if (devFD < 0) return false;
-	if (ioctl(devFD, TCGETS2, &attrib) < 0) return false;
+	if (devFD < 0) {
+		LOG(ERROR) << "Failed to open RC serial port " << _path;
+		return false;
+	}
+	if (ioctl(devFD, TCGETS2, &attrib) < 0) {
+		LOG(ERROR) << "Failed to open RC serial port " << _path;
+		return false;
+	}
 
 	// These commands set the serial speed to 100 kbps
 	attrib.c_cflag &= ~CBAUD;
@@ -88,25 +114,39 @@ bool RCInput::begin() {
 	attrib.c_oflag &= ~(OPOST);					// turn off post processing of output
 	attrib.c_cc[VMIN] = 0;						// this sets the timeouts for the read() operation to minimum
 	attrib.c_cc[VTIME] = 1;
-	if (ioctl(devFD, TCSETS2, &attrib) < 0) return false;
+	if (ioctl(devFD, TCSETS2, &attrib) < 0) {
+		LOG(ERROR) << "Failed to configure RC serial port " << _path;
+		close(devFD);
+		return false;
+	}
 	
 	// fire off the thread
 	this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 	myThread->detach();
+	LOG(INFO) << "Successfully configured RC input";
 	return true;
 }
 
 bool RCInput::execute() {
-	if (!lock && (!lock.try_lock_for(RC_LOCK_TIMEOUT))) return false;
-	if (devFD < 0) return false;
+	if (!lock && (!lock.try_lock_for(RC_LOCK_TIMEOUT))) {
+		LOG(ERROR) << "Failed to lock data for RC Input";
+		return false;
+	}
+	if (devFD < 0) {
+		LOG(ERROR) << "RC Serial port failed; killing thread";
+		this->kill();
+		return false;
+	}
 	char buf[SBUS_BUF_LEN];
 	ssize_t bytesRead = read(devFD, buf, SBUS_BUF_LEN);
 	if (bytesRead > 0) {
 		for (int i = 0; i < bytesRead; i++) inbuf.push_back(buf[i]); // we have to do this in order to copy /0 correctly
+		VLOG(5) << "Read " << to_string(bytesRead) << " bytes into inbuf: [" << inbuf << "]";
 		memset(buf, 0, SBUS_BUF_LEN);
 	}
 	if (inbuf.size() >= SBUS_BUF_LEN) {
 		if ((inbuf[0] != SBUS_STARTBYTE) || (inbuf[(SBUS_BUF_LEN - 1)] != SBUS_ENDBYTE)) {
+			LOG(INFO) << "Received invalid frame: [" << inbuf << "]";
 			inbuf.clear();
 			_errorFrames++;
 			_valid = false;

@@ -113,10 +113,12 @@ bool GPSdInput::execute() {
 				s.assign(p, l);
 				if (s == "TPV") {
 					LOG(INFO) << "Got GPS packet";
+					LOG(DEBUG) << "GPS packet contents: " << input;
 					result = _lastFix.parseGpsdPacket(input);
 				} else if (s == "AIS") {
 					AISShip newship;
 					LOG(INFO) << "Got AIS packet";
+					LOG(DEBUG) << "AIS packet contents: " << input;
 					if (newship.parseGpsdPacket(input)) {
 						_aisTargets.emplace(newship.getMMSI(), newship);
 						result = true;
@@ -167,6 +169,7 @@ int GPSdInput::pruneAIS(Location loc) {
 	int count = 0;
 	for (auto &r : _aisTargets) {
 		if (r.second.prune(loc)) {
+			LOG(DEBUG) << "Pruning AIS target " << r.second.pack();
 			_aisTargets.erase(r.first);
 			count++;
 		}

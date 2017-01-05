@@ -54,17 +54,21 @@ bool Waypoints::loadKML () {
 	bool gotName = false;
 	bool gotLineString = false;
 	bool result = false;
+	int linecount = 0;
 	LOG(INFO) << "Loading KML file " << kmlPath;
 	in.open(kmlPath);
 	if (in.is_open()) {																				// if we successfully opened the file, proceed 
 		while (in.good() && !gotLineString) {														// search through the file while it's still good and we haven't found a LineString object
 			std::getline(in, line);																	// suck in the next line
+			linecount++;
 			if (!gotPlacemark) {																	// if we have not yet found a <Placemark>, see if this line contains one
 				if (line.find("<Placemark>") != std::string::npos) {
-					gotPlacemark = true;		
+					gotPlacemark = true;
+					VLOG(3) << "Found start of Placemark on line:" << to_string(linecount) << "[" << line << "]";
 				}
 			} else {
 				if (line.find("</Placemark>") != std::string::npos) {								// if we've found a <Placemark> but it closes without hitting anything else, go back to the original state  
+					VLOG(3) << "Found close of Placemark with no name on line:" << to_string(linecount) << "[" << line << "]";
 					gotPlacemark = false;
 					gotName = false;
 				}
@@ -72,6 +76,7 @@ bool Waypoints::loadKML () {
 			if (gotPlacemark && !gotName) {															// if we have found a <Placemark> but no <name>, see if this line contains one
 				size_t start = line.find("<name>");
 				if (start != std::string::npos) {
+					VLOG(3) << "Found name on line:" << to_string(linecount) << "[" << line << "]";
 					gotName = true;
 					size_t stop = line.find("Waypoints</name>", start);							// if it contains a <name> tag, see if it has the right name (Waypoints)
 					if (stop == std::string::npos) {												// if not, skip over this <Placemark>
@@ -83,6 +88,7 @@ bool Waypoints::loadKML () {
 			} 
 			if (gotPlacemark && gotName && !gotLineString) {										// if we have found a <Placemark> with the right <name>, look for a <LineString> object
 				if (line.find("<LineString>") != std::string::npos) {
+					VLOG(3) << "Found start of line string on line: " << to_string(linecount) << "[" << line << "]";
 					gotLineString = true;
 				}
 			}
@@ -170,6 +176,7 @@ Location Waypoints::getWaypoint () {
 
 void Waypoints::setCurrent (unsigned int waypoint) {
 	if (waypoint >= waypoints.size()) waypoint = (waypoints.size() - 1);
+	LOG(INFO) << "Setting current waypoint to " << to_string(waypoint);
 	_c = waypoint;
 }
 
@@ -180,9 +187,13 @@ bool Waypoints::increment () {
 			LOG(INFO) << "Repeating waypoints...";
 			_c = 0;
 			return true;
-		} else return false;
+		} else {
+			LOG(INFO) << "Reached end of waypoint list, not repeating.";
+			return false;
+		}
 	}
 	_c++;
+	LOG(INFO) << "Setting current waypoint to " << to_string(_c);
 	return true;
 }
 
@@ -190,6 +201,7 @@ bool Waypoints::decrement () {
 	if (action == WaypointActionEnum::IDLE) return false;
 	if (_c == 0) return false;
 	_c--;
+	LOG(INFO) << "Setting current waypoint to " << to_string(_c);
 	return true;
 }
 

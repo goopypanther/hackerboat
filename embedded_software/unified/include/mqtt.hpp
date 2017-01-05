@@ -36,8 +36,12 @@ extern "C" {
 
 using namespace std;
 
-typedef map<string, function<void(BoatState*, string topic, MQTTClient*)>> PubFuncMap;
-typedef map<string, function<void(BoatState*, string topic, string payload)>> SubFuncMap;
+class MQTT;
+
+typedef function<void(BoatState*, string topic, MQTTClient* client, MQTT* me)> PubFunc;
+typedef function<void(BoatState*, string topic, string payload)> SubFunc;
+typedef map<string, PubFunc> PubFuncMap;
+typedef map<string, SubFunc> SubFuncMap;
 
 #define MQTT_QOS 		(1)
 #define MQTT_GROUP 		"hackerboat"
@@ -62,22 +66,22 @@ class MQTT {
 		~MQTT();									/// We need an explicit destructor to make sure we clean up everything
 		
 		// publisher functions
-		void pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client);		/// Publish the current GPS speed and location
-		void pub_Mode(BoatState* state, string topic, MQTTClient* client);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
-		void pub_Bearing(BoatState* state, string topic, MQTTClient* client);			/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
-		void pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client);	/// Publish the current battery voltage
-		void pub_RudderPosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current rudder position
-		void pub_ThrottlePosition(BoatState* state, string topic, MQTTClient* client);	/// Publish current throttle position
-		void pub_PID_K(BoatState* state, string topic, MQTTClient* client);				/// Publish current PID values
-		void pub_Course(BoatState* state, string topic, MQTTClient* client);			/// Publish GPS heading
+		static void pub_SpeedLocation(BoatState* state, string topic, MQTTClient* client, MQTT* me);		/// Publish the current GPS speed and location
+		static void pub_Mode(BoatState* state, string topic, MQTTClient* client, MQTT* me);				/// Publish the current mode as a CSV list of the form <Boat>,<Nav>,<RC>,<Auto>
+		static void pub_Bearing(BoatState* state, string topic, MQTTClient* client, MQTT* me);			/// Publish the current magnetic bearing, true bearing, and GPS course as a CSV list (in that order)
+		static void pub_BatteryVoltage(BoatState* state, string topic, MQTTClient* client, MQTT* me);	/// Publish the current battery voltage
+		static void pub_RudderPosition(BoatState* state, string topic, MQTTClient* client, MQTT* me);	/// Publish current rudder position
+		static void pub_ThrottlePosition(BoatState* state, string topic, MQTTClient* client, MQTT* me);	/// Publish current throttle position
+		static void pub_PID_K(BoatState* state, string topic, MQTTClient* client, MQTT* me);				/// Publish current PID values
+		static void pub_Course(BoatState* state, string topic, MQTTClient* client, MQTT* me);			/// Publish GPS heading
 		
 		// subscriber functions
-		void sub_Command(BoatState* state, string topic, string payload);		/// Subscribe to commands from shore
+		static void sub_Command(BoatState* state, string topic, string payload);		/// Subscribe to commands from shore
 		
 		
 	private:
 		// transmission function
-		void transmit(string topic, string payload, MQTTClient* client);
+		static void transmit(string topic, string payload, MQTTClient* client, MQTT* me);
 	
 		// callbacks
 		static void delivered(void *context, MQTTClient_deliveryToken dt);
@@ -85,10 +89,10 @@ class MQTT {
 		static void connlost(void *context, char *cause);
 		
 		static BoatState *_state;
-		PubFuncMap *_pub;	/// A map of the functions to call to publish different outgoing topics
-		static SubFuncMap *_sub;	/// A map of functions to call when different topics are received
-		static MQTTClient_deliveryToken token;	/// Delivery token for the last message
-		PubFuncMap::iterator pubit;	// iterator pointed to next item to publish
+		PubFuncMap *_pub;							/// A map of the functions to call to publish different outgoing topics
+		static SubFuncMap *_sub;					/// A map of functions to call when different topics are received
+		static MQTTClient_deliveryToken token;		/// Delivery token for the last message
+		PubFuncMap::iterator pubit;					// iterator pointed to next item to publish
 		MQTTClient client;
 		MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
 		//MQTTClient_SSLOptions ssl_opts;
@@ -99,6 +103,8 @@ class MQTT {
 		string clientID;
 };
 
-
+BoatState* MQTT::_state;
+SubFuncMap* MQTT::_sub;
+MQTTClient_deliveryToken MQTT::token;
 
 #endif /* MQTT_H */

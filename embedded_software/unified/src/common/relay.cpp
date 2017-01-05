@@ -24,6 +24,7 @@
 #include "hal/relay.hpp"
 #include <jansson.h>
 #include "json_utilities.hpp"
+#include "easylogging++.h"
 
 json_t *Relay::pack () {
 	json_t* output = json_object();
@@ -35,15 +36,23 @@ json_t *Relay::pack () {
 	packResult += json_object_set_new(output, "drive", json_boolean(std::get<1>(thisrelay)));
 	packResult += json_object_set_new(output, "fault", json_boolean(std::get<2>(thisrelay)));
 	if (packResult != 0) {
+		LOG(ERROR) << "Failed to correctly pack relay status: " << output;
 		json_decref(output);
 		return NULL;
 	}
+	LOG(DEBUG) << "Packed relay status: " << output;
 	return output;
 }
 
 bool Relay::init() {
-	if (this->initialized) return true;
-	if ((this->_adc) && !((this->_adc->getScaledValues().count(this->_name)) > 0)) return false; 
+	if (this->initialized) {
+		LOG(DEBUG) << "Attempting to intialize a previously initialized relay object " << this->_name;
+		return true;
+	}
+	if ((this->_adc) && !((this->_adc->getScaledValues().count(this->_name)) > 0)) {
+		LOG(ERROR) << "Failed to obtain current ADC channel for relay " << this->_name;
+		return false; 
+	}
 	this->initialized = true;
 	this->initialized &= _drive->init();
 	this->initialized &= _fault->init();
@@ -73,7 +82,8 @@ RelayTuple Relay::getState() {
 
 bool Relay::output(Pin* drive) {
 	if (drive) {
-		_drive = drive;
+		LOG(INFO) << "Setting drive pin of relay " << this->_name;
+ 		_drive = drive;
 		initialized = false;
 		return true;
 	}
@@ -82,6 +92,7 @@ bool Relay::output(Pin* drive) {
 
 bool Relay::fault(Pin* fault) {
 	if (fault) {
+		LOG(INFO) << "Setting fault pin of relay " << this->_name;
 		_fault = fault;
 		initialized = false;
 		return true;
@@ -91,6 +102,7 @@ bool Relay::fault(Pin* fault) {
 
 bool Relay::adc(ADCInput* adc) {
 	if (adc) {
+		LOG(INFO) << "Setting ADCInput object of relay " << this->_name;
 		_adc = adc;
 		initialized = false;
 		return true;
@@ -124,6 +136,7 @@ json_t* RelayMap::pack () {
 		packResult += json_object_set_new(output, std::get<0>(r).c_str(), std::get<1>(r).pack());
 	}
 	if (packResult != 0) {
+		LOG(ERROR) << "Failed to pack relay map";
 		json_decref(output);
 		return NULL;
 	}

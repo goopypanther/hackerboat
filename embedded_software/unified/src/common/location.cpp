@@ -19,6 +19,7 @@
 #include "location.hpp"
 #include "json_utilities.hpp"
 #include "twovector.hpp"
+#include "easylogging++.h"
 
 using namespace GeographicLib;
 
@@ -34,6 +35,7 @@ bool Location::isValid(void) const {
 }
 
 bool Location::parse(json_t* input) {
+	LOG(DEBUG) << "Parsing a location object from " << input;
 	::parse(json_object_get(input, "lat"), &lat);
 	::parse(json_object_get(input, "lon"), &lon);
 	return this->isValid();
@@ -50,9 +52,13 @@ json_t* Location::pack(void) const {
 		packResult += json_object_set_new(output, "lon", json_real(0));
 	}
 	if (packResult != 0) {
+		LOG(ERROR) << "Location packing failed " << output;
 		json_decref(output);
 		return NULL;
-	} else return output;
+	} else {
+		LOG(DEBUG) << "Packed location object: " << output;
+		return output;
+	}
 }
 
 /* Computation methods. */
@@ -63,11 +69,13 @@ double Location::bearing (const Location& dest, CourseTypeEnum type) const {
 	switch (type) {
 		case CourseTypeEnum::GreatCircle: {
 			geod->Inverse(this->lat, this->lon, dest.lat, dest.lon, azi1, azi2);
+			VLOG(3) << "Great circle bearing to " << dest << " is " << to_string(azi1);
 			return azi1;
 			break;
 		}
 		case CourseTypeEnum::RhumbLine:	{
 			rhumb->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist, azi1);
+			VLOG(3) << "Rhumb line bearing to " << dest << " is " << to_string(azi1);
 			return azi1;
 			break;
 		}
@@ -83,11 +91,13 @@ double Location::distance (const Location& dest, CourseTypeEnum type) const {
 	switch (type) {
 		case CourseTypeEnum::GreatCircle: {
 			geod->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist);
+			VLOG(3) << "Great circle distance to " << dest << " is " << to_string(dist) << "m";
 			return dist;
 			break;
 		}
 		case CourseTypeEnum::RhumbLine: {
 			rhumb->Inverse(this->lat, this->lon, dest.lat, dest.lon, dist, azi1);
+			VLOG(3) << "Rhumb line distance to " << dest << " is " << to_string(dist) << "m";
 			return dist;
 			break;
 		}
@@ -98,7 +108,10 @@ double Location::distance (const Location& dest, CourseTypeEnum type) const {
 }
 
 TwoVector Location::target (const Location& dest, CourseTypeEnum type) const {
-	if ((!this->isValid()) || (!dest.isValid())) return TwoVector {NAN,NAN};
+	if ((!this->isValid()) || (!dest.isValid())) {
+		LOG(DEBUG) << "Attempting to get vector from invalid position " << *this << " or to invalid location " << dest;
+		return TwoVector {NAN,NAN};
+	}
 	TwoVector direction {1, 0};							// Create a unit vector pointed due north
 	direction.rotateDeg(this->bearing(dest, type));		// Rotate to the desired course
 	direction *= this->distance(dest, type);			// multiply by the correct 					
@@ -110,11 +123,13 @@ Location Location::project (TwoVector& projection, CourseTypeEnum type) {
 	switch (type) {
 		case CourseTypeEnum::GreatCircle: {
 			geod->Direct(this->lat, this->lon, projection.angleDeg(), projection.mag(), result.lat, result.lon);
+			VLOG(3) << "Great circle projection along " << projection << " is " << result;
 			return result;
 			break;
 		}
 		case CourseTypeEnum::RhumbLine: {
 			rhumb->Direct(this->lat, this->lon, projection.angleDeg(), projection.mag(), result.lat, result.lon);
+			VLOG(3) << "Rhumb line projection along " << projection << " is " << result;
 			break;
 		}
 		default:

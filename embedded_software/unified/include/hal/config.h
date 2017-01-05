@@ -96,11 +96,6 @@
 #define SYSTEM_START_BATTERY_MIN	(12.0)
 #define SYSTEM_LOW_BATTERY_CUTOFF	(10.0)
 
-// Log file names
-#define MAIN_LOGFILE		"main.log"
-#define HARDWARE_LOGFILE	"hardware.log"
-#define MQTT_LOGFILE		"mqtt.log"
-
 // Relay map initializer
 #define RELAY_MAP_INITIALIZER	{ { "RED", Relay("RED", new Pin(8, 3, true), new Pin(8, 4, false)) }, \
 								  { "DIR", Relay("DIR", new Pin(8, 5, true), new Pin(8, 6, false)) }, \

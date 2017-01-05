@@ -379,6 +379,49 @@ std::string BoatState::getCSVheaders() {
 	return headers;
 }
 
+ArmButtonStateEnum BoatState::getArmState () {
+	int armval = this->armInput.get();
+	int disarmval = this->disarmInput.get();
+	if (armval < 0) {
+		LOG(WARNING) << "Arm GPIO input is invalid";
+		return ArmButtonStateEnum::INVALID;
+	}
+	if (disarmval < 0) {
+		LOG(WARNING) << "Disarm GPIO input is invalid";
+		return ArmButtonStateEnum::INVALID;
+	}
+	// This conditional compilation is so that this will work both with the directly connected arm/stop buttons 
+	// and also with the new power distribution setup
+	#ifdef DISTRIB_IMPLEMENTED
+		#pragma message "Compiling for new power distribution box"
+		if (armval == disarmval) {
+			LOG(WARNING) << "Arm and disarm inputs are equal: " << std::to_string(armval);
+			return ArmButtonStateEnum::INVALID;
+		}
+		if (disarmval > 0) return ArmButtonStateEnum::DISARM;
+		if (armval > 0) return ArmButtonStateEnum::ARM;
+	#else
+		#pragma message "Compiling for direct arm/disarm buttons"
+		if ((disarmval > 0) && (armval > 0)) {
+			LOG(WARNING) << "Arm and disarm inputs are equal: " << std::to_string(armval);
+			return ArmButtonStateEnum::INVALID;
+		}
+		sysclock now = std::chrono::system_clock::now();
+		if (disarmval == 0) disarmedStart = std::chrono::system_clock::now();
+		if (armval == 0) armedStart = std::chrono::system_clock::now();
+		if ((disarmval > 0) && ((now - disarmedStart) > 500ms)) {
+			buttonArmed = false;
+			return ArmButtonStateEnum::DISARM;
+		}
+		if ((armval > 0) && ((now - armedStart) > 5s)) {
+			buttonArmed = true;
+			return ArmButtonStateEnum::ARM;
+		}
+		if (buttonArmed) return ArmButtonStateEnum::ARM;
+		return ArmButtonStateEnum::DISARM;
+	#endif /* DISTRIB_IMPLEMENTED */
+}
+
 Command::Command (BoatState *state, std::string cmd, json_t *args) :
 	_state(state), _cmd(cmd), _args(args) {
 		this->_funcs.at(_cmd);	// force an exception on an invalid command name

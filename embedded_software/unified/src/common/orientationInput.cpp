@@ -25,16 +25,20 @@
 #include "hal/inputThread.hpp"
 #include "hal/orientationInput.hpp"
 #include "twovector.hpp"
+#include "easylogging++.h"
 
+using namespace std;
 
 OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
 	period = IMU_READ_PERIOD;
 }		
 
 bool OrientationInput::init() {
+	LOG(INFO) << "Creating new OrientationInput object";
 	sensorsValid = (/*gyro.begin() & */compass.begin());
 	compass.setMagOffset ( IMU_MAG_OFFSET );
 	compass.setMagScale ( IMU_MAG_SCALE );
+	LOG_IF(!sensorsValid, ERROR) << "Failed to initialize orientation subsystem";
 	return sensorsValid;
 }	
 				
@@ -42,13 +46,17 @@ bool OrientationInput::begin() {
 	if (this->init()) {
 		this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 		myThread->detach();
+		LOG(INFO) << "Successfully initialized orientation subsystem";
 		return true;
 	}
 	return false;
 }
 
 bool OrientationInput::execute() {
-	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) {
+		LOG(ERROR) << "Failed to lock data for OrientationInput";
+		return false;
+	}
 	if (!getData()) return false;
 	getAccelOrientation();
 	getMagOrientation();
@@ -135,7 +143,8 @@ void OrientationInput::getAccelOrientation () {
 	
 	_current.pitch = TwoVector::rad2deg(atan2(x, z));
 	_current.normalize();
-	
+	LOG_EVERY_N(100, DEBUG) << "Orientation after getAccelOrientation: " << _current;
+	LOG_EVERY_N(1000, INFO) << "Orientation after getAccelOrientation: " << _current;
 }
 
 void OrientationInput::getMagOrientation () {
@@ -158,5 +167,7 @@ void OrientationInput::getMagOrientation () {
 	// magnetic heading
 	_current.heading = TwoVector::rad2deg(atan2(y,x));
 	_current.normalize();
+	LOG_EVERY_N(100, DEBUG) << "Orientation after getMagOrientation: " << _current;
+	LOG_EVERY_N(1000, INFO) << "Orientation after getMagOrientation: " << _current;
 }
 

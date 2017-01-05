@@ -151,8 +151,14 @@ bool GPSFix::parse (json_t *input) {
 
 bool GPSFix::isValid (void) const {
 
-	if (speed < 0) return false;
-	if ((track < -180) || (track > 360)) return false;
+	if (speed < 0) {
+		LOG(DEBUG) << "Invalid GPS speed: " << to_string(speed);
+		return false;
+	}
+	if ((track < -180) || (track > 360)) {
+		LOG(DEBUG) << "Invalid GPS course " << to_string(track);
+		return false;
+	}
 	return this->fix.isValid();
 }
 

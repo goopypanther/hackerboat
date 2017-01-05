@@ -34,6 +34,7 @@ LDLIBS += -ljansson
 LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
+LDLIBS += -lpaho-mqtt3cs
 LDLIBS += /usr/local/lib/libGeographic.a
 
 export OPTS
@@ -142,6 +143,7 @@ RELAY_TEST_SRCS += functional_tests/relay_test.cpp
 THROTTLE_TEST_SRCS += functional_tests/throttle_test.cpp
 SERVO_TEST_SRCS += functional_tests/servo_test.cpp
 GPS_TEST_SRCS += functional_tests/gps_test.cpp
+MQTT_TEST_SRCS += functional_tests/mqtt_test.cpp
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
 ADC_TEST_OBJS = $(addprefix src/,$(ADC_TEST_SRCS:.cpp=.o))
@@ -149,6 +151,7 @@ RELAY_TEST_OBJS = $(addprefix src/,$(RELAY_TEST_SRCS:.cpp=.o))
 THROTTLE_TEST_OBJS += $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
 SERVO_TEST_OBJS += $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
 GPS_TEST_OBJ += $(addprefix src/,$(GPS_TEST_SRCS:.cpp=.o))
+MQTT_TEST_OBJ += $(addprefix src/,$(MQTT_TEST_SRCS:.cpp=.o))
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
 
@@ -173,7 +176,10 @@ servo_test: $(SERVO_TEST_OBJS) libhackerboat.a
 gps_test: $(GPS_TEST_OBJ) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test
+mqtt_test: $(MQTT_TEST_OBJ) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test mqtt_test
 	
 clean:
 	rm -f libhackerboat.a

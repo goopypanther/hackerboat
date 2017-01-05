@@ -28,36 +28,36 @@
 BoatModeBase* BoatModeBase::factory(BoatState& state, BoatModeEnum mode) {
 	switch (mode) {
 		case BoatModeEnum::START:
-			LOG(INFO) << "Creating new Start boat mode object";
+			LOG(DEBUG) << "Creating new Start boat mode object";
 			return new BoatStartMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::SELFTEST:
-			LOG(INFO) << "Creating new Self Test boat mode object";
+			LOG(DEBUG) << "Creating new Self Test boat mode object";
 			return new BoatSelfTestMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::DISARMED:
-			LOG(INFO) << "Creating new Disarmed boat mode object";
+			LOG(DEBUG) << "Creating new Disarmed boat mode object";
 			return new BoatDisarmedMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::FAULT:
-			LOG(INFO) << "Creating new Fault boat mode object";
+			LOG(DEBUG) << "Creating new Fault boat mode object";
 			return new BoatFaultMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::NAVIGATION:
-			LOG(INFO) << "Creating new Navigation boat mode object with submode " << state.navModeNames.get(state.getNavMode());
+			LOG(DEBUG) << "Creating new Navigation boat mode object with submode " << state.navModeNames.get(state.getNavMode());
 			return new BoatNavigationMode(state, state.getBoatMode(), state.getNavMode());
 			break;
 		case BoatModeEnum::ARMEDTEST:
-			LOG(INFO) << "Creating new Armed Test boat mode object";
+			LOG(DEBUG) << "Creating new Armed Test boat mode object";
 			return new BoatArmedTestMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::LOWBATTERY:
-			LOG(INFO) << "Creating new Low Battery boat mode object";
+			LOG(DEBUG) << "Creating new Low Battery boat mode object";
 			return new BoatLowBatteryMode(state, state.getBoatMode());
 			break;
 		case BoatModeEnum::NONE:
 		default:
-			LOG(INFO) << "Creating new Start boat mode object";
+			LOG(DEBUG) << "Creating new Start boat mode object";
 			return new BoatStartMode(state, state.getBoatMode());
 			break;
 	}

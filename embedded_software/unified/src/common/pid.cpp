@@ -18,6 +18,7 @@
 #include <vector>
 #include <tuple>
 #include "pid.hpp" 
+#include "easylogging++.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -65,6 +66,11 @@ bool PID::Compute()
       else if(output < outMin) output = outMin;
 	  *myOutput = output;
 	  
+	  LOG_EVERY_N(100, DEBUG) << "PID Inputs: input: [" << to_string(input) << "] error: [" << to_string(error)
+								<< "] Iterm: [" << to_string(ITerm) << "] output: [" << output << "]";
+	  VLOG(5) << "PID Inputs: input: [" << to_string(input) << "] error: [" << to_string(error)
+				<< "] Iterm: [" << to_string(ITerm) << "] output: [" << output << "]";
+	  
       /*Remember some variables for next time*/
       lastInput = input;
       lastTime = thisTime;
@@ -85,8 +91,14 @@ void PID::SetTunings(tuple<double, double, double> K) {
 
 void PID::SetTunings(double Kp, double Ki, double Kd)
 {
-   if (Kp<0 || Ki<0 || Kd<0) return;
-   if (!isfinite(Kp) || !isfinite(Ki) || !isfinite(Kd)) return;
+   if (Kp<0 || Ki<0 || Kd<0) {
+	   LOG(ERROR) << "One or more gains are less than zero: Kp [" << to_string(Kp) << "] Ki [" << to_string(Ki) << "] Kd [" << to_string(Kd);
+	   return;
+   }
+   if (!isfinite(Kp) || !isfinite(Ki) || !isfinite(Kd)) {
+	   LOG(ERROR) << "One or more gains are invalid: Kp [" << to_string(Kp) << "] Ki [" << to_string(Ki) << "] Kd [" << to_string(Kd);
+	   return;
+   }
  
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
    
@@ -94,6 +106,10 @@ void PID::SetTunings(double Kp, double Ki, double Kd)
    kp = Kp;
    ki = Ki * SampleTimeInSec;
    kd = Kd / SampleTimeInSec;
+   
+   LOG(DEBUG) << "Setting Display gains: Kp [" << to_string(dispKp) << "] Ki [" << to_string(dispKi) << "] Kd [" << to_string(dispKd) 
+				<< "] Real gains: Kp [" << to_string(kp) << "] Ki [" << to_string(ki) << "] Kd [" << to_string(kd) << "] Sample time: "
+				<< to_string(SampleTimeInSec) << "s";
  
   if(controllerDirection == REVERSE)
    {
@@ -113,6 +129,9 @@ void PID::SetSampleTime(long int NewSampleTime)
 		ki *= ratio;
 		kd /= ratio;
 		SampleTime = milliseconds(NewSampleTime);
+		LOG(DEBUG) << "Setting sample time to " << to_string(NewSampleTime) << " ms";
+	} else {
+		LOG(ERROR) << "Attempting to set sample time to " << to_string(NewSampleTime);
 	}
 }
  
@@ -126,7 +145,10 @@ void PID::SetSampleTime(long int NewSampleTime)
  **************************************************************************/
 void PID::SetOutputLimits(double Min, double Max)
 {
-   if(Min >= Max) return;
+   if(Min >= Max) {
+	   LOG(ERROR) << "Attempting to set output min " << to_string(Min) << " to a larger value than output max " << to_string(Max);
+	   return;
+   }
    outMin = Min;
    outMax = Max;
  
@@ -138,6 +160,7 @@ void PID::SetOutputLimits(double Min, double Max)
 	   if(ITerm > outMax) ITerm= outMax;
 	   else if(ITerm < outMin) ITerm= outMin;
    }
+   LOG(DEBUG) << "Setting output min to " << to_string(outMin) << " and output max to " << to_string(outMax);
 }
 
 /* SetMode(...)****************************************************************
@@ -153,6 +176,7 @@ void PID::SetMode(int Mode)
         PID::Initialize();
     }
     inAuto = newAuto;
+	LOG(DEBUG) << "Set mode to " << to_string(inAuto);
 }
  
 /* Initialize()****************************************************************
@@ -165,6 +189,7 @@ void PID::Initialize()
    lastInput = *myInput;
    if(ITerm > outMax) ITerm = outMax;
    else if(ITerm < outMin) ITerm = outMin;
+   LOG(DEBUG) << "Initializing PID";
 }
 
 /* SetControllerDirection(...)*************************************************
@@ -182,6 +207,11 @@ void PID::SetControllerDirection(int Direction)
       kd = (0 - kd);
    }   
    controllerDirection = Direction;
+   double SampleTimeInSec = (SampleTime.count())/1000.0;
+   LOG(DEBUG) << "Setting Display gains: Kp [" << to_string(dispKp) << "] Ki [" << to_string(dispKi) << "] Kd [" << to_string(dispKd) 
+				<< "] Real gains: Kp [" << to_string(kp) << "] Ki [" << to_string(ki) << "] Kd [" << to_string(kd) << "] Sample time: "
+				<< to_string(SampleTimeInSec) << "s";
+
 }
 
 /* Status Funcions*************************************************************

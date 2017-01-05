@@ -37,11 +37,11 @@
 INITIALIZE_EASYLOGGINGPP
 
 GTEST_API_ int main(int argc, char **argv) {
-	START_EASYLOGGINGPP(argc, argv);
     // Load configuration from file
     el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
+	START_EASYLOGGINGPP(argc, argv);
 	printf("Running main() from gtest_main.cc with logging enabled\n");
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

@@ -109,6 +109,7 @@ class BoatState : public HackerboatStateStorable {
 		int executeCmds (int num = 0);								/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
 		std::string getCSV();										/**< Export the current state as a line for a CSV file */
 		std::string getCSVheaders();								/**< Generate CSV headers */
+		ArmButtonStateEnum getArmState ();							/**< Get the current state of the arm & disarm inputs */
 			
 		int 					currentWaypoint; 	/**< The current waypoint */
 		double					waypointStrength;	/**< Relative strength of the waypoint */
@@ -140,6 +141,11 @@ class BoatState : public HackerboatStateStorable {
 		NavModeEnum		_nav = NavModeEnum::NONE;
 		AutoModeEnum 	_auto= AutoModeEnum::NONE;
 		RCModeEnum 		_rc = RCModeEnum::NONE;
+		#ifndef DISTRIB_IMPLEMENTED
+			bool buttonArmed = false;
+			sysclock armedStart;
+			sysclock disarmedStart;
+		#endif /* DISTRIB_IMPLEMENTED */
 	
 };
 
