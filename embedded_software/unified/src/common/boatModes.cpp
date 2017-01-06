@@ -86,9 +86,9 @@ BoatModeBase* BoatSelfTestMode::execute() {
 	if (!_state.adc->isValid()) _state.insertFault("ADC input invalid");
 	if (!_state.gps->isValid()) _state.insertFault("GPS input invalid");
 	if (!_state.lastFix.isValid()) _state.insertFault("Last GPS fix invalid");
-	if (_state.disarmInput.get() < 0) _state.insertFault("Disarm input invalid");
-	if (_state.armInput.get() < 0) _state.insertFault("Arm input invalid");
-	if (_state.disarmInput.get() == _state.armInput.get()) _state.insertFault("Arm/disarm inputs do not agree");
+	if (_state.getArmState() == ArmButtonStateEnum::INVALID) {
+		_state.insertFault("Arm and/or Disarm input is invalid");
+	}
 	for (auto r : *(_state.relays->getmap())) {
 		if (!r.second.isInitialized()) _state.insertFault("Relay " + r.first +  " did not initialize");
 		if (r.second.isFaulted()) _state.insertFault("Relay " + r.first + " is faulted");
@@ -108,7 +108,7 @@ BoatModeBase* BoatSelfTestMode::execute() {
 			}
 			return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 		} else {
-			if ((oldState.getBoatMode() == BoatModeEnum::NAVIGATION) && (_state.armInput.get() > 0)) {
+			if ((oldState.getBoatMode() == BoatModeEnum::NAVIGATION) && (_state.getArmState() == ArmButtonStateEnum::ARM)) {
 				LOG(INFO) << "Entering navigation mode from self test";
 				return new BoatNavigationMode(_state, _state.getBoatMode(), oldState.getNavMode());
 			} else {
@@ -150,7 +150,7 @@ BoatModeBase* BoatDisarmedMode::execute() {
 	} 
 	
 	// check if the boat has been armed
-	if (_state.armInput.get() > 0) {
+	if (_state.getArmState() == ArmButtonStateEnum::ARM) {
 		if (hornOn) {
 			if (_state.recordTime > (hornStartTime + HORN_TIME)) {
 				_state.relays->get("HORN").clear();
@@ -205,9 +205,9 @@ BoatModeBase* BoatFaultMode::execute() {
 	if (_state.adc->isValid()) _state.removeFault("ADC input invalid");
 	if (_state.gps->isValid()) _state.removeFault("GPS input invalid");
 	if (_state.lastFix.isValid()) _state.removeFault("Last GPS fix invalid");
-	if (_state.disarmInput.get() > 0) _state.removeFault("Disarm input invalid");
-	if (_state.armInput.get() > 0) _state.removeFault("Arm input invalid");
-	if (_state.disarmInput.get() != _state.armInput.get()) _state.removeFault("Arm/disarm inputs do not agree");
+	if (_state.getArmState() != ArmButtonStateEnum::INVALID) {
+		_state.removeFault("Arm and/or Disarm input is invalid");
+	}
 	for (auto r : *(_state.relays->getmap())) {
 		if (r.second.isInitialized()) _state.removeFault("Relay " + r.first +  " did not initialize");
 		if (!r.second.isFaulted()) _state.removeFault("Relay " + r.first + " is faulted");
@@ -266,7 +266,7 @@ BoatModeBase* BoatNavigationMode::execute() {
 		delete _navMode;
 		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}
-	if ((_state.disarmInput.get() == 1) || (_state.armInput.get() != 1)) {
+	if (_state.getArmState() == ArmButtonStateEnum::DISARM) {
 		LOG(INFO) << "Exiting Navigation mode on disarm signal";
 		delete _navMode;
 		return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
@@ -296,7 +296,7 @@ BoatModeBase* BoatLowBatteryMode::execute() {
 	if (_state.faultCount() > 1) {
 		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	} else {
-		if ((_lastMode == BoatModeEnum::NAVIGATION) && (_state.armInput.get() > 0)) {
+		if ((_lastMode == BoatModeEnum::NAVIGATION) && (_state.getArmState() == ArmButtonStateEnum::ARM)) {
 			LOG(INFO) << "Recovering from low battery to navigation mode";
 			return new BoatNavigationMode(_state, _lastMode, _state.getNavMode());
 		} else {

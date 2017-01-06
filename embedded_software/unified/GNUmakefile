@@ -40,7 +40,7 @@ LDLIBS += /usr/local/lib/libGeographic.a
 export OPTS
 
 VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc
-all: submodules master rcctrl
+all: submodules master 
 test: unit_tests
 	./unit_tests
 .PHONY: all test
