@@ -113,7 +113,7 @@ void MQTT::transmit (string topic, string payload, MQTTClient* client, MQTT* me)
 	pubmsg.payload = (void*)(payload.c_str());
 	pubmsg.payloadlen = payload.length();
 	MQTTClient_publishMessage(client, topic.c_str(), &pubmsg, &token);
-	VLOG(2) << "Publishing payload [" << payload << "] to topic: [" << topic << "]";
+	LOG(DEBUG) << "Publishing payload [" << payload << "] to topic: [" << topic << "]";
 	LOG_EVERY_N(8, INFO) << "Publishing payload [" << payload << "] to topic: [" << topic << "]";
 }
 
@@ -173,7 +173,7 @@ void MQTT::sub_Command(BoatState* state, string topic, string payload) {
 		string name = json_string_value(json_object_get(input, "Command"));
 		args = json_object_get(input, "Argument");
 		state->pushCmd(name, args);
-		LOG(INFO) << "Received command " << name << " with arguments: " << args; 
+		LOG(DEBUG) << "Received command " << name << " with arguments: " << args; 
 		json_decref(input);
 	} else {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
@@ -190,11 +190,11 @@ void MQTT::delivered(void *context, MQTTClient_deliveryToken dt) {
 int MQTT::msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
 	string topic = topicName;
 	string msg = static_cast<char*>(message->payload);
-	LOG(INFO) << "Received [" << msg << "] on topic: [" << topic << "]";
+	LOG(DEBUG) << "Received [" << msg << "] on topic: [" << topic << "]";
 	if (_state && _sub) {
 		try {
 			_sub->at(topic)(_state, topic, msg);
-			LOG(INFO) << "Subscribed to " << topic;
+			LOG(DEBUG) << "Subscribed to " << topic;
 			return 0;
 		} catch (...) {
 			LOG(ERROR) << "Failed to subscribe to " << topic;

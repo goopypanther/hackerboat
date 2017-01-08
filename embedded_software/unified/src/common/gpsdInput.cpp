@@ -33,11 +33,13 @@ using namespace redi;
 GPSdInput::GPSdInput (string host, int port) :
 	_host(host), _port(port) {
 		LOG(DEBUG) << "Creating GPSdInput object with specified target " << _host << ":" << _port;
+		period = 100ms;
 	};
 	
 GPSdInput::GPSdInput () :
 	_host("127.0.0.1"), _port(3001) {
 		LOG(DEBUG) << "Creating GPSdInput object with default target " << _host << ":" << _port;
+		period = 100ms;
 	};
 
 bool GPSdInput::setHost (string host) {
@@ -93,16 +95,19 @@ bool GPSdInput::begin() {
 
 bool GPSdInput::execute() {
 	// grab the lock
-	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
 	bool result = true;
 	json_error_t inerr;
 	string buf = "";
+	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
+		i++;
 		if (buf.back() == '\r') break;
+		if (i > 5000) break;
 	} 
-	if (buf != "") {
-		json_t* input = json_loads(buf.c_str(), JSON_DECODE_ANY | JSON_REJECT_DUPLICATES, &inerr);
+	if (buf.length() > 10) {
+		json_t* input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
 		if (input) {
 			buf.clear();
 			json_t* objclass = json_object_get(input, "class");
@@ -112,12 +117,12 @@ bool GPSdInput::execute() {
 				size_t l = json_string_length(objclass);
 				s.assign(p, l);
 				if (s == "TPV") {
-					LOG(INFO) << "Got GPS packet";
+					LOG(DEBUG) << "Got GPS packet";
 					LOG(DEBUG) << "GPS packet contents: " << input;
 					result = _lastFix.parseGpsdPacket(input);
 				} else if (s == "AIS") {
 					AISShip newship;
-					LOG(INFO) << "Got AIS packet";
+					LOG(DEBUG) << "Got AIS packet";
 					LOG(DEBUG) << "AIS packet contents: " << input;
 					if (newship.parseGpsdPacket(input)) {
 						_aisTargets.emplace(newship.getMMSI(), newship);
@@ -132,9 +137,9 @@ bool GPSdInput::execute() {
 		} result = false;
 	} else result = false;
 	
-	LOG_IF(strlen(inerr.text), ERROR) << "JSON loading error: " << inerr.text << " from " << inerr.source 
-									<< " at line " << inerr.line << ", column " << inerr.column;
-	lock.unlock();
+	LOG_IF(strlen(inerr.text), DEBUG) << "GPSd JSON loading error: " << inerr.text << " from " << inerr.source 
+									<< " at line " << inerr.line << ", column " << inerr.column << ", buffer: " << buf;
+	//lock.unlock();
 	return result;
 }
 

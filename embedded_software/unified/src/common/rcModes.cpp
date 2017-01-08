@@ -25,19 +25,19 @@
 RCModeBase *RCModeBase::factory(BoatState& state, RCModeEnum mode) {
 	switch(mode) {
 		case RCModeEnum::IDLE:
-			LOG(INFO) << "Creating new Idle RC mode object";
+			LOG(DEBUG) << "Creating new Idle RC mode object";
 			return new RCIdleMode(state, state.getRCMode());
 			break;
 		case RCModeEnum::RUDDER:
-			LOG(INFO) << "Creating new Rudder RC mode object";
+			LOG(DEBUG) << "Creating new Rudder RC mode object";
 			return new RCRudderMode(state, state.getRCMode());
 			break;
 		case RCModeEnum::COURSE:
-			LOG(INFO) << "Creating new Course RC mode object";
+			LOG(DEBUG) << "Creating new Course RC mode object";
 			return new RCCourseMode(state, state.getRCMode());
 			break;
 		case RCModeEnum::FAILSAFE:
-			LOG(INFO) << "Creating new Failsafe RC mode object";
+			LOG(DEBUG) << "Creating new Failsafe RC mode object";
 			return new RCFailsafeMode(state, state.getRCMode());
 			break;
 		default:
@@ -57,7 +57,7 @@ RCModeBase *RCIdleMode::execute() {
 	_state.throttle->setThrottle(0);
 	// Choose the next command
 	if (_state.rc->getMode() != RCModeEnum::IDLE) {
-		LOG(INFO) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
+		LOG(DEBUG) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
 		return RCModeBase::factory(_state, _state.rc->getMode());
 	}
 	return this;
@@ -70,13 +70,13 @@ RCModeBase *RCRudderMode::execute() {
 	callCount++;
 	// Write the outgoing rudder command
 	_state.rudder->write(_state.rc->getRudder());
-	LOG_EVERY_N(100, INFO) << "Rudder command: " << to_string(_state.rc->getRudder());
+	LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(_state.rc->getRudder());
 	// Set the throttle
 	_state.throttle->setThrottle(_state.rc->getThrottle());
-	LOG_EVERY_N(100, INFO) << "Throttle command: " << to_string(_state.rc->getThrottle());
+	LOG_EVERY_N(100, DEBUG) << "Throttle command: " << to_string(_state.rc->getThrottle());
 	// Choose the next command
 	if (_state.rc->getMode() != RCModeEnum::RUDDER) {
-		LOG(INFO) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
+		LOG(DEBUG) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
 		return RCModeBase::factory(_state, _state.rc->getMode());
 	}
 	return this;
@@ -97,18 +97,18 @@ RCModeBase *RCCourseMode::execute() {
 	// Grab the current orientation and find the heading error for the PID loop
 	in = _state.orient->getOrientation()->headingError(_state.rc->getCourse());
 	// Execute the PID process
-	LOG_EVERY_N(100, INFO) << "True Heading: " << _state.orient->getOrientation()->makeTrue() 
+	LOG_EVERY_N(100, DEBUG) << "True Heading: " << _state.orient->getOrientation()->makeTrue() 
 							<< ", Target Course: " << _state.rc->getCourse();
 	helm.Compute();	
 	// Write the outgoing rudder command
 	_state.rudder->write(out);
-	LOG_EVERY_N(100, INFO) << "Rudder command: " << to_string(this->out);
+	LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(this->out);
 	// Set the throttle
 	_state.throttle->setThrottle(_state.rc->getThrottle());
-	LOG_EVERY_N(100, INFO) << "Throttle command: " << to_string(_state.rc->getThrottle());
+	LOG_EVERY_N(100, DEBUG) << "Throttle command: " << to_string(_state.rc->getThrottle());
 	// Choose the next command
 	if (_state.rc->getMode() != RCModeEnum::COURSE) {
-		LOG(INFO) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
+		LOG(DEBUG) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
 		return RCModeBase::factory(_state, _state.rc->getMode());
 	}
 	return this;
@@ -125,7 +125,7 @@ RCModeBase *RCFailsafeMode::execute() {
 	_state.throttle->setThrottle(0);
 	// Choose the next command
 	if (_state.rc->getMode() != RCModeEnum::FAILSAFE) {
-		LOG(INFO) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
+		LOG(DEBUG) << "Switching to RC mode " << _state.rcModeNames.get(_state.rc->getMode()) << " by switch";
 		return RCModeBase::factory(_state, _state.rc->getMode());
 	}
 	return this;

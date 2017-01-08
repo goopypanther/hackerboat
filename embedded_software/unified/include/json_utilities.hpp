@@ -120,6 +120,7 @@ extern "C" {
 static inline
 std::ostream& operator<< (std::ostream& os, json_t *j)
 {
+	//if (j) os << json_dumps(j, JSON_ENCODE_ANY);
 	json_dump_callback(j, jansson_ostream, static_cast<void *>(&os), JSON_ENCODE_ANY);
 	return os;
 }

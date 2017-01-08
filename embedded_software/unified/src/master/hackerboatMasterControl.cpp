@@ -46,6 +46,7 @@ INITIALIZE_EASYLOGGINGPP
 //void outputBB (BoatState &state, long stepNum);
 
 int main (int argc, char **argv) {
+	cout << "Starting up..." << std::endl;
 	// command file path
 	std::string cmdfilepath = "/home/debian/hackerboat/embedded_software/unified/ctrl/command.json";
 	std::ifstream cmdin;
@@ -94,6 +95,8 @@ int main (int argc, char **argv) {
 	mode = BoatModeBase::factory(state, BoatModeEnum::START);
 	oldmode = mode;
 	
+	cout << "All configured -- entering state" << std::endl;
+	
 	// run the boat
 	for (;;) {
 		// read inputs
@@ -136,9 +139,11 @@ int main (int argc, char **argv) {
 		}
 		
 		// run the state
+		auto endtime = std::chrono::system_clock::now() + 100ms;
 		oldmode = mode;
 		mode = mode->execute();
 		if (mode != oldmode) delete oldmode;
+		std::this_thread::sleep_until(endtime);
 	}
 	
 	return 0;

@@ -149,7 +149,7 @@ bool AISShip::prune (Location& current) {
 	if ((!this->isValid()) || 
 		(current.isValid() && (fix.distance(current) > AIS_MAX_DISTANCE)) ||
 		((std::chrono::system_clock::now() - lastTimeStamp) > timeout)) {
-			LOG(INFO) << "Trimming target " << this->mmsi;
+			LOG(DEBUG) << "Trimming target " << this->mmsi;
 			LOG(DEBUG) << "Trimmed target " << *this;
 			removeEntry();
 			return true;
@@ -203,7 +203,7 @@ bool AISShip::isValid () const {
 
 HackerboatStateStorage& AISShip::storage() {
 	if (!aisShipStorage) {
-		LOG(INFO) << "Creating AIS database table";
+		LOG(DEBUG) << "Creating AIS database table";
 		aisShipStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(AIS_DB_FILE),
 							"AIS_SHIP",
 							{ { "mmsi", "INTEGER"},
@@ -234,7 +234,6 @@ HackerboatStateStorage& AISShip::storage() {
 
 bool AISShip::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(20);
-	LOG_EVERY_N(10, INFO) << "Storing AIS object to the database" << *this;
 	LOG(DEBUG) << "Storing AIS object to the database" << *this;
 	row.bind(0, mmsi);
 	row.bind(1, HackerboatState::packTime(recordTime));

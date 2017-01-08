@@ -53,14 +53,17 @@ bool OrientationInput::begin() {
 }
 
 bool OrientationInput::execute() {
-	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) {
-		LOG(ERROR) << "Failed to lock data for OrientationInput";
+	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) {
+	//	LOG(ERROR) << "Failed to lock data for OrientationInput";
+	//	return false;
+	//}
+	if (!getData()) {
+		//lock.unlock();
 		return false;
 	}
-	if (!getData()) return false;
 	getAccelOrientation();
 	getMagOrientation();
-	lock.unlock();
+	//lock.unlock();
 	return true;
 }		
 

@@ -128,25 +128,26 @@ bool RCInput::begin() {
 }
 
 bool RCInput::execute() {
-	if (!lock && (!lock.try_lock_for(RC_LOCK_TIMEOUT))) {
-		LOG(ERROR) << "Failed to lock data for RC Input";
-		return false;
-	}
+	//if (!lock && (!lock.try_lock_for(RC_LOCK_TIMEOUT))) {
+	//	LOG(ERROR) << "Failed to lock data for RC Input";
+	//	return false;
+	//}
 	if (devFD < 0) {
 		LOG(ERROR) << "RC Serial port failed; killing thread";
 		this->kill();
+		//lock.unlock();
 		return false;
 	}
 	char buf[SBUS_BUF_LEN];
 	ssize_t bytesRead = read(devFD, buf, SBUS_BUF_LEN);
 	if (bytesRead > 0) {
 		for (int i = 0; i < bytesRead; i++) inbuf.push_back(buf[i]); // we have to do this in order to copy /0 correctly
-		VLOG(5) << "Read " << to_string(bytesRead) << " bytes into inbuf: [" << inbuf << "]";
+		LOG(DEBUG) << "Read " << to_string(bytesRead) << " bytes into inbuf: [" << inbuf << "]";
 		memset(buf, 0, SBUS_BUF_LEN);
 	}
 	if (inbuf.size() >= SBUS_BUF_LEN) {
 		if ((inbuf[0] != SBUS_STARTBYTE) || (inbuf[(SBUS_BUF_LEN - 1)] != SBUS_ENDBYTE)) {
-			LOG(INFO) << "Received invalid frame: [" << inbuf << "]";
+			LOG(DEBUG) << "Received invalid frame: [" << inbuf << "]";
 			inbuf.clear();
 			_errorFrames++;
 			_valid = false;
@@ -184,6 +185,7 @@ bool RCInput::execute() {
 			inbuf.clear();			
 		}
 	}
+	//lock.unlock();
 	return true;
 }
 

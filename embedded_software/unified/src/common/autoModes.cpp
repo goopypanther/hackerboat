@@ -61,7 +61,7 @@ AutoModeBase* AutoIdleMode::execute() {
 	_state.throttle->setThrottle(0);
 	// Choose the next command
 	if (_state.getAutoMode() != AutoModeEnum::IDLE) {
-		LOG(INFO) << "Leaving auto idle mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
+		LOG(DEBUG) << "Leaving auto idle mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
 		return AutoModeBase::factory(_state, _state.getAutoMode());
 	}
 	return this;
@@ -90,12 +90,12 @@ AutoModeBase* AutoWaypointMode::execute() {
 	
 	// operate helm
 	this->in = _state.orient->getOrientation()->makeTrue().headingError(targetCourse);
-	LOG_EVERY_N(100, INFO) << "True Heading: " << _state.orient->getOrientation()->makeTrue() 
+	LOG_EVERY_N(100, DEBUG) << "True Heading: " << _state.orient->getOrientation()->makeTrue() 
 							<< ", Target Course: " << targetCourse << ", Waypoint: " 
 							<< _state.waypointList.current() << ": " << _state.waypointList.getWaypoint();
 	helm.Compute();
 	_state.rudder->write(this->out);
-	LOG_EVERY_N(100, INFO) << "Rudder command: " << to_string(this->out);
+	LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(this->out);
 	
 	// set the throttle
 	_state.throttle->setThrottle(this->throttleSetting);
@@ -155,12 +155,12 @@ AutoModeBase* AutoReturnMode::execute() {
 	
 	// operate helm
 	this->in = _state.orient->getOrientation()->makeTrue().headingError(targetCourse);
-	LOG_EVERY_N(100, INFO) << "True Heading: " << _state.orient->getOrientation()->makeTrue()
+	LOG_EVERY_N(100, DEBUG) << "True Heading: " << _state.orient->getOrientation()->makeTrue()
 							<< ", Target Course: " << to_string(targetCourse) << ", Target: " 
 							<< _state.launchPoint;
 	helm.Compute();
 	_state.rudder->write(this->out);
-	LOG_EVERY_N(100, INFO) << "Rudder command: " << to_string(this->out);
+	LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(this->out);
 	
 	// set the throttle
 	_state.throttle->setThrottle(this->throttleSetting);
@@ -173,7 +173,7 @@ AutoModeBase* AutoReturnMode::execute() {
 	
 	// check for commands 
 	if (_state.getAutoMode() != AutoModeEnum::RETURN) {
-		LOG(INFO) << "Leaving auto return mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
+		LOG(DEBUG) << "Leaving auto return mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
 		return AutoModeBase::factory(_state, _state.getAutoMode());
 	}
 	return this;
@@ -222,12 +222,12 @@ AutoModeBase* AutoAnchorMode::execute() {
 	helm.Compute();
 	_state.rudder->write(this->out);
 	_state.throttle->setThrottle(this->throttleSetting);
-	LOG_EVERY_N(100, INFO) << "Rudder command: " << to_string(this->out);
-	LOG_EVERY_N(100, INFO) << "Throttle command: " << to_string(this->throttleSetting);
+	LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(this->out);
+	LOG_EVERY_N(100, DEBUG) << "Throttle command: " << to_string(this->throttleSetting);
 	
 	// check for commands
 	if (_state.getAutoMode() != AutoModeEnum::ANCHOR) {
-		LOG(INFO) << "Leaving auto return mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
+		LOG(DEBUG) << "Leaving auto return mode for " << _state.autoModeNames.get(_state.getAutoMode()) << " by command";
 		return AutoModeBase::factory(_state, _state.getAutoMode());
 	}
 	return this;

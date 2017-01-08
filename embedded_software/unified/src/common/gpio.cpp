@@ -24,6 +24,11 @@
 #include <fstream>
 #include "easylogging++.h"
 
+// turn off debugging logging for this module
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+
 using namespace std;
 
 bool Pin::init () {
@@ -50,14 +55,14 @@ bool Pin::init () {
 	path = "/sys/class/gpio/gpio" + to_string(_gpio);
 	LOG(DEBUG) << "Pin path is " << path;
 	if (access(path.c_str(), F_OK)) {      // check if the file exists & export if necessary
-		string cmd = "echo " + to_string(_gpio);
+		string cmd = "sudo echo " + to_string(_gpio);
 		cmd += " > /sys/class/gpio/export\n";
 		if (system(cmd.c_str()) != 0) {
 			LOG(WARNING) << "Failed to access pin at " << path << " with cmd " << cmd;
 			return false;
 		}
 	} else {
-		LOG(WARNING) << "Failed to access pin at " << path;
+		LOG(DEBUG) << "Pin already exported at " << path;
 	}
 	
 	_init = true;

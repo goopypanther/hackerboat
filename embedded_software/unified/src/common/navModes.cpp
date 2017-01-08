@@ -25,24 +25,24 @@
 NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 	switch (mode) {
 		case NavModeEnum::IDLE:
-			LOG(INFO) << "Creating new Idle nav mode object";
+			LOG(DEBUG) << "Creating new Idle nav mode object";
 			return new NavIdleMode(state, state.getNavMode());
 			break;
 		case NavModeEnum::FAULT:
-			LOG(INFO) << "Creating new Fault nav mode object";
+			LOG(DEBUG) << "Creating new Fault nav mode object";
 			return new NavFaultMode(state, state.getNavMode());
 			break;
 		case NavModeEnum::RC:
-			LOG(INFO) << "Creating new RC nav mode object";
+			LOG(DEBUG) << "Creating new RC nav mode object";
 			return new NavRCMode(state, state.getNavMode());
 			break;
 		case NavModeEnum::AUTONOMOUS:
-			LOG(INFO) << "Creating new Autonomous nav mode object";
+			LOG(DEBUG) << "Creating new Autonomous nav mode object";
 			return new NavAutoMode(state, state.getNavMode());
 			break;
 		case NavModeEnum::NONE:
 		default:
-			LOG(INFO) << "Creating new Idle nav mode object by default";
+			LOG(DEBUG) << "Creating new Idle nav mode object by default";
 			return new NavIdleMode(state, state.getNavMode());
 			break;
 	}
@@ -73,13 +73,13 @@ NavModeBase *NavIdleMode::execute () {
 	// read the next command
 	NavModeEnum newmode = _state.getNavMode();
 	if (newmode != NavModeEnum::IDLE) {
-		LOG(INFO) << "Leaving nav idle mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
+		LOG(DEBUG) << "Leaving nav idle mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
 		return NavModeBase::factory(_state, newmode);
 	}
 	
 	// check for RC mode switch
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
-		LOG(INFO) << "Leaving nav idle mode for RC mode by switch";
+		LOG(DEBUG) << "Leaving nav idle mode for RC mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}
 	
@@ -129,14 +129,14 @@ NavModeBase *NavRCMode::execute () {
 	// read the next command
 	NavModeEnum newmode = _state.getNavMode();
 	if (newmode != NavModeEnum::RC) {
-		LOG(INFO) << "Leaving nav RC mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
+		LOG(DEBUG) << "Leaving nav RC mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
 		return NavModeBase::factory(_state, newmode);
 	}
 	_state.setNavMode(NavModeEnum::RC);	// Overwrites any improper commands
 	
 	// check the auto/rc mode switch (nav mode commands will be ignored)
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) < RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
-		LOG(INFO) << "Leaving nav RC mode for auto mode by switch";
+		LOG(DEBUG) << "Leaving nav RC mode for auto mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::AUTONOMOUS);
 	}
 	_state.setNavMode(NavModeEnum::RC);	// Overwrites any improper commands
@@ -167,14 +167,14 @@ NavModeBase *NavAutoMode::execute () {
 	// read the next command
 	NavModeEnum newmode = _state.getNavMode();
 	if (newmode != NavModeEnum::AUTONOMOUS) {
-		LOG(INFO) << "Leaving nav auto mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
+		LOG(DEBUG) << "Leaving nav auto mode for " << _state.navModeNames.get(_state.getNavMode()) << " by command";
 		return NavModeBase::factory(_state, newmode);
 	}
 	_state.setNavMode(NavModeEnum::AUTONOMOUS);	// Overwrites any improper commands
 	
 	// check for RC mode switch
 	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
-		LOG(INFO) << "Leaving nav auto mode for RC mode by switch";
+		LOG(DEBUG) << "Leaving nav auto mode for RC mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}
 	

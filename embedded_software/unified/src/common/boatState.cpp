@@ -224,7 +224,7 @@ bool BoatState::parse (json_t* input ) {
 
 HackerboatStateStorage &BoatState::storage () {
 	if (!stateStorage) {
-		LOG(INFO) << "Creating BoatState database table";
+		LOG(DEBUG) << "Creating BoatState database table";
 		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE), 
 							"BOAT_STATE",
 							{ { "recordTime", "TEXT" },
@@ -248,7 +248,7 @@ HackerboatStateStorage &BoatState::storage () {
 bool BoatState::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(13);
 	json_t* out;
-	LOG_EVERY_N(10, INFO) << "Storing BoatState object to the database" << *this;
+	LOG_EVERY_N(10, DEBUG) << "Storing BoatState object to the database" << *this;
 	LOG(DEBUG) << "Storing BoatState object to the database" << *this;
 	row.bind(0, HackerboatState::packTime(recordTime));
 	row.bind(1, currentWaypoint);
@@ -402,18 +402,18 @@ ArmButtonStateEnum BoatState::getArmState () {
 		if (armval > 0) return ArmButtonStateEnum::ARM;
 	#else
 		#pragma message "Compiling for direct arm/disarm buttons"
-		if ((disarmval > 0) && (armval > 0)) {
+		if ((disarmval == 0) && (armval == 0)) {
 			LOG(WARNING) << "Arm and disarm inputs are equal: " << std::to_string(armval);
 			return ArmButtonStateEnum::INVALID;
 		}
 		sysclock now = std::chrono::system_clock::now();
-		if (disarmval == 0) disarmedStart = std::chrono::system_clock::now();
-		if (armval == 0) armedStart = std::chrono::system_clock::now();
-		if ((disarmval > 0) && ((now - disarmedStart) > 500ms)) {
+		if (disarmval > 0) disarmedStart = std::chrono::system_clock::now();
+		if (armval > 0) armedStart = std::chrono::system_clock::now();
+		if ((disarmval == 0) && ((now - disarmedStart) > 500ms)) {
 			buttonArmed = false;
 			return ArmButtonStateEnum::DISARM;
 		}
-		if ((armval > 0) && ((now - armedStart) > 5s)) {
+		if ((armval == 0) && ((now - armedStart) > 5s)) {
 			buttonArmed = true;
 			return ArmButtonStateEnum::ARM;
 		}
@@ -456,7 +456,7 @@ bool Command::SetMode(json_t* args, BoatState *state) {
 		BoatModeEnum newmode;
 		if (state->boatModeNames.get(modeString, &newmode)) {
 			state->setBoatMode(newmode);
-			LOG(INFO) << "Setting boat mode to " << modeString;
+			LOG(DEBUG) << "Setting boat mode to " << modeString;
 			return true;
 		} else {
 			LOG(DEBUG) << "Invalid boat mode " << modeString;
@@ -477,7 +477,7 @@ bool Command::SetNavMode(json_t* args, BoatState *state) {
 		NavModeEnum newmode;
 		if (state->navModeNames.get(modeString, &newmode)) {
 			state->setNavMode(newmode);
-			LOG(INFO) << "Setting nav mode to " << modeString;
+			LOG(DEBUG) << "Setting nav mode to " << modeString;
 			return true;
 		} else {
 			LOG(DEBUG) << "Invalid nav mode " << modeString;
@@ -498,7 +498,7 @@ bool Command::SetAutoMode(json_t* args, BoatState *state) {
 		AutoModeEnum newmode;
 		if (state->autoModeNames.get(modeString, &newmode)) {
 			state->setAutoMode(newmode);
-			LOG(INFO) << "Setting auto mode to " << modeString;
+			LOG(DEBUG) << "Setting auto mode to " << modeString;
 			return true;
 		} else {
 			LOG(DEBUG) << "Invalid auto mode " << modeString;

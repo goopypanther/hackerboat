@@ -76,7 +76,7 @@ bool ADCInput::begin() {
 	if (this->init()) {
 		this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 		myThread->detach();
-		LOG(INFO) << "ADC subsystem started";
+		LOG(DEBUG) << "ADC subsystem started";
 		return true;
 	}
 	LOG(FATAL) << "Unable to initialize ADC subsystem";
@@ -85,7 +85,7 @@ bool ADCInput::begin() {
 
 bool ADCInput::execute() {
 	// grab the lock
-	if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
 	bool result = true;
 	
 	// set the time
@@ -111,7 +111,7 @@ bool ADCInput::execute() {
 		_raw[lowerChannels[j]] = lowerInputs[j];
 	}
 	
-	lock.unlock();
+	//lock.unlock();
 	return result;
 }
 

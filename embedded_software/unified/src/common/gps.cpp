@@ -142,7 +142,7 @@ bool GPSFix::parse (json_t *input) {
 	result &= NMEAModeNames.get(tmp, &mode);
 	json_decref(inFix);
 	
-	LOG_IF((!result && input), ERROR) << "Parsing GPSFix input failed: " << input;
+	LOG_IF((!result && input), ERROR) << "Parsing GPSFix input failed";
 	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parse()";
 	
 	if (result) return this->isValid();
@@ -165,7 +165,7 @@ bool GPSFix::isValid (void) const {
 HackerboatStateStorage &GPSFix::storage() {
 
 	if (!gpsStorage) {
-		LOG(INFO) << "Creating GPSFix database table";
+		LOG(DEBUG) << "Creating GPSFix database table";
 		gpsStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(GPS_DB_FILE),
 							"GPS_FIX",
 							{ { "recordTime", "TEXT" },
@@ -193,7 +193,7 @@ HackerboatStateStorage &GPSFix::storage() {
 
 bool GPSFix::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(17);
-	LOG_EVERY_N(10, INFO) << "Storing GPSFix object to the database" << *this;
+	LOG_EVERY_N(10, DEBUG) << "Storing GPSFix object to the database" << *this;
 	LOG(DEBUG) << "Storing GPSFix object to the database" << *this;
 	row.bind(0, HackerboatState::packTime(recordTime));
 	row.bind(1, HackerboatState::packTime(gpsTime));

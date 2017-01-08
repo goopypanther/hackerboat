@@ -65,6 +65,7 @@ BoatModeBase* BoatModeBase::factory(BoatState& state, BoatModeEnum mode) {
 
 BoatModeBase* BoatStartMode::execute() {
 	_state.getLastRecord();	// grab the last record, so we can go into that state if necessary. 
+	LOG(INFO) << "Entering self test from start mode";
 	return BoatModeBase::factory(_state, BoatModeEnum::SELFTEST);
 }
 
@@ -77,6 +78,7 @@ BoatModeBase* BoatSelfTestMode::execute() {
 		oldState = _state;					// Copy the old state so we can exit into the correct mode.
 	}	
 	this->callCount++;
+	cout << "Self Test call count: " << callCount << endl;
 	_state.servoEnable.set();
 	
 	// check for errors
@@ -89,15 +91,16 @@ BoatModeBase* BoatSelfTestMode::execute() {
 	if (_state.getArmState() == ArmButtonStateEnum::INVALID) {
 		_state.insertFault("Arm and/or Disarm input is invalid");
 	}
-	for (auto r : *(_state.relays->getmap())) {
-		if (!r.second.isInitialized()) _state.insertFault("Relay " + r.first +  " did not initialize");
-		if (r.second.isFaulted()) _state.insertFault("Relay " + r.first + " is faulted");
-	}
+	//for (auto r : *(_state.relays->getmap())) {
+	//	if (!r.second.isInitialized()) _state.insertFault("Relay " + r.first +  " did not initialize");
+	//	if (r.second.isFaulted()) _state.insertFault("Relay " + r.first + " is faulted");
+	//}
 	LOG_IF(_state.faultCount(), ERROR) << "Faults: [" << _state.getFaultString() << "]";
 	
 	// Check for things that might clear
 	if (_state.lastFix.isValid()) _state.removeFault("Last GPS fix invalid");
 	if (_state.health->batteryMon > SYSTEM_START_BATTERY_MIN) _state.removeFault("Low Battery");
+	if (_state.rc->isValid()) _state.removeFault("RC input invalid");
 	
 	// Are we done?
 	if (_state.recordTime > (start + SELFTEST_DELAY)) {
@@ -106,6 +109,7 @@ BoatModeBase* BoatSelfTestMode::execute() {
 				LOG(INFO) << "Entering low battery mode from self test";
 				return new BoatLowBatteryMode(_state, oldState.getBoatMode());
 			}
+			LOG(INFO) << "Entering fault mode from self test";
 			return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 		} else {
 			if ((oldState.getBoatMode() == BoatModeEnum::NAVIGATION) && (_state.getArmState() == ArmButtonStateEnum::ARM)) {
@@ -131,6 +135,7 @@ BoatModeBase* BoatDisarmedMode::execute() {
 		LOG(INFO) << "Starting disarmed mode";
 	}
 	this->callCount++;
+	cout << "Disarm call count: " << callCount << endl;
 	
 	_state.servoEnable.clear();
 	_state.throttle->setThrottle(0);
@@ -186,6 +191,7 @@ BoatModeBase* BoatFaultMode::execute() {
 		_state.relays->get("DISARM").clear();
 	}
 	this->callCount++;
+	cout << "Fault call count: " << callCount << endl;
 	_state.throttle->setThrottle(0);
 	_state.servoEnable.clear();
 	
@@ -208,10 +214,10 @@ BoatModeBase* BoatFaultMode::execute() {
 	if (_state.getArmState() != ArmButtonStateEnum::INVALID) {
 		_state.removeFault("Arm and/or Disarm input is invalid");
 	}
-	for (auto r : *(_state.relays->getmap())) {
-		if (r.second.isInitialized()) _state.removeFault("Relay " + r.first +  " did not initialize");
-		if (!r.second.isFaulted()) _state.removeFault("Relay " + r.first + " is faulted");
-	}
+	//for (auto r : *(_state.relays->getmap())) {
+	//	if (r.second.isInitialized()) _state.removeFault("Relay " + r.first +  " did not initialize");
+	//	if (!r.second.isFaulted()) _state.removeFault("Relay " + r.first + " is faulted");
+	//}
 
 	// check if we've cleared our error
 	if (_state.faultCount()) {

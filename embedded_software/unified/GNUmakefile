@@ -12,9 +12,9 @@ OPTS = -gdwarf-4 -g3 -Os -Wall
 GTEST_DIR=/usr/src/gtest
 GTEST_INC=/usr/include/gtest
 
-CFLAGS   += $(OPTS) -std=gnu11 -I submodules/lsquaredc
+CFLAGS   += $(OPTS) -std=gnu11 -g -I submodules/lsquaredc
 
-CXXFLAGS += $(OPTS) -Wno-reorder -std=gnu++14 -pthread 
+CXXFLAGS += $(OPTS) -Wno-reorder -g -std=gnu++14 -pthread 
 
 CPPFLAGS += -I submodules/include 
 CPPFLAGS += -I submodules/lsquaredc

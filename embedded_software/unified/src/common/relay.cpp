@@ -82,7 +82,7 @@ RelayTuple Relay::getState() {
 
 bool Relay::output(Pin* drive) {
 	if (drive) {
-		LOG(INFO) << "Setting drive pin of relay " << this->_name;
+		LOG(DEBUG) << "Setting drive pin of relay " << this->_name;
  		_drive = drive;
 		initialized = false;
 		return true;
@@ -92,7 +92,7 @@ bool Relay::output(Pin* drive) {
 
 bool Relay::fault(Pin* fault) {
 	if (fault) {
-		LOG(INFO) << "Setting fault pin of relay " << this->_name;
+		LOG(DEBUG) << "Setting fault pin of relay " << this->_name;
 		_fault = fault;
 		initialized = false;
 		return true;
@@ -102,7 +102,7 @@ bool Relay::fault(Pin* fault) {
 
 bool Relay::adc(ADCInput* adc) {
 	if (adc) {
-		LOG(INFO) << "Setting ADCInput object of relay " << this->_name;
+		LOG(DEBUG) << "Setting ADCInput object of relay " << this->_name;
 		_adc = adc;
 		initialized = false;
 		return true;
