@@ -292,15 +292,15 @@ class BoatModeDisarmedTest : public ::testing::Test {
 				Pin *drive;
 				Pin *fault;
 				harness.accessRelay(&(r.second), &drive, &fault);
-				fault->setDir(true);
 				fault->init();
+				fault->setDir(true);
 				fault->clear();
 			}
-			me.disarmInput.setDir(true);
 			me.disarmInput.init();
+			me.disarmInput.setDir(true);
 			me.disarmInput.set();
-			me.armInput.setDir(true);
 			me.armInput.init();
+			me.armInput.setDir(true);
 			me.armInput.clear();
 			*adcvalid = true;
 			*rcvalid = true;
@@ -337,8 +337,15 @@ TEST_F(BoatModeDisarmedTest, Horn) {
 	VLOG(2) << me;
 	EXPECT_EQ(me.servoEnable.get(), 0);
 	EXPECT_EQ(me.throttle->getThrottle(), 0);
-	me.disarmInput.clear();
-	me.armInput.set();
+	#ifdef DISTRIB_IMPLEMENTED
+		#pragma message "Compiling Horn test for new power distribution box"
+		me.disarmInput.clear();
+		me.armInput.set();
+	#else
+		#pragma message "Compiling Horn test for direct arm/disarm buttons"
+		me.disarmInput.set();
+		me.armInput.clear();
+	#endif /*DISTRIB_IMPLEMENTED*/
 	start = std::chrono::system_clock::now();
 	VLOG(2) << me;
 	mode = mode->execute();
@@ -350,6 +357,7 @@ TEST_F(BoatModeDisarmedTest, Horn) {
 		}
 		EXPECT_EQ(me.relays->get("HORN").output()->get(), 1);
 		mode = mode->execute();
+		std::this_thread::sleep_for(50ms);
 	}
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
@@ -387,10 +395,17 @@ class BoatModeNavTest : public ::testing::Test {
 			}
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
-			me.disarmInput.clear();
 			me.armInput.setDir(true);
 			me.armInput.init();
-			me.armInput.set();
+			#ifdef DISTRIB_IMPLEMENTED
+				#pragma message "Compiling Horn test for new power distribution box"
+				me.disarmInput.clear();
+				me.armInput.set();
+			#else
+				#pragma message "Compiling Horn test for direct arm/disarm buttons"
+				me.disarmInput.set();
+				me.armInput.clear();
+			#endif /*DISTRIB_IMPLEMENTED*/
 			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
 			*adcvalid = true;
 			*rcvalid = true;
@@ -579,9 +594,16 @@ TEST_F(BoatModeNavTest, NavModeExecute) {
 TEST_F(BoatModeNavTest, Disarm) {
 	VLOG(1) << "===Boat Mode Test, Nav, Disarm===";
 	me.setNavMode(NavModeEnum::IDLE);
-	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
-	me.armInput.clear();
-	me.disarmInput.set();
+	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);;
+	#ifdef DISTRIB_IMPLEMENTED
+		#pragma message "Compiling Disarm test for new power distribution box"
+		me.disarmInput.set();
+		me.armInput.clear();
+	#else
+		#pragma message "Compiling Disarm test for direct arm/disarm buttons"
+		me.disarmInput.clear();
+		me.armInput.set();
+	#endif /*DISTRIB_IMPLEMENTED*/
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
 			<< " Last mode: " << me.boatModeNames.get(mode->getLastMode());
@@ -597,7 +619,7 @@ TEST_F(BoatModeNavTest, Fault) {
 	VLOG(1) << "===Boat Mode Test, Nav, Fault===";
 	me.setNavMode(NavModeEnum::IDLE);
 	mode = BoatModeBase::factory(me, BoatModeEnum::NAVIGATION);
-	BoatNavigationMode *mynav = (BoatNavigationMode*)mode;
+	//BoatNavigationMode *mynav = (BoatNavigationMode*)mode;
 	me.insertFault("Test Fault");
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())

@@ -42,20 +42,20 @@ BoatState::BoatState () {
 	if (!disarmInput.isInit()) {
 		disarmInput.setPort(SYSTEM_DISARM_INPUT_PORT);
 		disarmInput.setPin(SYSTEM_DISARM_INPUT_PIN);
-		disarmInput.setDir(false);
 		disarmInput.init();
+		disarmInput.setDir(false);
 	}
 	if (!armInput.isInit()) {
 		armInput.setPort(SYSTEM_ARM_INPUT_PORT);
 		armInput.setPin(SYSTEM_ARM_INPUT_PIN);
-		armInput.setDir(false);
 		armInput.init();
+		armInput.setDir(false);
 	}
 	if (!servoEnable.isInit()) {
 		servoEnable.setPort(SYSTEM_SERVO_ENB_PORT);
 		servoEnable.setPin(SYSTEM_SERVO_ENB_PIN);
-		servoEnable.setDir(false);
 		servoEnable.init();
+		servoEnable.setDir(false);
 	}
 	K = {PID_KP, PID_KI, PID_KD};
 }

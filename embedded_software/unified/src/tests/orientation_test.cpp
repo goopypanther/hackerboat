@@ -100,7 +100,7 @@ TEST (Orientation, MakeTrue) {
 	EXPECT_TRUE(toleranceEquals(x.getDeclination(), z.getDeclination(), TOL));
 	Orientation th1 = x.makeTrue();
 	EXPECT_FALSE(th1.isMagnetic());
-	EXPECT_TRUE(toleranceEquals(th1.heading, x.heading + expectedDeclination, 0.1));
+	EXPECT_TRUE(toleranceEquals(th1.heading, x.heading + expectedDeclination, 0.25));
 	Orientation th2 = th1.makeTrue();
 	EXPECT_FALSE(th2.isMagnetic());
 	EXPECT_TRUE(toleranceEquals(th1.heading, th2.heading, TOL));
@@ -127,7 +127,7 @@ TEST (Orientation, MakeMagnetic) {
 	Orientation th1 = x.makeMag();
 	EXPECT_FALSE(x.isMagnetic());
 	EXPECT_TRUE(th1.isMagnetic());
-	EXPECT_TRUE(toleranceEquals(th1.heading, x.heading - expectedDeclination, 0.1));
+	EXPECT_TRUE(toleranceEquals(th1.heading, x.heading - expectedDeclination, 0.25));
 	Orientation th2 = th1.makeMag();
 	EXPECT_TRUE(th2.isMagnetic());
 	EXPECT_TRUE(toleranceEquals(th1.heading, th2.heading, TOL));

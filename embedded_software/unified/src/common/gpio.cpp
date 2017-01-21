@@ -64,7 +64,7 @@ bool Pin::init () {
 	} else {
 		LOG(DEBUG) << "Pin already exported at " << path;
 	}
-	
+		
 	_init = true;
 	return _init;
 
@@ -103,6 +103,10 @@ bool Pin::setPin (int pin) {
 
 bool Pin::setDir (bool dir) {
 	_dir = dir;
+	if (!_init) {
+		LOG(ERROR) << "Attempted to set the direction of uninitialized pin";
+		return false;
+	}
 	ofstream direction;
 	direction.open(path + "/direction");
 	if (direction.is_open()) {
@@ -115,7 +119,7 @@ bool Pin::setDir (bool dir) {
 		direction.close();
 		return result;
 	} else {
-		LOG(ERROR) << "Unable to set pin direction";
+		LOG(ERROR) << "Unable to set pin direction in " << path;
 		return false;
 	}
 }

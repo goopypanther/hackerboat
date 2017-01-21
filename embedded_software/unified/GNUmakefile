@@ -8,9 +8,12 @@ CC = /usr/bin/gcc-6
 OPTS = -gdwarf-4 -g3 -Os -Wall
 #OPTS = -gdwarf-4 -g3 -Wall
 
+ARFLAGS = rvU
+
 # Paths
-GTEST_DIR=/usr/src/gtest
-GTEST_INC=/usr/include/gtest
+GTEST_ROOT= submodules/googletest/googletest
+GTEST_DIR= $(GTEST_ROOT)
+GTEST_INC= $(GTEST_ROOT)/include/
 
 CFLAGS   += $(OPTS) -std=gnu11 -g -I submodules/lsquaredc
 
@@ -24,6 +27,7 @@ CPPFLAGS += -I submodules/hackerboat-private
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
 CPPFLAGS += -I submodules/easyloggingpp/src
+CPPFLAGS += -I $(GTEST_INC)
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
 CPPFLAGS += -fno-inline-small-functions
@@ -34,14 +38,15 @@ LDLIBS += -ljansson
 LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
-LDLIBS += -lpaho-mqtt3cs
-LDLIBS += /usr/local/lib/libGeographic.a
+LDLIBS += -lpaho-mqtt3c
+LDLIBS += -lGeographic
 
 export OPTS
 
-VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc
+VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc:submodules/easyloggingpp/src
 all: submodules master 
 test: unit_tests
+	./setup/Hackerboat-Init.sh
 	./unit_tests
 .PHONY: all test
 
@@ -86,10 +91,12 @@ LIBHACKERBOAT_SRCS+= boatModes.cpp
 LIBHACKERBOAT_SRCS+= navModes.cpp
 LIBHACKERBOAT_SRCS+= healthMonitor.cpp
 LIBHACKERBOAT_C_SRCS+= lsquaredc.c
+LOGGING_SRCS= easylogging++.cc
 
-libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o) $(LIBHACKERBOAT_C_SRCS:.c=.o))
+libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o) $(LOGGING_SRCS:.cc=.o) $(LIBHACKERBOAT_C_SRCS:.c=.o))
 ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)
 ALL_OBJS+=$(LIBHACKERBOAT_C_SRCS:.c=.o)
+ALL_OBJS+=$(LOGGING_SRCS:.cc=.o)
 
 MASTER_SRCS=master/hackerboatMasterControl.cpp 
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))

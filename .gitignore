@@ -35,6 +35,7 @@ embedded_software/unified/throttle_test
 embedded_software/unified/servo_test
 embedded_software/unified/rcctrl
 embedded_software/unified/gps_test
+BUILD
 
 # Eagle
 *.s#*

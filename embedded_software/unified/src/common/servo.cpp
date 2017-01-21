@@ -44,9 +44,9 @@ bool Servo::attach (int port, int pin, long min, long max, long freq) {
 	// It includes some very rude hacks using sudo, chown, and chmod to get the permissions right
 	// because I can't seem to get the motherfucking udev rule to do the right thing in any sort of
 	// consistent fashion.
-	std::string chmodcmd = "sudo chown -R root:gpio /sys/class/pwm; sudo chmod -R 770 /sys/class/pwm";
+	std::string chmodcmd = "sudo chown -R root:gpio /sys/class/pwm; sudo chmod -R 0770 /sys/class/pwm";
 	system(chmodcmd.c_str());
-	chmodcmd = "sudo chown -R root:gpio /sys/devices/platform/ocp/4????000.epwmss/*; sudo chmod -R 770 /sys/devices/platform/ocp/4????000.epwmss/*";
+	chmodcmd = "sudo chown -R root:gpio /sys/devices/platform/ocp/4????000.epwmss/*; sudo chmod -R 0770 /sys/devices/platform/ocp/4????000.epwmss/*";
 	system(chmodcmd.c_str());
 	std::string exportcmd = "echo " + std::to_string(minornum) + " > ";
 	exportcmd += basepath + std::to_string(majornum) + "/export";

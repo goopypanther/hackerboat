@@ -26,3 +26,6 @@
 [submodule "embedded_software/unified/submodules/easyloggingpp"]
 	path = embedded_software/unified/submodules/easyloggingpp
 	url = https://github.com/logos-electromechanical/easyloggingpp.git
+[submodule "embedded_software/unified/submodules/googletest"]
+	path = embedded_software/unified/submodules/googletest
+	url = https://github.com/google/googletest.git
