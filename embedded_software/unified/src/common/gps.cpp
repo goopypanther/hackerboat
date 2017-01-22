@@ -67,9 +67,9 @@ json_t *GPSFix::pack () const {
 
 	if (packResult != 0) {
 		if (output) {
-			LOG(ERROR) << "GPSFix pack failed: " << output;
+			//LOG(ERROR) << "GPSFix pack failed: " << output;
 		} else {
-			LOG(WARNING) << "GPSFix pack failed, no output";
+			//LOG(WARNING) << "GPSFix pack failed, no output";
 		}
 		json_decref(output);
 		return NULL;

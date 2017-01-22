@@ -31,6 +31,7 @@ CPPFLAGS += -I $(GTEST_INC)
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
 CPPFLAGS += -fno-inline-small-functions
+CPPFLAGS += -D ELPP_THREAD_SAFE 
 
 LDFLAGS  += -L /usr/local/lib
 
@@ -101,6 +102,7 @@ ALL_OBJS+=$(LOGGING_SRCS:.cc=.o)
 MASTER_SRCS=master/hackerboatMasterControl.cpp 
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
 ALL_OBJS+=$(MASTER_OBJS)
+
 master: $(MASTER_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
@@ -183,10 +185,10 @@ servo_test: $(SERVO_TEST_OBJS) libhackerboat.a
 gps_test: $(GPS_TEST_OBJ) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-mqtt_test: $(MQTT_TEST_OBJ) libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+#mqtt_test: $(MQTT_TEST_OBJ) libhackerboat.a
+#	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 	
-functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test mqtt_test
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test
 	
 clean:
 	rm -f libhackerboat.a

@@ -48,4 +48,5 @@ int main(int argc, char **argv) {
 	} else {
 		cout << "Connection failed";
 	}
+	return 0;
 }

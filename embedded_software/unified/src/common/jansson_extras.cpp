@@ -16,6 +16,7 @@ int json_object_add(json_t *obj, const char *types, ...)
 			continue;
 		const char *key = va_arg(ap, const char *);
 		if (!key)
+			va_end(ap);
 			return -1;
 
 		json_t *value;
@@ -39,11 +40,13 @@ int json_object_add(json_t *obj, const char *types, ...)
 			value = json_real(va_arg(ap, double));
 			break;
 		default:
+			va_end(ap);
 			return -1;
 		}
 
 		int errk = json_object_set_new(obj, key, value);
 		if (errk)
+			va_end(ap);
 			return errk;
 	}
 	va_end(ap);

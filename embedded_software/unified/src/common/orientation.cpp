@@ -39,11 +39,11 @@ json_t *Orientation::pack () const {
 	packResult += json_object_set_new(output, "heading", json_integer(heading));
 	
 	if (packResult != 0) {
-		LOG(ERROR) << "Orientation packing failed " << output;
+		//LOG(ERROR) << "Orientation packing failed " << output;
 		json_decref(output);
 		return NULL;
 	}
-	LOG(DEBUG) << "Packed Orientation object: " << output;
+	//LOG(DEBUG) << "Packed Orientation object: " << output;
 	return output;
 }
 
