@@ -182,9 +182,9 @@ json_t* BoatState::pack () const {
 	}
 	if (packResult != 0) {
 		if (output) {
-			LOG(ERROR) << "BoatState pack failed: " << output;
+			//LOG(ERROR) << "BoatState pack failed: " << output;
 		} else {
-			LOG(WARNING) << "BoatState pack failed, no output";
+			//LOG(WARNING) << "BoatState pack failed, no output";
 		}
 		json_decref(output);
 		return NULL;

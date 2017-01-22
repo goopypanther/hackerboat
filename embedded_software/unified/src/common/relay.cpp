@@ -36,11 +36,11 @@ json_t *Relay::pack () {
 	packResult += json_object_set_new(output, "drive", json_boolean(std::get<1>(thisrelay)));
 	packResult += json_object_set_new(output, "fault", json_boolean(std::get<2>(thisrelay)));
 	if (packResult != 0) {
-		LOG(ERROR) << "Failed to correctly pack relay status: " << output;
+		//LOG(ERROR) << "Failed to correctly pack relay status: " << output;
 		json_decref(output);
 		return NULL;
 	}
-	LOG(DEBUG) << "Packed relay status: " << output;
+	//LOG(DEBUG) << "Packed relay status: " << output;
 	return output;
 }
 

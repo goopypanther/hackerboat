@@ -52,11 +52,11 @@ json_t* Location::pack(void) const {
 		packResult += json_object_set_new(output, "lon", json_real(0));
 	}
 	if (packResult != 0) {
-		LOG(ERROR) << "Location packing failed " << output;
+		//LOG(ERROR) << "Location packing failed " << output;
 		json_decref(output);
 		return NULL;
 	} else {
-		LOG(DEBUG) << "Packed location object: " << output;
+		//LOG(DEBUG) << "Packed location object: " << output;
 		return output;
 	}
 }

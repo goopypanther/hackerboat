@@ -55,7 +55,7 @@ class RCInput : public InputThread {
 		std::string _path;
 		int devFD = -1;
 		bool failsafe = false;
-		bool _valid = false;
+		bool _valid = true;
 		std::vector<uint16_t> rawChannels { RC_CHANNEL_COUNT };
 		std::string inbuf;
 		int _errorFrames = 0;

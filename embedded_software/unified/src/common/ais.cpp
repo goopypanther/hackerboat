@@ -182,9 +182,9 @@ json_t *AISShip::pack () const {
 	
 	if (packResult != 0) {
 		if (output) {
-			LOG(ERROR) << "AIS pack failed: " << output;
+			//LOG(ERROR) << "AIS pack failed: " << output;
 		} else {
-			LOG(WARNING) << "AIS pack failed, no output";
+			//LOG(WARNING) << "AIS pack failed, no output";
 		}
 		json_decref(output);
 		return NULL;
