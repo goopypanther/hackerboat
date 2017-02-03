@@ -35,6 +35,7 @@ embedded_software/unified/throttle_test
 embedded_software/unified/servo_test
 embedded_software/unified/rcctrl
 embedded_software/unified/gps_test
+embedded_software/unified/aio_rest_test
 BUILD
 
 # Eagle

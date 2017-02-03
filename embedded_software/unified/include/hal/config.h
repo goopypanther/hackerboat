@@ -121,6 +121,15 @@
 #define STATE_DB_FILE		"state.db"
 #define HEALTH_DB_FILE		"health.db"
 
+// Adafruit.IO REST definition
+#define REST_SUBSCRIPTION_PERIOD	(250ms)
+#define REST_CURL					"/usr/bin/curl"
+#define REST_AIO_KEY_HEADER			"X-AIO-Key:"
+#define REST_DELAY					(1ms)
+#define REST_COUNT_OUT				(5000)
+#define REST_TIMEOUT				(200ms)
+#define REST_MAX_BUFFER				(50000)
+
 #endif /* CONFIG_H */
 
 

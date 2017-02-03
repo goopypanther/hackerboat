@@ -39,7 +39,7 @@ LDLIBS += -ljansson
 LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
-LDLIBS += -lpaho-mqtt3c
+#LDLIBS += -lpaho-mqtt3c
 LDLIBS += -lGeographic
 
 export OPTS
@@ -63,7 +63,8 @@ run: svctree
 .PHONY: svctree run
 
 LIBHACKERBOAT_SRCS= autoModes.cpp 
-LIBHACKERBOAT_SRCS+= mqtt.cpp
+#LIBHACKERBOAT_SRCS+= mqtt.cpp
+LIBHACKERBOAT_SRCS+= aio-rest.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= gpsdInput.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
@@ -146,23 +147,31 @@ submodules:
 
 # Functional tests
 RC_TEST_SRCS = functional_tests/rc_test.cpp
-ORIENTATION_TEST_SRCS += functional_tests/orientation_test.cpp
-ADC_TEST_SRCS += functional_tests/adc_test.cpp
-RELAY_TEST_SRCS += functional_tests/relay_test.cpp
-THROTTLE_TEST_SRCS += functional_tests/throttle_test.cpp
-SERVO_TEST_SRCS += functional_tests/servo_test.cpp
-GPS_TEST_SRCS += functional_tests/gps_test.cpp
-MQTT_TEST_SRCS += functional_tests/mqtt_test.cpp
+ORIENTATION_TEST_SRCS = functional_tests/orientation_test.cpp
+ADC_TEST_SRCS = functional_tests/adc_test.cpp
+RELAY_TEST_SRCS = functional_tests/relay_test.cpp
+THROTTLE_TEST_SRCS = functional_tests/throttle_test.cpp
+SERVO_TEST_SRCS = functional_tests/servo_test.cpp
+GPS_TEST_SRCS = functional_tests/gps_test.cpp
+AIO_REST_TEST_SRCS = functional_tests/aio_rest_test.cpp
+
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
 ADC_TEST_OBJS = $(addprefix src/,$(ADC_TEST_SRCS:.cpp=.o))
 RELAY_TEST_OBJS = $(addprefix src/,$(RELAY_TEST_SRCS:.cpp=.o))
-THROTTLE_TEST_OBJS += $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
-SERVO_TEST_OBJS += $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
-GPS_TEST_OBJ += $(addprefix src/,$(GPS_TEST_SRCS:.cpp=.o))
-MQTT_TEST_OBJ += $(addprefix src/,$(MQTT_TEST_SRCS:.cpp=.o))
+THROTTLE_TEST_OBJS = $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
+SERVO_TEST_OBJS = $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
+GPS_TEST_OBJS = $(addprefix src/,$(GPS_TEST_SRCS:.cpp=.o))
+AIO_REST_TEST_OBJS = $(addprefix src/,$(AIO_REST_TEST_SRCS:.cpp=.o))
+
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
+ALL_OBJS+=$(ADC_TEST_OBJS)
+ALL_OBJS+=$(RELAY_TEST_OBJS)
+ALL_OBJS+=$(THROTTLE_TEST_OBJS)
+ALL_OBJS+=$(SERVO_TEST_OBJS)
+ALL_OBJS+=$(GPS_TEST_OBJS)
+ALL_OBJS+=$(AIO_REST_TEST_OBJS)
 
 rc_test: $(RC_TEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
@@ -182,13 +191,13 @@ throttle_test: $(THROTTLE_TEST_OBJS) libhackerboat.a
 servo_test: $(SERVO_TEST_OBJS) libhackerboat.a 
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 	
-gps_test: $(GPS_TEST_OBJ) libhackerboat.a
+gps_test: $(GPS_TEST_OBJS) libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-#mqtt_test: $(MQTT_TEST_OBJ) libhackerboat.a
-#	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 	
-functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test aio_rest_test
 	
 clean:
 	rm -f libhackerboat.a
