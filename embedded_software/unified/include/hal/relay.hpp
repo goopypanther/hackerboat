@@ -36,11 +36,11 @@ class Relay {
 		Relay () = default;
 		Relay (std::string name, Pin output, Pin fault, ADCInput* adc = NULL, bool state = false) :
 			_name(name), _drive(&output), _fault(&fault), _adc(adc), _state(state) {
-				this->init();
+				//this->init();
 			};
 		Relay (std::string name, Pin *output, Pin *fault, ADCInput* adc = NULL, bool state = false) :
 			_name(name), _drive(output), _fault(fault), _adc(adc), _state(state) {
-				this->init();
+				//this->init();
 			};
 			
 		json_t *pack ();							/**< Pack a relay tuple with state, fault, and current output of this relay */

@@ -36,7 +36,7 @@ class Pin {
 				if (_dir) {
 					function = "out";
 				} else function = "in";
-				this->init();
+				//this->init();
 		};
 		bool init ();							/**< Initialize the pin. _port and _pin must be set or this returns false. Must be called any time the configuration is changed. */
 		bool setPort (int port);				/**< Set the port -- either 8 or 9 */
