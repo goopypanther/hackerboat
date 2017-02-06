@@ -1,19 +1,19 @@
 /******************************************************************************
  * Hackerboat Adafruit.IO REST interface module
  * aio-rest.hpp
- * This module provides an interface to curl in order to 
+ * This module provides an interface to curl in order to
  * allow the boat to talk to Adafruit.IO and other brokers.
  *
  * See the Hackerboat documentation for more details
  * Written by Pierce Nichols, Oct 2016
- * 
+ *
  * Version 0.1: First alpha
  *
  ******************************************************************************/
 
 #ifndef AIO_REST_H
 #define AIO_REST_H
- 
+
 #include <jansson.h>
 #include <cstdlib>
 #include <inttypes.h>
@@ -42,6 +42,7 @@ class AIO_Subscriber {
 		virtual int poll() = 0;									// returns number of bytes received
 		int getStatus() {return httpStatus;};
 	protected:
+		char toHex(char code);
 		string urlEncode(const string &value);		// url encode a string
 		string stripEscape(const string &value);	// strip backslash escapes out of a string
 		string 			_key;
@@ -68,34 +69,34 @@ typedef map<string, AIO_Subscriber*> SubFuncMap;
 class AIO_Rest : public InputThread  {
 	public:
 		AIO_Rest (BoatState *me,						/// The BoatState vector that data is taken from and read to
-				string host 	= REST_HOST,		 
+				string host 	= REST_HOST,
 				string username	= REST_USERNAME,
 				string key 		= REST_KEY,
 				string group	= REST_GROUP,
 				string datatype	= REST_DATATYPE,
 				std::chrono::system_clock::duration subper = REST_SUBSCRIPTION_PERIOD);
-		bool begin();								/// Start the 
-		bool execute();								/// Get the next subscription 
+		bool begin();								/// Start the
+		bool execute();								/// Get the next subscription
 		void setPubFuncMap (PubFuncMap *pubmap);	/// A map of the publish functions to call, by topic
 		int publishNext();							/// call the next function in the _pub function list. Returns the HTTP response code
 		int publishAll();							/// call all of the functions in the _pub function list. Returns the number of functions successfully executed (i.e. 200 series response code)
 		void setSubFuncMap (SubFuncMap *submap);	/// Set a map of the functions to call for each subscribed topic
 		int pollSubs();								/// Polls all subscribed channels. Returns the number of channels with new data
-		
+
 		// transmission functions
 		int transmit(string feedkey, string payload);						/// Attempts to add the given payload to the given feed. Returns HTTP response code.
 		string fetch(string feedkey, string specifier, int *httpStatus);	/// Fetches the last data from the given feed with the given specifier, which must be URL encoded. Returns the response string.
-		string getResponse(	redi::pstreambuf *str, 
+		string getResponse(	redi::pstreambuf *str,
 							size_t maxlen = REST_MAX_BUFFER,
-							std::chrono::system_clock::duration timeout = REST_TIMEOUT); 
-		
+							std::chrono::system_clock::duration timeout = REST_TIMEOUT);
+
 	private:
-		
+
 		BoatState *state;
 		PubFuncMap *_pub;				/// A map of the functions to call to publish different outgoing topics
 		SubFuncMap *_sub;				/// A map of functions to call when different topics are received
 		PubFuncMap::iterator pubit;		/// Iterator pointed to next item to publish
-		bool 			_autopub;		/// If this is true, the running thread attempts to publish one output every thread call.  
+		bool 			_autopub;		/// If this is true, the running thread attempts to publish one output every thread call.
 		string 			_uri;
 		string 			_name;
 		string 			_key;
@@ -115,7 +116,7 @@ class pub_SpeedLocation : public AIO_Publisher {
 		int pub();
 };
 
-/// Publish the boat's current modes as a colon-separated list 
+/// Publish the boat's current modes as a colon-separated list
 class pub_Mode : public AIO_Publisher {
 	public:
 		pub_Mode(BoatState *me, AIO_Rest *rest) :
@@ -163,20 +164,20 @@ class pub_ThrottlePosition : public AIO_Publisher {
 		int pub();
 };
 
-/// Publish the current fault string, if present. 
+/// Publish the current fault string, if present.
 class pub_FaultString : public AIO_Publisher {
 	public:
 		pub_FaultString(BoatState *me, AIO_Rest *rest) :
 			AIO_Publisher(me, rest, "faultstring"), _last(false) {};
 		int pub();
 	private:
-		bool _last;		/// If the last time this object was called there was a fault string, this will be true. 
+		bool _last;		/// If the last time this object was called there was a fault string, this will be true.
 };
 
 // Subscriber classes
 // Note that all subscriber classes will manipulate the given BoatState object, as appropriate
 
-/// Subscribe to shore commands 
+/// Subscribe to shore commands
 class sub_Command : public AIO_Subscriber {
 	public:
 		sub_Command(BoatState *me, AIO_Rest *rest) :

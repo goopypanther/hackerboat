@@ -40,6 +40,7 @@ using namespace std;
 class BoatState;	// forward declaration so this compiles
 
 class Command {
+	// TODO: This needs an explicit destructor that decrements the _args pointer
 	public:
 		Command (BoatState *state, std::string cmd, json_t *args = NULL);
 		std::string getCmd() {return _cmd;};
@@ -76,7 +77,7 @@ class BoatState : public HackerboatStateStorable {
 		static const EnumNameTable<NavModeEnum> navModeNames;
 		static const EnumNameTable<AutoModeEnum> autoModeNames;
 		static const EnumNameTable<RCModeEnum> rcModeNames;
-		
+
 		BoatState ();
 		bool parse (json_t *input);
 		json_t *pack () const;
@@ -84,7 +85,7 @@ class BoatState : public HackerboatStateStorable {
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
-		
+
 		bool insertFault (const std::string fault);					/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const std::string fault);					/**< Remove the named fault from the fault string. Returns false if not present */
 		bool hasFault (const std::string fault) const;				/**< Returns true if given fault is present */
@@ -110,7 +111,7 @@ class BoatState : public HackerboatStateStorable {
 		std::string getCSV();										/**< Export the current state as a line for a CSV file */
 		std::string getCSVheaders();								/**< Generate CSV headers */
 		ArmButtonStateEnum getArmState ();							/**< Get the current state of the arm & disarm inputs */
-			
+
 		int 					currentWaypoint; 	/**< The current waypoint */
 		double					waypointStrength;	/**< Relative strength of the waypoint */
 		sysclock				lastContact;		/**< Time of last shore contact */
@@ -130,9 +131,9 @@ class BoatState : public HackerboatStateStorable {
 		GPSdInput*				gps = 0;			/**< GPS input thread */
 		OrientationInput*		orient = 0;			/**< Orientation input thread */
 		RelayMap*				relays = 0;			/**< Pointer to relay singleton */
-		
-		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */ 
-		
+
+		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */
+
 	private:
 		std::list<Command>	cmdvec;
 		HackerboatStateStorage *stateStorage = NULL;
@@ -146,7 +147,7 @@ class BoatState : public HackerboatStateStorable {
 			sysclock armedStart;
 			sysclock disarmedStart;
 		#endif /* DISTRIB_IMPLEMENTED */
-	
+
 };
 
-#endif 
+#endif

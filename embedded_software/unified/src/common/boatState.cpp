@@ -115,7 +115,7 @@ bool BoatState::setNavMode (std::string mode) {
 	_nav = m;
 	return true;
 }
-						
+
 bool BoatState::setAutoMode (std::string mode) {
 	AutoModeEnum m;
 	if (!autoModeNames.get(mode, &m)) {
@@ -125,7 +125,7 @@ bool BoatState::setAutoMode (std::string mode) {
 	_auto = m;
 	return true;
 }
-						
+
 bool BoatState::setRCmode (std::string mode) {
 	RCModeEnum m;
 	if (!rcModeNames.get(mode, &m)) {
@@ -195,7 +195,7 @@ json_t* BoatState::pack () const {
 bool BoatState::parse (json_t* input ) {
 	std::string recordTimeIn, lastContactIn, lastRCin, boatMode, navMode, autoMode, rcMode;
 	bool result = true;
-	
+
 	result &= GET_VAR(currentWaypoint);
 	result &= GET_VAR(waypointStrength);
 	result &= GET_VAR(faultString);
@@ -215,7 +215,7 @@ bool BoatState::parse (json_t* input ) {
 	result &= navModeNames.get(navMode, &(this->_nav));
 	result &= autoModeNames.get(autoMode, &(this->_auto));
 	result &= rcModeNames.get(rcMode, &(this->_rc));
-	
+
 	LOG_IF((!result && input), ERROR) << "Parsing BoatState input failed: " << input;
 	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in BoatState.parse()";
 
@@ -225,7 +225,7 @@ bool BoatState::parse (json_t* input ) {
 HackerboatStateStorage &BoatState::storage () {
 	if (!stateStorage) {
 		LOG(DEBUG) << "Creating BoatState database table";
-		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE), 
+		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE),
 							"BOAT_STATE",
 							{ { "recordTime", "TEXT" },
 							  { "currentWaypoint", "INTEGER" },
@@ -240,7 +240,7 @@ HackerboatStateStorage &BoatState::storage () {
 							  { "autoMode", "TEXT" },
 							  { "rcMode", "TEXT" },
 							  { "relays", "TEXT" } });
-		stateStorage->createTable();						 
+		stateStorage->createTable();
 	}
 	return *stateStorage;
 }
@@ -266,7 +266,7 @@ bool BoatState::fillRow(SQLiteParameterSlice row) const {
 	row.bind(11, rcModeNames.get(_rc));
 	out = this->relays->pack();
 	row.bind_json_new(12, out);
-	
+
 	return true;
 }
 
@@ -297,12 +297,17 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 	str = row.string_field(11);
 	result &= rcModeNames.get(str, &(this->_rc));
 	LOG(DEBUG) << "Populated BoatState object from DB " << *this;
-	
+
 	return result;
 }
 
 void BoatState::pushCmd (std::string name, json_t* args) {
-	cmdvec.emplace_back(Command(this, name, args));
+	try {
+		cmdvec.emplace_back(Command(this, name, args));
+	} catch (...) {
+		LOG(ERROR) << "Attempted to push invalid command " << name << " with arguments " << args;
+		//cout << "Attempted to push invalid command " << name << " with arguments " << args << endl;
+	}
 	LOG_IF(args, DEBUG) << "Emplacing command [" << name << "] with arguments: " << args;
 	LOG_IF(!args, DEBUG) << "Emplacing command [" << name << "] with no arguments";
 }
@@ -313,7 +318,14 @@ int BoatState::executeCmds (int num) {
 	for (int i = 0; i < num; i++) {					// iterate over the given set of commands
 		if (cmdvec.size()) {						// this is here to guard against any modifications elsewhere
 			LOG(INFO) << "Executing command " << cmdvec.front();
-			if (cmdvec.front().execute()) result++;	// execute the command at the head of the queue
+			cout << "Executing command " << cmdvec.front() << endl;
+			try {
+				if (cmdvec.front().execute()) result++;	// execute the command at the head of the queue
+			} catch (...) {
+				LOG(ERROR) << "Attempted to execute invalid command";
+				cout << "Attempted to execute invalid command" << endl;
+				break;
+			}
 			LOG(DEBUG) << "Result: " << result;
 			cmdvec.pop_front();			// remove the head element
 		}
@@ -390,7 +402,7 @@ ArmButtonStateEnum BoatState::getArmState () {
 		LOG(WARNING) << "Disarm GPIO input is invalid";
 		return ArmButtonStateEnum::INVALID;
 	}
-	// This conditional compilation is so that this will work both with the directly connected arm/stop buttons 
+	// This conditional compilation is so that this will work both with the directly connected arm/stop buttons
 	// and also with the new power distribution setup
 	#ifdef DISTRIB_IMPLEMENTED
 		#pragma message "Compiling for new power distribution box"
@@ -424,6 +436,8 @@ ArmButtonStateEnum BoatState::getArmState () {
 
 Command::Command (BoatState *state, std::string cmd, json_t *args) :
 	_state(state), _cmd(cmd), _args(args) {
+		if (_args) cout << "Creating command object " << _cmd << " with arguments: " << _args << endl;
+		if (!_args) cout << "Creating command object " << _cmd << " without arguments." << endl;
 		this->_funcs.at(_cmd);	// force an exception on an invalid command name
 	};
 
@@ -431,13 +445,13 @@ bool Command::execute () {
 	std::function<bool(json_t*, BoatState*)> cmd = this->_funcs.at(_cmd);
 	return cmd(_args, _state);
 }
-	
+
 json_t* Command::pack () const {
 	json_t *output = json_object();
 	int packResult = 0;
-	packResult += json_object_set_new(output, "Command", json(_cmd));
+	packResult += json_object_set_new(output, "command", json(_cmd));
 	if (_args) {
-		packResult += json_object_set(output, "Argument", _args);
+		packResult += json_object_set(output, "argument", _args);
 	}
 	if (packResult != 0) {
 		json_decref(output);
@@ -456,13 +470,15 @@ bool Command::SetMode(json_t* args, BoatState *state) {
 		BoatModeEnum newmode;
 		if (state->boatModeNames.get(modeString, &newmode)) {
 			state->setBoatMode(newmode);
+			cout << "Setting boat mode to " << modeString << endl;
 			LOG(DEBUG) << "Setting boat mode to " << modeString;
 			return true;
 		} else {
+			cout << "Invalid boat mode " << modeString << endl;
 			LOG(DEBUG) << "Invalid boat mode " << modeString;
 			return false;
 		}
-	}  
+	} else
 	LOG(DEBUG) << "No mode argument for boat mode";
 	return false;
 }
@@ -483,7 +499,7 @@ bool Command::SetNavMode(json_t* args, BoatState *state) {
 			LOG(DEBUG) << "Invalid nav mode " << modeString;
 			return false;
 		}
-	} 
+	}
 	LOG(DEBUG) << "No mode argument for nav mode";
 	return false;
 }
@@ -504,7 +520,7 @@ bool Command::SetAutoMode(json_t* args, BoatState *state) {
 			LOG(DEBUG) << "Invalid auto mode " << modeString;
 			return false;
 		}
-	} 
+	}
 	LOG(DEBUG) << "No mode argument for auto mode";
 	return false;
 }
@@ -632,6 +648,7 @@ std::ostream& operator<< (std::ostream& stream, const Command& cmd) {
 	} else {
 		stream << "{}";
 	}
+	json_decref(json);
 	return stream;
 }
 

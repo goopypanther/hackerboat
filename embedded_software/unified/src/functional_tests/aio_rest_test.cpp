@@ -5,11 +5,11 @@
  * see the Hackerboat documentation for more details
  *
  * Written by Pierce Nichols, Aug 2016
- * 
+ *
  * Version 0.1: First alpha
  *
  ******************************************************************************/
- 
+
 #include "hal/config.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,8 +21,10 @@
 #include "gps.hpp"
 #include "easylogging++.h"
 #include "aio-rest.hpp"
+#include "hal/orientationInput.hpp"
+#include "hal/throttle.hpp"
 
-#define ELPP_STL_LOGGING 
+#define ELPP_STL_LOGGING
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -34,9 +36,12 @@ int main(int argc, char **argv) {
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
-	
+
 	// Setting up environment...
 	BoatState me;
+	me.throttle = new Throttle();
+	me.orient = new OrientationInput(SensorOrientation::SENSOR_AXIS_Z_UP);
+	me.orient->begin();
 	AIO_Rest myrest(&me);
 	cout << "Creating publishing map..." << endl;
 	PubFuncMap *mypubmap = new PubFuncMap {	{"SpeedLocation", new pub_SpeedLocation(&me, &myrest)},
@@ -57,6 +62,13 @@ int main(int argc, char **argv) {
 	std::this_thread::sleep_for(1500ms);
 	cout << "Calling publishAll()..." << endl;
 	myrest.publishAll();
-	
+	sub_Command cmdsub(&me, &myrest);
+	for (int x = 0; x < 20; x++) {
+		cout << "Calling command subscription..." << endl;
+		cmdsub.poll();
+		me.executeCmds();
+		std::this_thread::sleep_for(1000ms);
+	}
+
 	return 0;
 }

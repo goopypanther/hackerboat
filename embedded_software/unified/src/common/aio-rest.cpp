@@ -15,10 +15,11 @@
 #include <cstdlib>
 #include <inttypes.h>
 #include <cstdio>
-#include <cstring>
 #include <string>
 #include <list>
 #include <iomanip>
+#include <sstream>
+#include <cctype>
 #include "json_utilities.hpp"
 #include "hal/config.h"
 #include "private-config.h"
@@ -41,7 +42,7 @@ void AIO_Rest::setPubFuncMap (PubFuncMap *pubmap) {
 
 int AIO_Rest::publishNext() {
 	if (!state) return -1;
-	cout << "Publishing " << pubit->first << endl;
+	//cout << "Publishing " << pubit->first << endl;
 	int result = pubit->second->pub();
 	VLOG(2) << "Publishing " << pubit->first;
 	if (++pubit == _pub->end()) {
@@ -56,7 +57,7 @@ int AIO_Rest::publishAll() {
 	VLOG(1) << "Publishing all published items";
 	for (auto r: *_pub) {
 		VLOG(2) << "Publishing " << r.first;
-		cout << "Publishing " << r.first << endl;
+		//cout << "Publishing " << r.first << endl;
 		int result = r.second->pub();
 		if ((result >= 200) && (result < 300)) cnt++;
 	}
@@ -113,7 +114,7 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	cmd += "'" + payload + "' -w '\\n%{http_code}\\n' ";				// Add the payload and specify that the HTTP response code will be printed on the next line
 	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
 
-	cout << "Command is: " << cmd << endl;
+	//cout << "Command is: " << cmd << endl;
 
 	// fire the command off and wait for a response
 	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
@@ -154,11 +155,11 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	string cmd = REST_CURL;												// start with the curl command
 	cmd += " -H \"" + string(REST_AIO_KEY_HEADER); 						// Insert header for the API key
 	cmd += string(REST_KEY) + "\"";										// Insert the API key
-	cmd += "' -w '\\n%{http_code}\\n' ";								// Specify that the HTTP response code will be printed on the next line after the response
+	cmd += " -w '\\n%{http_code}\\n' ";								// Specify that the HTTP response code will be printed on the next line after the response
 	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
-	if (specifier.length()) cmd += "?" + specifier;
+	if (specifier.length()) cmd += "?start_time=" + specifier;
 
-	cout << "Command is: " << cmd << endl;
+	//cout << "Command is: " << cmd << endl;
 
 	// fire the command off and wait for a response
 	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
@@ -175,6 +176,9 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	// read the data
 	respbuf = getResponse(&curlstr);
 	statusbuf = getResponse(&curlstr, 10);
+
+	//cout << "Got response: " << respbuf << endl;
+	//cout << "Got status: " << statusbuf << endl;
 
 	// parse the status code
 	*httpStatus = stoi(statusbuf);
@@ -204,37 +208,44 @@ string AIO_Rest::getResponse(	redi::pstreambuf *str,
 // AIO_Subscriber class functions
 
 // function shamelessly stolen from http://stackoverflow.com/questions/154536/encode-decode-urls-in-c
+// And since that didn't work reliably, here it is from their original source, http://www.geekhideout.com/urlcode.shtml
+char AIO_Subscriber::toHex(char code) {
+	static char hex[] = "0123456789ABCDEF";
+	return hex[code & 15];
+}
+
 string AIO_Subscriber::urlEncode(const string &value) {
-    ostringstream escaped;
-    escaped.fill('0');
-    escaped << hex;
+    string escaped = "";
+
+    //cout << "URL encoding " << value << endl;
 
     for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
-        string::value_type c = (*i);
+        unsigned char c = (*i);
 
         // Keep alphanumeric and other accepted characters intact
         if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
-            escaped << c;
-            continue;
-        }
-
-        // Any other characters are percent-encoded
-        escaped << uppercase;
-        escaped << '%' << setw(2) << int((unsigned char) c);
-        escaped << nouppercase;
+            escaped += c;
+        } else if (c == ' ') {
+			escaped += "%20";
+		} else {
+			escaped += '%';
+			escaped += toHex(c >> 4);	// hexify the top nibble
+			escaped += toHex(c & 15);	// hexify the bottom nibble
+		}
     }
 
-    return escaped.str();
+    //cout << "Successfully encoded to " << escaped << endl;
+
+    return escaped;
 }
 
 string AIO_Subscriber::stripEscape(const string &value) {
-	ostringstream stripped;
-    stripped.fill('0');
+	string stripped = "";
     for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
-        string::value_type c = (*i);
-        if (c != '\\') stripped << c;
+        char c = (*i);
+        if (c != '\\') stripped += c;
 	}
-	return stripped.str();
+	return stripped;
 }
 
 // Publish functors
@@ -326,33 +337,48 @@ int pub_FaultString::pub() {
 
 int sub_Command::poll() {
 	json_error_t err;
-	string payload = _rest->fetch(_key, urlEncode(_lastMessageTime), &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
+	string payload, mostRecent;
+	try {
+		//cout << "Fetching data for the poll..." << endl;
+		payload = _rest->fetch(_key, urlEncode(_lastMessageTime), &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
+		//cout << "Poll data fetched" << endl;
+	} catch (...) {
+		//cout << "Subscription poll failed for unknown reasons" << endl;
+		LOG(ERROR) << "Subscription poll failed for unknown reasons" << endl;
+		return -1;
+	}
 	if (!payload.length()) return 0;										// If no payload string, depart
 	if ((httpStatus < 200) || (httpStatus >= 300)) return 0;				// If we didn't get a good HTTP status code, depart
 
+	//cout << "Parsing returned JSON..." << endl;
 	json_t *element, *input = json_loads(payload.c_str(), 0, &err);
+	//cout << "Finished parsing JSON from text." << endl;
 	if (input) {
-		element = json_array_get(input, 0);			// grab the first (most recent) command so we can set the time
-		if (element) {
-			_lastMessageTime = json_string_value(json_object_get(element, "created_at"));	// we just store the raw text because the time comparison only matters on the server side
-		}
-		for (size_t i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
+		for (int i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
 			json_t *val;
 			string value;
 			element = json_array_get(input, i);
-			if (!element) continue;											// if we should somehow get a null, skip to the next
+			if (!element) continue;														// if we should somehow get a null, skip to the next
+			mostRecent = json_string_value(json_object_get(element, "created_at"));		// grab the time this was created at...
+			if (mostRecent.compare(_lastMessageTime) == 0) {							// if we've seen this before, skip it
+				json_decref(element);
+				continue;
+			}
 			value = json_string_value(json_object_get(element, "value"));	// grab the command string from the element
 			value = stripEscape(value);										// strip any escape characters we had to use to push it through Adafruit.IO
 			val = json_loads(value.c_str(), 0, &err);						// load in the JSON from the string
 			if (val) {
-				_me->pushCmd(json_string_value(json_object_get(val, "command")),	// grab the command as a string
-								(json_object_get(val, "argument")));				// and the argument as a JSON object
-				LOG(DEBUG) << "Pushed command is [" << json_string_value(json_object_get(val, "command")) << "]";
+				string cmdstring = json_string_value(json_object_get(val, "command"));	// grab the command
+				json_t *argjson =  json_object_get(val, "argument");					// grab the JSON in the arguments
+				json_incref(argjson);													// we need to increment the reference because it's borrowed and would otherwise be destroyed when we call json_decref(val)
+				_me->pushCmd(cmdstring, argjson);
+				LOG(DEBUG) << "Pushed command is [" << json_string_value(json_object_get(val, "command")) << "]" << endl;
 				LOG(DEBUG) << "Pushed argument is [" << json_object_get(val, "argument") << "]";
 			} else {
 				LOG(ERROR) << "Failed to parse command [" << value << "]";
 			}
-			json_decref(val);
+			if (val) json_decref(val);
+			if (element) json_decref(element);
 		}
 	} else {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
@@ -360,6 +386,9 @@ int sub_Command::poll() {
 					<< " line: " << to_string(err.line) << " column: " << to_string(err.column);
 		return 0;
 	}
+	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands
+	// This needs to be fixed b/c it's a potential security hole
+	_lastMessageTime = mostRecent;
 	json_decref(input);
 	return payload.length();
 }
