@@ -66,7 +66,8 @@ int main(int argc, char **argv) {
 	for (int x = 0; x < 20; x++) {
 		cout << "Calling command subscription..." << endl;
 		cmdsub.poll();
-		me.executeCmds();
+		cout << "There are " << me.commandCnt() << " commands in the queue" << endl;
+		cout << "Executed " << me.executeCmds() << " commands" << endl;
 		std::this_thread::sleep_for(1000ms);
 	}
 

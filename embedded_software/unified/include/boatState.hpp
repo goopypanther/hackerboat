@@ -40,13 +40,16 @@ using namespace std;
 class BoatState;	// forward declaration so this compiles
 
 class Command {
-	// TODO: This needs an explicit destructor that decrements the _args pointer
 	public:
 		Command (BoatState *state, std::string cmd, json_t *args = NULL);
 		std::string getCmd() {return _cmd;};
 		json_t *getArgs() {return _args;};
 		bool execute ();
 		json_t* pack () const;
+		~Command() {
+			if (_args) json_decref(_args);
+		};
+
 	private:
 		static const map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
 		BoatState 		*_state = NULL;
@@ -135,7 +138,7 @@ class BoatState : public HackerboatStateStorable {
 		tuple<double, double, double> K;			/**< Steering PID gains. Proportional, integral, and differential, respectively. */
 
 	private:
-		std::list<Command>	cmdvec;
+		std::list<Command*>	cmdvec;
 		HackerboatStateStorage *stateStorage = NULL;
 		std::string 	faultString = "";
 		BoatModeEnum 	_boat = BoatModeEnum::NONE;

@@ -42,7 +42,6 @@ void AIO_Rest::setPubFuncMap (PubFuncMap *pubmap) {
 
 int AIO_Rest::publishNext() {
 	if (!state) return -1;
-	//cout << "Publishing " << pubit->first << endl;
 	int result = pubit->second->pub();
 	VLOG(2) << "Publishing " << pubit->first;
 	if (++pubit == _pub->end()) {
@@ -57,7 +56,6 @@ int AIO_Rest::publishAll() {
 	VLOG(1) << "Publishing all published items";
 	for (auto r: *_pub) {
 		VLOG(2) << "Publishing " << r.first;
-		//cout << "Publishing " << r.first << endl;
 		int result = r.second->pub();
 		if ((result >= 200) && (result < 300)) cnt++;
 	}
@@ -114,8 +112,6 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	cmd += "'" + payload + "' -w '\\n%{http_code}\\n' ";				// Add the payload and specify that the HTTP response code will be printed on the next line
 	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
 
-	//cout << "Command is: " << cmd << endl;
-
 	// fire the command off and wait for a response
 	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
 	LOG(DEBUG) << "Querying AIO with " << cmd;
@@ -159,8 +155,6 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
 	if (specifier.length()) cmd += "?start_time=" + specifier;
 
-	//cout << "Command is: " << cmd << endl;
-
 	// fire the command off and wait for a response
 	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
 	LOG(DEBUG) << "Querying AIO with " << cmd;
@@ -177,9 +171,6 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	respbuf = getResponse(&curlstr);
 	statusbuf = getResponse(&curlstr, 10);
 
-	//cout << "Got response: " << respbuf << endl;
-	//cout << "Got status: " << statusbuf << endl;
-
 	// parse the status code
 	*httpStatus = stoi(statusbuf);
 
@@ -188,7 +179,6 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 		state->lastContact = std::chrono::system_clock::now();
 	}
 
-	//LOG(DEBUG) << "Publishing payload [" << payload << "] to feed: [" << feedkey << "]";
 	LOG_IF(((*httpStatus < 200) || (*httpStatus >= 300)), WARNING) << "AIO REST request failed: " << cmd;
 	return respbuf;
 }
@@ -217,8 +207,6 @@ char AIO_Subscriber::toHex(char code) {
 string AIO_Subscriber::urlEncode(const string &value) {
     string escaped = "";
 
-    //cout << "URL encoding " << value << endl;
-
     for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
         unsigned char c = (*i);
 
@@ -233,8 +221,6 @@ string AIO_Subscriber::urlEncode(const string &value) {
 			escaped += toHex(c & 15);	// hexify the bottom nibble
 		}
     }
-
-    //cout << "Successfully encoded to " << escaped << endl;
 
     return escaped;
 }
@@ -339,20 +325,15 @@ int sub_Command::poll() {
 	json_error_t err;
 	string payload, mostRecent;
 	try {
-		//cout << "Fetching data for the poll..." << endl;
 		payload = _rest->fetch(_key, urlEncode(_lastMessageTime), &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
-		//cout << "Poll data fetched" << endl;
 	} catch (...) {
-		//cout << "Subscription poll failed for unknown reasons" << endl;
 		LOG(ERROR) << "Subscription poll failed for unknown reasons" << endl;
 		return -1;
 	}
 	if (!payload.length()) return 0;										// If no payload string, depart
 	if ((httpStatus < 200) || (httpStatus >= 300)) return 0;				// If we didn't get a good HTTP status code, depart
 
-	//cout << "Parsing returned JSON..." << endl;
 	json_t *element, *input = json_loads(payload.c_str(), 0, &err);
-	//cout << "Finished parsing JSON from text." << endl;
 	if (input) {
 		for (int i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
 			json_t *val;
@@ -388,7 +369,7 @@ int sub_Command::poll() {
 	}
 	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands
 	// This needs to be fixed b/c it's a potential security hole
-	_lastMessageTime = mostRecent;
+	if (mostRecent != "") _lastMessageTime = mostRecent;
 	json_decref(input);
 	return payload.length();
 }

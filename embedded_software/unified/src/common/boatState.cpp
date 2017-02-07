@@ -174,7 +174,7 @@ json_t* BoatState::pack () const {
 	if (commandCnt()) {
 		json_t* cmdarray = json_array();
 		for (auto &x : cmdvec) {
-			json_array_append_new(cmdarray, x.pack());
+			json_array_append_new(cmdarray, x->pack());
 		}
 		packResult += json_object_set_new(output, "commands", cmdarray);
 	} else {
@@ -303,10 +303,9 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 
 void BoatState::pushCmd (std::string name, json_t* args) {
 	try {
-		cmdvec.emplace_back(Command(this, name, args));
+		cmdvec.emplace_back(new Command(this, name, args));
 	} catch (...) {
 		LOG(ERROR) << "Attempted to push invalid command " << name << " with arguments " << args;
-		//cout << "Attempted to push invalid command " << name << " with arguments " << args << endl;
 	}
 	LOG_IF(args, DEBUG) << "Emplacing command [" << name << "] with arguments: " << args;
 	LOG_IF(!args, DEBUG) << "Emplacing command [" << name << "] with no arguments";
@@ -317,16 +316,17 @@ int BoatState::executeCmds (int num) {
 	int result = 0;
 	for (int i = 0; i < num; i++) {					// iterate over the given set of commands
 		if (cmdvec.size()) {						// this is here to guard against any modifications elsewhere
-			LOG(INFO) << "Executing command " << cmdvec.front();
-			cout << "Executing command " << cmdvec.front() << endl;
+			LOG(INFO) << "Executing command " << *(cmdvec.front());
 			try {
-				if (cmdvec.front().execute()) result++;	// execute the command at the head of the queue
+				if (cmdvec.front()->execute()) result++;	// execute the command at the head of the queue
 			} catch (...) {
 				LOG(ERROR) << "Attempted to execute invalid command";
-				cout << "Attempted to execute invalid command" << endl;
+				delete cmdvec.front();
+				cmdvec.pop_front();			// remove the head element
 				break;
 			}
 			LOG(DEBUG) << "Result: " << result;
+			delete cmdvec.front();
 			cmdvec.pop_front();			// remove the head element
 		}
 	}
@@ -436,8 +436,6 @@ ArmButtonStateEnum BoatState::getArmState () {
 
 Command::Command (BoatState *state, std::string cmd, json_t *args) :
 	_state(state), _cmd(cmd), _args(args) {
-		if (_args) cout << "Creating command object " << _cmd << " with arguments: " << _args << endl;
-		if (!_args) cout << "Creating command object " << _cmd << " without arguments." << endl;
 		this->_funcs.at(_cmd);	// force an exception on an invalid command name
 	};
 
@@ -470,11 +468,9 @@ bool Command::SetMode(json_t* args, BoatState *state) {
 		BoatModeEnum newmode;
 		if (state->boatModeNames.get(modeString, &newmode)) {
 			state->setBoatMode(newmode);
-			cout << "Setting boat mode to " << modeString << endl;
 			LOG(DEBUG) << "Setting boat mode to " << modeString;
 			return true;
 		} else {
-			cout << "Invalid boat mode " << modeString << endl;
 			LOG(DEBUG) << "Invalid boat mode " << modeString;
 			return false;
 		}
