@@ -32,8 +32,26 @@
 using namespace std;
 using namespace redi;
 
-AIO_Rest::AIO_Rest (BoatState *me, string host, string username, string key, string group, string datatype, std::chrono::system_clock::duration subper) :
-	_uri(host), _name(username), _key(key), _group(group), _datatype(datatype), state(me) {this->period = subper;}
+AIO_Rest::AIO_Rest (BoatState *me, string host, string username, string key, string group, string datatype,
+	std::chrono::system_clock::duration subper, std::chrono::system_clock::duration pubper) :
+	_uri(host), _name(username), _key(key), _group(group), _datatype(datatype), state(me),
+	_pubper(pubper), _subper(subper) {
+		// We use the Euclidean algorithm to find the GCD of the two times...
+		int cnt = 0;
+		while (subper != pubper) {
+			cnt++;
+			if (subper > pubper) {
+				subper = subper - pubper;
+			} else {
+				pubper = pubper - subper;
+			}
+			if (cnt > 100) break;
+		}
+		this->period = subper;
+		LOG(DEBUG) << "Thread period is " << std::chrono::duration_cast<std::chrono::milliseconds>(this->period).count() << " ms";
+		lastpub = chrono::system_clock::now();
+		lastsub = lastpub;
+	}
 
 void AIO_Rest::setPubFuncMap (PubFuncMap *pubmap) {
 	_pub = pubmap;
@@ -71,7 +89,7 @@ int AIO_Rest::pollSubs() {
 	int cnt = 0;
 	VLOG(1) << "Polling all subscribed channels";
 	for (auto r: *_sub) {
-		VLOG(2) << "Polling " << r.first;
+		LOG(DEBUG) << "Polling " << r.first;
 		int result = r.second->poll();
 		if (result) cnt++;
 	}
@@ -83,17 +101,27 @@ int AIO_Rest::pollSubs() {
 bool AIO_Rest::begin() {
 	this->myThread = new std::thread (InputThread::InputThreadRunner(this));
 	myThread->detach();
+	lastsub = chrono::system_clock::now();
+	lastpub = lastsub;
 	LOG(INFO) << "AIO REST subsystem started";
 	return true;
 }
 
 bool AIO_Rest::execute() {
 	bool status = true;
-	int pubResult = this->publishNext();
-	if ((pubResult >= 200) && (pubResult < 300)) {
-		status = true;
-	} else status = false;
-	if (!pollSubs()) status = false;
+	chrono::system_clock::time_point thistime = chrono::system_clock::now();
+	LOG(DEBUG) << "Hitting AIO_REST thread";
+	if ((lastpub + _pubper) < thistime) {
+		int pubResult = this->publishNext();
+		lastpub = thistime;
+		LOG(DEBUG) << "Publishing to next feeds, result: " << to_string(pubResult);
+	}
+	if ((lastsub + _subper) < thistime) {
+		if (!pollSubs()) status = false;
+		lastsub = thistime;
+		LOG(DEBUG) << "Polling all feeds";
+	}
+	LOG(DEBUG) << "Exiting AIO_REST thread";
 	return status;
 }
 

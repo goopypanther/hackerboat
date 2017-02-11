@@ -74,7 +74,8 @@ class AIO_Rest : public InputThread  {
 				string key 		= REST_KEY,
 				string group	= REST_GROUP,
 				string datatype	= REST_DATATYPE,
-				std::chrono::system_clock::duration subper = REST_SUBSCRIPTION_PERIOD);
+				std::chrono::system_clock::duration subper = REST_SUBSCRIPTION_PERIOD,
+				std::chrono::system_clock::duration pubper = REST_PUBLISH_PERIOD);
 		bool begin();								/// Start the
 		bool execute();								/// Get the next subscription
 		void setPubFuncMap (PubFuncMap *pubmap);	/// A map of the publish functions to call, by topic
@@ -96,6 +97,11 @@ class AIO_Rest : public InputThread  {
 		PubFuncMap *_pub;				/// A map of the functions to call to publish different outgoing topics
 		SubFuncMap *_sub;				/// A map of functions to call when different topics are received
 		PubFuncMap::iterator pubit;		/// Iterator pointed to next item to publish
+		std::chrono::system_clock::duration 	_subper;	/// Frequency of subscription polling
+		std::chrono::system_clock::duration 	_pubper;	/// Frequency of publishing
+		std::chrono::system_clock::time_point	lastsub;	/// Time of the last subscription poll
+		std::chrono::system_clock::time_point	lastpub;	/// Time of the last publication
+
 		bool 			_autopub;		/// If this is true, the running thread attempts to publish one output every thread call.
 		string 			_uri;
 		string 			_name;

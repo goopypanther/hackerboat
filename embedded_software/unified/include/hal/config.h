@@ -45,8 +45,8 @@
 #define PID_KD						(0.0)
 
 // Scales and offsets
-#define IMU_MAG_OFFSET				{{'x',330},{'y',-86},{'z',386}}	
-#define IMU_MAG_SCALE				{{'x',0.15835},{'y',0.18519},{'z',0.18149}}			
+#define IMU_MAG_OFFSET				{{'x',330},{'y',-86},{'z',386}}
+#define IMU_MAG_SCALE				{{'x',0.15835},{'y',0.18519},{'z',0.18149}}
 
 // RC defines
 
@@ -77,7 +77,7 @@
 #define IMU_LOCK_TIMEOUT	(300us)
 #define RC_LOCK_TIMEOUT		(300us)
 #define SELFTEST_DELAY		(30s)
-#define ADC_START_COUNT		(30)  
+#define ADC_START_COUNT		(30)
 #define ADC_START_PERIOD	(500us)
 #define ADC_LOCK_TIMEOUT	(500us)
 #define DISARM_PULSE_LEN	(50ms)
@@ -109,7 +109,7 @@
 
 // Analog initializers
 #define ADC_UPPER_INITIALIZER	{"RED", "DIR", "YLWWHT", "REDWHT", "YLW", "WHT", "DISARM", "ENABLE"}
-#define ADC_LOWER_INITIALIZER	{"HORN", "mot_i", "mot_v", "charge_v", "charge_i", "aux_0", "aux_1", "servo_i"}								  
+#define ADC_LOWER_INITIALIZER	{"HORN", "mot_i", "mot_v", "charge_v", "charge_i", "aux_0", "aux_1", "servo_i"}
 #define ADC128D818_EXTERNAL_REF	(5.0)
 #define ADC_BATMON_PATH			"/sys/devices/platform/ocp/44e0d000.tscadc/TI-am335x-adc/iio:device0/in_voltage1_raw"
 #define ADC_BATMON_NAME			"battery_mon"
@@ -122,7 +122,8 @@
 #define HEALTH_DB_FILE		"health.db"
 
 // Adafruit.IO REST definition
-#define REST_SUBSCRIPTION_PERIOD	(250ms)
+#define REST_SUBSCRIPTION_PERIOD	(200ms)
+#define REST_PUBLISH_PERIOD			(1000ms)
 #define REST_CURL					"/usr/bin/curl"
 #define REST_AIO_KEY_HEADER			"X-AIO-Key:"
 #define REST_DELAY					(1ms)

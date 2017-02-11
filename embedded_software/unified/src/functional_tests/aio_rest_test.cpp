@@ -53,23 +53,28 @@ int main(int argc, char **argv) {
 											{"ThrottlePosition", new pub_ThrottlePosition(&me, &myrest)},
 											{"FaultString", new pub_FaultString(&me, &myrest)}};
 	cout << "Publishing map created..." << endl;
+	SubFuncMap *mysubmap = new SubFuncMap {{"Command", new sub_Command(&me, &myrest)}};
+	cout << "Subscription map created..." << endl;
 	myrest.setPubFuncMap(mypubmap);
+	myrest.setSubFuncMap(mysubmap);
 	for (int x = 0; x < 20; x++) {
-		cout << "Calling publishNext()... " << to_string(x) << endl;
-		myrest.publishNext();
+		cout << "Calling publishNext()... " << to_string(myrest.publishNext()) << endl;
 		std::this_thread::sleep_for(500ms);
 	}
-	std::this_thread::sleep_for(1500ms);
-	cout << "Calling publishAll()..." << endl;
-	myrest.publishAll();
-	sub_Command cmdsub(&me, &myrest);
-	for (int x = 0; x < 20; x++) {
-		cout << "Calling command subscription..." << endl;
-		cmdsub.poll();
-		cout << "There are " << me.commandCnt() << " commands in the queue" << endl;
-		cout << "Executed " << me.executeCmds() << " commands" << endl;
-		std::this_thread::sleep_for(1000ms);
+	cout << "Starting threading test..." << endl;
+	myrest.begin();
+
+	for (int i = 0; i < 600; i++) {
+		me.lastFix.fix.lat += 0.001;
+		me.lastFix.fix.lon += 0.001;
+		me.lastFix.speed += 0.01;
+		if (me.commandCnt()) {
+			cout << to_string(me.commandCnt()) << " commands in the queue" << endl;
+			cout << to_string(me.executeCmds(0)) << " commands successfully executed" << endl;
+		}
+		std::this_thread::sleep_for(100ms);
 	}
+	myrest.kill();
 
 	return 0;
 }
