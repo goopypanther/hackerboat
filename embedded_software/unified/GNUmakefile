@@ -22,7 +22,6 @@ CXXFLAGS += $(OPTS) -Wno-reorder -g -std=gnu++14 -pthread
 CPPFLAGS += -I submodules/include
 CPPFLAGS += -I submodules/lsquaredc
 CPPFLAGS += -I include
-CPPFLAGS += -I submodules/PixelBone
 CPPFLAGS += -I submodules/hackerboat-private
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
@@ -43,7 +42,7 @@ LDLIBS += -lGeographic
 
 export OPTS
 
-VPATH=src/common:src/master:src/drivers:src/tests:submodules/lsquaredc:submodules/easyloggingpp/src
+VPATH=src/common:src/hal:src/master:src/drivers:src/tests:submodules/lsquaredc:submodules/easyloggingpp/src
 all: submodules master
 test: unit_tests
 	./setup/Hackerboat-Init.sh
@@ -61,17 +60,22 @@ run: svctree
 	svscan $(SVCTREE)
 .PHONY: svctree run
 
+LIBHACKERBOAT_HAL_SRCS= aio-rest.cpp
+LIBHACKERBOAT_HAL_SRCS+= gpsdInput.cpp
+LIBHACKERBOAT_HAL_SRCS+= RCinput.cpp
+LIBHACKERBOAT_HAL_SRCS+= adcInput.cpp
+LIBHACKERBOAT_HAL_SRCS+= throttle.cpp
+LIBHACKERBOAT_HAL_SRCS+= relay.cpp
+LIBHACKERBOAT_HAL_SRCS+= lsm303.cpp
+LIBHACKERBOAT_HAL_SRCS+= adc128d818.cpp
+LIBHACKERBOAT_HAL_SRCS+= gpio.cpp
+LIBHACKERBOAT_HAL_SRCS+= servo.cpp
+LIBHACKERBOAT_HAL_SRCS+= orientationInput.cpp
+LIBHACKERBOAT_C_HAL_SRCS+= lsquaredc.c
+
 LIBHACKERBOAT_SRCS= autoModes.cpp
-LIBHACKERBOAT_SRCS+= aio-rest.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
-LIBHACKERBOAT_SRCS+= gpsdInput.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
-LIBHACKERBOAT_SRCS+= RCinput.cpp
-LIBHACKERBOAT_SRCS+= adcInput.cpp
-LIBHACKERBOAT_SRCS+= throttle.cpp
-LIBHACKERBOAT_SRCS+= relay.cpp
-LIBHACKERBOAT_SRCS+= lsm303.cpp
-LIBHACKERBOAT_SRCS+= adc128d818.cpp
 LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp
 LIBHACKERBOAT_SRCS+= gps.cpp
@@ -80,17 +84,13 @@ LIBHACKERBOAT_SRCS+= ais.cpp
 LIBHACKERBOAT_SRCS+= pid.cpp
 LIBHACKERBOAT_SRCS+= twovector.cpp
 LIBHACKERBOAT_SRCS+= orientation.cpp
-LIBHACKERBOAT_SRCS+= orientationInput.cpp
 LIBHACKERBOAT_SRCS+= jansson_extras.cpp
 LIBHACKERBOAT_SRCS+= json_utilities.cpp
 LIBHACKERBOAT_SRCS+= json_ostream.cpp
-LIBHACKERBOAT_SRCS+= gpio.cpp
-LIBHACKERBOAT_SRCS+= servo.cpp
 LIBHACKERBOAT_SRCS+= boatState.cpp
 LIBHACKERBOAT_SRCS+= boatModes.cpp
 LIBHACKERBOAT_SRCS+= navModes.cpp
 LIBHACKERBOAT_SRCS+= healthMonitor.cpp
-LIBHACKERBOAT_C_SRCS+= lsquaredc.c
 LOGGING_SRCS= easylogging++.cc
 
 libhackerboat.a: libhackerboat.a($(LIBHACKERBOAT_SRCS:.cpp=.o) $(LOGGING_SRCS:.cc=.o) $(LIBHACKERBOAT_C_SRCS:.c=.o))
@@ -98,16 +98,20 @@ ALL_OBJS+=$(LIBHACKERBOAT_SRCS:.cpp=.o)
 ALL_OBJS+=$(LIBHACKERBOAT_C_SRCS:.c=.o)
 ALL_OBJS+=$(LOGGING_SRCS:.cc=.o)
 
+libhackerboathal.a: libhackerboathal.a($(LIBHACKERBOAT_HAL_SRCS:.cpp=.o) $(LIBHACKERBOAT_C_HAL_SRCS:.c=.o))
+ALL_OBJS+=$(LIBHACKERBOAT_HAL_SRCS:.cpp=.o)
+ALL_OBJS+=$(LIBHACKERBOAT_C_HAL_SRCS:.c=.o)
+
 MASTER_SRCS=master/hackerboatMasterControl.cpp
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
 ALL_OBJS+=$(MASTER_OBJS)
 
-master: $(MASTER_OBJS) libhackerboat.a
+master: $(MASTER_OBJS) libhackerboat.a libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 RC_SRCS=master/hackerboatRC.cpp
 RC_OBJS=$(addprefix src/,$(RC_SRCS:.cpp=.o))
-rcctrl: $(RC_OBJS) libhackerboat.a
+rcctrl: $(RC_OBJS) libhackerboat.a libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
@@ -171,34 +175,34 @@ ALL_OBJS+=$(SERVO_TEST_OBJS)
 ALL_OBJS+=$(GPS_TEST_OBJS)
 ALL_OBJS+=$(AIO_REST_TEST_OBJS)
 
-rc_test: $(RC_TEST_OBJS) libhackerboat.a
+rc_test: $(RC_TEST_OBJS) libhackerboat.a libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboat.a
+orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-adc_test: $(ADC_TEST_OBJS) libhackerboat.a
+adc_test: $(ADC_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-relay_test: $(RELAY_TEST_OBJS) libhackerboat.a
+relay_test: $(RELAY_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-throttle_test: $(THROTTLE_TEST_OBJS) libhackerboat.a
+throttle_test: $(THROTTLE_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-servo_test: $(SERVO_TEST_OBJS) libhackerboat.a
+servo_test: $(SERVO_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-gps_test: $(GPS_TEST_OBJS) libhackerboat.a
+gps_test: $(GPS_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
-aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboat.a
+aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboat.a  libhackerboathal.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test aio_rest_test
 
 clean:
-	rm -f libhackerboat.a
+	rm -f libhackerboat.a  libhackerboathal.a
 	rm -f storage_test
 	rm -f $(ALL_OBJS)
 	rm -f $(ALL_OBJS:.o=.d)

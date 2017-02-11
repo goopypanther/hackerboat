@@ -5,11 +5,11 @@
  * see the Hackerboat documentation for more details
  *
  * Written by Pierce Nichols, Aug 2016
- * 
+ *
  * Version 0.1: First alpha
  *
  ******************************************************************************/
- 
+
 #include "hal/config.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,16 +28,14 @@
 
 #include "hal/adcInput.hpp"
 #include "hal/gpsdInput.hpp"
-#include "hal/lights.hpp"
 #include "hal/orientationInput.hpp"
 #include "hal/RCinput.hpp"
 #include "hal/servo.hpp"
 #include "hal/throttle.hpp"
 #include "waypoint.hpp"
-#include "mqtt.hpp"
 #include "easylogging++.h"
 
-#define ELPP_STL_LOGGING 
+#define ELPP_STL_LOGGING
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -50,13 +48,13 @@ int main (int argc, char **argv) {
 	// command file path
 	std::string cmdfilepath = "/home/debian/hackerboat/embedded_software/unified/ctrl/command.json";
 	std::ifstream cmdin;
-	
+
     // Load configuration from file
     el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
-	
+
 	// system setup
 	BoatState state;
 	state.rc = new RCInput();
@@ -67,7 +65,7 @@ int main (int argc, char **argv) {
 	state.rudder = new Servo();
 	state.throttle = new Throttle();
 	state.orient = new OrientationInput(SensorOrientation::SENSOR_AXIS_Z_UP);
-	
+
 	// start the input threads
 	if (!state.rudder->attach(RUDDER_PORT, RUDDER_PIN)) {
 		LOG(FATAL) << "Rudder failed to attach";
@@ -89,20 +87,20 @@ int main (int argc, char **argv) {
 		LOG(FATAL)  << "ADC subsystem failed to start";
 		return -1;
 	}
-	
+
 	// create the boat mode
 	BoatModeBase *mode, *oldmode;
 	mode = BoatModeBase::factory(state, BoatModeEnum::START);
 	oldmode = mode;
-	
+
 	cout << "All configured -- entering state" << std::endl;
-	
+
 	// run the boat
 	for (;;) {
 		// read inputs
 		state.lastFix = *state.gps->getFix();
 		state.health->readHealth();
-		
+
 		// look for commands in the command file
 		// this is a thoroughly fugly hack to make up for the fact that MQTT is not up and running yet
 		if (!access(cmdfilepath.c_str(), R_OK)) {
@@ -128,7 +126,7 @@ int main (int argc, char **argv) {
 				cmdin.close();
 				// we scrub the file once we've read it
 				std::ofstream cmdout;
-				cmdout.open(cmdfilepath, std::ofstream::trunc);		// open the file and discard the contents		
+				cmdout.open(cmdfilepath, std::ofstream::trunc);		// open the file and discard the contents
 				if (cmdout.is_open()) cmdout << "";					// overwrite the contents of the file if we opened it
 				cmdout.close();
 			}
@@ -137,7 +135,7 @@ int main (int argc, char **argv) {
 				execflag = false;
 			}
 		}
-		
+
 		// run the state
 		auto endtime = std::chrono::system_clock::now() + 100ms;
 		oldmode = mode;
@@ -145,7 +143,7 @@ int main (int argc, char **argv) {
 		if (mode != oldmode) delete oldmode;
 		std::this_thread::sleep_until(endtime);
 	}
-	
+
 	return 0;
-	
+
 }
