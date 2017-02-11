@@ -154,11 +154,11 @@ TEST(BoatStateTest, JSON) {
 	VLOG(2) << "Packed JSON: " << json_dumps(packed, 0);
 	EXPECT_TRUE(you.parse(packed));
 	VLOG(2) << "Parsed JSON: " << you;
-	EXPECT_EQ(me.recordTime, you.recordTime);
+	EXPECT_EQ(floor<milliseconds>(me.recordTime), you.recordTime);
 	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
 	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
-	EXPECT_EQ(me.lastContact, you.lastContact);
-	EXPECT_EQ(me.lastRC, you.lastRC);
+	EXPECT_EQ(floor<milliseconds>(me.lastContact), you.lastContact);
+	EXPECT_EQ(floor<milliseconds>(me.lastRC), you.lastRC);
 	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
 	EXPECT_EQ(me.launchPoint.lon, you.launchPoint.lon);
 	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
@@ -194,11 +194,11 @@ TEST(BoatStateTest, Storage) {
 	EXPECT_TRUE(me.appendRecord());
 	EXPECT_TRUE(you.getLastRecord());
 	VLOG(2) << "Recovered object: " << you;
-	EXPECT_EQ(me.recordTime, you.recordTime);
+	EXPECT_EQ(floor<milliseconds>(me.recordTime), you.recordTime);
 	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
 	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
-	EXPECT_EQ(me.lastContact, you.lastContact);
-	EXPECT_EQ(me.lastRC, you.lastRC);
+	EXPECT_EQ(floor<milliseconds>(me.lastContact), you.lastContact);
+	EXPECT_EQ(floor<milliseconds>(me.lastRC), you.lastRC);
 	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
 	EXPECT_EQ(me.launchPoint.lon, you.launchPoint.lon);
 	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
@@ -302,9 +302,9 @@ TEST(BoatStateTest, SetWaypoint) {
 	BoatState me;
 	json_error_t err;
 	me.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/test_map_1.kml");
-	VLOG(2) << "Count: " << me.waypointList.count() 
-			<< ", current: " << me.waypointList.current() 
-			<< ", action: " 
+	VLOG(2) << "Count: " << me.waypointList.count()
+			<< ", current: " << me.waypointList.current()
+			<< ", action: "
 			<< me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.waypointList.count(), 7);
 	EXPECT_EQ(me.waypointList.current(), 0);
@@ -315,7 +315,7 @@ TEST(BoatStateTest, SetWaypoint) {
 	EXPECT_EQ(me.waypointList.current(), 4);
 	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":8}", 0, &err)));
 	EXPECT_EQ(me.executeCmds(1), 1);
-	VLOG(2) << "Count: " << me.waypointList.count() 
+	VLOG(2) << "Count: " << me.waypointList.count()
 			<< ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 6);
 	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":-1}", 0, &err)));
