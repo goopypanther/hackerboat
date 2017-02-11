@@ -3,6 +3,7 @@
 *.ko
 *.obj
 *.elf
+*.d
 
 # Libraries
 *.lib
@@ -23,13 +24,25 @@
 *.hex
 gpsParse
 hb.fcgi
-master
 nav
+embedded_software/unified/master
+embedded_software/unified/unit_tests
+embedded_software/unified/rc_test
+embedded_software/unified/orientation_test
+embedded_software/unified/adc_test
+embedded_software/unified/relay_test
+embedded_software/unified/throttle_test
+embedded_software/unified/servo_test
+embedded_software/unified/rcctrl
+embedded_software/unified/gps_test
+embedded_software/unified/aio_rest_test
+BUILD
 
 # Eagle
 *.s#*
 *.b#*
-*.l#*
+*.l#
+*.scr
 
 # Excel files
 ~$*

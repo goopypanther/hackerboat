@@ -1,0 +1,6 @@
+
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/bin/sh -c 'chown -R debian:gpio /sys/class/gpio'"
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/bin/sh -c 'chown -R debian:gpio /sys/devices/platform/ocp/*.gpio'"
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/bin/sh -c 'chown -R debian:gpio /sys/class/pwm'"
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/bin/sh -c 'chown -R debian:gpio /sys/devices/platform/ocp/*.epwmss'"
+

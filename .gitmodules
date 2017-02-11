@@ -1,9 +1,25 @@
-[submodule "embedded_software/arduino/HackerBoatLib"]
-	path = embedded_software/arduino/HackerBoatLib
-	url = https://github.com/logos-electromechanical/HackerBoatLib.git
-[submodule "embedded_software/beaglebone/submodules/jansson"]
-	path = embedded_software/beaglebone/submodules/jansson
-	url = https://github.com/akheron/jansson
-[submodule "embedded_software/beaglebone/submodules/minmea"]
-	path = embedded_software/beaglebone/submodules/minmea
-	url = https://github.com/logos-electromechanical/minmea.git
+[submodule "embedded_software/unified/submodules/jansson"]
+	path = embedded_software/unified/submodules/jansson
+	url = https://github.com/logos-electromechanical/jansson.git
+[submodule "embedded_software/unified/submodules/date"]
+	path = embedded_software/unified/submodules/date
+	url = https://github.com/logos-electromechanical/date.git
+
+[submodule "embedded_software/unified/submodules/GeographicLib"]
+	path = embedded_software/unified/submodules/GeographicLib
+	url = git://git.code.sf.net/p/geographiclib/code
+[submodule "embedded_software/unified/submodules/lsquaredc"]
+	path = embedded_software/unified/submodules/lsquaredc
+	url = https://github.com/jwr/lsquaredc.git
+[submodule "embedded_software/unified/submodules/paho.mqtt.c"]
+	path = embedded_software/unified/submodules/paho.mqtt.c
+	url = https://github.com/eclipse/paho.mqtt.c.git
+[submodule "embedded_software/unified/submodules/hackerboat-private"]
+	path = embedded_software/unified/submodules/hackerboat-private
+	url = https://github.com/logos-electromechanical/hackerboat-private.git
+[submodule "embedded_software/unified/submodules/easyloggingpp"]
+	path = embedded_software/unified/submodules/easyloggingpp
+	url = https://github.com/logos-electromechanical/easyloggingpp.git
+[submodule "embedded_software/unified/submodules/googletest"]
+	path = embedded_software/unified/submodules/googletest
+	url = https://github.com/google/googletest.git

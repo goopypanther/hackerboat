@@ -1,0 +1,35 @@
+These packages need to be installed, along with their pre-requisites:
+
+lighttpd
+libsqlite3-dev
+libfcgi-dev
+gcc-4.7
+g++-4.7
+cmake (to build jansson)
+automake  (at least version 1.10)
+libtool
+daemontools
+libcurl
+Boost
+
+These are not available as packages, but are included as Git submodules:
+
+https://github.com/akheron/jansson (json parsing)
+https://github.com/google/libkml (KML parsing)
+https://github.com/HowardHinnant/date (date parsing)
+https://sourceforge.net/p/geographiclib/code/ci/release/tree/ (Geographic processing)
+https://github.com/toroidal-code/PixelBone (Neopixel control)
+http://pstreams.sourceforge.net/ (External processes as streams)
+
+These are useful for development and debugging:
+
+sqlite3  (for inspecting database contents)
+lighttpd-doc
+libgtest-dev (for the unit tests)
+
+The following commanda need to be run to install data for the benefit of GeographicLib:
+
+geographiclib-get-magnetic all
+geographiclib-get-geoids best
+
+See https://github.com/cdsteinkuehler/beaglebone-universal-io for directions on how to make the IO work.

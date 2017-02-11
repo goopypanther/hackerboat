@@ -1,0 +1,205 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%Title: EAGLE Drawing C:/Users/Pierce/Documents/GitHub/hackerboat-hardware/hardware/electronics/ControlBoard/Hackerboat Control Board.brd
+%%Creator: EAGLE
+%%Pages: 1
+%%BoundingBox: 0 0 364 618
+%%EndComments
+
+% Coordinate transfer:
+
+/EU { 254 div 0.072 mul } def
+/inch { 72 mul } def
+
+% Linestyle:
+
+1 setlinecap
+1 setlinejoin
+
+% Drawing functions:
+
+/l {  % draw a line
+   /lw exch def
+   /y2 exch def
+   /x2 exch def
+   /y1 exch def
+   /x1 exch def
+   newpath
+   x1 EU y1 EU moveto
+   x2 EU y2 EU lineto
+   lw EU setlinewidth
+   stroke
+   } def
+
+/h {  % draw a hole
+   /d  exch def
+   /y  exch def
+   /x  exch def
+   d 0 gt {
+     newpath
+     x EU y EU d 2 div EU 0 360 arc
+     currentgray dup
+     1 exch sub setgray
+     fill
+     setgray
+     } if
+   } def
+
+/b {  % draw a bar
+   /an exch def
+   /y2 exch def
+   /x2 exch def
+   /y1 exch def
+   /x1 exch def
+   /w2 x2 x1 sub 2 div EU def
+   /h2 y2 y1 sub 2 div EU def
+   gsave
+   x1 x2 add 2 div EU y1 y2 add 2 div EU translate
+   an rotate
+   newpath
+   w2     h2     moveto
+   w2 neg h2     lineto
+   w2 neg h2 neg lineto
+   w2     h2 neg lineto
+   closepath
+   fill
+   grestore
+   } def
+
+/c {  % draw a circle
+   /lw exch def
+   /rd exch def
+   /y  exch def
+   /x  exch def
+   newpath
+   lw EU setlinewidth
+   x EU y EU rd EU 0 360 arc
+   stroke
+   } def
+
+/a {  % draw an arc
+   /lc exch def
+   /ae exch def
+   /as exch def
+   /lw exch def
+   /rd exch def
+   /y  exch def
+   /x  exch def
+   lw rd 2 mul gt {
+     /rd rd lw 2 div add 2 div def
+     /lw rd 2 mul def
+     } if
+   currentlinecap currentlinejoin
+   lc setlinecap 0 setlinejoin
+   newpath
+   lw EU setlinewidth
+   x EU y EU rd EU as ae arc
+   stroke
+   setlinejoin setlinecap
+   } def
+
+/p {  % draw a pie
+   /d exch def
+   /y exch def
+   /x exch def
+   newpath
+   x EU y EU d 2 div EU 0 360 arc
+   fill
+   } def
+
+/edge { 0.20710678119 mul } def
+
+/o {  % draw an octagon
+   /an exch def
+   /dy exch def
+   /dx exch def
+   /y  exch def
+   /x  exch def
+   gsave
+   x EU y EU translate
+   an dx dy lt { 90 add /dx dy /dy dx def def } if rotate
+   newpath
+      0 dx 2 div sub EU                    0 dy edge  add EU moveto
+      0 dx dy sub 2 div sub dy edge sub EU 0 dy 2 div add EU lineto
+      0 dx dy sub 2 div add dy edge add EU 0 dy 2 div add EU lineto
+      0 dx 2 div add EU                    0 dy edge  add EU lineto
+      0 dx 2 div add EU                    0 dy edge  sub EU lineto
+      0 dx dy sub 2 div add dy edge add EU 0 dy 2 div sub EU lineto
+      0 dx dy sub 2 div sub dy edge sub EU 0 dy 2 div sub EU lineto
+      0 dx 2 div sub EU                    0 dy edge  sub EU lineto
+   closepath
+   fill
+   grestore
+   } def
+
+1009332 333926 1019332 344926 180.0 b
+992332 333926 1002332 344926 180.0 b
+993582 314676 999082 326676 0.0 b
+1003082 314676 1008582 326676 0.0 b
+1012582 314676 1018082 326676 0.0 b
+1012582 288676 1018082 300676 0.0 b
+993582 288676 999082 300676 0.0 b
+895032 333926 905032 344926 180.0 b
+878032 333926 888032 344926 180.0 b
+879282 314676 884782 326676 0.0 b
+888782 314676 894282 326676 0.0 b
+898282 314676 903782 326676 0.0 b
+898282 288676 903782 300676 0.0 b
+879282 288676 884782 300676 0.0 b
+1066482 333926 1076482 344926 180.0 b
+1049482 333926 1059482 344926 180.0 b
+1050732 314676 1056232 326676 0.0 b
+1060232 314676 1065732 326676 0.0 b
+1069732 314676 1075232 326676 0.0 b
+1069732 288676 1075232 300676 0.0 b
+1050732 288676 1056232 300676 0.0 b
+952182 333926 962182 344926 180.0 b
+935182 333926 945182 344926 180.0 b
+936432 314676 941932 326676 0.0 b
+945932 314676 951432 326676 0.0 b
+955432 314676 960932 326676 0.0 b
+955432 288676 960932 300676 0.0 b
+936432 288676 941932 300676 0.0 b
+1008832 270926 1019832 280926 180.0 b
+991832 270926 1002832 280926 180.0 b
+894532 270926 905532 280926 180.0 b
+877532 270926 888532 280926 180.0 b
+769582 283626 780582 293626 0.0 b
+786582 283626 797582 293626 0.0 b
+951682 270926 962682 280926 180.0 b
+934682 270926 945682 280926 180.0 b
+1065982 270926 1076982 280926 180.0 b
+1048982 270926 1059982 280926 180.0 b
+1046432 644126 1051432 646626 180.0 b
+1046432 639126 1051432 641626 180.0 b
+1046432 634126 1051432 636626 180.0 b
+1046432 629126 1051432 631626 180.0 b
+1036432 644126 1041432 646626 180.0 b
+1036432 639126 1041432 641626 180.0 b
+1036432 634126 1041432 636626 180.0 b
+1036432 629126 1041432 631626 180.0 b
+1046432 682226 1051432 684726 180.0 b
+1046432 677226 1051432 679726 180.0 b
+1046432 672226 1051432 674726 180.0 b
+1046432 667226 1051432 669726 180.0 b
+1036432 682226 1041432 684726 180.0 b
+1036432 677226 1041432 679726 180.0 b
+1036432 672226 1041432 674726 180.0 b
+1036432 667226 1041432 669726 180.0 b
+1046432 720326 1051432 722826 180.0 b
+1046432 715326 1051432 717826 180.0 b
+1046432 710326 1051432 712826 180.0 b
+1046432 705326 1051432 707826 180.0 b
+1036432 720326 1041432 722826 180.0 b
+1036432 715326 1041432 717826 180.0 b
+1036432 710326 1041432 712826 180.0 b
+1036432 705326 1041432 707826 180.0 b
+1046432 758426 1051432 760926 180.0 b
+1046432 753426 1051432 755926 180.0 b
+1046432 748426 1051432 750926 180.0 b
+1046432 743426 1051432 745926 180.0 b
+1036432 758426 1041432 760926 180.0 b
+1036432 753426 1041432 755926 180.0 b
+1036432 748426 1041432 750926 180.0 b
+1036432 743426 1041432 745926 180.0 b
+237632 1250176 290632 1270176 90.0 b
+171632 1250176 224632 1270176 90.0 b
