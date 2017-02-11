@@ -11,9 +11,6 @@
 [submodule "embedded_software/unified/submodules/lsquaredc"]
 	path = embedded_software/unified/submodules/lsquaredc
 	url = https://github.com/jwr/lsquaredc.git
-[submodule "embedded_software/unified/submodules/paho.mqtt.c"]
-	path = embedded_software/unified/submodules/paho.mqtt.c
-	url = https://github.com/eclipse/paho.mqtt.c.git
 [submodule "embedded_software/unified/submodules/hackerboat-private"]
 	path = embedded_software/unified/submodules/hackerboat-private
 	url = https://github.com/logos-electromechanical/hackerboat-private.git
