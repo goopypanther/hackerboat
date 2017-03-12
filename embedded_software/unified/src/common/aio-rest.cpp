@@ -27,10 +27,13 @@
 #include "boatState.hpp"
 #include "aio-rest.hpp"
 #include "easylogging++.h"
-#include "pstream.h"
+extern "C" {
+	#include <curl/curl.h>
+}
 
 using namespace std;
-using namespace redi;
+
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
 AIO_Rest::AIO_Rest (BoatState *me, string host, string username, string key, string group, string datatype,
 	std::chrono::system_clock::duration subper, std::chrono::system_clock::duration pubper) :
@@ -75,7 +78,7 @@ int AIO_Rest::publishAll() {
 	for (auto r: *_pub) {
 		VLOG(2) << "Publishing " << r.first;
 		int result = r.second->pub();
-		if ((result >= 200) && (result < 300)) cnt++;
+		if (result == CURLE_OK) cnt++;
 	}
 	return cnt;
 }
@@ -90,8 +93,10 @@ int AIO_Rest::pollSubs() {
 	VLOG(1) << "Polling all subscribed channels";
 	for (auto r: *_sub) {
 		LOG(DEBUG) << "Polling " << r.first;
+		cout << endl << "Polling " << r.first << endl;
 		int result = r.second->poll();
-		if (result) cnt++;
+		cout << "Result: " << result << endl;
+		if (result >= 0) cnt++;
 	}
 	return cnt;
 }
@@ -128,130 +133,114 @@ bool AIO_Rest::execute() {
 // communication functions
 
 int AIO_Rest::transmit (string feedkey, string payload) {
-	pstreambuf curlstr;
-	string respbuf, statusbuf;
-	int i = 0;
+	CURLcode ret;
+	CURL *hnd;
+	struct curl_slist *slist1;
+	char errbuf[CURL_ERROR_SIZE];
 
-	// build command string
-	string cmd = REST_CURL;												// start with the curl command
-	cmd += " -H \"" + string(REST_AIO_KEY_HEADER); 						// Insert header for the API key
-	cmd += string(REST_KEY) + "\"";										// Insert the API key
-	cmd += " -H \"Content-Type: application/json\" -X POST -d "; 		// This is the preamble required to POST JSON correctly
-	cmd += "'" + payload + "' -w '\\n%{http_code}\\n' ";				// Add the payload and specify that the HTTP response code will be printed on the next line
-	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
+	// assemble header string
+	string keyheader = REST_AIO_KEY_HEADER;
+	keyheader += REST_KEY;
 
-	// fire the command off and wait for a response
-	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
-	LOG(DEBUG) << "Querying AIO with " << cmd;
-	while (!curlstr.in_avail() && (i < REST_COUNT_OUT)) {
-		i++;
-		this_thread::sleep_for(REST_DELAY);
-	}
-	if (i >= REST_COUNT_OUT) {
-		curlstr.close();
-		return -1;
-	}
+	// assemble URL string
+	string url = this->_uri + this->_name + "/feeds/" + feedkey + "/data";
+	//cout << "Transmitting to url: " << url << endl;
 
-	// read the data
-	respbuf = getResponse(&curlstr);
-	statusbuf = getResponse(&curlstr, 10);
+	// assemble request
+	slist1 = NULL;
+	slist1 = curl_slist_append(slist1, keyheader.c_str());
+	slist1 = curl_slist_append(slist1, "Content-Type: application/json");
 
-	// parse the status code
-	int response = stoi(statusbuf);
+	hnd = curl_easy_init();
+	curl_easy_setopt(hnd, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, payload.c_str());
+	curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)payload.length());
+	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.38.0");
+	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
+	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+	curl_easy_setopt(hnd, CURLOPT_SSH_KNOWNHOSTS, "/home/debian/.ssh/known_hosts");
+	curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, errbuf);
+	curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1);			// trigger a failure on a 400-series return code.
+
+	// make request
+	ret = curl_easy_perform(hnd);
+
+	// clean up request
+	curl_easy_cleanup(hnd);
+	hnd = NULL;
+	curl_slist_free_all(slist1);
+	slist1 = NULL;
 
 	// if we have a good status code, record this as last contact
-	if ((response >= 200) && (response < 300)) {
+	if (ret == CURLE_OK) {
 		state->lastContact = std::chrono::system_clock::now();
 	}
 
-	//LOG(DEBUG) << "Publishing payload [" << payload << "] to feed: [" << feedkey << "]";
-	LOG_IF(((response < 200) || (response >= 300)), WARNING) << "AIO REST transmission failed: " << cmd;
-	LOG_EVERY_N(8, INFO) << "Publishing payload [" << payload << "] to feed: [" << feedkey << "] with HTTP code " << response;
-	return response;
+	LOG_IF((ret != CURLE_OK), WARNING) << "AIO REST transmission failed: " << errbuf;
+	LOG_EVERY_N(8, INFO) << "Publishing payload [" << payload << "] to feed: [" << feedkey << "] with HTTP code " << to_string(ret);
+	return (int)ret;
 }
 
 string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
-	pstreambuf curlstr;
-	string respbuf, statusbuf;
-	int i = 0;
+	CURLcode ret;
+	CURL *hnd;
+	struct curl_slist *slist1;
+	string response;
+	char errbuf[CURL_ERROR_SIZE];
 
-	// build command string
-	string cmd = REST_CURL;												// start with the curl command
-	cmd += " -H \"" + string(REST_AIO_KEY_HEADER); 						// Insert header for the API key
-	cmd += string(REST_KEY) + "\"";										// Insert the API key
-	cmd += " -w '\\n%{http_code}\\n' ";								// Specify that the HTTP response code will be printed on the next line after the response
-	cmd += this->_uri + this->_name + "/feeds/" + feedkey + "/data";	// Build the URL
-	if (specifier.length()) cmd += "?start_time=" + specifier;
+	// assemble header string
+	string keyheader = REST_AIO_KEY_HEADER;
+	keyheader += REST_KEY;
 
-	// fire the command off and wait for a response
-	curlstr.open(cmd, pstreams::pstdout | pstreams::pstderr);
-	LOG(DEBUG) << "Querying AIO with " << cmd;
-	while (!curlstr.in_avail() && (i < REST_COUNT_OUT)) {
-		i++;
-		this_thread::sleep_for(REST_DELAY);
-	}
-	if (i >= REST_COUNT_OUT) {
-		curlstr.close();
-		return "";
+	// assemble URL string
+	hnd = curl_easy_init();
+	string url = this->_uri + this->_name + "/feeds/" + feedkey + "/data";
+	if (specifier.length()) {
+		url += "?start_time=";
+		url += curl_easy_escape(hnd, specifier.c_str(), specifier.size());
 	}
 
-	// read the data
-	respbuf = getResponse(&curlstr);
-	statusbuf = getResponse(&curlstr, 10);
+	// assemble request
+	slist1 = NULL;
+	slist1 = curl_slist_append(slist1, keyheader.c_str());
 
-	// parse the status code
-	*httpStatus = stoi(statusbuf);
+	curl_easy_setopt(hnd, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.38.0");
+	curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
+	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+	curl_easy_setopt(hnd, CURLOPT_SSH_KNOWNHOSTS, "/home/debian/.ssh/known_hosts");
+	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, errbuf);
+	curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1);			// trigger a failure on a 400-series return code.
+
+	// set up data writer callback
+	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, (void *)&response);
+
+	// make request
+	ret = curl_easy_perform(hnd);
+
+	// clean up request
+	curl_easy_cleanup(hnd);
+	hnd = NULL;
+	curl_slist_free_all(slist1);
+	slist1 = NULL;
 
 	// if we have a good status code, record this as last contact
-	if ((*httpStatus >= 200) && (*httpStatus < 300)) {
+	if (ret == CURLE_OK) {
 		state->lastContact = std::chrono::system_clock::now();
 	}
 
-	LOG_IF(((*httpStatus < 200) || (*httpStatus >= 300)), WARNING) << "AIO REST request failed: " << cmd;
-	return respbuf;
-}
-
-string AIO_Rest::getResponse(	redi::pstreambuf *str,
-								size_t maxlen,
-								std::chrono::system_clock::duration timeout) {
-	string buf = "";																// allocate a buffer
-	auto endTime = std::chrono::system_clock::now() + timeout;						// figure out what time we should stop
-	while (str->in_avail() || (std::chrono::system_clock::now() < endTime)) {		// wait for characters to show up on the input buffer and read them
-		if (str->in_avail()) buf.push_back(str->sbumpc());							// grab the next character, if there is one
-		if (buf.back() == '\n') break;												// look for the end of the line. This character should match the one passed to curl as a separator.
-	}
-	return buf;
+	*httpStatus = ret;
+	LOG_IF((ret != CURLE_OK), WARNING) << "AIO REST request failed" << errbuf;
+	return response;
 }
 
 // AIO_Subscriber class functions
-
-// function shamelessly stolen from http://stackoverflow.com/questions/154536/encode-decode-urls-in-c
-// And since that didn't work reliably, here it is from their original source, http://www.geekhideout.com/urlcode.shtml
-char AIO_Subscriber::toHex(char code) {
-	static char hex[] = "0123456789ABCDEF";
-	return hex[code & 15];
-}
-
-string AIO_Subscriber::urlEncode(const string &value) {
-    string escaped = "";
-
-    for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
-        unsigned char c = (*i);
-
-        // Keep alphanumeric and other accepted characters intact
-        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
-            escaped += c;
-        } else if (c == ' ') {
-			escaped += "%20";
-		} else {
-			escaped += '%';
-			escaped += toHex(c >> 4);	// hexify the top nibble
-			escaped += toHex(c & 15);	// hexify the bottom nibble
-		}
-    }
-
-    return escaped;
-}
 
 string AIO_Subscriber::stripEscape(const string &value) {
 	string stripped = "";
@@ -265,10 +254,11 @@ string AIO_Subscriber::stripEscape(const string &value) {
 // Publish functors
 
 int pub_SpeedLocation::pub() {
-	string payload = "{\"value\":" + to_string(_me->lastFix.speed) + ",";
+	string payload = "{\"value\":\"" + to_string(_me->lastFix.speed) + "\",";
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -278,7 +268,11 @@ int pub_Mode::pub() {
 	payload += "," + _me->navModeNames.get(_me->getNavMode());
 	payload += "," + _me->autoModeNames.get(_me->getAutoMode());
 	payload += "," + _me->rcModeNames.get(_me->getRCMode());
-	payload += "\"}";
+	payload += "\",";
+	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
+	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
+	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -289,6 +283,7 @@ int pub_MagHeading::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -298,6 +293,7 @@ int pub_GPSCourse::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -308,6 +304,7 @@ int pub_BatteryVoltage::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -318,6 +315,7 @@ int pub_RudderPosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -328,23 +326,29 @@ int pub_ThrottlePosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
 int pub_FaultString::pub() {
 	string payload = "{\"value\":\"";
-	payload += _me->getFaultString();
-	payload += "\"}";
+	if(_me->getFaultString().length()) {
+		payload += _me->getFaultString();
+	} else {
+		payload += "None";
+	}
+	payload += "\",";
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
+	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	if (_me->getFaultString().length()) {
 		_last = true;
 		return this->_rest->transmit(this->_key, payload);
 	} else if (this->_last) {
 		_last = false;
 		return this->_rest->transmit(this->_key, payload);
-	} else return 200;
+	} else return CURLE_OK;
 }
 
 // Subscriber functors
@@ -353,13 +357,13 @@ int sub_Command::poll() {
 	json_error_t err;
 	string payload, mostRecent;
 	try {
-		payload = _rest->fetch(_key, urlEncode(_lastMessageTime), &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
+		payload = _rest->fetch(_key, _lastMessageTime, &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
 	} catch (...) {
 		LOG(ERROR) << "Subscription poll failed for unknown reasons" << endl;
 		return -1;
 	}
-	if (!payload.length()) return 0;										// If no payload string, depart
-	if ((httpStatus < 200) || (httpStatus >= 300)) return 0;				// If we didn't get a good HTTP status code, depart
+	if (!payload.length()) return 0;					// If no payload string, depart
+	if (httpStatus != CURLE_OK) return -1;				// If we didn't get a good HTTP status code, depart
 
 	json_t *element, *input = json_loads(payload.c_str(), 0, &err);
 	if (input) {
@@ -381,7 +385,7 @@ int sub_Command::poll() {
 				json_t *argjson =  json_object_get(val, "argument");					// grab the JSON in the arguments
 				json_incref(argjson);													// we need to increment the reference because it's borrowed and would otherwise be destroyed when we call json_decref(val)
 				_me->pushCmd(cmdstring, argjson);
-				LOG(DEBUG) << "Pushed command is [" << json_string_value(json_object_get(val, "command")) << "]" << endl;
+				LOG(DEBUG) << "Pushed command is [" << json_string_value(json_object_get(val, "command")) << "]";
 				LOG(DEBUG) << "Pushed argument is [" << json_object_get(val, "argument") << "]";
 			} else {
 				LOG(ERROR) << "Failed to parse command [" << value << "]";
@@ -393,11 +397,25 @@ int sub_Command::poll() {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
 		LOG(ERROR) << "JSON error: " << err.text << " source: " << err.source
 					<< " line: " << to_string(err.line) << " column: " << to_string(err.column);
-		return 0;
+		return -1;
 	}
 	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands
 	// This needs to be fixed b/c it's a potential security hole
 	if (mostRecent != "") _lastMessageTime = mostRecent;
 	json_decref(input);
 	return payload.length();
+}
+
+// This is the write callback for libcurl
+// userp is expected to be of type std::string; if it is not, bad strange things will happen
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+	string *target = (string *)userp;
+	char *ptr = (char *)contents;
+
+	target->clear();
+	size *= nmemb;
+	for (size_t i = 0; i < size; i++) {
+		*target += ptr[i];
+	}
+	return size;
 }

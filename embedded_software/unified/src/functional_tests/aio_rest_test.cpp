@@ -57,8 +57,10 @@ int main(int argc, char **argv) {
 	cout << "Subscription map created..." << endl;
 	myrest.setPubFuncMap(mypubmap);
 	myrest.setSubFuncMap(mysubmap);
+	me.insertFault("testFault");
 	for (int x = 0; x < 20; x++) {
 		cout << "Calling publishNext()... " << to_string(myrest.publishNext()) << endl;
+		if (x > 10) me.clearFaults();
 		std::this_thread::sleep_for(500ms);
 	}
 	cout << "Starting threading test..." << endl;
