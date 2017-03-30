@@ -98,18 +98,19 @@ bool GPSdInput::execute() {
 	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
 	bool result = true;
 	json_error_t inerr;
-	string buf = "";
+	string buf;
+	buf.resize(GPS_BUF_SIZE);
 	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
 		i++;
-		if (buf.back() == '\r') break;
+		if (buf.back() == '\r')	break;
 		if (i > 5000) break;
 	} 
 	if (buf.length() > 10) {
 		json_t* input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
 		if (input) {
-			buf.clear();
+			//buf.clear();
 			json_t* objclass = json_object_get(input, "class");
 			if (objclass) {
 				string s;

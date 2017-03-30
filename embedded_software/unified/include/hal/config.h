@@ -40,11 +40,16 @@
 #define SYSTEM_SERVO_ENB_PIN		(19)
 #define	RUDDER_PORT					(9)
 #define RUDDER_PIN					(16)
-#define PID_KP						(1.0)
+#define PID_KP						(10.0)
 #define PID_KI						(0.1)
 #define PID_KD						(0.0)
 
+// buffer sizes
+
+#define GPS_BUF_SIZE				(2000)
+
 // Scales and offsets
+
 #define IMU_MAG_OFFSET				{{'x',330},{'y',-86},{'z',386}}
 #define IMU_MAG_SCALE				{{'x',0.15835},{'y',0.18519},{'z',0.18149}}
 
@@ -64,6 +69,7 @@
 #define RC_HORN_SWITCH				(7)
 
 // Autonomous definitions
+
 #define AUTO_DEFAULT_THROTTLE 	(5)
 #define AUTO_WAYPOINT_TOL		(50.0)
 #define ANCHOR_DEADBAND			(5.0)

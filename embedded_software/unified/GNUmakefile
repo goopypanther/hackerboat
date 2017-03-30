@@ -107,12 +107,12 @@ MASTER_SRCS=master/hackerboatMasterControl.cpp
 MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
 ALL_OBJS+=$(MASTER_OBJS)
 
-master: $(MASTER_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+master: $(MASTER_OBJS) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
 RC_SRCS=master/hackerboatRC.cpp
 RC_OBJS=$(addprefix src/,$(RC_SRCS:.cpp=.o))
-rcctrl: $(RC_OBJS) libhackerboathal.a libhackerboat.a
+rcctrl: $(RC_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 # Unit test targets
@@ -130,7 +130,7 @@ TEST_OBJS += boatmode_test.o
 TEST_OBJS += sqliteStorage_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
-unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a
+unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # gtest rules:
@@ -176,29 +176,29 @@ ALL_OBJS+=$(SERVO_TEST_OBJS)
 ALL_OBJS+=$(GPS_TEST_OBJS)
 ALL_OBJS+=$(AIO_REST_TEST_OBJS)
 
-rc_test: $(RC_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+rc_test: $(RC_TEST_OBJS) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+orientation_test: $(ORIENTATION_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-adc_test: $(ADC_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+adc_test: $(ADC_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-relay_test: $(RELAY_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+relay_test: $(RELAY_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-throttle_test: $(THROTTLE_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+throttle_test: $(THROTTLE_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-servo_test: $(SERVO_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+servo_test: $(SERVO_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
 gps_test: $(GPS_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
 functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test aio_rest_test
 

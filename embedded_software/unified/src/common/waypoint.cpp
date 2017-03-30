@@ -64,11 +64,11 @@ bool Waypoints::loadKML () {
 			if (!gotPlacemark) {																	// if we have not yet found a <Placemark>, see if this line contains one
 				if (line.find("<Placemark>") != std::string::npos) {
 					gotPlacemark = true;
-					VLOG(3) << "Found start of Placemark on line:" << to_string(linecount) << "[" << line << "]";
+					LOG(INFO) << "Found start of Placemark on line:" << to_string(linecount) << "[" << line << "]";
 				}
 			} else {
 				if (line.find("</Placemark>") != std::string::npos) {								// if we've found a <Placemark> but it closes without hitting anything else, go back to the original state  
-					VLOG(3) << "Found close of Placemark with no name on line:" << to_string(linecount) << "[" << line << "]";
+					LOG(INFO)  << "Found close of Placemark with no name on line:" << to_string(linecount) << "[" << line << "]";
 					gotPlacemark = false;
 					gotName = false;
 				}
@@ -76,7 +76,7 @@ bool Waypoints::loadKML () {
 			if (gotPlacemark && !gotName) {															// if we have found a <Placemark> but no <name>, see if this line contains one
 				size_t start = line.find("<name>");
 				if (start != std::string::npos) {
-					VLOG(3) << "Found name on line:" << to_string(linecount) << "[" << line << "]";
+					LOG(INFO)  << "Found name on line:" << to_string(linecount) << "[" << line << "]";
 					gotName = true;
 					size_t stop = line.find("Waypoints</name>", start);							// if it contains a <name> tag, see if it has the right name (Waypoints)
 					if (stop == std::string::npos) {												// if not, skip over this <Placemark>
@@ -88,7 +88,7 @@ bool Waypoints::loadKML () {
 			} 
 			if (gotPlacemark && gotName && !gotLineString) {										// if we have found a <Placemark> with the right <name>, look for a <LineString> object
 				if (line.find("<LineString>") != std::string::npos) {
-					VLOG(3) << "Found start of line string on line: " << to_string(linecount) << "[" << line << "]";
+					LOG(INFO)  << "Found start of line string on line: " << to_string(linecount) << "[" << line << "]";
 					gotLineString = true;
 				}
 			}
@@ -144,6 +144,7 @@ bool Waypoints::loadKML () {
 bool Waypoints::loadKML (std::string kmlFile) {
 	if (access(kmlFile.c_str(), R_OK)) { 	// Make sure the file exists and is readable; otherwise, exit
 		LOG(ERROR) << "Can't read file: " << kmlFile << endl;
+		cout << "Can't read file: " << kmlFile << endl;
 		return false; 
 	}
 	kmlPath = kmlFile;

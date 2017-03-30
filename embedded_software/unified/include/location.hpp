@@ -41,7 +41,7 @@ enum class CourseTypeEnum {
 class Location : public HackerboatState {
 	public:
 		Location (void)
-		  : lat(NAN), lon(NAN)
+		  : lat(0), lon(0)
 		{ };
 		Location (double _lat, double _lon)			/**< Create a location object at the given latitude & longitude */
 		  : lat(_lat), lon(_lon)

@@ -1,0 +1,48 @@
+
+
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns='http://www.opengis.net/kml/2.2'>
+	<Document>
+		<name>Untitled map</name>
+		<description><![CDATA[]]></description>
+		<Folder>
+			<name>Waypoints</name>
+			<Placemark>
+				<name>Waypoints</name>
+				<description><![CDATA[path-test]]></description>
+				<styleUrl>#line-000000-1</styleUrl>
+				<LineString>
+					<tessellate>1</tessellate>
+					<coordinates>-122.3785543,47.5930107,0.0 
+					-122.37849,47.6002167,0.0 
+					-122.3688555,47.6002311,0.0 
+					-122.3646927,47.5982923,0.0 
+					-122.3647141,47.5956877,0.0 
+					-122.3784685,47.5924608,0.0</coordinates>
+				</LineString>
+			</Placemark>
+		</Folder>
+		<Style id='line-000000-1-normal'>
+			<LineStyle>
+				<color>ff000000</color>
+				<width>1</width>
+			</LineStyle>
+		</Style>
+		<Style id='line-000000-1-highlight'>
+			<LineStyle>
+				<color>ff000000</color>
+				<width>2.0</width>
+			</LineStyle>
+		</Style>
+		<StyleMap id='line-000000-1'>
+			<Pair>
+				<key>normal</key>
+				<styleUrl>#line-000000-1-normal</styleUrl>
+			</Pair>
+			<Pair>
+				<key>highlight</key>
+				<styleUrl>#line-000000-1-highlight</styleUrl>
+			</Pair>
+		</StyleMap>
+	</Document>
+</kml>

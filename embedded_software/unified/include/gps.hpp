@@ -49,6 +49,7 @@ class GPSFix : public HackerboatStateStorable {
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		void copy(GPSFix *newfix);
 		
 		sysclock		gpsTime;	/**< GPS time of fix */
 		

@@ -137,6 +137,7 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	CURL *hnd;
 	struct curl_slist *slist1;
 	char errbuf[CURL_ERROR_SIZE];
+	string response;
 
 	// assemble header string
 	string keyheader = REST_AIO_KEY_HEADER;
@@ -164,6 +165,10 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 	curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, errbuf);
 	curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 1);			// trigger a failure on a 400-series return code.
+	
+	// set up data writer callback
+	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+	curl_easy_setopt(hnd, CURLOPT_WRITEDATA, (void *)&response);
 
 	// make request
 	ret = curl_easy_perform(hnd);
@@ -258,7 +263,7 @@ int pub_SpeedLocation::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -272,7 +277,7 @@ int pub_Mode::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -283,7 +288,7 @@ int pub_MagHeading::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -293,7 +298,7 @@ int pub_GPSCourse::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -301,10 +306,10 @@ int pub_BatteryVoltage::pub() {
 	if (!_me->health) return -1;
 	string payload = "{\"value\":";
 	payload += to_string(_me->health->batteryMon) + ",";
-	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
+	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -315,7 +320,7 @@ int pub_RudderPosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -326,7 +331,7 @@ int pub_ThrottlePosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -341,7 +346,7 @@ int pub_FaultString::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	//cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	if (_me->getFaultString().length()) {
 		_last = true;
 		return this->_rest->transmit(this->_key, payload);
@@ -360,11 +365,15 @@ int sub_Command::poll() {
 		payload = _rest->fetch(_key, _lastMessageTime, &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
 	} catch (...) {
 		LOG(ERROR) << "Subscription poll failed for unknown reasons" << endl;
+		cout << "Subscription poll failed for unknown reasons" << endl;
 		return -1;
 	}
 	if (!payload.length()) return 0;					// If no payload string, depart
-	if (httpStatus != CURLE_OK) return -1;				// If we didn't get a good HTTP status code, depart
-
+	if (httpStatus != CURLE_OK) { 				// If we didn't get a good HTTP status code, depart
+		cout << "HTTP failure on poll" << endl;
+		return -1;
+	} 
+	cout << "Received command payload is: " << payload << endl;
 	json_t *element, *input = json_loads(payload.c_str(), 0, &err);
 	if (input) {
 		for (int i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
@@ -374,7 +383,7 @@ int sub_Command::poll() {
 			if (!element) continue;														// if we should somehow get a null, skip to the next
 			mostRecent = json_string_value(json_object_get(element, "created_at"));		// grab the time this was created at...
 			if (mostRecent.compare(_lastMessageTime) == 0) {							// if we've seen this before, skip it
-				json_decref(element);
+				//json_decref(element);
 				continue;
 			}
 			value = json_string_value(json_object_get(element, "value"));	// grab the command string from the element
@@ -397,6 +406,7 @@ int sub_Command::poll() {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
 		LOG(ERROR) << "JSON error: " << err.text << " source: " << err.source
 					<< " line: " << to_string(err.line) << " column: " << to_string(err.column);
+		cout << "Poll command JSON failure" << endl;
 		return -1;
 	}
 	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands
@@ -412,8 +422,9 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 	string *target = (string *)userp;
 	char *ptr = (char *)contents;
 
-	target->clear();
+	//target->clear();
 	size *= nmemb;
+	target->resize(size);
 	for (size_t i = 0; i < size; i++) {
 		*target += ptr[i];
 	}
