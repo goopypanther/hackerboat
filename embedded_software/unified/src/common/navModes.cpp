@@ -144,7 +144,7 @@ NavModeBase *NavRCMode::execute () {
 	// execute the current RC mode
 	_oldRCmode = _rcMode;
 	_rcMode = _rcMode->execute();
-	if (_rcMode != _oldRCmode) delete _oldRCmode;
+	if (_rcMode != _oldRCmode) { delete _oldRCmode; _oldRCmode = NULL; }
 	
 	return this;
 }
@@ -181,7 +181,7 @@ NavModeBase *NavAutoMode::execute () {
 	// execute the current RC mode
 	_oldAutoMode = _autoMode;
 	_autoMode = _autoMode->execute();
-	if (_autoMode != _oldAutoMode) delete _oldAutoMode;
+	if (_autoMode != _oldAutoMode) { delete _oldAutoMode; _oldAutoMode = NULL; }
 	
 	return this;
 }

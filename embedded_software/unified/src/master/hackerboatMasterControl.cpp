@@ -105,9 +105,8 @@ int main (int argc, char **argv) {
 	myrest.begin();
 
 	// create the boat mode
-	BoatModeBase *mode, *oldmode;
+	BoatModeBase *mode, *newmode = {0};
 	mode = BoatModeBase::factory(state, BoatModeEnum::START);
-	oldmode = mode;
 
 	// load KML file
 	if (!state.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/2017Mar25.kml")) {
@@ -131,9 +130,12 @@ int main (int argc, char **argv) {
 			cout << to_string(state.commandCnt()) << " commands in the queue" << endl;
 			cout << to_string(state.executeCmds(0)) << " commands successfully executed" << endl;
 		}
-		oldmode = mode;
-		mode = mode->execute();
-		if (mode != oldmode) delete oldmode;
+		newmode = mode->execute();
+		if (mode != newmode) {
+			BoatModeBase *oldmode = mode;
+			mode = newmode;
+			delete oldmode;
+		}
 		LOG_EVERY_N(5, INFO) << ",CSV," << state.getCSV();
 		std::this_thread::sleep_until(endtime);
 	}

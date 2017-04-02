@@ -116,7 +116,7 @@ class BoatState : public HackerboatStateStorable {
 		ArmButtonStateEnum getArmState ();							/**< Get the current state of the arm & disarm inputs */
 
 		int 					currentWaypoint; 	/**< The current waypoint */
-		double					waypointStrength;	/**< Relative strength of the waypoint */
+		double					waypointStrength = 0.0;	/**< Relative strength of the waypoint */
 		sysclock				lastContact;		/**< Time of last shore contact */
 		sysclock				lastRC;				/**< Time of the last signal from the RC input */
 		GPSFix					lastFix;			/**< Location of the last GPS fix */

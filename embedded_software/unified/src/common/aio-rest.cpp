@@ -374,16 +374,16 @@ int sub_Command::poll() {
 		return -1;
 	} 
 	cout << "Received command payload is: " << payload << endl;
-	json_t *element, *input = json_loads(payload.c_str(), 0, &err);
+	json_t *element = 0;
+	json_t *input = json_loads(payload.c_str(), 0, &err);
 	if (input) {
 		for (int i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
-			json_t *val;
+			json_t *val = 0;
 			string value;
 			element = json_array_get(input, i);
 			if (!element) continue;														// if we should somehow get a null, skip to the next
 			mostRecent = json_string_value(json_object_get(element, "created_at"));		// grab the time this was created at...
 			if (mostRecent.compare(_lastMessageTime) == 0) {							// if we've seen this before, skip it
-				//json_decref(element);
 				continue;
 			}
 			value = json_string_value(json_object_get(element, "value"));	// grab the command string from the element
@@ -400,7 +400,6 @@ int sub_Command::poll() {
 				LOG(ERROR) << "Failed to parse command [" << value << "]";
 			}
 			if (val) json_decref(val);
-			if (element) json_decref(element);
 		}
 	} else {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
@@ -424,7 +423,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 
 	//target->clear();
 	size *= nmemb;
-	target->resize(size);
+	//target->resize(size);
 	for (size_t i = 0; i < size; i++) {
 		*target += ptr[i];
 	}

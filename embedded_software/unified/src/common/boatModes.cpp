@@ -240,14 +240,14 @@ BoatModeBase* BoatNavigationMode::execute() {
 	if (newmode != BoatModeEnum::NAVIGATION) {
 		if (newmode == BoatModeEnum::SELFTEST) {
 			LOG(INFO) << "Departing navigation mode for self test on shore command";
-			delete _navMode;
+			//delete _navMode;
 			return new BoatSelfTestMode(_state, BoatModeEnum::NAVIGATION);
 		} else if (newmode == BoatModeEnum::DISARMED) {
 			LOG(INFO) << "Disarming on shore command";
 			_state.relays->get("DISARM").set();
 			std::this_thread::sleep_for(DISARM_PULSE_LEN);
 			_state.relays->get("DISARM").clear();
-			delete _navMode;
+			//delete _navMode;
 			return new BoatDisarmedMode(_state, BoatModeEnum::NAVIGATION);
 		} else _state.setBoatMode(BoatModeEnum::NAVIGATION);
 	} 
@@ -255,13 +255,13 @@ BoatModeBase* BoatNavigationMode::execute() {
 	// execute the current nav mode
 	_oldNavMode = _navMode;
 	_navMode = _navMode->execute();
-	if (_navMode != _oldNavMode) delete _oldNavMode;
+	if (_navMode != _oldNavMode) { delete _oldNavMode; _oldNavMode = NULL; }
 
 	// check the battery
 	if (_state.health->batteryMon < SYSTEM_LOW_BATTERY_CUTOFF) {
 		LOG(ERROR) << "Departing navigation mode in response to low battery";
 		_state.insertFault("Low Battery");
-		delete _navMode;
+		//delete _navMode;
 		return new BoatLowBatteryMode(_state, BoatModeEnum::NAVIGATION);
 	}
 	
@@ -269,12 +269,12 @@ BoatModeBase* BoatNavigationMode::execute() {
 	if (_state.faultCount() || (_state.getNavMode() == NavModeEnum::FAULT)) {
 		LOG(ERROR) << "Departing navigation mode in response to fault: [" << _state.getFaultString() << "]";
 		_state.setNavMode(NavModeEnum::FAULT);
-		delete _navMode;
+		//delete _navMode;
 		return BoatModeBase::factory(_state, BoatModeEnum::FAULT);
 	}
 	if (_state.getArmState() == ArmButtonStateEnum::DISARM) {
 		LOG(INFO) << "Exiting Navigation mode on disarm signal";
-		delete _navMode;
+		// delete _navMode;
 		return BoatModeBase::factory(_state, BoatModeEnum::DISARMED);
 	}
 	

@@ -68,6 +68,7 @@ class BoatFaultMode : public BoatModeBase {
 	public:
 		BoatFaultMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE) : 
 			BoatModeBase(state, last, BoatModeEnum::FAULT) {
+				cout << "Entering fault mode." << endl;
 				state.setBoatMode(BoatModeEnum::FAULT);
 			};
 		BoatModeBase* execute();							/**< Execute the current state */
@@ -77,13 +78,17 @@ class BoatNavigationMode : public BoatModeBase {
 	public:
 		BoatNavigationMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE, NavModeEnum submode = NavModeEnum::IDLE) : 
 			BoatModeBase(state, last, BoatModeEnum::NAVIGATION),
-			_navMode(NavModeBase::factory(state, submode)) {
+			_navMode(NavModeBase::factory(state, submode)), _oldNavMode(NULL) {
 				state.setBoatMode(BoatModeEnum::NAVIGATION);
 				state.setNavMode(submode);
 			};
-		NavModeBase* getNavMode () {return _navMode;};		/**< Get the current nav mode object */
+		NavModeBase* getNavMode () {return _navMode;}		/**< Get the current nav mode object */
 		BoatModeBase* execute();							/**< Execute the current state */
-		~BoatNavigationMode () {delete _navMode; delete _oldNavMode;};	/**< Explicit destructor to make sure we nuke the submode */
+		virtual ~BoatNavigationMode () {							/**< Explicit destructor to make sure we nuke the submode */
+			cout << "Calling BoatNavigationMode destructor" << endl;
+			if (_oldNavMode && (_oldNavMode != _navMode)) { delete _oldNavMode; _oldNavMode = NULL; }
+			if (_navMode) { delete _navMode; _navMode = NULL; }
+		};	
 	private:
 		NavModeBase* _navMode;
 		NavModeBase* _oldNavMode;
