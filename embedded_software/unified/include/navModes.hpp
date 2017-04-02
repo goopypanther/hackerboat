@@ -22,6 +22,7 @@
 #include "boatState.hpp"
 #include "rcModes.hpp"
 #include "autoModes.hpp"
+#include "util.hpp"
 
 class NavModeBase : public StateMachineBase<NavModeEnum, BoatState> {
 	public:
@@ -62,8 +63,8 @@ class NavRCMode : public NavModeBase {
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		RCModeBase* getRCMode () {return _rcMode;};							/**< Get the current RC mode object */
 		~NavRCMode () {														/**< Explicit destructor to make sure we take care of the submode */
-			if (_oldRCmode && (_oldRCmode != _rcMode)) { delete _oldRCmode; _oldRCmode = NULL; }
-			if (_rcMode) { delete _rcMode; _rcMode = NULL; } 
+			REMOVE(_rcMode);
+			REMOVE(_oldRCmode);
 		}
 	private:
 		RCModeBase* _rcMode;
@@ -79,9 +80,9 @@ class NavAutoMode : public NavModeBase {
 			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		AutoModeBase* getAutoMode () {return _autoMode;};					/**< Get the current autonomous mode object */
-		~NavAutoMode () {														/**< Explicit destructor to make sure we take care of the submode */
-			if (_oldAutoMode && (_oldAutoMode != _autoMode)) { delete _oldAutoMode; _oldAutoMode = NULL; }
-			if (_autoMode) { delete _autoMode; _autoMode = NULL; } 
+		~NavAutoMode () {													/**< Explicit destructor to make sure we take care of the submode */
+			REMOVE(_autoMode);
+			REMOVE(_oldAutoMode);
 		}
 	private:
 		AutoModeBase* _autoMode;
