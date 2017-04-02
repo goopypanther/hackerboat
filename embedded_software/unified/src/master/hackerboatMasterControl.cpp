@@ -85,6 +85,7 @@ int main (int argc, char **argv) {
 		LOG(FATAL)  << "ADC subsystem failed to start";
 		return -1;
 	}
+	state.relays->init();
 	
 	// AIO REST setup
 	AIO_Rest myrest(&state);
