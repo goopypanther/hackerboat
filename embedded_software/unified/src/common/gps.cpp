@@ -267,3 +267,23 @@ void GPSFix::copy(GPSFix *newfix) {
 	this->epc		= newfix->epc;
 	this->fixValid	= newfix->fixValid;
 }
+
+void GPSFix::copy(GPSFix &newfix) {
+	this->gpsTime 	= newfix.gpsTime;
+	this->mode 		= newfix.mode;
+	//this->device 	= newfix.device;
+	this->fix.lat 	= newfix.fix.lat;
+	this->fix.lon 	= newfix.fix.lon;
+	this->track		= newfix.track;
+	this->speed		= newfix.speed;
+	this->alt		= newfix.alt;
+	this->climb		= newfix.climb;
+	this->epx		= newfix.epx;
+	this->epy		= newfix.epy;
+	this->epd		= newfix.epd;
+	this->eps		= newfix.eps;
+	this->ept		= newfix.ept;
+	this->epv		= newfix.epv;
+	this->epc		= newfix.epc;
+	this->fixValid	= newfix.fixValid;
+}

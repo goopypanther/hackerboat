@@ -98,7 +98,8 @@ int main (int argc, char **argv) {
 											{"BatteryVoltage", new pub_BatteryVoltage(&state, &myrest)},
 											{"RudderPosition", new pub_RudderPosition(&state, &myrest)},
 											{"ThrottlePosition", new pub_ThrottlePosition(&state, &myrest)},
-											{"FaultString", new pub_FaultString(&state, &myrest)}};
+											{"FaultString", new pub_FaultString(&state, &myrest)},
+											{"Waypoint", new pub_Waypoint(&state, &myrest)} };
 	cout << "Publishing map created..." << endl;
 	SubFuncMap *mysubmap = new SubFuncMap {{"Command", new sub_Command(&state, &myrest)}};
 	cout << "Subscription map created..." << endl;
