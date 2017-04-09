@@ -82,27 +82,27 @@ double Orientation::headingError (double target) {
 
 Orientation Orientation::makeTrue () {
 	if (!this->isMagnetic()) {
-		LOG(ERROR) << "Course " << *this << " is already true";
+		//LOG(ERROR) << "Course " << *this << " is already true";
 		return *this;
 	}
 	Orientation output = *this;
 	output.magnetic = false;
 	output.heading += declination;
 	output.normalize();
-	LOG(DEBUG) << "Magnetic declination is " << to_string(declination) << " new true Orientation is: " << output;
+	//LOG(DEBUG) << "Magnetic declination is " << to_string(declination) << " new true Orientation is: " << output;
 	return output;
 }
 
 Orientation Orientation::makeMag () {
 	if (this->isMagnetic()) {
-		LOG(ERROR) << "Course " << *this << " is already magnetic";
+		//LOG(ERROR) << "Course " << *this << " is already magnetic";
 		return *this;
 	}
 	Orientation output = *this;
 	output.magnetic = true;
 	output.heading -= declination;
 	output.normalize();
-	LOG(DEBUG) << "Magnetic declination is " << to_string(declination) << " new magnetic Orientation is: " << output;
+	//LOG(DEBUG) << "Magnetic declination is " << to_string(declination) << " new magnetic Orientation is: " << output;
 	return output;
 }
 
