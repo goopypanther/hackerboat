@@ -35,6 +35,7 @@
 #include "hal/throttle.hpp"
 #include "hal/servo.hpp"
 #include "hal/orientationInput.hpp"
+#include "util.hpp"
 
 using namespace std;
 class BoatState;	// forward declaration so this compiles

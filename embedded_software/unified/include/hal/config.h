@@ -47,6 +47,7 @@
 // buffer sizes
 
 #define GPS_BUF_SIZE				(2000)
+#define GPS_AVG_LEN					(10)
 
 // Scales and offsets
 

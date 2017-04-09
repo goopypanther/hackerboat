@@ -356,6 +356,37 @@ int pub_FaultString::pub() {
 	} else return CURLE_OK;
 }
 
+int pub_Waypoint::pub() {
+	if ((_me->getBoatMode() == BoatModeEnum::NAVIGATION) &&
+		(_me->getNavMode() == NavModeEnum::AUTONOMOUS)) {
+		string payload = "{\"value\":";
+		if (_me->getAutoMode() == AutoModeEnum::ANCHOR) {
+			payload += "\"ANCHOR\",";
+			// TODO: refactor as necessary to pull out the anchor point instead of the current location
+			payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
+			payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
+			payload += "\"ele\":0.0}";
+		} else if (_me->getAutoMode() == AutoModeEnum::RETURN) {
+			payload += "\"RETURN\",";
+			payload += "\"lat\":" + to_string(_me->launchPoint.lat) + ",";
+			payload += "\"lon\":" + to_string(_me->launchPoint.lon) + ",";
+			payload += "\"ele\":0.0}";
+		} else if (_me->getAutoMode() == AutoModeEnum::WAYPOINT) {
+			payload += to_string(_me->currentWaypoint);
+			payload += "\"lat\":" + to_string(_me->waypointList.getWaypoint(_me->currentWaypoint).lat) + ",";
+			payload += "\"lon\":" + to_string(_me->waypointList.getWaypoint(_me->currentWaypoint).lon) + ",";
+			payload += "\"ele\":0.0}";
+		} else {
+			payload += "\"IDLE\",";
+			payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
+			payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
+			payload += "\"ele\":0.0}";
+		}
+		cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+		return this->_rest->transmit(this->_key, payload);
+	} else return CURLE_OK;
+}
+
 // Subscriber functors
 
 int sub_Command::poll() {
@@ -423,7 +454,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 
 	//target->clear();
 	size *= nmemb;
-	//target->resize(size);
+	target->reserve(size);
 	for (size_t i = 0; i < size; i++) {
 		*target += ptr[i];
 	}

@@ -177,6 +177,14 @@ class pub_FaultString : public AIO_Publisher {
 		bool _last;		/// If the last time this object was called there was a fault string, this will be true.
 };
 
+/// Publish the current waypoint number and location
+class pub_Waypoint : public AIO_Publisher {
+	public:
+		pub_Waypoint(BoatState *me, AIO_Rest *rest) :
+			AIO_Publisher(me, rest, "waypoint") {};
+	int pub();
+};
+
 // Subscriber classes
 // Note that all subscriber classes will manipulate the given BoatState object, as appropriate
 

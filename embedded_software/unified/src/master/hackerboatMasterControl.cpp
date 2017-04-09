@@ -36,10 +36,11 @@
 #include "waypoint.hpp"
 #include "easylogging++.h"
 
+#include "util.hpp"
+
 #define ELPP_STL_LOGGING
 
 INITIALIZE_EASYLOGGINGPP
-
 
 //void inputBB (BoatState &state, long stepNum);
 //void outputBB (BoatState &state, long stepNum);
@@ -97,7 +98,8 @@ int main (int argc, char **argv) {
 											{"BatteryVoltage", new pub_BatteryVoltage(&state, &myrest)},
 											{"RudderPosition", new pub_RudderPosition(&state, &myrest)},
 											{"ThrottlePosition", new pub_ThrottlePosition(&state, &myrest)},
-											{"FaultString", new pub_FaultString(&state, &myrest)}};
+											{"FaultString", new pub_FaultString(&state, &myrest)},
+											{"Waypoint", new pub_Waypoint(&state, &myrest)} };
 	cout << "Publishing map created..." << endl;
 	SubFuncMap *mysubmap = new SubFuncMap {{"Command", new sub_Command(&state, &myrest)}};
 	cout << "Subscription map created..." << endl;
@@ -106,7 +108,7 @@ int main (int argc, char **argv) {
 	myrest.begin();
 
 	// create the boat mode
-	BoatModeBase *mode, *newmode = {0};
+	BoatModeBase *mode, *oldmode = {0};
 	mode = BoatModeBase::factory(state, BoatModeEnum::START);
 
 	// load KML file
@@ -131,12 +133,9 @@ int main (int argc, char **argv) {
 			cout << to_string(state.commandCnt()) << " commands in the queue" << endl;
 			cout << to_string(state.executeCmds(0)) << " commands successfully executed" << endl;
 		}
-		newmode = mode->execute();
-		if (mode != newmode) {
-			BoatModeBase *oldmode = mode;
-			mode = newmode;
-			delete oldmode;
-		}
+		oldmode = mode;
+		mode = mode->execute();
+		if (mode != oldmode) REMOVE(oldmode);		
 		LOG_EVERY_N(5, INFO) << ",CSV," << state.getCSV();
 		std::this_thread::sleep_until(endtime);
 	}

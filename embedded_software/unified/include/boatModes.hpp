@@ -86,8 +86,8 @@ class BoatNavigationMode : public BoatModeBase {
 		BoatModeBase* execute();							/**< Execute the current state */
 		virtual ~BoatNavigationMode () {							/**< Explicit destructor to make sure we nuke the submode */
 			cout << "Calling BoatNavigationMode destructor" << endl;
-			if (_oldNavMode && (_oldNavMode != _navMode)) { delete _oldNavMode; _oldNavMode = NULL; }
-			if (_navMode) { delete _navMode; _navMode = NULL; }
+			REMOVE(_navMode);
+			REMOVE(_oldNavMode);
 		};	
 	private:
 		NavModeBase* _navMode;

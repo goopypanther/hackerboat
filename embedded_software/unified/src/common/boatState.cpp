@@ -528,7 +528,7 @@ bool Command::SetHome(json_t* args, BoatState *state) {
 	}
 	if ((!args) && state->lastFix.isValid()) {
 		state->launchPoint = state->lastFix.fix;
-		LOG(INFO) << "Setting launch point to current location, " << state->launchPoint;
+		LOG(INFO) << "Setting launch point to current location, " << state->gps->getAverageFix();
 		return true;
 	} else {
 		Location newhome;

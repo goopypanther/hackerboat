@@ -99,7 +99,7 @@ bool GPSdInput::execute() {
 	bool result = true;
 	json_error_t inerr;
 	string buf;
-	buf.resize(GPS_BUF_SIZE);
+	buf.reserve(GPS_BUF_SIZE);
 	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
@@ -108,8 +108,10 @@ bool GPSdInput::execute() {
 		if (i > 5000) break;
 	} 
 	if (buf.length() > 10) {
+		cout << "Incoming buffer is: " << buf.c_str() << endl;
 		json_t* input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
 		if (input) {
+			cout << "Loaded GPS JSON string." << endl;
 			//buf.clear();
 			json_t* objclass = json_object_get(input, "class");
 			if (objclass) {
@@ -141,6 +143,12 @@ bool GPSdInput::execute() {
 	LOG_IF(strlen(inerr.text), DEBUG) << "GPSd JSON loading error: " << inerr.text << " from " << inerr.source 
 									<< " at line " << inerr.line << ", column " << inerr.column << ", buffer: " << buf;
 	//lock.unlock();
+	if (result) {
+		_gpsAvgList.emplace_front(_lastFix);
+		if (_gpsAvgList.size() < GPS_AVG_LEN) {
+			_gpsAvgList.pop_back();
+		}
+	}
 	return result;
 }
 
@@ -181,4 +189,17 @@ int GPSdInput::pruneAIS(Location loc) {
 		}
 	}
 	return count;
+}
+
+GPSFix GPSdInput::getAverageFix() {
+	double lattot = 0, lontot = 0;
+	GPSFix result;
+	for (auto &thisfix: _gpsAvgList) {
+		lattot += thisfix.fix.lat;
+		lontot += thisfix.fix.lon;
+	}
+	result.fix.lat = lattot/_gpsAvgList.size();
+	result.fix.lon = lontot/_gpsAvgList.size();
+	return result;
+	
 }
