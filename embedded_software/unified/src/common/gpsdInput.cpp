@@ -132,9 +132,9 @@ bool GPSdInput::execute() {
 						result = true;
 					} 
 				} 
-				json_decref(input);
-				json_decref(objclass);
-			}
+				//json_decref(input);
+				//json_decref(objclass);
+			} 
 			json_decref(input);
 			result = false;
 		} result = false;
