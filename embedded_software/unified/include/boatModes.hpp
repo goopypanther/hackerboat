@@ -68,7 +68,6 @@ class BoatFaultMode : public BoatModeBase {
 	public:
 		BoatFaultMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE) : 
 			BoatModeBase(state, last, BoatModeEnum::FAULT) {
-				cout << "Entering fault mode." << endl;
 				state.setBoatMode(BoatModeEnum::FAULT);
 			};
 		BoatModeBase* execute();							/**< Execute the current state */
@@ -85,7 +84,6 @@ class BoatNavigationMode : public BoatModeBase {
 		NavModeBase* getNavMode () {return _navMode;}		/**< Get the current nav mode object */
 		BoatModeBase* execute();							/**< Execute the current state */
 		virtual ~BoatNavigationMode () {							/**< Explicit destructor to make sure we nuke the submode */
-			cout << "Calling BoatNavigationMode destructor" << endl;
 			REMOVE(_navMode);
 			REMOVE(_oldNavMode);
 		};	

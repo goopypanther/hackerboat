@@ -144,7 +144,7 @@ bool Waypoints::loadKML () {
 bool Waypoints::loadKML (std::string kmlFile) {
 	if (access(kmlFile.c_str(), R_OK)) { 	// Make sure the file exists and is readable; otherwise, exit
 		LOG(ERROR) << "Can't read file: " << kmlFile << endl;
-		cout << "Can't read file: " << kmlFile << endl;
+		cerr << "Can't read file: " << kmlFile << endl;
 		return false; 
 	}
 	kmlPath = kmlFile;

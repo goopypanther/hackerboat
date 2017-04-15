@@ -79,7 +79,7 @@ BoatModeBase* BoatSelfTestMode::execute() {
 		oldState = _state;					// Copy the old state so we can exit into the correct mode.
 	}	
 	this->callCount++;
-	//cout << "Self Test call count: " << callCount << endl;
+	//cerr << "Self Test call count: " << callCount << endl;
 	_state.servoEnable.set();
 	
 	// check for errors
@@ -136,7 +136,7 @@ BoatModeBase* BoatDisarmedMode::execute() {
 		LOG(INFO) << "Starting disarmed mode";
 	}
 	this->callCount++;
-	//cout << "Disarm call count: " << callCount << endl;
+	//cerr << "Disarm call count: " << callCount << endl;
 	
 	_state.servoEnable.clear();
 	_state.throttle->setThrottle(0);
@@ -192,7 +192,7 @@ BoatModeBase* BoatFaultMode::execute() {
 		_state.relays->get("DISARM").clear();
 	}
 	this->callCount++;
-	//cout << "Fault call count: " << callCount << endl;
+	//cerr << "Fault call count: " << callCount << endl;
 	_state.throttle->setThrottle(0);
 	_state.servoEnable.clear();
 	

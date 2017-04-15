@@ -14,7 +14,9 @@
 #ifndef LOCATION_H
 #define LOCATION_H
  
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include "hal/config.h"
 #include <math.h>
 #include <string>
@@ -41,7 +43,7 @@ enum class CourseTypeEnum {
 class Location : public HackerboatState {
 	public:
 		Location (void)
-		  : lat(0), lon(0)
+		  : lat(NAN), lon(NAN)
 		{ };
 		Location (double _lat, double _lon)			/**< Create a location object at the given latitude & longitude */
 		  : lat(_lat), lon(_lon)

@@ -14,7 +14,9 @@
 #ifndef AIO_REST_H
 #define AIO_REST_H
 
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include <cstdlib>
 #include <inttypes.h>
 #include <cstdio>

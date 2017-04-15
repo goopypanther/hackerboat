@@ -29,7 +29,7 @@ CPPFLAGS += -isystem submodules/easyloggingpp/src
 CPPFLAGS += -I $(GTEST_INC)
 CPPFLAGS += -D _USE_MATH_DEFINES
 CPPFLAGS += -MMD -MT $@
-CPPFLAGS += -fno-inline-small-functions
+#CPPFLAGS += -fno-inline-small-functions
 CPPFLAGS += -D ELPP_THREAD_SAFE
 
 LDFLAGS  += -L /usr/local/lib
@@ -74,7 +74,8 @@ LIBHACKERBOAT_HAL_SRCS+= servo.cpp
 LIBHACKERBOAT_HAL_SRCS+= orientationInput.cpp
 LIBHACKERBOAT_C_HAL_SRCS+= lsquaredc.c
 
-LIBHACKERBOAT_SRCS= autoModes.cpp
+LIBHACKERBOAT_SRCS= util.cpp
+LIBHACKERBOAT_SRCS+= autoModes.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
 LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
@@ -128,6 +129,7 @@ TEST_OBJS += automode_test.o
 TEST_OBJS += boatstate_test.o
 TEST_OBJS += boatmode_test.o
 TEST_OBJS += sqliteStorage_test.o
+TEST_OBJS += rudder_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
 unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
@@ -157,6 +159,7 @@ THROTTLE_TEST_SRCS = functional_tests/throttle_test.cpp
 SERVO_TEST_SRCS = functional_tests/servo_test.cpp
 GPS_TEST_SRCS = functional_tests/gps_test.cpp
 AIO_REST_TEST_SRCS = functional_tests/aio_rest_test.cpp
+RUDDER_TEST_SRCS = functional_tests/rudder_test.cpp
 
 RC_TEST_OBJS = $(addprefix src/,$(RC_TEST_SRCS:.cpp=.o))
 ORIENTATION_TEST_OBJS = $(addprefix src/,$(ORIENTATION_TEST_SRCS:.cpp=.o))
@@ -166,6 +169,7 @@ THROTTLE_TEST_OBJS = $(addprefix src/,$(THROTTLE_TEST_SRCS:.cpp=.o))
 SERVO_TEST_OBJS = $(addprefix src/,$(SERVO_TEST_SRCS:.cpp=.o))
 GPS_TEST_OBJS = $(addprefix src/,$(GPS_TEST_SRCS:.cpp=.o))
 AIO_REST_TEST_OBJS = $(addprefix src/,$(AIO_REST_TEST_SRCS:.cpp=.o))
+RUDDER_TEST_OBJS = $(addprefix src/,$(RUDDER_TEST_SRCS:.cpp=.o))
 
 ALL_OBJS+=$(RC_TEST_OBJS)
 ALL_OBJS+=$(ORIENTATION_TEST_OBJS)
@@ -175,6 +179,7 @@ ALL_OBJS+=$(THROTTLE_TEST_OBJS)
 ALL_OBJS+=$(SERVO_TEST_OBJS)
 ALL_OBJS+=$(GPS_TEST_OBJS)
 ALL_OBJS+=$(AIO_REST_TEST_OBJS)
+ALL_OBJS+=$(RUDDER_TEST_OBJS)
 
 rc_test: $(RC_TEST_OBJS) libhackerboathal.a libhackerboat.a 
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
@@ -199,8 +204,11 @@ gps_test: $(GPS_TEST_OBJS) libhackerboathal.a libhackerboat.a
 
 aio_rest_test: $(AIO_REST_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
+	
+rudder_test: $(RUDDER_TEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
-functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test aio_rest_test
+functional_tests: rc_test orientation_test adc_test relay_test throttle_test servo_test gps_test aio_rest_test rudder_test
 
 clean:
 	rm -f libhackerboat.a  libhackerboathal.a

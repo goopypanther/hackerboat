@@ -92,9 +92,9 @@ class AutoAnchorMode : public AutoModeBase {
 				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
-		Location getAnchorPoint() {return anchorPoint;};
+		Location getAnchorPoint() {return _state.anchorPoint;};
 	private:
-		Location anchorPoint;
+		//Location anchorPoint;
 		PID helm;
 		double in = 0;
 		double out = 0;

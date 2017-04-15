@@ -11,7 +11,6 @@
  *
  ******************************************************************************/
 
-#include <jansson.h>
 #include <cstdlib>
 #include <inttypes.h>
 #include <cstdio>
@@ -29,6 +28,7 @@
 #include "easylogging++.h"
 extern "C" {
 	#include <curl/curl.h>
+	#include <jansson.h>
 }
 
 using namespace std;
@@ -93,9 +93,9 @@ int AIO_Rest::pollSubs() {
 	VLOG(1) << "Polling all subscribed channels";
 	for (auto r: *_sub) {
 		LOG(DEBUG) << "Polling " << r.first;
-		cout << endl << "Polling " << r.first << endl;
+		//cerr << endl << "Polling " << r.first << endl;
 		int result = r.second->poll();
-		cout << "Result: " << result << endl;
+		//cerr << "Result: " << result << endl;
 		if (result >= 0) cnt++;
 	}
 	return cnt;
@@ -145,7 +145,7 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 
 	// assemble URL string
 	string url = this->_uri + this->_name + "/feeds/" + feedkey + "/data";
-	//cout << "Transmitting to url: " << url << endl;
+	//cerr << "Transmitting to url: " << url << endl;
 
 	// assemble request
 	slist1 = NULL;
@@ -263,7 +263,7 @@ int pub_SpeedLocation::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -277,7 +277,7 @@ int pub_Mode::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -288,7 +288,7 @@ int pub_MagHeading::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -298,7 +298,7 @@ int pub_GPSCourse::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -309,7 +309,7 @@ int pub_BatteryVoltage::pub() {
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -320,7 +320,7 @@ int pub_RudderPosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -331,7 +331,7 @@ int pub_ThrottlePosition::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	return this->_rest->transmit(this->_key, payload);
 }
 
@@ -346,7 +346,7 @@ int pub_FaultString::pub() {
 	payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
 	payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
 	payload += "\"ele\":0.0}";
-	cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
 	if (_me->getFaultString().length()) {
 		_last = true;
 		return this->_rest->transmit(this->_key, payload);
@@ -357,34 +357,15 @@ int pub_FaultString::pub() {
 }
 
 int pub_Waypoint::pub() {
-	if ((_me->getBoatMode() == BoatModeEnum::NAVIGATION) &&
-		(_me->getNavMode() == NavModeEnum::AUTONOMOUS)) {
-		string payload = "{\"value\":";
-		if (_me->getAutoMode() == AutoModeEnum::ANCHOR) {
-			payload += "\"ANCHOR\",";
-			// TODO: refactor as necessary to pull out the anchor point instead of the current location
-			payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
-			payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
-			payload += "\"ele\":0.0}";
-		} else if (_me->getAutoMode() == AutoModeEnum::RETURN) {
-			payload += "\"RETURN\",";
-			payload += "\"lat\":" + to_string(_me->launchPoint.lat) + ",";
-			payload += "\"lon\":" + to_string(_me->launchPoint.lon) + ",";
-			payload += "\"ele\":0.0}";
-		} else if (_me->getAutoMode() == AutoModeEnum::WAYPOINT) {
-			payload += to_string(_me->currentWaypoint);
-			payload += "\"lat\":" + to_string(_me->waypointList.getWaypoint(_me->currentWaypoint).lat) + ",";
-			payload += "\"lon\":" + to_string(_me->waypointList.getWaypoint(_me->currentWaypoint).lon) + ",";
-			payload += "\"ele\":0.0}";
-		} else {
-			payload += "\"IDLE\",";
-			payload += "\"lat\":" + to_string(_me->lastFix.fix.lat) + ",";
-			payload += "\"lon\":" + to_string(_me->lastFix.fix.lon) + ",";
-			payload += "\"ele\":0.0}";
-		}
-		cout << "Sending payload: " << payload << " to key: " << this->_key << endl;
-		return this->_rest->transmit(this->_key, payload);
-	} else return CURLE_OK;
+	string payload = "{\"value\":\"";
+	payload += _me->printCurrentWaypointNum();
+	payload += "\",\"lat\":";
+	payload += to_string(_me->getCurrentTarget().lat);
+	payload += ",\"lon\":";
+	payload += to_string(_me->getCurrentTarget().lon);
+	payload += ",\"ele\":0.0}";
+	//cerr << "Sending payload: " << payload << " to key: " << this->_key << endl;
+	return this->_rest->transmit(this->_key, payload);
 }
 
 // Subscriber functors
@@ -396,15 +377,15 @@ int sub_Command::poll() {
 		payload = _rest->fetch(_key, _lastMessageTime, &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
 	} catch (...) {
 		LOG(ERROR) << "Subscription poll failed for unknown reasons" << endl;
-		cout << "Subscription poll failed for unknown reasons" << endl;
+		//cerr << "Subscription poll failed for unknown reasons" << endl;
 		return -1;
 	}
 	if (!payload.length()) return 0;					// If no payload string, depart
 	if (httpStatus != CURLE_OK) { 				// If we didn't get a good HTTP status code, depart
-		cout << "HTTP failure on poll" << endl;
+		//cerr << "HTTP failure on poll" << endl;
 		return -1;
 	} 
-	cout << "Received command payload is: " << payload << endl;
+	//cerr << "Received command payload is: " << payload << endl;
 	json_t *element = 0;
 	json_t *input = json_loads(payload.c_str(), 0, &err);
 	if (input) {
@@ -436,7 +417,7 @@ int sub_Command::poll() {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
 		LOG(ERROR) << "JSON error: " << err.text << " source: " << err.source
 					<< " line: " << to_string(err.line) << " column: " << to_string(err.column);
-		cout << "Poll command JSON failure" << endl;
+		//cerr << "Poll command JSON failure" << endl;
 		return -1;
 	}
 	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands

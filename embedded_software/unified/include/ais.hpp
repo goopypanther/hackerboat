@@ -14,7 +14,9 @@
 #ifndef AIS_H
 #define AIS_H
  
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include "hal/config.h"
 #include <math.h>
 #include <string>

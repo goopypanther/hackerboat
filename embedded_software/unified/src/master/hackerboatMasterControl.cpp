@@ -46,13 +46,14 @@ INITIALIZE_EASYLOGGINGPP
 //void outputBB (BoatState &state, long stepNum);
 
 int main (int argc, char **argv) {
-	cout << "Starting up..." << std::endl;
+	cerr << "Starting up..." << std::endl;
 
     // Load configuration from file
     el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
+	Args::getargs()->load(argc, argv);
 
 	// system setup
 	BoatState state;
@@ -90,7 +91,7 @@ int main (int argc, char **argv) {
 	
 	// AIO REST setup
 	AIO_Rest myrest(&state);
-	cout << "Creating publishing map..." << endl;
+	cerr << "Creating publishing map..." << endl;
 	PubFuncMap *mypubmap = new PubFuncMap {	{"SpeedLocation", new pub_SpeedLocation(&state, &myrest)},
 											{"Mode", new pub_Mode(&state, &myrest)},
 											{"MagneticHeading", new pub_MagHeading(&state, &myrest)},
@@ -100,9 +101,9 @@ int main (int argc, char **argv) {
 											{"ThrottlePosition", new pub_ThrottlePosition(&state, &myrest)},
 											{"FaultString", new pub_FaultString(&state, &myrest)},
 											{"Waypoint", new pub_Waypoint(&state, &myrest)} };
-	cout << "Publishing map created..." << endl;
+	cerr << "Publishing map created..." << endl;
 	SubFuncMap *mysubmap = new SubFuncMap {{"Command", new sub_Command(&state, &myrest)}};
-	cout << "Subscription map created..." << endl;
+	cerr << "Subscription map created..." << endl;
 	myrest.setPubFuncMap(mypubmap);
 	myrest.setSubFuncMap(mysubmap);
 	myrest.begin();
@@ -114,11 +115,11 @@ int main (int argc, char **argv) {
 	// load KML file
 	if (!state.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/2017Mar25.kml")) {
 		LOG(ERROR)  << "Waypoint list failed to load";
-		cout << "KML failed to load" << endl;
+		cerr << "KML failed to load" << endl;
 		//return -1;
 	}
 
-	cout << "All configured -- entering state" << std::endl;
+	cerr << "All configured -- entering state" << std::endl;
 	LOG(INFO) << ",CSV," << state.getCSVheaders();
 
 	// run the boat
@@ -130,8 +131,8 @@ int main (int argc, char **argv) {
 		// run the state
 		auto endtime = std::chrono::system_clock::now() + 100ms;
 		if (state.commandCnt()) {
-			cout << to_string(state.commandCnt()) << " commands in the queue" << endl;
-			cout << to_string(state.executeCmds(0)) << " commands successfully executed" << endl;
+			cerr << to_string(state.commandCnt()) << " commands in the queue" << endl;
+			cerr << to_string(state.executeCmds(0)) << " commands successfully executed" << endl;
 		}
 		oldmode = mode;
 		mode = mode->execute();

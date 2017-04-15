@@ -47,10 +47,10 @@ class GPSdInput : public InputThread {
 		bool begin();								/**< Start the input thread */
 		bool execute();								/**< Gather input	*/
 		GPSFix* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
-		std::map<int, AISShip> getData();				/**< Returns all AIS contacts */
+		std::map<int, AISShip>* getData();			/**< Returns all AIS contacts */
 		std::map<int, AISShip> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
-		AISShip getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
-		AISShip getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
+		AISShip* getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
+		AISShip* getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
 		int pruneAIS(Location loc);					/**< Call the prune() function of each AIS contact. */
 		bool isValid() {return isConnected();};
 		GPSFix getAverageFix();

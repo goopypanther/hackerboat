@@ -12,7 +12,9 @@
 #ifndef GPS_H
 #define GPS_H
 
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include <stdlib.h>
 #include <chrono>
 #include <string>

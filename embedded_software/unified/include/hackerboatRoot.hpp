@@ -15,7 +15,9 @@
 #ifndef HACKERBOATROOT_H
 #define HACKERBOATROOT_H
  
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include <stdlib.h>
 #include <inttypes.h>
 #include <chrono>
