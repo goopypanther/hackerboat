@@ -63,7 +63,9 @@ int main(int argc, char **argv) {
 	}
 	
 	for (int i = 0; i < 100; i++) {
-		targetHeading += me->orient->getOrientation()->makeTrue().heading;
+		double currentheading = me->orient->getOrientation()->makeTrue().heading;
+		if (isfinite(currentheading)) targetHeading += currentheading;
+		cout << targetHeading << endl;
 		std::this_thread::sleep_for(100ms);
 	}
 	targetHeading = targetHeading/100;
