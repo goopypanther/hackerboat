@@ -22,26 +22,54 @@
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
 #include "hal/relay.hpp"
-#include <jansson.h>
-#include "json_utilities.hpp"
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
 
-json_t *Relay::pack () {
-	json_t* output = json_object();
+using namespace rapidjson;
+using namespace std;
+
+Document root;
+
+int static inline PutVar(const string name, int& var, Value &d) {
+	string ptr = "/" + name;
+	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+	return 0;
+}
+
+int static inline PutVar(const string name, double& var, Value &d) {
+	string ptr = "/" + name;
+	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+	return 0;
+}
+
+int static inline PutVar(const string name, const Value& var, Value &d) {
+	string ptr = "/" + name;
+	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+	return 0;
+}
+
+int static inline PutVar(const string name, bool var, Value &d) {
+	string ptr = "/" + name;
+	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+	return 0;
+}
+
+int static inline PutVar(const string name, Value &d) {
+	string ptr = "/" + name;
+	Pointer(ptr.c_str()).Create(d, root.GetAllocator());
+	return 0;
+}
+
+Value Relay::pack () {
+	Value d;
 	int packResult = 0;
 	RelayTuple thisrelay = getState();
-	double current = std::get<0>(thisrelay);
-	packResult += std::isfinite(current) ? json_object_set_new(output, "current", json_real(current)) : 
-										json_object_set_new(output, "current", json_null());
-	packResult += json_object_set_new(output, "drive", json_boolean(std::get<1>(thisrelay)));
-	packResult += json_object_set_new(output, "fault", json_boolean(std::get<2>(thisrelay)));
-	if (packResult != 0) {
-		//LOG(ERROR) << "Failed to correctly pack relay status: " << output;
-		json_decref(output);
-		return NULL;
-	}
-	//LOG(DEBUG) << "Packed relay status: " << output;
-	return output;
+	packResult += isfinite(get<0>(thisrelay)) ? PutVar("current", get<0>(thisrelay), d) : 
+												PutVar("current", d);
+	packResult += PutVar("drive", get<1>(thisrelay), d);
+	packResult += PutVar("fault", get<2>(thisrelay), d);
+	
+	return d;
 }
 
 bool Relay::init() {
@@ -129,18 +157,14 @@ bool RelayMap::init() {
 	return result;
 }
 
-json_t* RelayMap::pack () {
-	json_t* output = json_object();
+Value RelayMap::pack () {
+	Value d;
 	int packResult = 0;
 	for (auto &r : *relays) {
-		packResult += json_object_set_new(output, std::get<0>(r).c_str(), std::get<1>(r).pack());
+		packResult += PutVar(r.first.c_str(), r.second.pack(), d);
 	}
-	if (packResult != 0) {
-		LOG(ERROR) << "Failed to pack relay map";
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+
+	return d;
 }
 
 bool RelayMap::adc(ADCInput* adc) {

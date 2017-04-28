@@ -20,3 +20,6 @@
 [submodule "embedded_software/unified/submodules/googletest"]
 	path = embedded_software/unified/submodules/googletest
 	url = https://github.com/google/googletest.git
+[submodule "embedded_software/unified/submodules/rapidjson"]
+	path = embedded_software/unified/submodules/rapidjson
+	url = https://github.com/logos-electromechanical/rapidjson

@@ -5,10 +5,12 @@
 #include "boatState.hpp"
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
 
 #define TOL 0.000001
+
+using namespace rapidjson;
 
 TEST(BoatStateTest, FaultString) {
 	VLOG(1) << "===Boat State Test, Fault String===";
@@ -148,10 +150,10 @@ TEST(BoatStateTest, JSON) {
 	me.setNavMode("Fault");
 	me.setAutoMode("Waypoint");
 	me.setRCmode("Rudder");
-	json_t* packed;
+	Value packed;
 	ASSERT_NO_THROW(packed = me.pack());
 	ASSERT_TRUE(packed);
-	VLOG(2) << "Packed JSON: " << json_dumps(packed, 0);
+	VLOG(2) << "Packed JSON: " << packed;
 	EXPECT_TRUE(you.parse(packed));
 	VLOG(2) << "Parsed JSON: " << you;
 	EXPECT_EQ(floor<milliseconds>(me.recordTime), you.recordTime);
@@ -213,18 +215,25 @@ TEST(BoatStateTest, Storage) {
 TEST(BoatStateTest, Command) {
 	VLOG(1) << "===Boat State Test, Command List===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, &err)));
+	Document start, selftest, disarmed, fault, navigation, armedtest;
+	start.Parse("{\"mode\":\"Start\"}");
+	selftest.Parse("{\"mode\":\"SelfTest\"}");
+	disarmed.Parse("{\"mode\":\"Disarmed\"}");
+	fault.Parse("{\"mode\":\"Fault\"}");
+	navigation.Parse("{\"mode\":\"Navigation\"}");
+	armedtest.Parse("{\"mode\":\"ArmedTest\"}");
+
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(start))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(selftest))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(disarmed))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(fault))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(navigation))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(armedtest))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.commandCnt(), 6);
 	EXPECT_EQ(me.executeCmds(1), 1);
@@ -239,17 +248,17 @@ TEST(BoatStateTest, Command) {
 	VLOG(2) << me;
 	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::ARMEDTEST);
 	EXPECT_EQ(me.commandCnt(), 0);
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(start))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(selftest))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(disarmed))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(fault))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(navigation))));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", *(Pointer("/").Get(armedtest))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.commandCnt(), 6);
 	EXPECT_NO_THROW(me.flushCmds());
@@ -260,8 +269,9 @@ TEST(BoatStateTest, Command) {
 TEST(BoatStateTest, SetNavMode) {
 	VLOG(1) << "===Boat State Test, Command Nav Mode===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetNavMode", json_loads("{\"mode\":\"Autonomous\"}", 0, &err)));
+	Document d;
+	d.Parse("{\"mode\":\"Autonomous\"}");
+	EXPECT_NO_THROW(me.pushCmd("SetNavMode", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
@@ -271,8 +281,9 @@ TEST(BoatStateTest, SetNavMode) {
 TEST(BoatStateTest, SetAutoMode) {
 	VLOG(1) << "===Boat State Test, Command Auto Mode===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetAutoMode", json_loads("{\"mode\":\"Return\"}", 0, &err)));
+	Document d;
+	d.Parse("{\"mode\":\"Return\"}");
+	EXPECT_NO_THROW(me.pushCmd("SetNavMode", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
@@ -282,14 +293,17 @@ TEST(BoatStateTest, SetAutoMode) {
 TEST(BoatStateTest, SetHome) {
 	VLOG(1) << "===Boat State Test, Command Set Home===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lat\":5.0,\"lon\":7.5}}", 0, &err)));
+	Document d;
+	d.Parse("{\"location\":{\"lat\":5.0,\"lon\":7.5}}");
+	EXPECT_NO_THROW(me.pushCmd("SetHome", *(Pointer("/").Get(d))));
+	d.Clear();
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
 	EXPECT_EQ(me.launchPoint.lat, 5.0);
 	EXPECT_EQ(me.launchPoint.lon, 7.5);
-	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lon\":7.5}}", 0, &err)));
+	d.Parse("{\"location\":{\"lon\":7.5}}");
+	EXPECT_NO_THROW(me.pushCmd("SetHome", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 0);
 	VLOG(2) << me;
@@ -300,7 +314,7 @@ TEST(BoatStateTest, SetHome) {
 TEST(BoatStateTest, SetWaypoint) {
 	VLOG(1) << "===Boat State Test, Command Set Waypoint===";
 	BoatState me;
-	json_error_t err;
+	Document d;
 	me.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/test_map_1.kml");
 	VLOG(2) << "Count: " << me.waypointList.count()
 			<< ", current: " << me.waypointList.current()
@@ -309,16 +323,19 @@ TEST(BoatStateTest, SetWaypoint) {
 	EXPECT_EQ(me.waypointList.count(), 7);
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::NONE);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":4}", 0, &err)));
+	d.Parse("{\"number\":4}");
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", *(Pointer("/").Get(d))));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count() << ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 4);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":8}", 0, &err)));
+	d.Parse("{\"number\":8}");
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", *(Pointer("/").Get(d))));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count()
 			<< ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 6);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":-1}", 0, &err)));
+	d.Parse("{\"number\":-1}");
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", *(Pointer("/").Get(d))));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count() << ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 0);
@@ -327,13 +344,15 @@ TEST(BoatStateTest, SetWaypoint) {
 TEST(BoatStateTest, SetWaypointAction) {
 	VLOG(1) << "===Boat State Test, Command Set Waypoint Action===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"Return\"}", 0, &err)));
+	Document d;
+	d.Parse("{\"action\":\"Return\"}");
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", *(Pointer("/").Get(d))));
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"\"}", 0, &err)));
+	d.Parse("{\"action\":\"\"}");
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction",*(Pointer("/").Get(d))));
 	EXPECT_EQ(me.executeCmds(1), 0);
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
@@ -342,22 +361,25 @@ TEST(BoatStateTest, SetWaypointAction) {
 TEST(BoatStateTest, SetPID) {
 	VLOG(1) << "===Boat State Test, Command Set PID===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":5.0}", 0, &err)));
+	Document d;
+	d.Parse("{\"Kp\":5.0}");
+	EXPECT_NO_THROW(me.pushCmd("SetPID", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
 	EXPECT_EQ(std::get<0>(me.K), 5.0);
 	EXPECT_EQ(std::get<1>(me.K), 0.1);
 	EXPECT_EQ(std::get<2>(me.K), 0.0);
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Ki\":0.5,\"Kd\":0.1}", 0, &err)));
+	d.Parse("{\"Ki\":0.5,\"Kd\":0.1}");
+	EXPECT_NO_THROW(me.pushCmd("SetPID", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
 	EXPECT_EQ(std::get<0>(me.K), 5.0);
 	EXPECT_EQ(std::get<1>(me.K), 0.5);
 	EXPECT_EQ(std::get<2>(me.K), 0.1);
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":50.0,\"Ki\":5.0,\"Kd\":1.0}", 0, &err)));
+	d.Parse("{\"Kp\":50.0,\"Ki\":5.0,\"Kd\":1.0}");
+	EXPECT_NO_THROW(me.pushCmd("SetPID", *(Pointer("/").Get(d))));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;

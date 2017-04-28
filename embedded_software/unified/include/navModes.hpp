@@ -12,7 +12,6 @@
 #ifndef NAVMODES_H
 #define NAVMODES_H 
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>

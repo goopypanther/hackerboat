@@ -11,7 +11,7 @@
  *
  ******************************************************************************/
 
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "hal/config.h"
 #include <stdlib.h>
 #include <math.h>
@@ -22,7 +22,6 @@
 #include "location.hpp"
 #include "hal/config.h"
 #include "sqliteStorage.hpp"
-#include "json_utilities.hpp"
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "ais.hpp"
@@ -30,103 +29,95 @@
 
 #define METERS_PER_KNOT		(1852)
 #define SECONDS_PER_HOUR	(3600)
-#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
+using namespace rapidjson;
 
 const std::string AISBase::msgClass = "AIS";
 
-AISShip::AISShip (json_t *packet) {
+AISShip::AISShip (Value& packet) {
 	VLOG(2) << "Creating new AIS object";
 	recordTime = std::chrono::system_clock::now();
 	parseGpsdPacket(packet);
 }			
 
-bool AISShip::parseGpsdPacket (json_t *input) {
+bool AISShip::parseGpsdPacket (Value& input) {
 	bool result = true;
-	std::string time;
-	double lat, lon;
 	
-	result &= coreParse(input);
-	result &= GET_VAR(time);
+	result = coreParse(input);
 	this->lastTimeStamp = std::chrono::system_clock::now();
-	result &= GET_VAR(lat);
-	result &= GET_VAR(lon);
+	if (input.HasMember("lat") && input["lat"].IsDouble() &&
+		input.HasMember("lon") && input["lon"].IsDouble()) {
+			this->fix.lat = input["lat"].GetDouble();
+			this->fix.lon = input["lon"].GetDouble();
+	} else result = false;
 	
-	LOG_IF((!result && input), ERROR) << "Parsing AIS input from gpsd failed: " << input;
-	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in AISShip.parseGpsdPacket()";
+	LOG_IF((!result), ERROR) << "Parsing AIS input from gpsd failed: " << input;
 	
 	if (result) return this->isValid();
 	return result;
 }
 
-bool AISShip::parse (json_t *input) {
-	json_t* inFix;
+bool AISShip::parse (Value& input) {
 	bool result = true;
 	std::string myTime, lastTime;
 	
-	inFix = json_object_get(input, "fix");
 	result &= this->coreParse(input);
-	result &= ::parse(json_object_get(input, "recordTime"), &myTime);
-	result &= ::parse(json_object_get(input, "lastTimeStamp"), &lastTime);
-	result &= parseTime(myTime, this->recordTime);
-	result &= parseTime(lastTime, this->lastTimeStamp);
-	result &= fix.parse(inFix);
-	json_decref(inFix);
-	LOG_IF((!result && input), ERROR) << "Parsing AIS input failed: " << input;
-	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in AISShip.parse()";
-
+	if (input.HasMember("fix")) {
+		result &= this->fix.parse(input["fix"]);
+	} else result = false;
+	if (input.HasMember("recordTime") && input["recordTime"].IsString()) {
+		result &= parseTime(input["recordTime"].GetString(), this->recordTime);
+	} else result = false;
+	if (input.HasMember("lastTimeStamp") && input["lastTimeStamp"].IsString()) {
+		result &= parseTime(input["lastTimeStamp"].GetString(), this->lastTimeStamp);
+	} else result = false;
 	
+	LOG_IF((!result), ERROR) << "Parsing AIS input failed: " << input;
 	if (result) return this->isValid();
 	return result;
 }
 
-bool AISShip::coreParse (json_t *input) {
+bool AISShip::coreParse (Value& input) {
 	bool result = true;
-	json_t* tmpObj;
-	int tmpInt;
+	int tmp;
 	
-	result &= GET_VAR(mmsi);
-	GET_VAR(course);
-	GET_VAR(heading);
-	GET_VAR(turn);
-	GET_VAR(speed);
-	GET_VAR(device);
-	GET_VAR(imo);
-	GET_VAR(callsign);
-	GET_VAR(shipname);
-	GET_VAR(to_bow);
-	GET_VAR(to_starboard);
-	GET_VAR(to_stern);
-	GET_VAR(to_port);
-	tmpObj = json_object_get(input, "status");
-	if (::parse(tmpObj, &tmpInt)) {
-		try {
-			this->status = static_cast<AISNavStatus>(tmpInt);
-		} catch (...) {
-			status = AISNavStatus::UNDEFINED;
-		}
+	result &= GetVar("mmsi", 		this->mmsi, 	input);
+	result &= GetVar("course", 		this->course, 	input);
+	result &= GetVar("heading", 	this->heading, 	input);
+	result &= GetVar("turn", 		this->turn, 	input);
+	result &= GetVar("speed", 		this->speed, 	input);
+	result &= GetVar("device", 		this->device, 	input);
+	result &= GetVar("imo", 		this->imo, 		input);
+	result &= GetVar("callsign", 	this->callsign, input);
+	result &= GetVar("shipname", 	this->shipname, input);
+	result &= GetVar("to_bow", 		this->to_bow, 	input);
+	result &= GetVar("to_starboard",this->to_starboard, input);
+	result &= GetVar("to_port", 	this->to_port, 	input);
+	result &= GetVar("to_stern", 	this->to_stern, input);
+	
+	GetVar("status", tmp, input);
+	try {
+		this->status = static_cast<AISNavStatus>(tmp);
+	} catch (...) {
+		this->status = AISNavStatus::UNDEFINED;
+		result = false;
 	}
-	json_decref(tmpObj);
-	tmpObj = json_object_get(input, "shiptype");
-	if (::parse(tmpObj, &tmpInt)) {
-		try {
-			this->shiptype = static_cast<AISShipType>(tmpInt);
-		} catch (...) {
-			this->shiptype = AISShipType::UNAVAILABLE;
-		}
+	GetVar("shiptype", tmp, input);
+	try {
+		this->shiptype = static_cast<AISShipType>(tmp);
+	} catch (...) {
+		this->shiptype = AISShipType::UNAVAILABLE;
+		result = false;
 	}
-	json_decref(tmpObj);
-	tmpObj = json_object_get(input, "epfd");
-	if (::parse(tmpObj, &tmpInt)) {
-		try {
-			this->epfd = static_cast<AISEPFDType>(tmpInt);
-		} catch (...) {
-			this->epfd = AISEPFDType::UNDEFINED;
-		}
+	GetVar("epfd", tmp, input);
+	try {
+		this->epfd = static_cast<AISEPFDType>(tmp);
+	} catch (...) {
+		this->epfd = AISEPFDType::UNDEFINED;
+		result = false;
 	}
-	json_decref(tmpObj);
 	
 	return result;
 }
@@ -157,39 +148,31 @@ bool AISShip::prune (Location& current) {
 	return false;
 }
 
-json_t *AISShip::pack () const {
-	json_t* output = json_object();
+Value AISShip::pack () const {
+	Value d;
 	int packResult = 0;
-	packResult += json_object_set_new(output, "mmsi", json_integer(this->mmsi));
-	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
-	packResult += json_object_set_new(output, "lastTimeStamp", json(HackerboatState::packTime(this->lastTimeStamp)));
-	packResult += json_object_set_new(output, "device", json(device));
-	packResult += json_object_set_new(output, "fix", this->fix.pack());
-	packResult += json_object_set_new(output, "status", json_integer(static_cast<int>(this->status)));
-	packResult += json_object_set_new(output, "turn", json_real(this->turn));
-	packResult += json_object_set_new(output, "speed", json_real(this->speed));
-	packResult += json_object_set_new(output, "course", json_real(this->course));
-	packResult += json_object_set_new(output, "heading", json_real(this->heading));
-	packResult += json_object_set_new(output, "imo", json_integer(this->imo));
-	packResult += json_object_set_new(output, "callsign", json(this->callsign));
-	packResult += json_object_set_new(output, "shipname", json(this->shipname));
-	packResult += json_object_set_new(output, "shiptype", json_integer(static_cast<int>(this->shiptype)));
-	packResult += json_object_set_new(output, "to_bow", json_integer(this->to_bow));
-	packResult += json_object_set_new(output, "to_stern", json_integer(this->to_stern));
-	packResult += json_object_set_new(output, "to_port", json_integer(this->to_port));
-	packResult += json_object_set_new(output, "to_starboard", json_integer(this->to_starboard));
-	packResult += json_object_set_new(output, "epfd", json_integer(static_cast<int>(this->epfd)));
+
+	packResult += PutVar("mmsi", this->mmsi, d);
+	packResult += PutVar("recordTime", HackerboatState::packTime(this->recordTime), d);
+	packResult += PutVar("lastTimeStamp", HackerboatState::packTime(this->lastTimeStamp), d);
+	packResult += PutVar("device", this->device, d);
+	packResult += PutVar("fix", this->fix.pack(), d);
+	packResult += PutVar("status", static_cast<int>(this->status), d);
+	packResult += PutVar("turn", this->turn, d);
+	packResult += PutVar("speed", this->speed, d);
+	packResult += PutVar("course", this->course, d);
+	packResult += PutVar("heading", this->heading, d);
+	packResult += PutVar("imo", this->heading, d);
+	packResult += PutVar("callsign", this->callsign, d);
+	packResult += PutVar("shipname", this->shipname, d);
+	packResult += PutVar("shiptype", static_cast<int>(this->shiptype), d);
+	packResult += PutVar("to_bow", this->to_bow, d);
+	packResult += PutVar("to_stern", this->to_stern, d);
+	packResult += PutVar("to_port", this->to_port, d);
+	packResult += PutVar("to_starboard", this->to_starboard, d);
+	packResult += PutVar("epfd", static_cast<int>(this->epfd), d);
 	
-	if (packResult != 0) {
-		if (output) {
-			//LOG(ERROR) << "AIS pack failed: " << output;
-		} else {
-			//LOG(WARNING) << "AIS pack failed, no output";
-		}
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+	return d;
 }
 
 bool AISShip::isValid () const {
@@ -295,14 +278,14 @@ bool AISShip::removeEntry () {
 	return false;
 }
 
-bool AISShip::merge(AISShip* other) {
+bool AISShip::merge(AISShip& other) {
 	AISShip *a,*b;
 	if (this->mmsi != other->mmsi) return false;		// Can only merge contacts with the same MMSI
 	if (this->lastTimeStamp > other->lastTimeStamp) {	// make the newer one dominant
 		a = this; 
-		b = other;
+		b = &other;
 	} else {
-		a = other;
+		a = &other;
 		b = this;
 	}
 	this->recordTime 	= std::chrono::system_clock::now();
@@ -330,14 +313,26 @@ bool AISShip::merge(AISShip* other) {
 	return true;
 }
 
+void AISShip::copy (const AISShip& c) {
+	this->fix = c.fix;
+	this->device = c.device;
+	this->status = c.status;
+	this->turn = c.turn;
+	this->speed = c.speed;
+	this->course = c.course;
+	this->heading = c.heading;
+	this->imo = c.imo;
+	this->callsign = c.callsign;
+	this->shipname = c.shipname;
+	this->shiptype = c.shiptype;
+	this->to_bow = c.to_bow;
+	this->to_starboard = c.to_starboard;
+	this->to_port = c.to_port;
+	this->to_stern = c.to_stern;
+	this->epfd = c.epfd;
+}
+
 std::ostream& operator<< (std::ostream& stream, const AISShip& state) {
-	json_t* json;
-	json = state.pack();
-	if (json) {
-		stream << json;
-		json_decref(json);
-	} else {
-		stream << "{}";
-	}
+	stream << state.pack();
 	return stream;
 }

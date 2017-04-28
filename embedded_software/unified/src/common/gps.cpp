@@ -9,7 +9,6 @@
  *
  ******************************************************************************/
 
-#include <jansson.h>
 #include <stdlib.h>
 #include <chrono>
 #include <math.h>
@@ -17,12 +16,12 @@
 #include "gps.hpp"
 #include "hal/config.h"
 #include "sqliteStorage.hpp"
-#include "json_utilities.hpp"
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "easylogging++.h"
+#include "rapidjson/rapidjson.h"
 
-#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
+using namespace rapidjson;
 
 const EnumNameTable<NMEAModeEnum> GPSFix::NMEAModeNames = {
 	"None", 
@@ -39,74 +38,64 @@ GPSFix::GPSFix() {
 	fixValid = false;
 }
 
-GPSFix::GPSFix(json_t *packet) {
+GPSFix::GPSFix(Value& packet) {
 	LOG(DEBUG) << "Creating new GPSFix object from packet " << packet;
 	fixValid = this->parseGpsdPacket(packet); 
 }
 
-json_t *GPSFix::pack () const {
-	json_t *output = json_object();
+Value GPSFix::pack () const {
+	Value d;
 	int packResult = 0;
-	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
-	packResult += json_object_set_new(output, "gpsTime", json(HackerboatState::packTime(this->gpsTime)));
-	packResult += json_object_set_new(output, "mode", json(NMEAModeNames.get(mode)));
-	packResult += json_object_set_new(output, "device", json(device));
-	packResult += json_object_set_new(output, "fix", this->fix.pack());
-	packResult += json_object_set_new(output, "track", json_real(track));
-	packResult += json_object_set_new(output, "speed", json_real(speed));
-	packResult += json_object_set_new(output, "alt", json_real(track));
-	packResult += json_object_set_new(output, "climb", json_real(speed));
-	packResult += json_object_set_new(output, "epx", json_real(epx));
-	packResult += json_object_set_new(output, "epy", json_real(epy));
-	packResult += json_object_set_new(output, "epd", json_real(epd));
-	packResult += json_object_set_new(output, "eps", json_real(eps));
-	packResult += json_object_set_new(output, "ept", json_real(epy));
-	packResult += json_object_set_new(output, "epv", json_real(epd));
-	packResult += json_object_set_new(output, "epc", json_real(eps));
-	packResult += json_object_set_new(output, "fixValid", json_boolean(fixValid));
 
-	if (packResult != 0) {
-		if (output) {
-			//LOG(ERROR) << "GPSFix pack failed: " << output;
-		} else {
-			//LOG(WARNING) << "GPSFix pack failed, no output";
-		}
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+	packResult += PutVar("recordTime", HackerboatState::packTime(this->recordTime), d);
+	packResult += PutVar("gpsTime", HackerboatState::packTime(this->gpsTime), d);
+	packResult += PutVar("mode", NMEAModeNames.get(this->mode), d);
+	packResult += PutVar("device", this->device, d);
+	packResult += PutVar("fix", this->fix.pack(), d);
+	packResult += PutVar("track", this->track, d);
+	packResult += PutVar("speed", this->speed, d);
+	packResult += PutVar("alt", this->alt, d);
+	packResult += PutVar("climb", this->climb, d);
+	packResult += PutVar("epx", this->epx, d);
+	packResult += PutVar("epy", this->epy, d);
+	packResult += PutVar("epd", this->epd, d);
+	packResult += PutVar("eps", this->eps, d);
+	packResult += PutVar("ept", this->ept, d);
+	packResult += PutVar("epv", this->epv, d);
+	packResult += PutVar("epc", this->epc, d);
+	packResult += PutVar("fixValid", this->fixValid, d);
+
+	return d;
 }
 
-bool GPSFix::coreParse (json_t *input) {
-	GET_VAR(track);
-	GET_VAR(speed);
-	GET_VAR(alt);
-	GET_VAR(climb);
-	GET_VAR(ept);
-	GET_VAR(epx);
-	GET_VAR(epy);
-	GET_VAR(epv);
-	GET_VAR(epd);
-	GET_VAR(eps);
-	GET_VAR(epc);
-	GET_VAR(device);
+bool GPSFix::coreParse (Value& packet) {
+	GetVar("track", this->track, packet);
+	GetVar("speed", this->speed, packet);
+	GetVar("alt", this->alt, packet);
+	GetVar("climb", this->climb, packet);
+	GetVar("ept", this->ept, packet);
+	GetVar("epx", this->epx, packet);
+	GetVar("epy", this->epy, packet);
+	GetVar("epv", this->epv, packet);
+	GetVar("epd", this->epd, packet);
+	GetVar("eps", this->eps, packet);
+	GetVar("epc", this->epc, packet);
+	GetVar("device", this->device, packet);
 	return true;
 }
 
-bool GPSFix::parseGpsdPacket (json_t *input) {
-	json_t* gpsMode;
+bool GPSFix::parseGpsdPacket (Value& input) {
 	bool result = true;
 	int tmp;
 	std::string time;
 	double lat, lon;
 	
 	result &= coreParse(input);
-	result &= GET_VAR(time);
-	this->gpsTime = std::chrono::system_clock::now();
-	result &= GET_VAR(lat);
-	result &= GET_VAR(lon);
-	gpsMode = json_object_get(input, "mode");
-	result &= ::parse(gpsMode, &tmp);
+	result &= GetVar("time", time, input);
+	result &= HackerboatState::parseTime(time, this->gpsTime);
+	result &= GetVar("lat", lat, input);
+	result &= GetVar("lon", lon, input);
+	result &= GetVar("mode", tmp, input);
 	if (NMEAModeNames.valid(tmp)) {
 		this->mode = static_cast<NMEAModeEnum>(tmp);
 	} else {
@@ -118,34 +107,30 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 		this->fix.lon = lon;
 	}
 	this->recordTime = std::chrono::system_clock::now();
-	json_decref(gpsMode);
 	
-	LOG_IF((!result && input), ERROR) << "Parsing GPSFix packet input failed: ";// << input;
-	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parseGpsdPacket()";
+	LOG_IF(!result, ERROR) << "Parsing GPSFix packet input failed: ";// << input;
 	
 	if (result) return this->isValid();
 	return false;
 }
 
-bool GPSFix::parse (json_t *input) {
-	json_t *inFix;
+bool GPSFix::parse (Value& input) {
+	Value inFix;
 	bool result = true;
 	std::string inTime, gpsInTime, tmp;
 	
-	inFix = json_object_get(input, "fix");
-	result &= ::parse(json_object_get(input, "recordTime"), &inTime);
-	result &= ::parse(json_object_get(input, "gpsTime"), &gpsInTime);
+	result &= this->coreParse(input);
+	result &= GetVar("fix", inFix, input);
+	result &= this->fix.parse(inFix);
+	result &= GetVar("recordTime", inTime, input);
+	result &= GetVar("gpsTime", gpsInTime, input);
 	result &= HackerboatState::parseTime(inTime, this->recordTime);
 	result &= HackerboatState::parseTime(gpsInTime, this->gpsTime);
-	result &= this->coreParse(input);
-	result &= GET_VAR(fixValid);
-	result &= fix.parse(inFix);
-	result &= ::parse(json_object_get(input, "mode"), &tmp);
+	result &= GetVar("fixValid", fixValid, input);
+	result &= GetVar("mode", tmp, input);
 	result &= NMEAModeNames.get(tmp, &mode);
-	json_decref(inFix);
 	
-	LOG_IF((!result && input), ERROR) << "Parsing GPSFix input failed";
-	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parse()";
+	LOG_IF(!result, ERROR) << "Parsing GPSFix input failed";
 	
 	if (result) return this->isValid();
 	return false;
@@ -248,7 +233,7 @@ bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
 	return false;
 }
 
-void GPSFix::copy(GPSFix *newfix) {
+void GPSFix::copy(const GPSFix *newfix) {
 	this->gpsTime 	= newfix->gpsTime;
 	this->mode 		= newfix->mode;
 	//this->device 	= newfix->device;
@@ -268,7 +253,7 @@ void GPSFix::copy(GPSFix *newfix) {
 	this->fixValid	= newfix->fixValid;
 }
 
-void GPSFix::copy(GPSFix &newfix) {
+void GPSFix::copy(const GPSFix &newfix) {
 	this->gpsTime 	= newfix.gpsTime;
 	this->mode 		= newfix.mode;
 	//this->device 	= newfix.device;

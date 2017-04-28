@@ -12,7 +12,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <string>
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include <chrono>
 #include <ctime>
 #include "orientation.hpp"
@@ -21,30 +21,29 @@
 #include <GeographicLib/Constants.hpp>
 #include "easylogging++.h"
 
-#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
-
 using namespace GeographicLib;
 using namespace std;
+using namespace rapidjson;
 
-bool Orientation::parse (json_t *input) {
-	return(GET_VAR(pitch) && GET_VAR(heading) && GET_VAR(roll) && this->isValid());
+bool Orientation::parse (Value& input) {
+	bool result = true;
+
+	result += GetVar("pitch", this->pitch, input);
+	result += GetVar("roll", this->roll, input);
+	result += GetVar("heading", this->heading, input);
+
+	return (result && this->isValid() && this->normalize());
 }
 
-json_t *Orientation::pack () const {
-	json_t *output = json_object();
+Value Orientation::pack () const {
+	Value d;
 	int packResult = 0;
+
+	packResult += PutVar("pitch", this->pitch, d);
+	packResult += PutVar("roll", this->roll, d);
+	packResult += PutVar("heading", this->heading, d);
 	
-	packResult += json_object_set_new(output, "pitch", json_integer(pitch));
-	packResult += json_object_set_new(output, "roll", json_integer(roll));
-	packResult += json_object_set_new(output, "heading", json_integer(heading));
-	
-	if (packResult != 0) {
-		//LOG(ERROR) << "Orientation packing failed " << output;
-		json_decref(output);
-		return NULL;
-	}
-	//LOG(DEBUG) << "Packed Orientation object: " << output;
-	return output;
+	return d;
 }
 
 bool Orientation::isValid () {

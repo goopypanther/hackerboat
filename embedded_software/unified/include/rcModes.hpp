@@ -12,7 +12,6 @@
 #ifndef RCMODES_H
 #define RCMODES_H 
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>

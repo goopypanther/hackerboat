@@ -32,8 +32,7 @@
 #include "easylogging++.h"
 #include "util.hpp"
 
-#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
-#define MAKE_FUNC(func) { #func, std::function<bool(json_t*, BoatState*)>( Command::func ) }
+#define MAKE_FUNC(func) { #func, std::function<bool(Value&, BoatState*)>( Command::func ) }
 
 BoatState::BoatState () {
 	VLOG(2) << "Creating new BoatState object";
@@ -145,50 +144,47 @@ bool BoatState::isValid() {
 	return result;
 }
 
-json_t* BoatState::pack () const {
-	json_t *output = json_object();
-	int packResult = 0;
-	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
-//	packResult += json_object_set_new(output, "currentWaypoint", json_integer(currentWaypoint));
-//	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
-	packResult += json_object_set_new(output, "lastContact", json(HackerboatState::packTime(this->lastContact)));
-	packResult += json_object_set_new(output, "lastRC", json(HackerboatState::packTime(this->lastRC)));
-	packResult += json_object_set_new(output, "lastFix", this->lastFix.pack());
-	packResult += json_object_set_new(output, "launchPoint", this->launchPoint.pack());
-	packResult += json_object_set_new(output, "faultString", json(this->faultString));
-	packResult += json_object_set_new(output, "boatMode", json(boatModeNames.get(_boat)));
-	packResult += json_object_set_new(output, "navMode", json(navModeNames.get(_nav)));
-	packResult += json_object_set_new(output, "autoMode", json(autoModeNames.get(_auto)));
-	packResult += json_object_set_new(output, "rcMode", json(rcModeNames.get(_rc)));
-	packResult += json_object_set_new(output, "disarmInput", json(disarmInput.getState()));
-	packResult += json_object_set_new(output, "armInput", json(armInput.getState()));
-	packResult += json_object_set_new(output, "servoEnable", json(servoEnable.getState()));
+Value BoatState::pack () const {
+	Value d;
+	int p = 0;
+
+	p += PutVar("recordTime", HackerboatState::packTime(this->recordTime), d);
+	p += PutVar("lastContact", HackerboatState::packTime(this->lastContact), d);
+	p += PutVar("lastRC", ::packTime(this->lastRC), d);
+	p += PutVar("lastFix", this->lastFix.pack(), d);
+	p += PutVar("launchPoint", this->launchPoint.pack(), d);
+	p += PutVar("faultString", this->faultString, d);
+	p += PutVar("boatMode", boatModeNames.get(this->_boat), d);
+	p += PutVar("navMode", navModeNames.get(this->_nav), d);
+	p += PutVar("autoMode", autoModeNames.get(this->_auto), d);
+	p += PutVar("rcMode", rcModeNames.get(this->_rc), d);
+	p += PutVar("disarmInput", this->disarmInput.getState(), d);
+	p += PutVar("armInput", this->armInput.getState(), d);
+	p += PutVar("servoEnable", this->servoEnable.getState(), d);
 	try {
-		if (throttle) packResult += json_object_set_new(output, "throttlePosition", json_integer(throttle->getThrottle()));
+		if (throttle) p += PutVar("throttlePosition", throttle->getThrottle(), d);
 	} catch (...) {};
 	try {
-		if (rudder) packResult += json_object_set_new(output, "rudderPosition", json_integer(rudder->read()));
+		if (rudder) p += PutVar("rudderPosition", rudder->read(), d);
 	} catch (...) {};
 	try {
-		if (relays) packResult += json_object_set_new(output, "relays", this->relays->pack());
+		if (relays) p += PutVar("relays", this->relays->pack(), d);
 	} catch (...) {};
 	if (commandCnt()) {
-		json_t* cmdarray = json_array();
+		Value cmdarray(kArrayType);
 		for (auto &x : cmdvec) {
-			json_array_append_new(cmdarray, x->pack());
+			cmdarray.PushBack(x->pack(), cmdarray.GetAllocator());
 		}
-		packResult += json_object_set_new(output, "commands", cmdarray);
+		packResult += p += PutVar("commands", cmdarray, d);
 	} else {
-		packResult += json_object_set_new(output, "commands", json_null());
+		packResult += p += PutVar("commands", d);
 	}
-	if (packResult != 0) {
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+	
+
+	return d;
 }
 
-bool BoatState::parse (json_t* input ) {
+bool BoatState::parse (Value& input) {
 	std::string recordTimeIn, lastContactIn, lastRCin, boatMode, navMode, autoMode, rcMode;
 	bool result = true;
 

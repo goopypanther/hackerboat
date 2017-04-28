@@ -28,8 +28,8 @@ class HealthMonitor : public HackerboatStateStorable {
 	public:
 		HealthMonitor () = default;
 		HealthMonitor (ADCInput* adc) : _adc(adc) {};
-		bool parse (json_t *input);
-		json_t *pack () const;
+		bool parse (Value& input);
+		Value pack () const;
 		bool isValid () {return valid;};
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice) const USE_RESULT;

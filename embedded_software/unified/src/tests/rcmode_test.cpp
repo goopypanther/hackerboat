@@ -8,8 +8,10 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
+
+using namespace rapidjson;
 
 class RCModeIdleTest : public ::testing::Test {
 	public:

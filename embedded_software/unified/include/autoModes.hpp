@@ -12,7 +12,6 @@
 #ifndef AUTOMODES_H
 #define AUTOMODES_H 
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>
@@ -92,7 +91,7 @@ class AutoAnchorMode : public AutoModeBase {
 				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
-		Location getAnchorPoint() {return _state.anchorPoint;};
+		Location* getAnchorPoint() {return &(_state.anchorPoint);};
 	private:
 		//Location anchorPoint;
 		PID helm;

@@ -1,11 +1,13 @@
 #include <stdexcept>
 #include <gtest/gtest.h>
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include <cmath>
 #include "location.hpp"
 #include "twovector.hpp"
 #include "test_utilities.hpp"
 #include "easylogging++.h"
+
+using namespace rapidjson;
 
 #define TOL (0.00001)	// Tolerance for floating point comparisons
 #define NMTOM (1852)
@@ -47,10 +49,10 @@ TEST (Location, JSON) {
 	VLOG(1) << "===Location Test, Creation===";
 	Location u {3 , -4};
 	Location v;
-	json_t *loc;
+	Value loc;
 	
 	loc = u.pack();
-	VLOG(2) << "Output JSON: " << json_dumps(loc, 0);
+	VLOG(2) << "Output JSON: " << loc;
 	v.parse(loc);
 	VLOG(2) << "Parsed location: " << v;
 	EXPECT_TRUE(toleranceEquals(u.lat, v.lat, TOL));

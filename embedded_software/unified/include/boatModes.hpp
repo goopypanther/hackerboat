@@ -12,7 +12,7 @@
 #ifndef BOATMODES_H
 #define BOATMODES_H 
  
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include <stdlib.h>
 #include <string>
 #include <chrono>

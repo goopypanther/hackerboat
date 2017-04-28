@@ -10,14 +10,19 @@
 #define STORAGE_H
 
 extern "C" {
-#include <sqlite3.h>
-#include <assert.h>
+	#include <sqlite3.h>
+	#include <assert.h>
 }
 
 #include <memory>
 #include <sstream>
 #include <vector>
 #include <initializer_list>
+
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+
+using namespace rapidjson;
 
 typedef std::shared_ptr<sqlite3> shared_dbh;
 typedef std::shared_ptr<sqlite3_stmt> shared_stmt;
@@ -134,7 +139,7 @@ public:
 		assert(column < count);
 		sqlite3_bind_text(sth, column + offset, value.data(), value.length(), SQLITE_TRANSIENT);
 	}
-	void bind_json_new(int column, struct json_t *value);
+	void bind_json_new(int column, Value& value);
 	void bind_null(int column) {
 		assert(column >= 0);
 		assert(column < count);
@@ -176,7 +181,7 @@ public:
 		assert (count == width);
 	}
 
-	struct json_t *json_field(int column) const;
+	Value json_field(int column) const;
 	int64_t int64_field(int column) const {
 		assert(column >= 0);
 		assert(column < count);

@@ -14,15 +14,15 @@
 #ifndef AIS_H
 #define AIS_H
  
-extern "C" {
-	#include <jansson.h>
-}
+#include "rapidjson/rapidjson.h"
 #include "hal/config.h"
 #include <math.h>
 #include <string>
 #include <chrono>
 #include "hackerboatRoot.hpp"
 #include "location.hpp"
+
+using namespace rapidjson;
 
 enum class AISMsgType : int {
 	UNDEFINED		= 0,
@@ -134,19 +134,21 @@ class AISBase : public HackerboatStateStorable {
 class AISShip : AISBase {
 	public:
 		AISShip () = default;
-		AISShip (json_t *packet);				/**< Create a ship object from the given packet. */
-		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
+		AISShip (Value& packet);				/**< Create a ship object from the given packet. */
+		AISShip (const AISShip& s) {this->copy(s);};
+		bool parseGpsdPacket (Value& packet);	/**< Parse an incoming AIS packet. Return true if successful. Will fail is packet is bad or MMSIs do not match. */
 		Location project ();					/**< Project the position of the current contact now. */
 		Location project (sysclock t);			/**< Project the position of this contact at time_point. */
-		bool merge (AISShip* other);			/**< Merges two targets with the same MMSI. Returns false if the MMSIs do not match */
+		bool merge (AISShip& other);			/**< Merges two targets with the same MMSI. Returns false if the MMSIs do not match */
 		bool prune (Location& current);			/**< Prune AIS targets that are excessively old or far away */
-		bool parse (json_t *input);				/**< Populate this object from a given json object */ 
-		json_t *pack () const;					
+		bool parse (Value& input);				/**< Populate this object from a given json object */ 
+		Value pack () const;					
 		bool isValid () const;
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
 		int getMMSI () {return this->mmsi;};
+		void copy (const AISShip& c);
 		
 		AISNavStatus	status = AISNavStatus::UNDEFINED;	/**< Navigation status of target */
 		double			turn = NAN;				/**< Rate of turn, degrees per minute. */
@@ -164,7 +166,7 @@ class AISShip : AISBase {
 		AISEPFDType		epfd = AISEPFDType::UNDEFINED;		/**< Type of position locating device. */
 		
 	private:
-		bool coreParse (json_t* input);			/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */
+		bool coreParse (Value& input);		/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */
 		bool removeEntry ();					/**< Remove this entry from the database. Called only from prune() */
 		HackerboatStateStorage *aisShipStorage = NULL;
 	

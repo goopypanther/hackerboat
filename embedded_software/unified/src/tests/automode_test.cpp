@@ -8,7 +8,6 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
 #include "easylogging++.h"
 
 class AutoModeIdleTest : public ::testing::Test {

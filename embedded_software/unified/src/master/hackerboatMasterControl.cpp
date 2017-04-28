@@ -24,9 +24,8 @@
 #include "location.hpp"
 #include "orientation.hpp"
 #include "pid.hpp"
-#include "json_utilities.hpp"
 #include "aio-rest.hpp"
-
+#include "rapidjson/rapidjson.h"
 #include "hal/adcInput.hpp"
 #include "hal/gpsdInput.hpp"
 #include "hal/orientationInput.hpp"

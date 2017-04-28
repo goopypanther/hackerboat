@@ -18,11 +18,10 @@
 #include "hal/gpsdInput.hpp"
 #include "orientation.hpp"
 #include "location.hpp"
-extern "C" {
-	#include <jansson.h>
-}
+#include "rapidjson/rapidjson.h"
 
 using namespace std;
+using namespace rapidjson;
 
 HackerboatHALsim::HackerboatHALsim () {
 	bool argsStrFnd = false;

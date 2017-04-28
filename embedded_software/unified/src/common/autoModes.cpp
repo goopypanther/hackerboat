@@ -21,7 +21,6 @@
 #include "hackerboatRoot.hpp"
 #include "hal/relay.hpp"
 #include "hal/gpio.hpp"
-#include "json_utilities.hpp"
 #include "pid.hpp"
 #include "rcModes.hpp"
 #include "easylogging++.h"

@@ -9,7 +9,6 @@
  *
  ******************************************************************************/
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>
@@ -22,7 +21,6 @@
 #include "hackerboatRoot.hpp"
 #include "hal/relay.hpp"
 #include "hal/gpio.hpp"
-#include "json_utilities.hpp"
 #include "easylogging++.h"
 #include "util.hpp"
 

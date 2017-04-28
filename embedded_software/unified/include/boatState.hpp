@@ -36,41 +36,41 @@
 #include "hal/servo.hpp"
 #include "hal/orientationInput.hpp"
 #include "util.hpp"
+#include "rapidjson/rapidjson.h"
 
 using namespace std;
+using namespace rapidjson;
+
 class BoatState;	// forward declaration so this compiles
 
 class Command {
 	public:
-		Command (BoatState *state, std::string cmd, json_t *args = NULL);
+		Command (BoatState *state, std::string cmd, Value args = Value());
 		std::string getCmd() {return _cmd;};
-		json_t *getArgs() {return _args;};
+		Value& getArgs() {return _args;};
 		bool execute ();
-		json_t* pack () const;
-		~Command() {
-			if (_args) json_decref(_args);
-		};
+		Value pack () const;
 
 	private:
-		static const map<std::string, std::function<bool(json_t*, BoatState*)>> _funcs;
+		static const map<std::string, std::function<bool(Value&, BoatState*)>> _funcs;
 		BoatState 		*_state = NULL;
 		std::string 	_cmd;
-		json_t 			*_args = NULL;
+		Value& 			_args;
 		// here begins the functions that implement incoming commands
-		static bool SetMode(json_t* args, BoatState *state);
-		static bool SetNavMode(json_t* args, BoatState *state);
-		static bool SetAutoMode(json_t* args, BoatState *state);
-		static bool SetHome(json_t* args, BoatState *state);
-		static bool ReverseShell(json_t* args, BoatState *state);
-		static bool SetWaypoint(json_t* args, BoatState *state);
-		static bool SetWaypointAction(json_t* args, BoatState *state);
-		static bool DumpPathKML(json_t* args, BoatState *state);
-		static bool DumpWaypointKML(json_t* args, BoatState *state);
-		static bool DumpObstacleKML(json_t* args, BoatState *state);
-		static bool DumpAIS(json_t* args, BoatState *state);
-		static bool FetchWaypoints(json_t* args, BoatState *state);
-		static bool PushPath(json_t* args, BoatState *state);
-		static bool SetPID(json_t* args, BoatState *state);
+		static bool SetMode(Value& args, BoatState *state);
+		static bool SetNavMode(Value& args, BoatState *state);
+		static bool SetAutoMode(Value& args, BoatState *state);
+		static bool SetHome(Value& args, BoatState *state);
+		static bool ReverseShell(Value& args, BoatState *state);
+		static bool SetWaypoint(Value& args, BoatState *state);
+		static bool SetWaypointAction(Value& args, BoatState *state);
+		static bool DumpPathKML(Value& args, BoatState *state);
+		static bool DumpWaypointKML(Value& args, BoatState *state);
+		static bool DumpObstacleKML(Value& args, BoatState *state);
+		static bool DumpAIS(Value& args, BoatState *state);
+		static bool FetchWaypoints(Value& args, BoatState *state);
+		static bool PushPath(Value& args, BoatState *state);
+		static bool SetPID(Value& args, BoatState *state);
 };
 
 std::ostream& operator<< (std::ostream& stream, const Command& state);
@@ -83,8 +83,8 @@ class BoatState : public HackerboatStateStorable {
 		static const EnumNameTable<RCModeEnum> rcModeNames;
 
 		BoatState ();
-		bool parse (json_t *input);
-		json_t *pack () const;
+		bool parse (Value& input);
+		Value pack () const;
 		bool isValid ();
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
@@ -109,7 +109,8 @@ class BoatState : public HackerboatStateStorable {
 		bool setRCmode (std::string mode);							/**< Set RC mode to the given value */
 		RCModeEnum getRCMode () {return _rc;};
 		int commandCnt () const {return cmdvec.size();};			/**< Return the number of commands waiting to be executed */
-		void pushCmd (std::string name, json_t* args = NULL);		/**< Add a command to the back of the command queue */
+		void pushCmd (std::string name, const Value& args);			/**< Add a command to the back of the command queue */
+		void pushCmd (std::string name) {Value m; pushCmd(name, m);};
 		void flushCmds () {cmdvec.clear();};						/**< Empty the command queue */
 		int executeCmds (int num = 0);								/**< Execute the given number of commands. 0 executes all available. Returns the number of commands successfully executed. */
 		std::string getCSV();										/**< Export the current state as a line for a CSV file */

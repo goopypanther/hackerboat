@@ -23,8 +23,11 @@
 #include "hal/config.h"
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
-#include <jansson.h>
-#include "json_utilities.hpp"
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/pointer.h"
+
+using namespace rapidjson;
 
 class HalTestHarness;
 
@@ -43,7 +46,7 @@ class Relay {
 				//this->init();
 			};
 			
-		json_t *pack ();							/**< Pack a relay tuple with state, fault, and current output of this relay */
+		Value pack ();							/**< Pack a relay tuple with state, fault, and current output of this relay */
 		
 		bool init();								/**< Initialize this relay */
 		bool set() {return _drive->set();};			/**< Set the output state of this relay to ON */
@@ -75,7 +78,7 @@ class RelayMap {
 		static RelayMap* instance ();						/**< Returns a pointer to the object */
 		bool init ();										/**< Initialize all relays */
 		Relay& get (std::string name) {return relays->at(name);}	/**< Get a reference to the named relay */
-		json_t *pack ();									/**< Pack status for all of relays in the map. */
+		Value pack ();									/**< Pack status for all of relays in the map. */
 		bool adc(ADCInput* adc);							/**< Set the ADC for all relays */
 		std::map<std::string, Relay> *getmap () {return relays;};
 		

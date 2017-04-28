@@ -15,9 +15,6 @@
 #ifndef HACKERBOATROOT_H
 #define HACKERBOATROOT_H
  
-extern "C" {
-	#include <jansson.h>
-}
 #include <stdlib.h>
 #include <inttypes.h>
 #include <chrono>
@@ -28,10 +25,15 @@ extern "C" {
 #include <sstream>
 #include <locale>
 #include "hal/config.h"
-#include "json_utilities.hpp"
 #include "sqliteStorage.hpp"
 #include "date.h"
 #include "tz.h"
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/pointer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include <ostream>
 
 // forward declarations
 class HackerboatStateStorage;
@@ -42,6 +44,8 @@ class SQLiteRowReference;
 
 using namespace date;
 using namespace std::chrono;
+using namespace rapidjson;
+using namespace std;
 
 // type definitions for code sanity
 
@@ -62,12 +66,12 @@ class HackerboatState {
 		/** Populate the object from the given json object.
 		 * If seq is true, a sequence number element is expected
 		 */
-		virtual bool parse (json_t *input) USE_RESULT = 0;
+		virtual bool parse (Value& input) USE_RESULT = 0;
 
 		/** Pack the contents of the object into a json object and return a pointer to that object.
 		 * If seq is true, a sequence number element will be included
 		 */
-		virtual json_t *pack () const USE_RESULT = 0;
+		virtual Value pack () const USE_RESULT = 0;
 
 		/** Tests whether the current object is in a valid state */
 		virtual bool isValid (void) const {
@@ -128,6 +132,94 @@ class HackerboatState {
 		
 	protected:
 		HackerboatState(void) {};
+		static Document root;
+
+		// helper functions for getting and setting JSON values
+		bool inline static GetVar(const string name, int& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsInt()) {
+				var = myvar.GetInt();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, double& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsDouble()) {
+				var = myvar.GetDouble();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, string& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsString()) {
+				var = myvar.GetString();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, Value& var, Value &d) {
+			Value default_val;
+			string ptr = "/" + name;
+			var = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			return true;
+		}
+
+		bool inline static GetVar(const string name, bool& var, Value &d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsBool()) {
+				var = myvar.GetBool();
+			} else return false;
+			return true;
+		}
+
+		int inline static PutVar(const string name, const int& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const double& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const string& var, Value &d) {
+			Value s;
+			s.SetString(var.c_str(), var.size(), root.GetAllocator());
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, s, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const Value& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const bool var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Create(d, root.GetAllocator());
+			return 0;
+		}
+
 };
 
 std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
@@ -195,5 +287,20 @@ class HackerboatStateStorable : public HackerboatState {
 		 */
 		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT = 0;
 };
+
+std::ostream& operator<< (std::ostream& stream, const Document& d) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	d.Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
+
+std::ostream& operator<< (std::ostream& stream, const Value& v) {
+	Document d;
+	Pointer("/").Set(d, v, d.GetAllocator());
+	stream << d;
+	return stream;
+}
 
 #endif

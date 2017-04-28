@@ -14,14 +14,16 @@
 #include <sstream>
 #include <unordered_map>
 #include "easylogging++.h"
+#include "rapidjson/rapidjson.h"
 
 extern "C" {
-#include <err.h>
-#include <string.h>
-#include <unistd.h>
-#include <sqlite3.h>
-#include "jansson.h"
+	#include <err.h>
+	#include <string.h>
+	#include <unistd.h>
+	#include <sqlite3.h>
 }
+
+using namespace rapidjson;
 
 /* Deleter helper-classes for use with std::shared_ptr<> */
 
@@ -399,30 +401,40 @@ bool HackerboatStateStorable::getRecord(sequence oid)
 //******************************************************************************
 // C++-y helper classes for parameter and row slices
 
-void SQLiteParameterSlice::bind_json_new(int column, json_t *j)
+void SQLiteParameterSlice::bind_json_new(int column, Value& j)
 {
 	assert(column >= 0);
 	assert(column < count);
-	if (json_is_null(j)) {
+	if (!j.IsObject()) {
 		sqlite3_bind_null(sth, column + offset);
 	} else {
-		char *encoded = json_dumps(j, JSON_COMPACT);
-		sqlite3_bind_text(sth, column + offset, encoded, -1, ::free);
+		Document d;
+		Pointer("/").Set(d, j);
+		StringBuffer buffer;
+		Writer<StringBuffer, Document::EncodingType, ASCII<> > writer(buffer);
+		d.Accept(writer);
+		sqlite3_bind_text(sth, column + offset, buffer.GetString(), -1, ::free);
 	}
-	json_decref(j);
 }
 
-json_t *SQLiteRowReference::json_field(int column) const
+Value SQLiteRowReference::json_field(int column) const
 {
+	Document d;
+	Value j;
 	assert(column >= 0);
 	assert(column < count);
 	int coltype = sqlite3_column_type(sth, column + offset);
-	if (coltype == SQLITE_NULL) {
-		return json_null();
-	}
+	if (coltype == SQLITE_NULL) return j;
 	int length = sqlite3_column_bytes(sth, column + offset);
-	const unsigned char *contents = sqlite3_column_text(sth, column + offset);
-	return json_loadb(reinterpret_cast<const char *>(contents), length, 0, NULL);
+	const char *contents = (const char*)(sqlite3_column_text(sth, column + offset));
+	d.Parse(contents, length);
+	if (!d.HasParseError()) {
+		j = *(Pointer("/").Get(d));
+	} else {
+		LOG(ERROR) << "Failed to parse JSON from SQLite [" << contents << "]";
+		LOG(ERROR) << "JSON error code: " << d.GetParseError() << " offset: " << d.GetErrorOffset();
+	}
+	return j;
 }
 
 std::string SQLiteRowReference::string_field(int column) const
