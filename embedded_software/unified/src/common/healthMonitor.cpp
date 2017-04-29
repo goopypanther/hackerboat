@@ -21,8 +21,8 @@
 #include "healthMonitor.hpp"
 #include "easylogging++.h"
 
-#define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
-#define PACK_VAR(var) json_object_set_new(output, #var, json(var))
+using namespace rapidjson;
+using namespace std;
 
 bool HealthMonitor::readHealth () {
 	// attempt to grab a lock over the adc input in order to make sure we're copying consistent data
@@ -50,49 +50,45 @@ bool HealthMonitor::readHealth () {
 	return true;
 }
 
-bool HealthMonitor::parse (json_t *input) {
-	std::string recordTimeIn;
+bool HealthMonitor::parse (Value& input) {
+	string recordTimeIn;
 	bool result = true;
 
-	result &= ::parse(json_object_get(input, "recordTime"), &recordTimeIn);
+	result &= GetVar("recordTime", recordTimeIn, input);
 	result &= HackerboatState::parseTime(recordTimeIn, this->recordTime);
-	result &= GET_VAR(servoCurrent);
-	result &= GET_VAR(batteryMon);
-	result &= GET_VAR(mainVoltage);
-	result &= GET_VAR(mainCurrent);
-	result &= GET_VAR(chargeVoltage);
-	result &= GET_VAR(chargeCurrent);
-	result &= GET_VAR(motorVoltage);
-	result &= GET_VAR(motorCurrent);
-	result &= GET_VAR(rcRssi);
-	result &= GET_VAR(cellRssi);
-	result &= GET_VAR(wifiRssi);
+	result &= GetVar("servoCurrent", this->servoCurrent, input);
+	result &= GetVar("batteryMon", this->batteryMon, input);
+	result &= GetVar("mainVoltage", this->mainVoltage, input);
+	result &= GetVar("mainCurrent", this->mainCurrent, input);
+	result &= GetVar("chargeVoltage", this->chargeVoltage, input);
+	result &= GetVar("chargeCurrent", this->chargeVoltage, input);
+	result &= GetVar("motorVoltage", this->motorVoltage, input);
+	result &= GetVar("motorCurrent", this->motorCurrent, input);
+	result &= GetVar("rcRssi", this->rcRssi, input);
+	result &= GetVar("cellRssi", this->cellRssi, input);
+	result &= GetVar("wifiRssi", this->wifiRssi, input);
 	
 	valid = result;
 	return result;
 }
 
-json_t *HealthMonitor::pack () const {
-	json_t *output = json_object();
+Value HealthMonitor::pack () const {
+	Value o;
 	int packResult = 0;
-	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
-	packResult += PACK_VAR(servoCurrent);
-	packResult += PACK_VAR(batteryMon);
-	packResult += PACK_VAR(mainVoltage);
-	packResult += PACK_VAR(mainCurrent);
-	packResult += PACK_VAR(chargeVoltage);
-	packResult += PACK_VAR(chargeCurrent);
-	packResult += PACK_VAR(motorVoltage);
-	packResult += PACK_VAR(motorCurrent);
-	packResult += PACK_VAR(rcRssi);
-	packResult += PACK_VAR(cellRssi);
-	packResult += PACK_VAR(wifiRssi);
+	packResult += PutVar("recordTime", HackerboatState::packTime(this->recordTime), o);
+	packResult += PutVar("servoCurrent", this->servoCurrent, o);
+	packResult += PutVar("batteryMon", this->batteryMon, o);
+	packResult += PutVar("mainVoltage", this->mainVoltage, o);
+	packResult += PutVar("mainCurrent", this->mainCurrent, o);
+	packResult += PutVar("chargeVoltage", this->chargeVoltage, o);
+	packResult += PutVar("chargeCurrent", this->chargeCurrent, o);
+	packResult += PutVar("motorVoltage", this->motorVoltage, o);
+	packResult += PutVar("motorCurrent", this->motorCurrent, o);
+	packResult += PutVar("rcRssi", this->rcRssi, o);
+	packResult += PutVar("cellRssi", this->cellRssi, o);
+	packResult += PutVar("wifiRssi", this->wifiRssi, o);
 	
-	if (packResult != 0) {
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+	return o;
 	
 }
 

@@ -45,7 +45,8 @@ class BoatState;	// forward declaration so this compiles
 
 class Command {
 	public:
-		Command (BoatState *state, std::string cmd, Value args = Value());
+		Command (BoatState *state, const string cmd, const Value& args);
+		Command (BoatState *state, const string cmd);
 		std::string getCmd() {return _cmd;};
 		Value& getArgs() {return _args;};
 		bool execute ();
@@ -55,7 +56,9 @@ class Command {
 		static const map<std::string, std::function<bool(Value&, BoatState*)>> _funcs;
 		BoatState 		*_state = NULL;
 		std::string 	_cmd;
-		Value& 			_args;
+		Value 			_args;
+		Document 		root;
+
 		// here begins the functions that implement incoming commands
 		static bool SetMode(Value& args, BoatState *state);
 		static bool SetNavMode(Value& args, BoatState *state);

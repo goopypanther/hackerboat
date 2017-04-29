@@ -32,6 +32,9 @@
 #include "easylogging++.h"
 #include "util.hpp"
 
+using namespace std;
+using namespace rapidjson;
+
 #define MAKE_FUNC(func) { #func, std::function<bool(Value&, BoatState*)>( Command::func ) }
 
 BoatState::BoatState () {
@@ -150,7 +153,7 @@ Value BoatState::pack () const {
 
 	p += PutVar("recordTime", HackerboatState::packTime(this->recordTime), d);
 	p += PutVar("lastContact", HackerboatState::packTime(this->lastContact), d);
-	p += PutVar("lastRC", ::packTime(this->lastRC), d);
+	p += PutVar("lastRC", HackerboatState::packTime(this->lastRC), d);
 	p += PutVar("lastFix", this->lastFix.pack(), d);
 	p += PutVar("launchPoint", this->launchPoint.pack(), d);
 	p += PutVar("faultString", this->faultString, d);
@@ -173,43 +176,43 @@ Value BoatState::pack () const {
 	if (commandCnt()) {
 		Value cmdarray(kArrayType);
 		for (auto &x : cmdvec) {
-			cmdarray.PushBack(x->pack(), cmdarray.GetAllocator());
+			cmdarray.PushBack(x->pack(), root.GetAllocator());
 		}
-		packResult += p += PutVar("commands", cmdarray, d);
+		p += PutVar("commands", cmdarray, d);
 	} else {
-		packResult += p += PutVar("commands", d);
+		p += PutVar("commands", d);
 	}
 	
 
 	return d;
 }
 
-bool BoatState::parse (Value& input) {
-	std::string recordTimeIn, lastContactIn, lastRCin, boatMode, navMode, autoMode, rcMode;
+bool BoatState::parse (Value& d) {
+	string time, mode;
+	Value tmp;
 	bool result = true;
 
-//	result &= GET_VAR(currentWaypoint);
-//	result &= GET_VAR(waypointStrength);
-	result &= GET_VAR(faultString);
-	result &= GET_VAR(boatMode);
-	result &= GET_VAR(navMode);
-	result &= GET_VAR(autoMode);
-	result &= GET_VAR(rcMode);
-	result &= ::parse(json_object_get(input, "recordTime"), &recordTimeIn);
-	result &= ::parse(json_object_get(input, "lastContact"), &lastContactIn);
-	result &= ::parse(json_object_get(input, "lastRC"), &lastRCin);
-	result &= lastFix.parse(json_object_get(input, "lastFix"));
-	result &= launchPoint.parse(json_object_get(input, "launchPoint"));
-	result &= HackerboatState::parseTime(recordTimeIn, this->recordTime);
-	result &= HackerboatState::parseTime(lastContactIn, this->lastContact);
-	result &= HackerboatState::parseTime(lastRCin, this->lastRC);
-	result &= boatModeNames.get(boatMode, &(this->_boat));
-	result &= navModeNames.get(navMode, &(this->_nav));
-	result &= autoModeNames.get(autoMode, &(this->_auto));
-	result &= rcModeNames.get(rcMode, &(this->_rc));
+	result &= GetVar("faultString", faultString, d);
+	result &= GetVar("boatMode", mode, d);
+	result &= boatModeNames.get(mode, &(this->_boat));
+	result &= GetVar("navMode", mode, d);
+	result &= navModeNames.get(mode, &(this->_nav));
+	result &= GetVar("autoMode", mode, d);
+	result &= autoModeNames.get(mode, &(this->_auto));
+	result &= GetVar("rcMode", mode, d);
+	result &= rcModeNames.get(mode, &(this->_rc));
+	result &= GetVar("recordTime", time, d);
+	result &= HackerboatState::parseTime(time, this->recordTime);
+	result &= GetVar("lastContact", time, d);
+	result &= HackerboatState::parseTime(time, this->lastContact);
+	result &= GetVar("lastRC", time, d);
+	result &= HackerboatState::parseTime(time, this->lastRC);
+	result &= GetVar("lastFix", tmp, d);
+	result &= this->lastFix.parse(tmp);
+	result &= GetVar("launchPoint", tmp, d);
+	result &= this->launchPoint.parse(tmp);
 
-	LOG_IF((!result && input), ERROR) << "Parsing BoatState input failed: " << input;
-	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in BoatState.parse()";
+	LOG_IF(!result, ERROR) << "Parsing BoatState input failed: " << d;
 
 	return result;
 }
@@ -220,8 +223,6 @@ HackerboatStateStorage &BoatState::storage () {
 		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE),
 							"BOAT_STATE",
 							{ { "recordTime", "TEXT" },
-	//						  { "currentWaypoint", "INTEGER" },
-	//						  { "waypointStrength", "REAL" },
 							  { "lastContact", "TEXT" },
 							  { "lastRC", "TEXT" },
 							  { "lastFix", "TEXT" },
@@ -239,12 +240,10 @@ HackerboatStateStorage &BoatState::storage () {
 
 bool BoatState::fillRow(SQLiteParameterSlice row) const {
 	row.assertWidth(11);
-	json_t* out;
+	Value out;
 	LOG_EVERY_N(10, DEBUG) << "Storing BoatState object to the database" << *this;
 	LOG(DEBUG) << "Storing BoatState object to the database" << *this;
 	row.bind(0, HackerboatState::packTime(recordTime));
-//	row.bind(1, currentWaypoint);
-//	row.bind(2, waypointStrength);
 	row.bind(1, HackerboatState::packTime(lastContact));
 	row.bind(2, HackerboatState::packTime(lastRC));
 	out = this->lastFix.pack();
@@ -269,16 +268,16 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 
 	std::string str = row.string_field(0);
 	result &= HackerboatState::parseTime(str, this->recordTime);
-//	this->currentWaypoint = row.int_field(1);
-//	this->waypointStrength = row.double_field(2);
 	str = row.string_field(3);
 	result &= HackerboatState::parseTime(str, this->lastContact);
 	str = row.string_field(4);
 	result &= HackerboatState::parseTime(str, this->lastRC);
 	str = row.string_field(5);
-	result &= this->lastFix.parse(json_loads(str.c_str(), str.size(), NULL));
+	root.Parse(str.c_str(), str.size());
+	result &= this->lastFix.parse(*(Pointer("/").Get(root)));
 	str = row.string_field(6);
-	result &= this->launchPoint.parse(json_loads(str.c_str(), str.size(), NULL));
+	root.Parse(str.c_str(), str.size());
+	result &= this->launchPoint.parse(*(Pointer("/").Get(root)));
 	this->faultString = row.string_field(7);
 	str = row.string_field(8);
 	result &= boatModeNames.get(str, &(this->_boat));
@@ -293,14 +292,13 @@ bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 	return result;
 }
 
-void BoatState::pushCmd (std::string name, json_t* args) {
+void BoatState::pushCmd (std::string name, const Value& args) {
 	try {
 		cmdvec.emplace_back(new Command(this, name, args));
 	} catch (...) {
 		LOG(ERROR) << "Attempted to push invalid command " << name << " with arguments " << args;
 	}
-	LOG_IF(args, DEBUG) << "Emplacing command [" << name << "] with arguments: " << args;
-	LOG_IF(!args, DEBUG) << "Emplacing command [" << name << "] with no arguments";
+	LOG(DEBUG) << "Emplacing command [" << name << "] with arguments: " << args;
 }
 
 int BoatState::executeCmds (int num) {
@@ -457,44 +455,45 @@ ArmButtonStateEnum BoatState::getArmState () {
 	#endif /* DISTRIB_IMPLEMENTED */
 }
 
-Command::Command (BoatState *state, std::string cmd, json_t *args) :
-	_state(state), _cmd(cmd), _args(args) {
+Command::Command (BoatState *state, const string cmd, const Value& args) :
+	_state(state), _cmd(cmd) {
+		_args.CopyFrom(args, root.GetAllocator());
+		this->_funcs.at(_cmd);	// force an exception on an invalid command name
+	};
+
+Command::Command (BoatState *state, const string cmd) :
+	_state(state), _cmd(cmd) {
 		this->_funcs.at(_cmd);	// force an exception on an invalid command name
 	};
 
 bool Command::execute () {
-	std::function<bool(json_t*, BoatState*)> cmd = this->_funcs.at(_cmd);
+	function<bool(Value&, BoatState*)> cmd = this->_funcs.at(_cmd);
 	return cmd(_args, _state);
 }
 
-json_t* Command::pack () const {
-	json_t *output = json_object();
-	int packResult = 0;
-	packResult += json_object_set_new(output, "command", json(_cmd));
-	if (_args) {
-		packResult += json_object_set(output, "argument", _args);
-	}
-	if (packResult != 0) {
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+Value Command::pack () const {
+	Value d;
+	int p = 0;
+	p += HackerboatState::PutVar("command", _cmd, d);
+	p += HackerboatState::PutVar("argument", _args, d);
+	
+	return d;
 }
 
-bool Command::SetMode(json_t* args, BoatState *state) {
+bool Command::SetMode(Value& args, BoatState *state) {
 	if (!state) {
 		LOG(WARNING) << "Command function called without valid BoatState pointer";
 		return false;
 	}
-	std::string modeString;
-	if (::parse(json_object_get(args, "mode"), &modeString)) {
+	string mode;
+	if (HackerboatState::GetVar("mode", mode, args)) {
 		BoatModeEnum newmode;
-		if (state->boatModeNames.get(modeString, &newmode)) {
+		if (state->boatModeNames.get(mode, &newmode)) {
 			state->setBoatMode(newmode);
-			LOG(DEBUG) << "Setting boat mode to " << modeString;
+			LOG(DEBUG) << "Setting boat mode to " << mode;
 			return true;
 		} else {
-			LOG(DEBUG) << "Invalid boat mode " << modeString;
+			LOG(ERROR) << "Invalid boat mode " << mode;
 			return false;
 		}
 	} else
@@ -502,20 +501,20 @@ bool Command::SetMode(json_t* args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetNavMode(json_t* args, BoatState *state) {
+bool Command::SetNavMode(Value& args, BoatState *state) {
 	if (!state) {
 		LOG(WARNING) << "Command function called without valid BoatState pointer";
 		return false;
 	}
-	std::string modeString;
-	if (::parse(json_object_get(args, "mode"), &modeString)) {
+	string mode;
+	if (HackerboatState::GetVar("mode", mode, args)) {
 		NavModeEnum newmode;
-		if (state->navModeNames.get(modeString, &newmode)) {
+		if (state->navModeNames.get(mode, &newmode)) {
 			state->setNavMode(newmode);
-			LOG(DEBUG) << "Setting nav mode to " << modeString;
+			LOG(DEBUG) << "Setting nav mode to " << mode;
 			return true;
 		} else {
-			LOG(DEBUG) << "Invalid nav mode " << modeString;
+			LOG(DEBUG) << "Invalid nav mode " << mode;
 			return false;
 		}
 	}
@@ -523,20 +522,20 @@ bool Command::SetNavMode(json_t* args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetAutoMode(json_t* args, BoatState *state) {
+bool Command::SetAutoMode(Value& args, BoatState *state) {
 	if (!state) {
 		LOG(WARNING) << "Command function called without valid BoatState pointer";
 		return false;
 	}
-	std::string modeString;
-	if (::parse(json_object_get(args, "mode"), &modeString)) {
+	string mode;
+	if (HackerboatState::GetVar("mode", mode, args)) {
 		AutoModeEnum newmode;
-		if (state->autoModeNames.get(modeString, &newmode)) {
+		if (state->autoModeNames.get(mode, &newmode)) {
 			state->setAutoMode(newmode);
-			LOG(DEBUG) << "Setting auto mode to " << modeString;
+			LOG(DEBUG) << "Setting auto mode to " << mode;
 			return true;
 		} else {
-			LOG(DEBUG) << "Invalid auto mode " << modeString;
+			LOG(DEBUG) << "Invalid auto mode " << mode;
 			return false;
 		}
 	}
@@ -544,38 +543,41 @@ bool Command::SetAutoMode(json_t* args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetHome(json_t* args, BoatState *state) {
+bool Command::SetHome(Value& args, BoatState *state) {
 	if (!state) {
 		LOG(WARNING) << "Command function called without valid BoatState pointer";
 		return false;
 	}
-	if ((!args) && state->lastFix.isValid()) {
+	if ((!args.HasMember("location")) && state->lastFix.isValid()) {
 		state->launchPoint = state->lastFix.fix;
 		LOG(INFO) << "Setting launch point to current location, " << state->gps->getAverageFix();
 		return true;
 	} else {
 		Location newhome;
-		if ((newhome.parse(json_object_get(args, "location"))) && (newhome.isValid())) {
-			state->launchPoint = newhome;
-			LOG(INFO) << "Setting launch point to " << state->launchPoint;
-			return true;
+		Value loc;
+		if (HackerboatState::GetVar("location", loc, args)) {
+			if (newhome.parse(loc) && (newhome.isValid())) {
+				state->launchPoint = newhome;
+				LOG(INFO) << "Setting launch point to " << state->launchPoint;
+				return true;
+			}
 		}
 	}
 	LOG(DEBUG) << "No home point set";
 	return false;
 }
 
-bool Command::ReverseShell(json_t* args, BoatState *state) {
+bool Command::ReverseShell(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetWaypoint(json_t* args, BoatState *state) {
-	if ((!state) || (!args)) {
+bool Command::SetWaypoint(Value& args, BoatState *state) {
+	if ((!state) || (!args.IsObject())) {
 		LOG(WARNING) << "SetWaypoint command called without valid BoatState pointer and/or arguments";
 		return false;
 	}
 	int number;
-	if (::parse(json_object_get(args, "number"), &number)) {
+	if (HackerboatState::GetVar("number", number, args)) {
 		if (number > state->waypointList.count()) number = state->waypointList.count();
 		if (number < 0) number = 0;
 		state->waypointList.setCurrent(number);
@@ -586,20 +588,20 @@ bool Command::SetWaypoint(json_t* args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetWaypointAction(json_t* args, BoatState *state) {
-	if ((!state) || (!args)) {
+bool Command::SetWaypointAction(Value& args, BoatState *state) {
+	if ((!state) || (!args.IsObject())) {
 		LOG(WARNING) << "SetWaypointAction command called without valid BoatState pointer and/or arguments";
 		return false;
 	}
-	std::string modeString;
-	if (::parse(json_object_get(args, "action"), &modeString)) {
+	string mode;
+	if (HackerboatState::GetVar("action", mode, args)) {
 		WaypointActionEnum action;
-		if (state->waypointList.actionNames.get(modeString, &action)) {
+		if (state->waypointList.actionNames.get(mode, &action)) {
 			state->waypointList.setAction(action);
-			LOG(INFO) << "Setting current waypoint action to " << modeString;
+			LOG(INFO) << "Setting current waypoint action to " << mode;
 			return true;
 		} else {
-			LOG(DEBUG) << "Invalid waypoint action " << modeString;
+			LOG(DEBUG) << "Invalid waypoint action " << mode;
 			return false;
 		}
 	}
@@ -607,50 +609,49 @@ bool Command::SetWaypointAction(json_t* args, BoatState *state) {
 	return false;
 }
 
-bool Command::DumpPathKML(json_t* args, BoatState *state) {
+bool Command::DumpPathKML(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::DumpWaypointKML(json_t* args, BoatState *state) {
+bool Command::DumpWaypointKML(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::DumpObstacleKML(json_t* args, BoatState *state) {
+bool Command::DumpObstacleKML(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::DumpAIS(json_t* args, BoatState *state) {
+bool Command::DumpAIS(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::FetchWaypoints(json_t* args, BoatState *state) {
+bool Command::FetchWaypoints(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::PushPath(json_t* args, BoatState *state) {
+bool Command::PushPath(Value& args, BoatState *state) {
 	return false;
 }
 
-bool Command::SetPID(json_t* args, BoatState *state) {
-	if ((!state) || (!args)) {
+bool Command::SetPID(Value& args, BoatState *state) {
+	if ((!state) || (!args.IsObject())) {
 		LOG(WARNING) << "SetPID command called without valid BoatState pointer and/or arguments";
 		return false;
 	}
-	json_t *input = args;
 	double Kp, Ki, Kd;
 	bool result = false;
-	if (GET_VAR(Kp)) {
+	if (HackerboatState::GetVar("Kp", Kp, args)) {
 		std::get<0>(state->K) = Kp;
 		LOG(INFO) << "Setting proportional gain to " << Kp;
 		result = true;
 	}
-	if (GET_VAR(Ki)) {
+	if (HackerboatState::GetVar("Ki", Ki, args)) {
 		std::get<1>(state->K) = Ki;
 		LOG(INFO) << "Setting integral gain to " << Ki;
 		result = true;
 		result = true;
 	}
-	if (GET_VAR(Kd)) {
+	if (HackerboatState::GetVar("Kd", Kd, args)) {
 		std::get<2>(state->K) = Kd;
 		LOG(INFO) << "Setting differential gain to " << Kd;
 		result = true;
@@ -660,18 +661,17 @@ bool Command::SetPID(json_t* args, BoatState *state) {
 }
 
 std::ostream& operator<< (std::ostream& stream, const Command& cmd) {
-	json_t* json;
+	Value json;
 	json = cmd.pack();
-	if (json) {
+	if (json.IsObject()) {
 		stream << json;
 	} else {
 		stream << "{}";
 	}
-	json_decref(json);
 	return stream;
 }
 
-const map<std::string, std::function<bool(json_t*, BoatState*)>> Command::_funcs = {
+const map<std::string, std::function<bool(Value&, BoatState*)>> Command::_funcs = {
 	MAKE_FUNC(SetMode),
 	MAKE_FUNC(SetNavMode),
 	MAKE_FUNC(SetAutoMode),

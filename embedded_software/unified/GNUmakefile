@@ -35,7 +35,6 @@ CPPFLAGS += -D ELPP_THREAD_SAFE
 
 LDFLAGS  += -L /usr/local/lib
 
-LDLIBS += -ljansson
 LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt

@@ -280,8 +280,8 @@ bool AISShip::removeEntry () {
 
 bool AISShip::merge(AISShip& other) {
 	AISShip *a,*b;
-	if (this->mmsi != other->mmsi) return false;		// Can only merge contacts with the same MMSI
-	if (this->lastTimeStamp > other->lastTimeStamp) {	// make the newer one dominant
+	if (this->mmsi != other.mmsi) return false;		// Can only merge contacts with the same MMSI
+	if (this->lastTimeStamp > other.lastTimeStamp) {	// make the newer one dominant
 		a = this; 
 		b = &other;
 	} else {

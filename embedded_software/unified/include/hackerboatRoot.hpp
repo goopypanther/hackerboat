@@ -129,10 +129,6 @@ class HackerboatState {
 			}
 			return true;
 		};
-		
-	protected:
-		HackerboatState(void) {};
-		static Document root;
 
 		// helper functions for getting and setting JSON values
 		bool inline static GetVar(const string name, int& var, Value& d) {
@@ -220,6 +216,9 @@ class HackerboatState {
 			return 0;
 		}
 
+	protected:
+		HackerboatState(void) {};
+		static Document root;
 };
 
 std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
