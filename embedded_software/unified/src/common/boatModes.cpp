@@ -63,7 +63,7 @@ BoatModeBase* BoatModeBase::factory(BoatState& state, BoatModeEnum mode) {
 }
 
 BoatModeBase* BoatStartMode::execute() {
-	_state.getLastRecord();	// grab the last record, so we can go into that state if necessary. 
+	//_state.getLastRecord();	// grab the last record, so we can go into that state if necessary. 
 	LOG(INFO) << "Entering self test from start mode";
 	return BoatModeBase::factory(_state, BoatModeEnum::SELFTEST);
 }

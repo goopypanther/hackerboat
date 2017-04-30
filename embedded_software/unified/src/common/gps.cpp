@@ -15,7 +15,6 @@
 #include <string>
 #include "gps.hpp"
 #include "hal/config.h"
-#include "sqliteStorage.hpp"
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "easylogging++.h"
@@ -147,90 +146,6 @@ bool GPSFix::isValid (void) const {
 		return false;
 	}
 	return this->fix.isValid();
-}
-
-HackerboatStateStorage &GPSFix::storage() {
-
-	if (!gpsStorage) {
-		LOG(DEBUG) << "Creating GPSFix database table";
-		gpsStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(GPS_DB_FILE),
-							"GPS_FIX",
-							{ { "recordTime", "TEXT" },
-							  { "gpsTime", "TEXT"},
-							  { "lat", "REAL" },
-							  { "lon", "REAL" },
-							  { "track", "REAL" },
-							  { "speed", "REAL" },
-							  { "alt", "REAL" },
-							  { "climb", "REAL" },
-							  { "ept", "REAL" },
-							  { "epx", "REAL" },
-							  { "epy", "REAL" },
-							  { "epv", "REAL" },
-							  { "epd", "REAL" },
-							  { "eps", "REAL" },
-							  { "epc", "REAL" },
-							  { "device", "TEXT" },
-							  { "fixValid", "INTEGER" } });
-		gpsStorage->createTable();
-	}
-
-	return *gpsStorage;
-}
-
-bool GPSFix::fillRow(SQLiteParameterSlice row) const {
-	row.assertWidth(17);
-	LOG_EVERY_N(10, DEBUG) << "Storing GPSFix object to the database" << *this;
-	LOG(DEBUG) << "Storing GPSFix object to the database" << *this;
-	row.bind(0, HackerboatState::packTime(recordTime));
-	row.bind(1, HackerboatState::packTime(gpsTime));
-	row.bind(2, fix.lat);
-	row.bind(3, fix.lon);
-	row.bind(4, track);
-	row.bind(5, speed);
-	row.bind(6, alt);
-	row.bind(7, climb);
-	row.bind(8, ept);
-	row.bind(9, epx);
-	row.bind(10, epy);
-	row.bind(11, epv);
-	row.bind(12, epd);
-	row.bind(13, eps);
-	row.bind(14, epc);
-	row.bind(15, device);
-	row.bind(16, fixValid);
-
-	return true;
-}
-
-bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
-	bool result = true;
-	_sequenceNum = seq;
-	row.assertWidth(17);
-	
-	std::string recordTimeStr = row.string_field(0);
-	result &= HackerboatState::parseTime(recordTimeStr, this->recordTime);
-	std::string gpsTimeStr = row.string_field(1);
-	result &= HackerboatState::parseTime(gpsTimeStr, this->gpsTime);
-	this->fix.lat = row.double_field(2);
-	this->fix.lon = row.double_field(3);
-	this->track = row.double_field(4);
-	this->speed = row.double_field(5);
-	this->alt = row.double_field(6);
-	this->climb = row.double_field(7);
-	this->ept = row.double_field(8);
-	this->epx = row.double_field(9);
-	this->epy = row.double_field(10);
-	this->epv = row.double_field(11);
-	this->epd = row.double_field(12);
-	this->eps = row.double_field(13);
-	this->epc = row.double_field(14);
-	this->device = row.string_field(15);
-	this->fixValid = row.bool_field(16);
-	LOG(DEBUG) << "Populated GPSFix object from DB " << *this;
-	
-	if (fixValid && result) return this->isValid();
-	return false;
 }
 
 void GPSFix::copy(const GPSFix *newfix) {

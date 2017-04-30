@@ -25,7 +25,6 @@
 #include <sstream>
 #include <locale>
 #include "hal/config.h"
-#include "sqliteStorage.hpp"
 #include "date.h"
 #include "tz.h"
 #include "rapidjson/rapidjson.h"
@@ -34,11 +33,6 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <ostream>
-
-// forward declarations
-class HackerboatStateStorage;
-class SQLiteParameterSlice;
-class SQLiteRowReference;
 
 // namespaces used to make the time functions readable
 
@@ -231,61 +225,6 @@ std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
  * This base class connects to a database of records containing instances of the object type.
  *
  */
-
-class HackerboatStateStorable : public HackerboatState {
-	public:
-		typedef int64_t sequence;			/**< The type of sequence numbers / OIDs in persistent storage. Negative numbers indicate invalid / missing data */
-
-		/** Get the sequenceNum of this object.
-		 * An object's sequence number is -1 until populated from or inserted into a file.
-		 */
-		sequence getSequenceNum (void) const
-		{ return _sequenceNum; }
-
-		sequence countRecords (void);							/**< Return the number of records of the object's type in the open database file */
-		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
-		bool getRecord(sequence select) USE_RESULT;				/**< Populate the object from the open database file */
-		bool getLastRecord(void) USE_RESULT;					/**< Get the latest record */
-		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
-		
-	protected:
-		HackerboatStateStorable()			/**< Create a state object */
-			: _sequenceNum(-1)
-		{};
-
-		sequence 	_sequenceNum;				/**< sequence number in the database, or -1 */
-
-		/** Returns a sqlite storage object for this instance.
-		 *
-		 * Concrete classes must implement this to return a
-		 * HackerboatStateStorage object representing the database,
-		 * table name, and columns of the place this instance is
-		 * stored. Typically this returns a single shared storage
-		 * instance for all instances of a given class, but that's not
-		 * required.
-		 *
-		 * The columns defined by the returned storage object must
-		 * match whatever this class's fillRow() and readFromRow()
-		 * implementations expect.
-		 */
-		virtual HackerboatStateStorage& storage() = 0;
-
-		/** Write the receiver's state into a set of sqlite columns.
-		 *
-		 * The default implementation calls
-		 * HackerboatState::pack() and expects the database to
-		 * contain a single JSON column.
-		 */
-		virtual bool fillRow(SQLiteParameterSlice) const USE_RESULT = 0;
-
-		/** Populate the receiver from a database row.
-		 *
-		 * The default implementation expects a single column
-		 * containing JSON text which is deserialized and given to
-		 * HackerboatState::parse().
-		 */
-		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT = 0;
-};
 
 inline std::ostream& operator<< (std::ostream& stream, const Document& d) {
 	StringBuffer buf;

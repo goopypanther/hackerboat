@@ -21,7 +21,6 @@
 #include "hackerboatRoot.hpp"
 #include "location.hpp"
 #include "hal/config.h"
-#include "sqliteStorage.hpp"
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "ais.hpp"
@@ -142,7 +141,6 @@ bool AISShip::prune (Location& current) {
 		((std::chrono::system_clock::now() - lastTimeStamp) > timeout)) {
 			LOG(DEBUG) << "Trimming target " << this->mmsi;
 			LOG(DEBUG) << "Trimmed target " << *this;
-			removeEntry();
 			return true;
 		} else return false;
 	return false;
@@ -182,100 +180,6 @@ bool AISShip::isValid () const {
 	result &= (fix.isValid());
 	result &= ((std::chrono::system_clock::now() - (this->lastTimeStamp)) < timeout);
 	return result;
-}
-
-HackerboatStateStorage& AISShip::storage() {
-	if (!aisShipStorage) {
-		LOG(DEBUG) << "Creating AIS database table";
-		aisShipStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(AIS_DB_FILE),
-							"AIS_SHIP",
-							{ { "mmsi", "INTEGER"},
-							  { "recordTime", "TEXT" },
-							  { "lastTimeStamp", "TEXT"},
-							  { "lat", "REAL" },
-							  { "lon", "REAL" },
-							  { "device", "TEXT" },
-							  { "status", "INTEGER" },
-							  { "turn", "REAL" },
-							  { "speed", "REAL" },
-							  { "course", "REAL" },
-							  { "heading", "REAL" },
-							  { "imo", "INTEGER" },
-							  { "callsign", "TEXT" },
-							  { "shipname", "TEXT" },
-							  { "shiptype", "INTEGER" },
-							  { "to_bow", "INTEGER" },
-							  { "to_stern", "INTEGER" },
-							  { "to_port", "INTEGER" },
-							  { "to_starboard", "INTEGER" },
-							  { "epfd", "INTEGER" } });
-		aisShipStorage->createTable();
-	}
-
-	return *aisShipStorage;
-}
-
-bool AISShip::fillRow(SQLiteParameterSlice row) const {
-	row.assertWidth(20);
-	LOG(DEBUG) << "Storing AIS object to the database" << *this;
-	row.bind(0, mmsi);
-	row.bind(1, HackerboatState::packTime(recordTime));
-	row.bind(2, HackerboatState::packTime(lastTimeStamp));
-	row.bind(3, fix.lat);
-	row.bind(4, fix.lon);
-	row.bind(5, device);
-	row.bind(6, static_cast<int>(status));
-	row.bind(7, turn);
-	row.bind(8, speed);
-	row.bind(9, course);
-	row.bind(10, heading);
-	row.bind(11, imo);
-	row.bind(12, callsign);
-	row.bind(13, shipname);
-	row.bind(14, static_cast<int>(shiptype));
-	row.bind(15, to_bow);
-	row.bind(16, to_stern);
-	row.bind(17, to_port);
-	row.bind(18, to_starboard);
-	row.bind(19, static_cast<int>(epfd));
-	
-	return true;
-}
-
-bool AISShip::readFromRow(SQLiteRowReference row, sequence seq) {
-	bool result = true;
-	row.assertWidth(20);
-	
-	this->mmsi = row.int64_field(0);
-	std::string recordTimeStr = row.string_field(1);
-	result &= parseTime(recordTimeStr, this->recordTime);
-	std::string aisTimeStr = row.string_field(2);
-	result &= parseTime(aisTimeStr, this->lastTimeStamp);
-	this->fix.lat = row.double_field(3);
-	this->fix.lon = row.double_field(4);
-	this->device = row.string_field(5);
-	this->status = static_cast<AISNavStatus>(row.int64_field(6));
-	this->turn = row.double_field(7);
-	this->speed = row.double_field(8);
-	this->course = row.double_field(9);
-	this->heading = row.double_field(10);
-	this->imo = row.int64_field(11);
-	this->callsign = row.string_field(12);
-	this->shipname = row.string_field(13);
-	this->shiptype = static_cast<AISShipType>(row.int64_field(14));
-	this->to_bow = row.int64_field(15);
-	this->to_stern = row.int64_field(16);
-	this->to_port = row.int64_field(17);
-	this->to_starboard = row.int64_field(18);
-	this->epfd = static_cast<AISEPFDType>(row.int64_field(19));
-	LOG(DEBUG) << "Populated AIS object from DB " << *this;
-	
-	return this->isValid();
-}
-
-bool AISShip::removeEntry () {
-	// implementation postponed -- we can allow the DB to grow 
-	return false;
 }
 
 bool AISShip::merge(AISShip& other) {

@@ -20,7 +20,6 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include "gps.hpp"
-#include "sqliteStorage.hpp"
 #include "hal/config.h"
 #include "easylogging++.h"
 #include "enumdefs.hpp"
@@ -78,7 +77,7 @@ class Command {
 
 std::ostream& operator<< (std::ostream& stream, const Command& state);
 
-class BoatState : public HackerboatStateStorable {
+class BoatState : public HackerboatState {
 	public:
 		static const EnumNameTable<BoatModeEnum> boatModeNames;
 		static const EnumNameTable<NavModeEnum> navModeNames;
@@ -89,9 +88,6 @@ class BoatState : public HackerboatStateStorable {
 		bool parse (Value& input);
 		Value pack () const;
 		bool isValid ();
-		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 
 		bool insertFault (const std::string fault);					/**< Add the named fault to the fault string. Returns false if fault string is full */
 		bool removeFault (const std::string fault);					/**< Remove the named fault from the fault string. Returns false if not present */
@@ -145,7 +141,6 @@ class BoatState : public HackerboatStateStorable {
 
 	private:
 		std::list<Command*>	cmdvec;
-		HackerboatStateStorage *stateStorage = NULL;
 		std::string 	faultString = "";
 		BoatModeEnum 	_boat = BoatModeEnum::NONE;
 		NavModeEnum		_nav = NavModeEnum::NONE;

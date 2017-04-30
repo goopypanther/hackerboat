@@ -17,7 +17,6 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include "gps.hpp"
-#include "sqliteStorage.hpp"
 #include "hal/config.h"
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"
@@ -217,81 +216,6 @@ bool BoatState::parse (Value& d) {
 	return result;
 }
 
-HackerboatStateStorage &BoatState::storage () {
-	if (!stateStorage) {
-		LOG(DEBUG) << "Creating BoatState database table";
-		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE),
-							"BOAT_STATE",
-							{ { "recordTime", "TEXT" },
-							  { "lastContact", "TEXT" },
-							  { "lastRC", "TEXT" },
-							  { "lastFix", "TEXT" },
-							  { "launchPoint", "TEXT" },
-							  { "faultString", "TEXT" },
-							  { "boatMode", "TEXT" },
-							  { "navMode", "TEXT" },
-							  { "autoMode", "TEXT" },
-							  { "rcMode", "TEXT" },
-							  { "relays", "TEXT" } });
-		stateStorage->createTable();
-	}
-	return *stateStorage;
-}
-
-bool BoatState::fillRow(SQLiteParameterSlice row) const {
-	row.assertWidth(11);
-	Value out;
-	LOG_EVERY_N(10, DEBUG) << "Storing BoatState object to the database" << *this;
-	LOG(DEBUG) << "Storing BoatState object to the database" << *this;
-	row.bind(0, HackerboatState::packTime(recordTime));
-	row.bind(1, HackerboatState::packTime(lastContact));
-	row.bind(2, HackerboatState::packTime(lastRC));
-	out = this->lastFix.pack();
-	row.bind_json_new(3, out);
-	out  = this->launchPoint.pack();
-	row.bind_json_new(4, out);
-	row.bind(5, faultString);
-	row.bind(6, boatModeNames.get(_boat));
-	row.bind(7, navModeNames.get(_nav));
-	row.bind(8, autoModeNames.get(_auto));
-	row.bind(9, rcModeNames.get(_rc));
-	out = this->relays->pack();
-	row.bind_json_new(10, out);
-
-	return true;
-}
-
-bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
-	bool result = true;
-	_sequenceNum = seq;
-	row.assertWidth(11);
-
-	std::string str = row.string_field(0);
-	result &= HackerboatState::parseTime(str, this->recordTime);
-	str = row.string_field(3);
-	result &= HackerboatState::parseTime(str, this->lastContact);
-	str = row.string_field(4);
-	result &= HackerboatState::parseTime(str, this->lastRC);
-	str = row.string_field(5);
-	root.Parse(str.c_str(), str.size());
-	result &= this->lastFix.parse(*(Pointer("/").Get(root)));
-	str = row.string_field(6);
-	root.Parse(str.c_str(), str.size());
-	result &= this->launchPoint.parse(*(Pointer("/").Get(root)));
-	this->faultString = row.string_field(7);
-	str = row.string_field(8);
-	result &= boatModeNames.get(str, &(this->_boat));
-	str = row.string_field(9);
-	result &= navModeNames.get(str, &(this->_nav));
-	str = row.string_field(10);
-	result &= autoModeNames.get(str, &(this->_auto));
-	str = row.string_field(11);
-	result &= rcModeNames.get(str, &(this->_rc));
-	LOG(DEBUG) << "Populated BoatState object from DB " << *this;
-
-	return result;
-}
-
 void BoatState::pushCmd (std::string name, const Value& args) {
 	try {
 		cmdvec.emplace_back(new Command(this, name, args));
@@ -456,7 +380,7 @@ ArmButtonStateEnum BoatState::getArmState () {
 }
 
 Command::Command (BoatState *state, const string cmd, const Value& args) :
-	_state(state), _cmd(cmd) {
+	_state(state), _cmd(cmd), root() {
 		_args.CopyFrom(args, root.GetAllocator());
 		this->_funcs.at(_cmd);	// force an exception on an invalid command name
 	};

@@ -118,7 +118,7 @@ enum class AISEPFDType : int {
 	GALILEO		= 8
 };
 
-class AISBase : public HackerboatStateStorable {
+class AISBase : public HackerboatState {
 	public:
 		AISBase () = default;
 		
@@ -144,9 +144,6 @@ class AISShip : AISBase {
 		bool parse (Value& input);				/**< Populate this object from a given json object */ 
 		Value pack () const;					
 		bool isValid () const;
-		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice row) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence seq) USE_RESULT;
 		int getMMSI () {return this->mmsi;};
 		void copy (const AISShip& c);
 		
@@ -167,9 +164,7 @@ class AISShip : AISBase {
 		
 	private:
 		bool coreParse (Value& input);		/**< Pieces of the parsing task shared between parse() and gpsdInputParse() */
-		bool removeEntry ();					/**< Remove this entry from the database. Called only from prune() */
-		HackerboatStateStorage *aisShipStorage = NULL;
-	
+		bool removeEntry ();					/**< Remove this entry from the database. Called only from prune() */	
 };
 
 // This is here because I am having dumb inheritance issues

@@ -35,7 +35,6 @@ CPPFLAGS += -D ELPP_THREAD_SAFE
 
 LDFLAGS  += -L /usr/local/lib
 
-LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
 LDLIBS += -lGeographic
@@ -78,7 +77,6 @@ LIBHACKERBOAT_SRCS= util.cpp
 LIBHACKERBOAT_SRCS+= autoModes.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
-LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp
 LIBHACKERBOAT_SRCS+= gps.cpp
 LIBHACKERBOAT_SRCS+= enumtable.cpp
@@ -125,7 +123,6 @@ TEST_OBJS += rcmode_test.o
 TEST_OBJS += automode_test.o
 TEST_OBJS += boatstate_test.o
 TEST_OBJS += boatmode_test.o
-TEST_OBJS += sqliteStorage_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
 unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a

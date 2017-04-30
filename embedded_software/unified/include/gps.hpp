@@ -17,7 +17,6 @@
 #include <chrono>
 #include <string>
 #include "hackerboatRoot.hpp"
-#include "sqliteStorage.hpp"
 #include "location.hpp"
 #include "enumtable.hpp"
 
@@ -38,7 +37,7 @@ enum class NMEAModeEnum : int {
  * The actual text of each incoming sentence is stored for logging purposes as well. 
  *
  */
-class GPSFix : public HackerboatStateStorable {
+class GPSFix : public HackerboatState {
 	public:
 		static const EnumNameTable<NMEAModeEnum> NMEAModeNames;
 	
@@ -49,9 +48,6 @@ class GPSFix : public HackerboatStateStorable {
 		bool parse (Value& input);
 		Value pack () const;
 		bool isValid () const;
-		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 		void copy(const GPSFix* newfix);
 		void copy(const GPSFix& newfix);
 		
@@ -76,7 +72,6 @@ class GPSFix : public HackerboatStateStorable {
 		
 	private:
 		bool coreParse (Value& input);	/**< This is the pieces of the parsing task shared between parse() and parseGpsdPacket() */
-		HackerboatStateStorage *gpsStorage = NULL;
 };
 
 #endif
