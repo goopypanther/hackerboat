@@ -131,8 +131,8 @@ TEST_F(AutoModeIdleTest, AnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 class AutoModeWaypointTest : public ::testing::Test {
@@ -248,8 +248,8 @@ TEST_F(AutoModeWaypointTest, CommandAnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, CourseSelection) {
@@ -342,8 +342,8 @@ TEST_F(AutoModeWaypointTest, WaypointAnchor) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.59436, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.37912, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.59436, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.37912, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, WaypointIdle) {
@@ -491,8 +491,8 @@ TEST_F(AutoModeReturnTest, CommandAnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeReturnTest, CourseSelection) {

@@ -39,9 +39,9 @@ TEST (Orientation, JSON) {
 	Value orient;
 	
 	orient = u.pack();
-	VLOG_IF(orient, 2) << "Output JSON: " << orient;
+	VLOG_IF(orient.IsObject(), 2) << "Output JSON: " << orient;
 	v.parse(orient);
-	VLOG_IF(v.pack(), 2) << "Parsed JSON: " << orient;
+	VLOG_IF(v.pack().IsObject(), 2) << "Parsed JSON: " << orient;
 	EXPECT_TRUE(toleranceEquals(u.pitch, v.pitch, TOL));
 	EXPECT_TRUE(toleranceEquals(u.roll, v.roll, TOL));
 	EXPECT_TRUE(toleranceEquals(u.heading, v.heading, TOL));

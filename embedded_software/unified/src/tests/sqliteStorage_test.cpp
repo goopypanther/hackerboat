@@ -60,14 +60,15 @@ public:
 	std::string s;
 
 	/* Stub impls */
-	bool parse(json_t* s) {
+	bool parse(Value& s) {
 		return false;
 	}
 	bool isValid() const {
 		return true;
 	}
-	json_t *pack() const {
-		return NULL;
+	Value pack() const {
+		Value v;
+		return v;
 	}
 
 protected:

@@ -10,6 +10,13 @@
  *
  ******************************************************************************/
  
- #include "util.hpp"
+#include "util.hpp"
+#include "hackerboatRoot.hpp"
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+
+using namespace rapidjson;
  
+ // initialization of static class members
  Args* Args::_instance = new Args();
+ Document HackerboatState::root;

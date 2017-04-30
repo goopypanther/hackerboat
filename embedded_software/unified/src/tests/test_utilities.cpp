@@ -8,7 +8,7 @@ extern "C" {
 
 using namespace rapidjson;
 
-std::ostream& operator<< (std::ostream& os, pathelt *p)
+/*std::ostream& operator<< (std::ostream& os, pathelt *p)
 {
 	if (!p) {
 		return os << "\t<root>";
@@ -38,5 +38,5 @@ testing::AssertionResult assertJSONEqual(const char *expected_expr, const char *
 	//result << diffs.str();
 
 	return result;
-}
+}*/
 
