@@ -125,8 +125,8 @@ TEST_OBJS += boatstate_test.o
 TEST_OBJS += boatmode_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
-unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS) -o $@
 
 # gtest rules:
 # gtest isn't installed as a library by the debian package because it

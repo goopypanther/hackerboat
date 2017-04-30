@@ -235,12 +235,10 @@ int BoatState::executeCmds (int num) {
 				if (cmdvec.front()->execute()) result++;	// execute the command at the head of the queue
 			} catch (...) {
 				LOG(ERROR) << "Attempted to execute invalid command";
-				delete cmdvec.front();
 				cmdvec.pop_front();			// remove the head element
 				break;
 			}
 			LOG(DEBUG) << "Result: " << result;
-			delete cmdvec.front();
 			cmdvec.pop_front();			// remove the head element
 		}
 	}
