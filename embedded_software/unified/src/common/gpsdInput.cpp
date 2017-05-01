@@ -94,8 +94,7 @@ bool GPSdInput::begin() {
 }
 
 bool GPSdInput::execute() {
-	// grab the lock
-	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	Document root;
 	bool result = true;
 	string buf, s;
 	buf.reserve(GPS_BUF_SIZE);
@@ -108,11 +107,10 @@ bool GPSdInput::execute() {
 	} 
 	if (buf.length() > 10) {
 		//cerr << "Incoming buffer is: " << buf.c_str() << endl;
-		root.Clear();
 		root.Parse(buf.c_str());
 		if (!root.HasParseError() && root.IsObject()) {
 			//cerr << "Loaded GPS JSON string." << endl;
-			if (GetVar("class", s, root)) {
+			if (HackerboatState::GetVar("class", s, root)) {
 				if (s == "TPV") {
 					LOG(DEBUG) << "Got GPS packet";
 					LOG(DEBUG) << "GPS packet contents: " << root;

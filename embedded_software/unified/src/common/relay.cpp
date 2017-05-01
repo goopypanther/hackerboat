@@ -28,46 +28,14 @@
 using namespace rapidjson;
 using namespace std;
 
-Document root;
-
-int static inline PutVar(const string name, int& var, Value &d) {
-	string ptr = "/" + name;
-	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
-	return 0;
-}
-
-int static inline PutVar(const string name, double& var, Value &d) {
-	string ptr = "/" + name;
-	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
-	return 0;
-}
-
-int static inline PutVar(const string name, const Value& var, Value &d) {
-	string ptr = "/" + name;
-	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
-	return 0;
-}
-
-int static inline PutVar(const string name, bool var, Value &d) {
-	string ptr = "/" + name;
-	Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
-	return 0;
-}
-
-int static inline PutVar(const string name, Value &d) {
-	string ptr = "/" + name;
-	Pointer(ptr.c_str()).Create(d, root.GetAllocator());
-	return 0;
-}
-
 Value Relay::pack () {
 	Value d;
 	int packResult = 0;
 	RelayTuple thisrelay = getState();
-	packResult += isfinite(get<0>(thisrelay)) ? PutVar("current", get<0>(thisrelay), d) : 
-												PutVar("current", d);
-	packResult += PutVar("drive", get<1>(thisrelay), d);
-	packResult += PutVar("fault", get<2>(thisrelay), d);
+	packResult += isfinite(get<0>(thisrelay)) ? HackerboatState::PutVar("current", get<0>(thisrelay), d) : 
+												HackerboatState::PutVar("current", d);
+	packResult += HackerboatState::PutVar("drive", get<1>(thisrelay), d);
+	packResult += HackerboatState::PutVar("fault", get<2>(thisrelay), d);
 	
 	return d;
 }
@@ -161,7 +129,7 @@ Value RelayMap::pack () {
 	Value d;
 	int packResult = 0;
 	for (auto &r : *relays) {
-		packResult += PutVar(r.first.c_str(), r.second.pack(), d);
+		packResult += HackerboatState::PutVar(r.first.c_str(), r.second.pack(), d);
 	}
 
 	return d;

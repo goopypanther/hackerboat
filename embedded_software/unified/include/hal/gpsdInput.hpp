@@ -69,7 +69,7 @@ class GPSdInput : public InputThread {
 		redi::pstreambuf	gpsdstream;
 		std::thread 		*myThread;
 
-		Document root;
+		/*Document root;
 
 		// helper functions for getting and setting JSON values
 		bool inline GetVar(const string name, int& var, Value& d) {
@@ -117,7 +117,7 @@ class GPSdInput : public InputThread {
 				var = myvar.GetBool();
 			} else return false;
 			return true;
-		}
+		}*/
 };
 		
 #endif

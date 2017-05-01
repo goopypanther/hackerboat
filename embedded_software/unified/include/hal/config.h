@@ -138,6 +138,10 @@
 #define REST_TIMEOUT				(200ms)
 #define REST_MAX_BUFFER				(50000)
 
+// Watchdog configuration
+#define WD_DEFAULT_FILE				"/tmp/watchdog"
+#define WD_TIMEOUT					(30s)
+
 #endif /* CONFIG_H */
 
 

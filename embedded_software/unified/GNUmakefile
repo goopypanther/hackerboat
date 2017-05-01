@@ -43,7 +43,7 @@ LDLIBS += -lcurl
 export OPTS
 
 VPATH=src/common:src/hal:src/master:src/drivers:src/tests:submodules/lsquaredc:submodules/easyloggingpp/src
-all: submodules master
+all: submodules master watchdog
 test: unit_tests
 	./setup/Hackerboat-Init.sh
 	./unit_tests
@@ -104,6 +104,13 @@ MASTER_OBJS=$(addprefix src/,$(MASTER_SRCS:.cpp=.o))
 ALL_OBJS+=$(MASTER_OBJS)
 
 master: $(MASTER_OBJS) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
+
+WD_SRCS=master/hackerboatWatchdog.cpp
+WD_OBJ=$(addprefix src/,$(WD_SRCS:.cpp=.o))
+ALL_OBJS+=$(WD_OBJ)
+
+watchdog: $(WD_OBJ) libhackerboathal.a libhackerboat.a 
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
 RC_SRCS=master/hackerboatRC.cpp

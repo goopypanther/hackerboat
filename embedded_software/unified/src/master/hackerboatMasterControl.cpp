@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string>
 #include <chrono>
+#include <fstream>
 #include "boatState.hpp"
 #include "boatModes.hpp"
 #include "autoModes.hpp"
@@ -123,6 +124,12 @@ int main (int argc, char **argv) {
 
 	// run the boat
 	for (;;) {
+		// kick the dog
+		fstream wdfile;
+		wdfile.open(WD_DEFAULT_FILE);
+		wdfile << "1" << endl;
+		wdfile.close();
+
 		// read inputs
 		state.lastFix.copy(state.gps->getFix());
 		state.health->readHealth();
