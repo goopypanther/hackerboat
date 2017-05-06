@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
     el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
+    RelayMap* relays = RelayMap::instance();
+    relays->init();
 	Throttle throttle;
 	for (int i = throttle.getMinThrottle(); i <= throttle.getMaxThrottle(); i++) {
 		std::cout << "Setting throttle to " << std::to_string(i) << std::endl;

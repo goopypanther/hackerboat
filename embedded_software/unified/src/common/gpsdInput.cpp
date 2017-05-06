@@ -110,7 +110,8 @@ bool GPSdInput::execute() {
 		root.Parse(buf.c_str());
 		if (!root.HasParseError() && root.IsObject()) {
 			//cerr << "Loaded GPS JSON string." << endl;
-			if (HackerboatState::GetVar("class", s, root)) {
+			if (root.HasMember("class") && root["class"].IsString()) {
+				s = root["class"].GetString();
 				if (s == "TPV") {
 					LOG(DEBUG) << "Got GPS packet";
 					LOG(DEBUG) << "GPS packet contents: " << root;

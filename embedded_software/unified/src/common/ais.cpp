@@ -43,6 +43,7 @@ AISShip::AISShip (Value& packet) {
 
 bool AISShip::parseGpsdPacket (Value& input) {
 	bool result = true;
+	root.CopyFrom(input, root.GetAllocator());
 	
 	result = coreParse(input);
 	this->lastTimeStamp = std::chrono::system_clock::now();

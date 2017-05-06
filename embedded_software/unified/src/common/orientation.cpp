@@ -51,7 +51,7 @@ bool Orientation::isValid () {
 }
 
 bool Orientation::normalize () {
-	VLOG(2) << "Un-normalized orientation: " << *this;
+	//VLOG(2) << "Un-normalized orientation: " << *this;
 	pitch 	+= 180.0;
 	roll 	+= 180.0;
 	pitch 	= normAxis(pitch, 360.0, 0.0);
@@ -59,7 +59,7 @@ bool Orientation::normalize () {
 	heading = normAxis(heading, 360.0, 0.0);
 	pitch 	-= 180.0;
 	roll 	-= 180.0;
-	VLOG(2) << "Normalized orientation: " << *this;
+	//VLOG(2) << "Normalized orientation: " << *this;
 	
 	return this->isValid();
 }

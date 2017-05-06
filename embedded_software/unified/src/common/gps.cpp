@@ -88,6 +88,7 @@ bool GPSFix::parseGpsdPacket (Value& input) {
 	int tmp;
 	std::string time;
 	double lat, lon;
+	root.CopyFrom(input, root.GetAllocator());
 	
 	result &= coreParse(input);
 	result &= GetVar("time", time, input);
@@ -187,3 +188,4 @@ void GPSFix::copy(const GPSFix &newfix) {
 	this->epc		= newfix.epc;
 	this->fixValid	= newfix.fixValid;
 }
+

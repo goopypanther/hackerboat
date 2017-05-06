@@ -242,6 +242,22 @@ inline std::ostream& operator<< (std::ostream& stream, const Value& v) {
 	return stream;
 }
 
+inline std::ostream& operator<< (std::ostream& stream, const Value* v) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	v->Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
+
+inline std::ostream& operator<< (std::ostream& stream, const Document* d) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	d->Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
+
 inline std::ostream& operator<< (std::ostream& stream, const HackerboatState& v) {
 	stream << v.pack();
 	return stream;

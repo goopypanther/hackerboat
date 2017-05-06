@@ -135,4 +135,3 @@ Location Location::project (TwoVector& projection, CourseTypeEnum type) {
 Geodesic *Location::geod = new Geodesic(Constants::WGS84_a(), Constants::WGS84_f());
 Rhumb *Location::rhumb = new Rhumb(Constants::WGS84_a(), Constants::WGS84_f());
 
-
