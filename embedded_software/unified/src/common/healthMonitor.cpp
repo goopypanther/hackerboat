@@ -26,12 +26,12 @@ using namespace std;
 
 bool HealthMonitor::readHealth () {
 	// attempt to grab a lock over the adc input in order to make sure we're copying consistent data
-	if (!_adc->lock.try_lock_for(ADC_LOCK_TIMEOUT)) {
-		return false;
-	}
+	//if (!_adc->lock.try_lock_for(ADC_LOCK_TIMEOUT)) {
+	//	return false;
+	//}
 	std::map<std::string, double> data = _adc->getScaledValues();	
 	this->recordTime = _adc->getLastInputTime();
-	_adc->lock.unlock();
+	//_adc->lock.unlock();
 	// End lock block
 	
 	this->valid 		= true;

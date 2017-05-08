@@ -16,6 +16,7 @@
 #include <string>
 #include <chrono>
 #include "hal/throttle.hpp"
+#include "configuration.hpp"
 extern "C" {
 	#include <sys/types.h>
 	#include <sys/stat.h>
@@ -34,12 +35,12 @@ using namespace std::chrono;
 bool killRelays () {
 	RelayMap *relays = RelayMap::instance();
 	bool result = true;
-	result &= relays->get("DIR").clear();
-	result &= relays->get("RED").clear();
-	result &= relays->get("WHT").clear();
-	result &= relays->get("YLW").clear();
-	result &= relays->get("REDWHT").clear();
-	result &= relays->get("YLWWHT").clear();
+	result &= relays->get("DIR")->clear();
+	result &= relays->get("RED")->clear();
+	result &= relays->get("WHT")->clear();
+	result &= relays->get("YLW")->clear();
+	result &= relays->get("REDWHT")->clear();
+	result &= relays->get("YLWWHT")->clear();
 	return result;
 }
 
@@ -63,7 +64,7 @@ int main (int argc, char **argv) {
 	if (argc > 2) {
 		wdFilePath = argv[1];
 	} else {
-		wdFilePath = WD_DEFAULT_FILE;
+		wdFilePath = Conf::get()->wdFile();
 	}
 	cerr << "Watchdog file is: " << wdFilePath << endl;
 	if (stat(wdFilePath.c_str(), &wdFileStatus)) {
@@ -82,7 +83,7 @@ int main (int argc, char **argv) {
 			system_clock::time_point lastmod(duration_cast<system_clock::duration>(
 												seconds{wdFileStatus.st_mtim.tv_sec} + 
 												nanoseconds{wdFileStatus.st_mtim.tv_nsec}));
-			if ((system_clock::now() - lastmod) > WD_TIMEOUT) {
+			if ((system_clock::now() - lastmod) > Conf::get()->wdTimeout()) {
 				cerr << "Watchdog fired" << std::endl;
 				killRelays();
 			}

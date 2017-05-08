@@ -25,6 +25,7 @@
 #include "enumtable.hpp"
 #include "ais.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #define METERS_PER_KNOT		(1852)
 #define SECONDS_PER_HOUR	(3600)
@@ -136,9 +137,9 @@ Location AISShip::project (sysclock t) {
 }
 			
 bool AISShip::prune (Location& current) {
-	auto timeout = AIS_MAX_TIME;
+	auto timeout = Conf::get()->aisMaxTime();
 	if ((!this->isValid()) || 
-		(current.isValid() && (fix.distance(current) > AIS_MAX_DISTANCE)) ||
+		(current.isValid() && (fix.distance(current) > Conf::get()->aisMaxDistance())) ||
 		((std::chrono::system_clock::now() - lastTimeStamp) > timeout)) {
 			LOG(DEBUG) << "Trimming target " << this->mmsi;
 			LOG(DEBUG) << "Trimmed target " << *this;
@@ -176,7 +177,7 @@ Value AISShip::pack () const {
 
 bool AISShip::isValid () const {
 	bool result = true;
-	auto timeout = AIS_MAX_TIME;
+	auto timeout = Conf::get()->aisMaxTime();
 	result &= (mmsi > 0);
 	result &= (fix.isValid());
 	result &= ((std::chrono::system_clock::now() - (this->lastTimeStamp)) < timeout);

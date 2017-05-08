@@ -16,6 +16,7 @@
 #include <iostream>
 #include <cstdio>
 #include <tuple>
+#include <vector>
 #include "util.hpp"
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
@@ -23,25 +24,27 @@
 #include "rapidjson/filereadstream.h"
 #include "private-config.h"
 
-int Fetch(const string& name, string& target) {
-	if (d.HasMember(name.c_str()) && d.IsString(name.c_str())) {
-		target = d.GetString(name.c_str());
+using namespace std;
+
+int Conf::Fetch(const string& name, string& target) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsString()) {
+		target = d[name.c_str()].GetString();
 		return 1;
 	}
 	return 0;
 }
 
-int Fetch(const string& name, unsigned int& target) {
-	if (d.HasMember(name.c_str()) && d.IsUint(name.c_str())) {
-		target = d.GetUint(name.c_str());
+int Conf::Fetch(const string& name, unsigned int& target) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsUint()) {
+		target = d[name.c_str()].GetUint();
 		return 1;
 	}
 	return 0;
 }
 
-int Fetch(const string& name, uint8_t& target) {
-	if (d.HasMember(name.c_str()) && d.IsUint(name.c_str())) {
-		unsigned int tmp = d.GetUint(name.c_str());
+int Conf::Fetch(const string& name, uint8_t& target) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsUint()) {
+		unsigned int tmp = d[name.c_str()].GetUint();
 		if (tmp > 255) return 0;
 		target = tmp;
 		return 1;
@@ -49,32 +52,32 @@ int Fetch(const string& name, uint8_t& target) {
 	return 0;
 }
 
-int Fetch(const string& name, float& target) {
-	if (d.HasMember(name.c_str()) && d.IsFloat(name.c_str())) {
-		target = d.GetFloat(name.c_str());
+int Conf::Fetch(const string& name, float& target) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsFloat()) {
+		target = d[name.c_str()].GetFloat();
 		return 1;
 	}
 	return 0;
 }
 
-int Fetch(const string& name, int& target) {
-	if (d.HasMember(name.c_str()) && d.IsInt(name.c_str())) {
-		target = d.GetInt(name.c_str());
+int Conf::Fetch(const string& name, int& target) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsInt()) {
+		target = d[name.c_str()].GetInt();
 		return 1;
 	}
 	return 0;
 }
 
-int Fetch(const string& name, sysdur& duration) {
-	if (d.HasMember(name.c_str()) && d.IsString(name.c_str())) {
-		if (parseDuration(d.GetString(name.c_str()), duration)) return 1;
+int Conf::Fetch(const string& name, sysdur& duration) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsString()) {
+		if (parseDuration(d[name.c_str()].GetString(), duration)) return 1;
 	}
 	return 0;
 }
 
-int Fetch(const string& name, Value& v) {
-	if (d.HasMember(name.c_str()) && d.IsObject(name.c_str())) {
-		target = d.GetObject(name.c_str());
+int Conf::Fetch(const string& name, Value& v) {
+	if (d.HasMember(name.c_str()) && d[name.c_str()].IsObject()) {
+		v = d[name.c_str()].GetObject();
 		return 1;
 	}
 	return 0;
@@ -82,7 +85,7 @@ int Fetch(const string& name, Value& v) {
 
 Conf::Conf () {
 	_gpsdAddress 		= "127.0.0.1";
-	_gpsdPort			= "3001";
+	_gpsdPort			= (3001);
 	_adcUpperAddress	= (0x1f);
 	_adcLowerAddress	= (0x1d);
 	_adcI2Cbus			= (2);
@@ -97,7 +100,7 @@ Conf::Conf () {
 	_courseMin			= (0.0);
 	_lightCount			= (72);
 	_aisMaxTime			= (600s);
-	_configPinPath		= "/usr/local/bin/config-pin"
+	_configPinPath		= "/usr/local/bin/config-pin";
 	_disarmInputPort	= (8);
 	_disarmInputPin		= (22);
 	_armInputPort 		= (8);
@@ -157,24 +160,27 @@ Conf::Conf () {
 	_restMaxCount		= (5000);
 	_wdFile				= "/tmp/watchdog";
 	_wdTimeout			= (30s);
-	_relayInit			= { { "RED", 8, 3, 8, 4 },
-							{ "DIR", 8, 5, 8, 6 }, 
-							{ "YLWWHT", 8, 7, 8, 8 }, 
-							{ "REDWHT", 8, 9, 8, 10 }, 
-							{ "YLW", 8, 11, 8, 12 }, 
-							{ "WHT", 8, 13, 8, 14 }, 
-							{ "DISARM", 8, 15, 8, 16 }, 
-							{ "HORN", 8, 17, 8, 18 }, 
-							{ "ENABLE", 8, 24, 8, 26 } };
+	_relayInit			= { { "RED", { "RED", 8, 3, 8, 4 } },
+							{ "DIR", { "DIR", 8, 5, 8, 6 } }, 
+							{ "YLWWHT", { "YLWWHT", 8, 7, 8, 8 } }, 
+							{ "REDWHT", { "REDWHT", 8, 9, 8, 10 } }, 
+							{ "YLW", { "YLW", 8, 11, 8, 12 } }, 
+							{ "WHT", { "WHT", 8, 13, 8, 14 } }, 
+							{ "DISARM", { "DISARM", 8, 15, 8, 16 } }, 
+							{ "HORN", { "HORN", 8, 17, 8, 18 } }, 
+							{ "ENABLE", { "ENABLE", 8, 24, 8, 26 } } };
+	_RCchannelCount		= (18);
+	_aisMaxDistance		= (10000);
+	_selfTestDelay		= (30s);
 }
 
 int Conf::load (const string& file) {
 	FILE* fp = fopen(file.c_str(), "r");
-	if (fp) {
+	if (fp != nullptr) {
 		confFilePath = file;
-	} else return -1;
+	} else return 0;
 	char readbuf[65536];
-	FileReadStream is(fp, readbuf, sizeof[readbuf]);
+	FileReadStream is(fp, readbuf, sizeof(readbuf));
 	d.ParseStream(is);
 	Value v;
 
@@ -235,46 +241,52 @@ int Conf::load (const string& file) {
 	result += Fetch("REST Max Count", _restMaxCount);
 	result += Fetch("Watchdog File", _wdFile);
 	result += Fetch("Watchdog Timeout", _wdTimeout);
+	result += Fetch("RC Channel Count", _RCchannelCount);
+	result += Fetch("AIS Max Distance", _aisMaxDistance);
+	result += Fetch("Self Test Period", _selfTestDelay);
 	if (Fetch("IMU Magnetic Offset", v) && v.IsArray() && (v.Size() >= 3)) {
-		_imuMagOffset = make_tuple(v[0], v[1], v[2]);
+		_imuMagOffset = make_tuple(v[0].GetInt(), v[1].GetInt(), v[2].GetInt());
 		result++;
 	}
 	if (Fetch("IMU Magnetic Scale", v) && v.IsArray() && (v.Size() >= 3)) {
-		_imuMagScale = make_tuple(v[0], v[1], v[2]);
+		_imuMagScale = make_tuple(v[0].GetFloat(), v[1].GetFloat(), v[2].GetFloat());
 		result++;
 	}
 	if (Fetch("RC Channel Map", v) && v.IsObject()) {
-		for (auto itr = v.MemberBegin(); itr != v.MemberEnd(); ++itr) {
-			if (itr->value.IsUInt()) {
-				_RCchannelMap[itr->name.GetString()] = itr->value.GetUint();
+		for (auto& itr : v.GetObject()) {
+			if (itr.value.IsUint()) {
+				_RCchannelMap.emplace((itr.name.GetString()),
+										itr.value.GetUint());
 			}	
 		}
 		result++;
 	}
 	if (Fetch("RC Limits", v) && v.IsObject()) {
 		for (auto& itr : v.GetObject()) {
-			if (itr.value.IsUInt()) {
-				_RCchannelMap[itr.name.GetString()] = itr.value.GetUint();
+			if (itr.value.IsUint()) {
+				_RClimits.emplace((itr.name.GetString()),
+									itr.value.GetUint());
 			}	
 		}
 		result++;
 	}
 	if (Fetch("ADC Upper Channel List", v) && v.IsArray()) {
-		for (auto& itr : v.GetObject()) {
+		for (auto& itr : v.GetArray()) {
 			if (itr.IsString()) _adcUpperChanList.emplace_back(itr.GetString());
 		}
 		result++;
 	}
 	if (Fetch("ADC Lower Channel List", v) && v.IsArray()) {
-		for (auto& itr : v.GetObject()) {
+		for (auto& itr : v.GetArray()) {
 			if (itr.IsString()) _adcLowerChanList.emplace_back(itr.GetString());
 		}
 		result++;
 	}
 	if (Fetch("REST Configuration", v) && v.IsObject()) {
-		for (auto itr = v.MemberBegin(); itr != v.MemberEnd(); ++itr) {
-			if (itr->value.IsString()) {
-				_RCchannelMap[itr->name.GetString()] = itr->value.GetString();
+		for (auto& itr : v.GetObject()) {
+			if (itr.value.IsString()) {
+				_restConf.emplace((itr.name.GetString()),
+									itr.value.GetString());
 			}	
 		}
 		result++;
@@ -283,9 +295,8 @@ int Conf::load (const string& file) {
 	return result;
 }
 
-sysdur Conf::parseDuration (const string& dur) {
+bool Conf::parseDuration (const string& dur, sysdur& output) {
 	long double mydur = stold(dur);
-	sydur output;
 	if (dur.find("h") != std::string::npos) {
 		output = duration_cast<sysdur>(duration<long double>(mydur/3600));
 	} else if (dur.find("min") != std::string::npos) {
@@ -298,6 +309,8 @@ sysdur Conf::parseDuration (const string& dur) {
 		output = duration_cast<sysdur>(duration<long double, nano>(mydur));
 	} else if (dur.find("s") != std::string::npos) {
 		output = duration_cast<sysdur>(duration<long double>(mydur));
-	}
-	return output;
+	} else return false;
+	return true;
 }
+
+Conf* Conf::_instance = new Conf();

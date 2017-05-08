@@ -35,6 +35,7 @@
 #include "hal/throttle.hpp"
 #include "waypoint.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #include "util.hpp"
 
@@ -54,6 +55,7 @@ int main (int argc, char **argv) {
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
 	Args::getargs()->load(argc, argv);
+	Conf::get()->load();
 
 	// system setup
 	BoatState state;
@@ -67,7 +69,7 @@ int main (int argc, char **argv) {
 	state.orient = new OrientationInput(SensorOrientation::SENSOR_AXIS_Z_UP);
 
 	// start the input threads
-	if (!state.rudder->attach(RUDDER_PORT, RUDDER_PIN)) {
+	if (!state.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin())) {
 		LOG(FATAL) << "Rudder failed to attach";
 		return -1;
 	}
@@ -126,7 +128,7 @@ int main (int argc, char **argv) {
 	for (;;) {
 		// kick the dog
 		fstream wdfile;
-		wdfile.open(WD_DEFAULT_FILE);
+		wdfile.open(Conf::get()->wdFile());
 		wdfile << "1" << endl;
 		wdfile.close();
 

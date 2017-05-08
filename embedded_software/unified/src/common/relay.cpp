@@ -18,6 +18,7 @@
 #include <map>
 #include <inttypes.h>
 #include <cmath>
+#include <tuple>
 #include "hal/config.h"
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
@@ -109,7 +110,8 @@ bool Relay::adc(ADCInput* adc) {
 RelayMap* RelayMap::_instance = new RelayMap();
 
 RelayMap::RelayMap () {
-	relays = new std::map<std::string, Relay> RELAY_MAP_INITIALIZER; 
+	relays = new std::map<std::string, Relay*>;
+	
 }
 
 RelayMap *RelayMap::instance () {
@@ -118,8 +120,14 @@ RelayMap *RelayMap::instance () {
 
 bool RelayMap::init() {
 	bool result = true;
+	for (auto& a : Conf::get()->relayInit()) {
+		RelaySpec r = a.second;
+		relays->emplace(a.first, 
+						new Relay(a.first, new Pin(std::get<1>(r), std::get<2>(r), true),
+						new Pin(std::get<3>(r), std::get<4>(r), false)));
+	}
 	for (auto &r : *relays) {
-		result &= r.second.init();
+		result &= r.second->init();
 	}
 	initialized = result;
 	return result;
@@ -129,7 +137,7 @@ Value RelayMap::pack () {
 	Value d;
 	int packResult = 0;
 	for (auto &r : *relays) {
-		packResult += HackerboatState::PutVar(r.first.c_str(), r.second.pack(), d);
+		packResult += HackerboatState::PutVar(r.first.c_str(), r.second->pack(), d);
 	}
 
 	return d;
@@ -138,7 +146,7 @@ Value RelayMap::pack () {
 bool RelayMap::adc(ADCInput* adc) {
 	bool result = true;
 	for (auto &r : *relays) {
-		result &= r.second.adc(adc);
+		result &= r.second->adc(adc);
 	}
 	initialized = false;
 	return result;

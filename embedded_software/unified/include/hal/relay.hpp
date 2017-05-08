@@ -47,7 +47,7 @@ class Relay {
 			};
 			
 		Value pack ();							/**< Pack a relay tuple with state, fault, and current output of this relay */
-		
+
 		bool init();								/**< Initialize this relay */
 		bool set() {return _drive->set();};			/**< Set the output state of this relay to ON */
 		bool clear() {return _drive->clear();};		/**< Set the output state of this relay to OFF */
@@ -77,17 +77,17 @@ class RelayMap {
 	public:
 		static RelayMap* instance ();						/**< Returns a pointer to the object */
 		bool init ();										/**< Initialize all relays */
-		Relay& get (std::string name) {return relays->at(name);}	/**< Get a reference to the named relay */
+		Relay* get (std::string name) {return relays->at(name);}	/**< Get a reference to the named relay */
 		Value pack ();									/**< Pack status for all of relays in the map. */
 		bool adc(ADCInput* adc);							/**< Set the ADC for all relays */
-		std::map<std::string, Relay> *getmap () {return relays;};
+		std::map<std::string, Relay*> *getmap () {return relays;};
 		
 	protected:
 		RelayMap ();										/**< Hark, a singleton! */
 		RelayMap (RelayMap const&) = delete;				/**< Hark, a singleton! */
 		RelayMap& operator=(RelayMap const&) = delete;		/**< Hark, a singleton! */
 		static RelayMap* 			_instance;				/**< Hark, a singleton! */
-		std::map<std::string, Relay> *relays;				/**< Named map of all relays */
+		std::map<std::string, Relay*> *relays;				/**< Named map of all relays */
 		bool						initialized = false;	/**< Record whether all relays are initialized */
 };
 

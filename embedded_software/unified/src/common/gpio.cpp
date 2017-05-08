@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <fstream>
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 // turn off debugging logging for this module
 #ifndef NDEBUG
@@ -43,7 +44,7 @@ bool Pin::init () {
 	pinName += "_" + to_string(_pin);
 	
 	// use config-pin to set the pinmux & direction
-	std::string pinmux = CONFIG_PIN_PATH; 
+	std::string pinmux = Conf::get()->configPinPath(); 
 	pinmux += " " + pinName + " " + function + "\n";
 	LOG(DEBUG) << "Initializing pin with command " << pinmux;
 	if (system(pinmux.c_str()) != 0) {
@@ -176,7 +177,7 @@ bool Pin::pullUp () {
 	if (_dir) return false;
 	function += "in_pu";
 	if (_init) {
-		std::string pinmux = CONFIG_PIN_PATH; 
+		std::string pinmux = Conf::get()->configPinPath(); 
 		pinmux += " " + pinName + " " + function + "\n";
 		if (system(pinmux.c_str()) != 0) {
 			LOG(ERROR) << "Unable to set pull-up with " << pinmux;
@@ -190,7 +191,7 @@ bool Pin::pullDown () {
 	if (_dir) return false;
 	function = "in_pd";
 	if (_init) {
-		std::string pinmux = CONFIG_PIN_PATH; 
+		std::string pinmux = Conf::get()->configPinPath(); 
 		pinmux += " " + pinName + " " + function + "\n";
 		if (system(pinmux.c_str()) != 0) {
 			LOG(ERROR) << "Unable to set pull-down with " << pinmux;
@@ -204,7 +205,7 @@ bool Pin::floating () {
 	if (_dir) return false;
 	function = "in";
 	if (_init) {
-		std::string pinmux = CONFIG_PIN_PATH; 
+		std::string pinmux = Conf::get()->configPinPath(); 
 		pinmux += " " + pinName + function + "\n";
 		if (system(pinmux.c_str()) != 0) {
 			LOG(ERROR) << "Unable to set floating with " << pinmux;

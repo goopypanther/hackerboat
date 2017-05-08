@@ -9,6 +9,7 @@
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 class AutoModeIdleTest : public ::testing::Test {
 	public:
@@ -34,7 +35,7 @@ class AutoModeIdleTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -45,7 +46,7 @@ class AutoModeIdleTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -159,7 +160,7 @@ class AutoModeWaypointTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -170,7 +171,7 @@ class AutoModeWaypointTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -402,7 +403,7 @@ class AutoModeReturnTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -413,7 +414,7 @@ class AutoModeReturnTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -556,7 +557,7 @@ class AutoModeAnchorTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -567,7 +568,7 @@ class AutoModeAnchorTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();

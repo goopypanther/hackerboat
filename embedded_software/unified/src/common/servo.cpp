@@ -19,6 +19,7 @@
 #include "hal/config.h"
 #include "hal/servo.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 static const std::string basepath = "/sys/class/pwm/pwmchip";
 
@@ -65,7 +66,7 @@ bool Servo::attach (int port, int pin, long min, long max, long freq) {
 	
 	// call config-pin to turn things on
 	// we assume that the correct udev rule has been invoked to fire up the pwm
-	std::string pinmux = CONFIG_PIN_PATH;
+	std::string pinmux = Conf::get()->configPinPath();
 	pinmux += " " + pinname + " pwm\n";
 	if (system(pinmux.c_str()) != 0) {
 		LOG(ERROR) << "Unable to enable pinmux " << pinmux;
@@ -103,7 +104,7 @@ void Servo::detach () {
 		enable << "0";
 		enable.close();
 	}
-	std::string pinmux = CONFIG_PIN_PATH; 
+	std::string pinmux = Conf::get()->configPinPath(); 
 	pinmux += " " + pinname + " default\n";
 	if (system(pinmux.c_str()) != 0) {
 		LOG(ERROR) << "Unable to disable pinmux for " << pinname;

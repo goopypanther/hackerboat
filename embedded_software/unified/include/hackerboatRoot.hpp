@@ -44,7 +44,7 @@ using namespace std;
 // type definitions for code sanity
 
 typedef time_point<system_clock> 	sysclock;
-typedef duration<system_clock>		sysdur;
+//typedef duration<system_clock>		sysdur;
 
 #define USE_RESULT __attribute__((warn_unused_result))
 

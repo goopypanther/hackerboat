@@ -18,6 +18,7 @@
 #include "hal/config.h"
 #include <map>
 #include <vector>
+#include <tuple>
 #include "hal/drivers/lsm303.hpp"
 extern "C" {
 	#include "lsquaredc.h"
@@ -99,9 +100,9 @@ bool LSM303::readMag () {
 		seq.push_back((LSM303_ADDRESS_MAG << 1)|1);
 		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
-			_magData['x'] = (int16_t)((uint16_t)buf[1] | ((uint16_t)buf[0] << 8));
-			_magData['z'] = (int16_t)((uint16_t)buf[3] | ((uint16_t)buf[2] << 8));
-			_magData['y'] = (int16_t)((uint16_t)buf[5] | ((uint16_t)buf[4] << 8));
+			get<0>(_magData) = (int16_t)((uint16_t)buf[1] | ((uint16_t)buf[0] << 8));
+			get<2>(_magData) = (int16_t)((uint16_t)buf[3] | ((uint16_t)buf[2] << 8));
+			get<1>(_magData) = (int16_t)((uint16_t)buf[5] | ((uint16_t)buf[4] << 8));
 			result = true;
 		}
 	} 
@@ -121,9 +122,9 @@ bool LSM303::readAccel () {
 		seq.push_back((LSM303_ADDRESS_ACCEL << 1)|1);
 		for (int i = 0; i < 6; i++) seq.push_back(I2C_READ);
 		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
-			_accelData['x'] = (int16_t)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
-			_accelData['y'] = (int16_t)((uint16_t)buf[2] | ((uint16_t)buf[3] << 8));
-			_accelData['z'] = (int16_t)((uint16_t)buf[4] | ((uint16_t)buf[5] << 8));
+			get<0>(_accelData) = (int16_t)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
+			get<1>(_accelData) = (int16_t)((uint16_t)buf[2] | ((uint16_t)buf[3] << 8));
+			get<2>(_accelData) = (int16_t)((uint16_t)buf[4] | ((uint16_t)buf[5] << 8));
 			result = true;
 		}
 	} 
@@ -151,21 +152,19 @@ bool LSM303::readTemp () {
 	return result;
 }
 
-map<char, double> LSM303::getMagData (void) {
-	map<char, double> result;
-	for (auto& item : _magData) {
-		char c = item.first;
-		result[c] =  (double)(item.second + _magOffset[c]) * _magScale[c];
-	}
+tuple<double, double, double> LSM303::getMagData (void) {
+	tuple<double, double, double> result;
+	get<0>(result) = (get<0>(_magData) + get<0>(_magOffset)) * get<0>(_magScale);
+	get<1>(result) = (get<1>(_magData) + get<1>(_magOffset)) * get<1>(_magScale);
+	get<2>(result) = (get<2>(_magData) + get<2>(_magOffset)) * get<2>(_magScale);
 	return result;
 }
 
-map<char, double> LSM303::getAccelData (void) {
-	map<char, double> result;
-	for (auto& item : _accelData) { 
-		char c = item.first;
-		result[c] =  (double)(item.second + _accelOffset[c]) * _accelScale[c];
-	}
+tuple<double, double, double> LSM303::getAccelData (void) {
+	tuple<double, double, double> result;
+	get<0>(result) = (get<0>(_accelData) + get<0>(_accelOffset)) * get<0>(_accelScale);
+	get<1>(result) = (get<1>(_accelData) + get<1>(_accelOffset)) * get<1>(_accelScale);
+	get<2>(result) = (get<2>(_accelData) + get<2>(_accelOffset)) * get<2>(_accelScale);
 	return result;
 }
 
@@ -173,50 +172,22 @@ double LSM303::getTempData () {
 	return (double)(_tempData + _tempOffset) * _tempScale;
 }
 
-bool LSM303::setMagOffset (map<char, int> offset) {
-	int count = 0;
-	for (auto& item : _magOffset) {
-		char c = item.first;
-		if (offset.find(c) != offset.end()) {
-			item.second = offset[c];
-			count++;
-		}
-	}
-	return (count) ? true : false;
+bool LSM303::setMagOffset (tuple<int,int,int> offset) {
+	_magOffset = offset;
+	return true;
 }
 
-bool LSM303::setAccelOffset (map<char, int> offset) {
-	int count = 0;
-	for (auto& item : _accelOffset) {
-		char c = item.first;
-		if (offset.find(c) != offset.end()) {
-			item.second = offset[c];
-			count++;
-		}
-	}
-	return (count) ? true : false;
+bool LSM303::setAccelOffset (tuple<int,int,int> offset) {
+	_accelOffset = offset;
+	return true;
 }
 
-bool LSM303::setMagScale (map<char, double> scale) {
-	int count = 0;
-	for (auto& item : _magScale) {
-		char c = item.first;
-		if (scale.find(c) != scale.end()) {
-			item.second = scale[c];
-			count++;
-		}
-	}
-	return (count) ? true : false;	
+bool LSM303::setMagScale (tuple<double,double,double> scale) {
+	_magScale = scale;
+	return true;
 }
 
-bool LSM303::setAccelScale (map<char, double> scale) {
-	int count = 0;
-	for (auto& item : _accelScale) {
-		char c = item.first;
-		if (scale.find(c) != scale.end()) {
-			item.second = scale[c];
-			count++;
-		}
-	}
-	return (count) ? true : false;	 
+bool LSM303::setAccelScale (tuple<double,double,double> scale) {
+	_accelScale = scale;
+	return true;
 }

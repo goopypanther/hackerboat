@@ -73,7 +73,8 @@ LIBHACKERBOAT_HAL_SRCS+= servo.cpp
 LIBHACKERBOAT_HAL_SRCS+= orientationInput.cpp
 LIBHACKERBOAT_C_HAL_SRCS+= lsquaredc.c
 
-LIBHACKERBOAT_SRCS= util.cpp
+LIBHACKERBOAT_SRCS= configuration.cpp
+LIBHACKERBOAT_SRCS+= util.cpp
 LIBHACKERBOAT_SRCS+= autoModes.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
@@ -144,7 +145,7 @@ gtest.o: $(GTEST_DIR) $(GTEST_INC)
 	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -I $(GTEST_DIR) -c -o $@ $(GTEST_DIR)/src/gtest-all.cc
 #gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 gtest_main.o: gtest_main.cc
-	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -isystem submodules/easyloggingpp/src -c -o $@ $^
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -I $(GTEST_INC) -isystem submodules/easyloggingpp/src -c -o $@ $^
 
 submodules:
 	@$(MAKE) -C submodules

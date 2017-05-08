@@ -26,6 +26,7 @@
 #include "hal/gpsdInput.hpp"
 #include "pstream.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 using namespace std;
 using namespace redi;
@@ -97,7 +98,7 @@ bool GPSdInput::execute() {
 	Document root;
 	bool result = true;
 	string buf, s;
-	buf.reserve(GPS_BUF_SIZE);
+	buf.reserve(Conf::get()->gpsBufSize());
 	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
@@ -134,7 +135,7 @@ bool GPSdInput::execute() {
 	//lock.unlock();
 	if (result && s == "TPV") {
 		_gpsAvgList.emplace_front(_lastFix);
-		if (_gpsAvgList.size() < GPS_AVG_LEN) {
+		if (_gpsAvgList.size() < Conf::get()->gpsAvgLen()) {
 			_gpsAvgList.pop_back();
 		}
 	}

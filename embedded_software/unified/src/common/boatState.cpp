@@ -40,26 +40,26 @@ BoatState::BoatState () {
 	VLOG(2) << "Creating new BoatState object";
 	relays = RelayMap::instance();
 	rudder = new Servo();
-	rudder->attach(RUDDER_PORT, RUDDER_PIN);
+	rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 	if (!disarmInput.isInit()) {
-		disarmInput.setPort(SYSTEM_DISARM_INPUT_PORT);
-		disarmInput.setPin(SYSTEM_DISARM_INPUT_PIN);
+		disarmInput.setPort(Conf::get()->disarmInputPort());
+		disarmInput.setPin(Conf::get()->disarmInputPin());
 		disarmInput.init();
 		disarmInput.setDir(false);
 	}
 	if (!armInput.isInit()) {
-		armInput.setPort(SYSTEM_ARM_INPUT_PORT);
-		armInput.setPin(SYSTEM_ARM_INPUT_PIN);
+		armInput.setPort(Conf::get()->armInputPort());
+		armInput.setPin(Conf::get()->armInputPin());
 		armInput.init();
 		armInput.setDir(false);
 	}
 	if (!servoEnable.isInit()) {
-		servoEnable.setPort(SYSTEM_SERVO_ENB_PORT);
-		servoEnable.setPin(SYSTEM_SERVO_ENB_PIN);
+		servoEnable.setPort(Conf::get()->servoEnbPort());
+		servoEnable.setPin(Conf::get()->servoEnbPin());
 		servoEnable.init();
 		servoEnable.setDir(false);
 	}
-	K = {PID_KP, PID_KI, PID_KD};
+	K = {Conf::get()->pidKp(), Conf::get()->pidKi(), Conf::get()->pidKd()};
 }
 
 bool BoatState::insertFault (const string fault) {

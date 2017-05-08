@@ -7,6 +7,7 @@
 #include "test_utilities.hpp"
 #include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #define TOL 0.000001
 

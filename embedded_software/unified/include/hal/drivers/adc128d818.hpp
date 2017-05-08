@@ -25,7 +25,7 @@ extern "C" {
 	#include "lsquaredc.h"
 }
 
-#define ADC128D818_INTERNAL_REF		(2.56)
+//#define ADC128D818_INTERNAL_REF		(2.56)
 
 enum class reference_mode_t : uint8_t {
 	INTERNAL_REF 	= 0, 
@@ -59,6 +59,7 @@ class ADC128D818 {
 		double readScaled(uint8_t channel);				/**< Reads data and scales it according to the reference voltage. Returns NAN if the channel is disabled. */
 		std::vector<double> readScaled (void);			/**< Returns a vector with the scaled voltage of all channels. Disabled channels contain NAN. */
 		double readTemperatureScaled();					/**< Read the ADC temperature */
+		double internalRefVolt = 2.56;
 
 	private:
 		bool writeByteRegister(uint8_t reg, uint8_t data);

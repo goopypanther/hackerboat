@@ -25,17 +25,18 @@
 #include "enumtable.hpp"
 #include "hal/config.h"
 #include "hal/inputThread.hpp"
+#include "configuration.hpp"
 
 class HalTestHarness;
 
-#define SBUS_STARTBYTE			0x0f
-#define SBUS_ENDBYTE			0x00
-#define SBUS_BUF_LEN			25 
- 
+//#define SBUS_STARTBYTE		0x0f
+//#define SBUS_ENDBYTE			0x00
+//#define SBUS_BUF_LEN			25 
+
 class RCInput : public InputThread {
 	friend class HalTestHarness;
 	public:
-		RCInput (std::string devpath = RC_SERIAL_PATH);	/**< Create a rcInput reader attached to serial port devpath 		*/
+		RCInput (std::string devpath = Conf::get()->RCserialPath());	/**< Create a rcInput reader attached to serial port devpath 		*/
 		int getThrottle ();					/**< Get the last throttle position from the RC input 				*/
 		double getRudder ();				/**< Get the last rudder position from the RC input 				*/
 		double getCourse ();				/**< Get the last course command, in degrees. */	
@@ -50,13 +51,16 @@ class RCInput : public InputThread {
 		~RCInput();						/**< Explicit destructor to make sure we close out the serial port and kill the thread.	*/
 				
 	private:
+		const uint8_t startByte = 0x0f;
+		const uint8_t endByte = 0x00;
+		const uint8_t buflen = 25;
 		int _throttle = 0;
 		double _rudder = 0;
 		std::string _path;
 		int devFD = -1;
 		bool failsafe = false;
 		bool _valid = true;
-		std::vector<uint16_t> rawChannels { RC_CHANNEL_COUNT };
+		std::vector<uint16_t> rawChannels;
 		std::string inbuf;
 		int _errorFrames = 0;
 		int _goodFrames = 0;

@@ -26,6 +26,7 @@
 #include "aio-rest.hpp"
 #include "easylogging++.h"
 #include "rapidjson/rapidjson.h"
+#include "configuration.hpp"
 extern "C" {
 	#include <curl/curl.h>
 }
@@ -140,8 +141,8 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	string response;
 
 	// assemble header string
-	string keyheader = REST_AIO_KEY_HEADER;
-	keyheader += REST_KEY;
+	string keyheader = Conf::get()->restConf().at("key_header");
+	keyheader += this->_key;
 
 	// assemble URL string
 	string url = this->_uri + this->_name + "/feeds/" + feedkey + "/data";
@@ -197,8 +198,8 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	char errbuf[CURL_ERROR_SIZE];
 
 	// assemble header string
-	string keyheader = REST_AIO_KEY_HEADER;
-	keyheader += REST_KEY;
+	string keyheader = Conf::get()->restConf().at("key_header");
+	keyheader += this->_key;
 
 	// assemble URL string
 	hnd = curl_easy_init();
