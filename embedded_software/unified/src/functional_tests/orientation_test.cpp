@@ -16,6 +16,7 @@
 #include <string>
 #include <chrono>
 #include <iostream>
+#include <tuple>
 #include "orientation.hpp"
 #include "hal/orientationInput.hpp"
 #include "easylogging++.h"
@@ -39,14 +40,14 @@ void runTestSet (OrientationInput *orient) {
 		//orient->lock.unlock();
 		cout << to_string(pitch) << "\t" << to_string(roll) << "\t"; 
 		cout << to_string(heading) << "\t";
-		map<char, double> mag = orient->compass.getMagData();
-		map<char, double> acc = orient->compass.getAccelData();
-		//cout << to_string(acc['x']) << "\t";
-		//cout << to_string(acc['y']) << "\t";
-		//cout << to_string(acc['z']) << "\t";
-		cout << to_string(mag['x']) << "\t";
-		cout << to_string(mag['y']) << "\t";
-		cout << to_string(mag['z']) << "\t";
+		tuple<double,double,double> mag = orient->compass.getMagData();
+		tuple<double,double,double> acc = orient->compass.getAccelData();
+		cout << to_string(get<0>(acc)) << "\t";
+		cout << to_string(get<1>(acc)) << "\t";
+		cout << to_string(get<2>(acc)) << "\t";
+		cout << to_string(get<0>(mag)) << "\t";
+		cout << to_string(get<1>(mag)) << "\t";
+		cout << to_string(get<2>(mag)) << "\t";
 		cout << valid << endl;
 		std::this_thread::sleep_for(250ms);
 	}
@@ -56,13 +57,13 @@ void runMagExtrema (OrientationInput *orient) {
 	int maxX = 0, minX = 0, maxY = 0, minY = 0, maxZ = 0, minZ = 0;
 	cout << "maxX\tminX\tmaxY\tminY\tmaxZ\tminZ" << endl;
 	for (int i = 0; i < 10000; i++) {
-		map<char, int> mag = orient->compass.getRawMagData();
-		if (mag['x'] > maxX) maxX = mag['x'];
-		if (mag['x'] < minX) minX = mag['x'];
-		if (mag['y'] > maxY) maxY = mag['y'];
-		if (mag['y'] < minY) minY = mag['y'];
-		if (mag['z'] > maxZ) maxZ = mag['z'];
-		if (mag['z'] < minZ) minZ = mag['z'];
+		tuple<int,int,int> mag = orient->compass.getRawMagData();
+		if (get<0>(mag) > maxX) maxX = get<0>(mag);
+		if (get<0>(mag) < minX) minX = get<0>(mag);
+		if (get<1>(mag) > maxY) maxY = get<1>(mag);
+		if (get<1>(mag) < minY) minY = get<1>(mag);
+		if (get<2>(mag) > maxZ) maxZ = get<2>(mag);
+		if (get<2>(mag) < minZ) minZ = get<2>(mag);
 		if (!(i%50)) {
 			cout << to_string(maxX) << "\t";
 			cout << to_string(minX) << "\t";

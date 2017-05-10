@@ -105,7 +105,7 @@ Conf::Conf () {
 	_disarmInputPin		= (22);
 	_armInputPort 		= (8);
 	_armInputPin 		= (20);
-	_servoEnbPort 		= (9);
+	_servoEnbPort 		= (8);
 	_servoEnbPin 		= (19);
 	_rudderPort 		= (9);
 	_rudderPin			= (16);

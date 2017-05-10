@@ -365,9 +365,9 @@ TEST(BoatStateTest, SetPID) {
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
-	EXPECT_EQ(std::get<0>(me.K), 5.0);
-	EXPECT_EQ(std::get<1>(me.K), 0.1);
-	EXPECT_EQ(std::get<2>(me.K), 0.0);
+	EXPECT_TRUE(toleranceEquals(std::get<0>(me.K), 5.0, 0.0000001));
+	EXPECT_TRUE(toleranceEquals(std::get<1>(me.K), 0.1, 0.0000001));
+	EXPECT_TRUE(toleranceEquals(std::get<2>(me.K), 0.0, 0.0000001));
 	d.Parse("{\"Ki\":0.5,\"Kd\":0.1}");
 	ASSERT_TRUE(d.IsObject());
 	ASSERT_TRUE(d.HasMember("Ki"));

@@ -372,6 +372,7 @@ class RCModeCourseTest : public ::testing::Test {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = RCModeBase::factory(me, RCModeEnum::COURSE);
 			start = std::chrono::system_clock::now();
+			rcchannels->assign(18, Conf::get()->RClimits().at("min"));
 			rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
 			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 			me.health = &health;
@@ -501,23 +502,23 @@ TEST_F(RCModeCourseTest, FailSafeSwitch) {
 
 TEST_F(RCModeCourseTest, PIDtestProportional) {
 	VLOG(1) << "===RC Mode Course Test, PID (proportional) Test===";
-	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");				// Course mode
-	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");				// RC mode
-	rcchannels->at(Conf::get()->RCchannelMap().at("course")) = Conf::get()->RClimits().at("middlePosn");	// target course 180 degrees
-	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("max");				// max forward throttle
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max"));				// Course mode
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max"));				// RC mode
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("courseSelect")) = Conf::get()->RClimits().at("middlePosn"));	// target course 180 degrees
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("max"));				// max forward throttle
 	std::get<0>(me.K) = 10.0;
 	std::get<1>(me.K) = 0.0;
 	std::get<2>(me.K) = 0.0;
 	orientvalue->roll = 0.0;
 	orientvalue->pitch = 0.0;
 	orientvalue->heading = 181.0;
-	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
-	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
-	VLOG(2) << "Target course: " << me.rc->getCourse() << " Current course: " << orientvalue->heading;
+	//VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
+	//VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
+	//VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
+	//VLOG(2) << "Target course: " << me.rc->getCourse() << " Current course: " << orientvalue->heading;
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::COURSE);
 	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10.0, 0.1));
-	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
-	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
+	//VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
+	//VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 }

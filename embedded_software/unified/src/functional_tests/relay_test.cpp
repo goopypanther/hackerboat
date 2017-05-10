@@ -41,13 +41,13 @@ int main(int argc, char **argv) {
 	cout << "Setting relays in sequence..." << endl;
 	for (auto &r : *(relays->getmap())) {
 		cout << "Setting " << r.first << endl;
-		r.second.set();
+		r.second->set();
 		//if (r.second.pack()) cout << "Successfully packed" << endl;
-		cout << r.second.pack() << endl;
+		cout << r.second->pack() << endl;
 		std::this_thread::sleep_for(1500ms);
 		cout << "Clearing " << r.first << endl;
-		r.second.clear();
-		cout << r.second.pack() << endl;
+		r.second->clear();
+		cout << r.second->pack() << endl;
 	}
 	return 0;
 }

@@ -20,6 +20,7 @@
 #include "hal/servo.hpp"
 #include "hal/gpio.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #define ELPP_STL_LOGGING 
 
@@ -34,8 +35,8 @@ int main(int argc, char **argv) {
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
 	Servo rudder;
-	Pin enable(SYSTEM_SERVO_ENB_PORT, SYSTEM_SERVO_ENB_PIN, true, true);
-	if (!rudder.attach(RUDDER_PORT, RUDDER_PIN)) {
+	Pin enable(Conf::get()->servoEnbPort(), Conf::get()->servoEnbPin(), true, true);
+	if (!rudder.attach(Conf::get()->rudderPort(), Conf::get()->rudderPin())) {
 		std::cout << "Rudder failed to attach 1" << std::endl;
 		return -1;
 	}
