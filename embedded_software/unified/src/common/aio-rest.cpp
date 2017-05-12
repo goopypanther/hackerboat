@@ -385,7 +385,7 @@ int sub_Command::poll() {
 		//cerr << "HTTP failure on poll" << endl;
 		return -1;
 	} 
-	cerr << "Received command payload is: " << payload << endl;
+	//cerr << "Received command payload is: " << payload << endl;
 	Document input, val, element;
 	input.Parse(payload.c_str());
 	if (!input.HasParseError() && input.IsArray()) {

@@ -122,12 +122,12 @@ int main (int argc, char **argv) {
 	}
 
 	cerr << "All configured -- entering state" << std::endl;
-	LOG(INFO) << ",CSV," << state.getCSVheaders();
+	LOG(INFO) << "CSV," << state.getCSVheaders();
 
 	// run the boat
 	for (;;) {
 		// kick the dog
-		fstream wdfile;
+		ofstream wdfile;
 		wdfile.open(Conf::get()->wdFile());
 		wdfile << "1" << endl;
 		wdfile.close();
@@ -145,7 +145,7 @@ int main (int argc, char **argv) {
 		oldmode = mode;
 		mode = mode->execute();
 		if (mode != oldmode) REMOVE(oldmode);		
-		LOG_EVERY_N(5, INFO) << ",CSV," << state.getCSV();
+		LOG_EVERY_N(5, INFO) << "CSV," << state.getCSV();
 		std::this_thread::sleep_until(endtime);
 	}
 

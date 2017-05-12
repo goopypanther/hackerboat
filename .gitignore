@@ -37,6 +37,7 @@ embedded_software/unified/rcctrl
 embedded_software/unified/gps_test
 embedded_software/unified/aio_rest_test
 embedded_software/unified/rudder_test
+embedded_software/unified/watchdog
 BUILD
 
 # Eagle
