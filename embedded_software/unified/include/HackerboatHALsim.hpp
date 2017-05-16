@@ -9,10 +9,7 @@
  * Version 0.1: First alpha
  *
  ******************************************************************************/
- 
-extern 'C' {
-	#include <jansson.h>
-}
+
 #include <cstdlib>
 #include <chrono>
 #include <string>
@@ -28,6 +25,7 @@ extern 'C' {
 #include "hal/inputThread.hpp"
 
 using namespace std;
+using namespace rapidjson;
 
 class HackerboatHALsim {
 	friend class GPSdInput;

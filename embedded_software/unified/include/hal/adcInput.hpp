@@ -24,24 +24,27 @@
 #include "hal/inputThread.hpp"
 #include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
+#include "configuration.hpp"
 
 class HalTestHarness;
+
+using namespace std;
 
 class ADCInput : public InputThread {
 	friend class HalTestHarness;
 	public:
 		ADCInput(void); 
 		
-		bool 							isValid() {return inputsValid;};				/**< Check if the hardware connections are good */
-		bool							init();											/**< Intialize all inputs */
-		bool 							begin();										/**< Start the input thread */
-		bool 							execute();										/**< Gather input	*/
-		std::map<std::string, int> 		getRawValues (void) {return _raw;};				/**< Return the raw ADC values, in volts */
-		std::map<std::string, double> 	getScaledValues (void);							/**< Return the scaled ADC values */
-		bool 							setOffsets (std::map<std::string, int> offsets);/**< Set the offsets for all channels. */
-		bool 							setScales (std::map<std::string, double> scales);/**< Set the scaling for all channels. */
-		std::map<std::string, int> 		getOffsets() {return _offsets;};				/**< Get the offsets for all channels. */
-		std::map<std::string, double> 	getScales() {return _scales;};					/**< Get the scaling for all channels. */
+		bool 				isValid() {return inputsValid;};				/**< Check if the hardware connections are good */
+		bool				init();											/**< Intialize all inputs */
+		bool 				begin();										/**< Start the input thread */
+		bool 				execute();										/**< Gather input	*/
+		map<string, int> 	getRawValues (void) {return _raw;};				/**< Return the raw ADC values, in volts */
+		map<string, double> getScaledValues (void);							/**< Return the scaled ADC values */
+		bool 				setOffsets (std::map<std::string, int> offsets);/**< Set the offsets for all channels. */
+		bool 				setScales (std::map<std::string, double> scales);/**< Set the scaling for all channels. */
+		map<string, int> 	getOffsets() {return _offsets;};				/**< Get the offsets for all channels. */
+		map<string, double> getScales() {return _scales;};					/**< Get the scaling for all channels. */
 		~ADCInput () {
 			this->kill(); 
 			//if (myThread) delete myThread;
@@ -50,16 +53,16 @@ class ADCInput : public InputThread {
 		using InputThread::getLastInputTime;
 		
 	private:
-		ADC128D818 						upper { ADC_UPPER_ADDR, ADC_I2C_BUS };
-		ADC128D818 						lower { ADC_LOWER_ADDR, ADC_I2C_BUS };
-		std::vector<std::string>		upperChannels ADC_UPPER_INITIALIZER;
-		std::vector<std::string>		lowerChannels ADC_LOWER_INITIALIZER;
-		std::string						batmonPath;
-		std::map<std::string, int> 		_raw;
-		std::map<std::string, int> 		_offsets;
-		std::map<std::string, double> 	_scales;
-		bool							inputsValid = false;
-		std::thread *myThread = NULL;
+		ADC128D818 			upper { Conf::get()->adcUpperAddress(), Conf::get()->adcI2Cbus() };
+		ADC128D818 			lower { Conf::get()->adcLowerAddress(), Conf::get()->adcI2Cbus() };
+		vector<string>		upperChannels = Conf::get()->adcUpperChanList();
+		vector<string>		lowerChannels = Conf::get()->adcLowerChanList();
+		string				batmonPath;
+		map<string, int> 	_raw;
+		map<string, int> 	_offsets;
+		map<string, double> _scales;
+		bool				inputsValid = false;
+		thread *myThread = NULL;
 };
 
 #endif /* ADCINPUT_H */

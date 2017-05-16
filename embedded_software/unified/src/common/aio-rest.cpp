@@ -19,19 +19,20 @@
 #include <iomanip>
 #include <sstream>
 #include <cctype>
-#include "json_utilities.hpp"
 #include "hal/config.h"
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"
 #include "aio-rest.hpp"
 #include "easylogging++.h"
+#include "rapidjson/rapidjson.h"
+#include "configuration.hpp"
 extern "C" {
 	#include <curl/curl.h>
-	#include <jansson.h>
 }
 
 using namespace std;
+using namespace rapidjson;
 
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
@@ -140,8 +141,8 @@ int AIO_Rest::transmit (string feedkey, string payload) {
 	string response;
 
 	// assemble header string
-	string keyheader = REST_AIO_KEY_HEADER;
-	keyheader += REST_KEY;
+	string keyheader = Conf::get()->restConf().at("key_header");
+	keyheader += this->_key;
 
 	// assemble URL string
 	string url = this->_uri + this->_name + "/feeds/" + feedkey + "/data";
@@ -197,8 +198,8 @@ string AIO_Rest::fetch(string feedkey, string specifier, int *httpStatus) {
 	char errbuf[CURL_ERROR_SIZE];
 
 	// assemble header string
-	string keyheader = REST_AIO_KEY_HEADER;
-	keyheader += REST_KEY;
+	string keyheader = Conf::get()->restConf().at("key_header");
+	keyheader += this->_key;
 
 	// assemble URL string
 	hnd = curl_easy_init();
@@ -371,7 +372,6 @@ int pub_Waypoint::pub() {
 // Subscriber functors
 
 int sub_Command::poll() {
-	json_error_t err;
 	string payload, mostRecent;
 	try {
 		payload = _rest->fetch(_key, _lastMessageTime, &httpStatus);		// Fetch the desired feed, excluding anything that arrived before the last item processed.
@@ -386,44 +386,43 @@ int sub_Command::poll() {
 		return -1;
 	} 
 	//cerr << "Received command payload is: " << payload << endl;
-	json_t *element = 0;
-	json_t *input = json_loads(payload.c_str(), 0, &err);
-	if (input) {
-		for (int i = json_array_size(input) - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order
-			json_t *val = 0;
-			string value;
-			element = json_array_get(input, i);
-			if (!element) continue;														// if we should somehow get a null, skip to the next
-			mostRecent = json_string_value(json_object_get(element, "created_at"));		// grab the time this was created at...
-			if (mostRecent.compare(_lastMessageTime) == 0) {							// if we've seen this before, skip it
-				continue;
+	Document input, val, element;
+	input.Parse(payload.c_str());
+	if (!input.HasParseError() && input.IsArray()) {
+		for (int i = input.Size() - 1; i >= 0; i--) {			// we run this backwards so that the commands end up on the queue in chronological order													// if we should somehow get a null, skip to the next
+			if (input[i].HasMember("created_at") && 
+				input[i]["created_at"].IsString() &&
+				input[i].HasMember("value") &&
+				input[i]["value"].IsString()) {
+					mostRecent = input[i]["created_at"].GetString();		// grab the time this was created at...
+					if (mostRecent.compare(_lastMessageTime) == 0) {							// if we've seen this before, skip it
+						continue;
+					}
+					string value = input[i]["value"].GetString();
+					value = stripEscape(value);
+					val.Parse(value.c_str());								// load in the JSON from the string
+					if (!val.HasParseError() && 
+						val.HasMember("command")) {
+							if (val.HasMember("argument")) {
+								_me->pushCmd(val["command"].GetString(), 
+											val["argument"].GetObject());
+							} else {
+								_me->pushCmd(val["command"].GetString());
+							}
+					} else {
+						LOG(ERROR) << "Failed to parse command [" << value << "]";
+					}
 			}
-			value = json_string_value(json_object_get(element, "value"));	// grab the command string from the element
-			value = stripEscape(value);										// strip any escape characters we had to use to push it through Adafruit.IO
-			val = json_loads(value.c_str(), 0, &err);						// load in the JSON from the string
-			if (val) {
-				string cmdstring = json_string_value(json_object_get(val, "command"));	// grab the command
-				json_t *argjson =  json_object_get(val, "argument");					// grab the JSON in the arguments
-				json_incref(argjson);													// we need to increment the reference because it's borrowed and would otherwise be destroyed when we call json_decref(val)
-				_me->pushCmd(cmdstring, argjson);
-				LOG(DEBUG) << "Pushed command is [" << json_string_value(json_object_get(val, "command")) << "]";
-				LOG(DEBUG) << "Pushed argument is [" << json_object_get(val, "argument") << "]";
-			} else {
-				LOG(ERROR) << "Failed to parse command [" << value << "]";
-			}
-			if (val) json_decref(val);
-		}
+		} 
 	} else {
 		LOG(ERROR) << "Failed to parse incoming payload [" << payload << "]";
-		LOG(ERROR) << "JSON error: " << err.text << " source: " << err.source
-					<< " line: " << to_string(err.line) << " column: " << to_string(err.column);
-		//cerr << "Poll command JSON failure" << endl;
+		LOG(ERROR) << "JSON error code: " << input.GetParseError() << " offset: " << input.GetErrorOffset();
+		cerr << "Poll command JSON failure" << endl;
 		return -1;
 	}
 	// We haven't really validated this input, so it's possible that it's garbage and that could cause us to re-execute old commands
 	// This needs to be fixed b/c it's a potential security hole
 	if (mostRecent != "") _lastMessageTime = mostRecent;
-	json_decref(input);
 	return payload.length();
 }
 

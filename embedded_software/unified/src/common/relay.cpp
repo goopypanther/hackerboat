@@ -18,30 +18,27 @@
 #include <map>
 #include <inttypes.h>
 #include <cmath>
+#include <tuple>
 #include "hal/config.h"
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
 #include "hal/relay.hpp"
-#include <jansson.h>
-#include "json_utilities.hpp"
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
 
-json_t *Relay::pack () {
-	json_t* output = json_object();
+using namespace rapidjson;
+using namespace std;
+
+Value Relay::pack () {
+	Value d;
 	int packResult = 0;
 	RelayTuple thisrelay = getState();
-	double current = std::get<0>(thisrelay);
-	packResult += std::isfinite(current) ? json_object_set_new(output, "current", json_real(current)) : 
-										json_object_set_new(output, "current", json_null());
-	packResult += json_object_set_new(output, "drive", json_boolean(std::get<1>(thisrelay)));
-	packResult += json_object_set_new(output, "fault", json_boolean(std::get<2>(thisrelay)));
-	if (packResult != 0) {
-		//LOG(ERROR) << "Failed to correctly pack relay status: " << output;
-		json_decref(output);
-		return NULL;
-	}
-	//LOG(DEBUG) << "Packed relay status: " << output;
-	return output;
+	packResult += isfinite(get<0>(thisrelay)) ? HackerboatState::PutVar("current", get<0>(thisrelay), d) : 
+												HackerboatState::PutVar("current", d);
+	packResult += HackerboatState::PutVar("drive", get<1>(thisrelay), d);
+	packResult += HackerboatState::PutVar("fault", get<2>(thisrelay), d);
+	
+	return d;
 }
 
 bool Relay::init() {
@@ -113,7 +110,8 @@ bool Relay::adc(ADCInput* adc) {
 RelayMap* RelayMap::_instance = new RelayMap();
 
 RelayMap::RelayMap () {
-	relays = new std::map<std::string, Relay> RELAY_MAP_INITIALIZER; 
+	relays = new std::map<std::string, Relay*>;
+	
 }
 
 RelayMap *RelayMap::instance () {
@@ -122,31 +120,33 @@ RelayMap *RelayMap::instance () {
 
 bool RelayMap::init() {
 	bool result = true;
+	for (auto& a : Conf::get()->relayInit()) {
+		RelaySpec r = a.second;
+		relays->emplace(a.first, 
+						new Relay(a.first, new Pin(std::get<1>(r), std::get<2>(r), true),
+						new Pin(std::get<3>(r), std::get<4>(r), false)));
+	}
 	for (auto &r : *relays) {
-		result &= r.second.init();
+		result &= r.second->init();
 	}
 	initialized = result;
 	return result;
 }
 
-json_t* RelayMap::pack () {
-	json_t* output = json_object();
+Value RelayMap::pack () {
+	Value d;
 	int packResult = 0;
 	for (auto &r : *relays) {
-		packResult += json_object_set_new(output, std::get<0>(r).c_str(), std::get<1>(r).pack());
+		packResult += HackerboatState::PutVar(r.first.c_str(), r.second->pack(), d);
 	}
-	if (packResult != 0) {
-		LOG(ERROR) << "Failed to pack relay map";
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+
+	return d;
 }
 
 bool RelayMap::adc(ADCInput* adc) {
 	bool result = true;
 	for (auto &r : *relays) {
-		result &= r.second.adc(adc);
+		result &= r.second->adc(adc);
 	}
 	initialized = false;
 	return result;

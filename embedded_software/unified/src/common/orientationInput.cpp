@@ -30,14 +30,14 @@
 using namespace std;
 
 OrientationInput::OrientationInput(SensorOrientation axis) : _axis(axis) {
-	period = IMU_READ_PERIOD;
+	period = Conf::get()->imuReadPeriod();
 }		
 
 bool OrientationInput::init() {
 	LOG(INFO) << "Creating new OrientationInput object";
 	sensorsValid = (/*gyro.begin() & */compass.begin());
-	compass.setMagOffset ( IMU_MAG_OFFSET );
-	compass.setMagScale ( IMU_MAG_SCALE );
+	compass.setMagOffset ( Conf::get()->imuMagOffset() );
+	compass.setMagScale ( Conf::get()->imuMagScale() );
 	LOG_IF(!sensorsValid, ERROR) << "Failed to initialize orientation subsystem";
 	return sensorsValid;
 }	
@@ -73,39 +73,39 @@ bool OrientationInput::getData () {
 }
 
 
-void OrientationInput::mapAxes (map<char, double> data, double &x, double &y, double &z) {
+void OrientationInput::mapAxes (tuple<double, double, double> data, double &x, double &y, double &z) {
 	// assign the axis data, making sure to keep it all right hand ruled
 	// only the Z_UP direction has been tested. 
 	switch (_axis) {
 		case (SensorOrientation::SENSOR_AXIS_X_UP):
-			x = data['y'];
-			y = data['z'];
-			z = data['x'];
+			x = std::get<1>(data);
+			y = std::get<2>(data);
+			z = std::get<0>(data);
 			break;
 		case (SensorOrientation::SENSOR_AXIS_Y_UP):
-			x = data['z'];
-			y = data['x'];
-			z = data['y'];
+			x = std::get<2>(data);
+			y = std::get<0>(data);
+			z = std::get<1>(data);
 			break;
 		case (SensorOrientation::SENSOR_AXIS_Z_UP):
-			x = data['x'];
-			y = data['y'];
-			z = data['z'];
+			x = std::get<0>(data);
+			y = std::get<1>(data);
+			z = std::get<2>(data);
 			break;
 		case (SensorOrientation::SENSOR_AXIS_X_DN):
-			x = data['y'];
-			y = data['z'];
-			z = -data['x'];
+			x = std::get<1>(data);
+			y = std::get<2>(data);
+			z = -std::get<0>(data);
 			break;
 		case (SensorOrientation::SENSOR_AXIS_Y_DN):
-			x = data['x'];
-			y = data['z'];
-			z = -data['y'];
+			x = std::get<0>(data);
+			y = std::get<2>(data);
+			z = -std::get<1>(data);
 			break;
 		case (SensorOrientation::SENSOR_AXIS_Z_DN):
-			x = data['y'];
-			y = data['x'];
-			z = data['z'];
+			x = std::get<1>(data);
+			y = std::get<0>(data);
+			z = std::get<2>(data);
 			break;
 		default:
 			break;

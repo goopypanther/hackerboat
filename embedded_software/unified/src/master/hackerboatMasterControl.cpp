@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string>
 #include <chrono>
+#include <fstream>
 #include "boatState.hpp"
 #include "boatModes.hpp"
 #include "autoModes.hpp"
@@ -24,9 +25,8 @@
 #include "location.hpp"
 #include "orientation.hpp"
 #include "pid.hpp"
-#include "json_utilities.hpp"
 #include "aio-rest.hpp"
-
+#include "rapidjson/rapidjson.h"
 #include "hal/adcInput.hpp"
 #include "hal/gpsdInput.hpp"
 #include "hal/orientationInput.hpp"
@@ -35,6 +35,7 @@
 #include "hal/throttle.hpp"
 #include "waypoint.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #include "util.hpp"
 
@@ -54,6 +55,7 @@ int main (int argc, char **argv) {
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
 	Args::getargs()->load(argc, argv);
+	Conf::get()->load();
 
 	// system setup
 	BoatState state;
@@ -67,7 +69,7 @@ int main (int argc, char **argv) {
 	state.orient = new OrientationInput(SensorOrientation::SENSOR_AXIS_Z_UP);
 
 	// start the input threads
-	if (!state.rudder->attach(RUDDER_PORT, RUDDER_PIN)) {
+	if (!state.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin())) {
 		LOG(FATAL) << "Rudder failed to attach";
 		return -1;
 	}
@@ -120,10 +122,16 @@ int main (int argc, char **argv) {
 	}
 
 	cerr << "All configured -- entering state" << std::endl;
-	LOG(INFO) << ",CSV," << state.getCSVheaders();
+	LOG(INFO) << "CSV," << state.getCSVheaders();
 
 	// run the boat
 	for (;;) {
+		// kick the dog
+		ofstream wdfile;
+		wdfile.open(Conf::get()->wdFile());
+		wdfile << "1" << endl;
+		wdfile.close();
+
 		// read inputs
 		state.lastFix.copy(state.gps->getFix());
 		state.health->readHealth();
@@ -137,7 +145,7 @@ int main (int argc, char **argv) {
 		oldmode = mode;
 		mode = mode->execute();
 		if (mode != oldmode) REMOVE(oldmode);		
-		LOG_EVERY_N(5, INFO) << ",CSV," << state.getCSV();
+		LOG_EVERY_N(5, INFO) << "CSV," << state.getCSV();
 		std::this_thread::sleep_until(endtime);
 	}
 

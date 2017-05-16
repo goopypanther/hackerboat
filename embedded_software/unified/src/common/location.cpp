@@ -13,15 +13,15 @@
  *
  ******************************************************************************/
 
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include <stdlib.h>
 #include <math.h>
 #include "location.hpp"
-#include "json_utilities.hpp"
 #include "twovector.hpp"
 #include "easylogging++.h"
 
 using namespace GeographicLib;
+using namespace rapidjson;
 
 /* Minimum angle (close to roundoff error) */
 #define MIN_ANG	0.0000001
@@ -34,31 +34,25 @@ bool Location::isValid(void) const {
 			(std::isfinite(lat)) && (std::isfinite(lon)));
 }
 
-bool Location::parse(json_t* input) {
+bool Location::parse(Value& input) {
 	LOG(DEBUG) << "Parsing a location object from " << input;
-	::parse(json_object_get(input, "lat"), &lat);
-	::parse(json_object_get(input, "lon"), &lon);
+	GetVar("lon", this->lon, input);
+	GetVar("lat", this->lat, input);
 	return this->isValid();
 }
 
-json_t* Location::pack(void) const {
-	json_t *output = json_object();
+Value Location::pack(void) const {
+	Value d;
 	int packResult = 0;
 	if (this->isValid()) {
-		packResult += json_object_set_new(output, "lat", json_real(lat));
-		packResult += json_object_set_new(output, "lon", json_real(lon));
+		packResult += PutVar("lon", this->lon, d);
+		packResult += PutVar("lat", this->lat, d);
 	} else {
-		packResult += json_object_set_new(output, "lat", json_real(0));
-		packResult += json_object_set_new(output, "lon", json_real(0));
+		packResult += PutVar("lon", NAN, d);
+		packResult += PutVar("lat", NAN, d);
 	}
-	if (packResult != 0) {
-		//LOG(ERROR) << "Location packing failed " << output;
-		json_decref(output);
-		return NULL;
-	} else {
-		//LOG(DEBUG) << "Packed location object: " << output;
-		return output;
-	}
+	
+	return d;
 }
 
 /* Computation methods. */
@@ -140,5 +134,4 @@ Location Location::project (TwoVector& projection, CourseTypeEnum type) {
 
 Geodesic *Location::geod = new Geodesic(Constants::WGS84_a(), Constants::WGS84_f());
 Rhumb *Location::rhumb = new Rhumb(Constants::WGS84_a(), Constants::WGS84_f());
-
 

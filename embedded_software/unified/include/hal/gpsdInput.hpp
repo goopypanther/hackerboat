@@ -48,7 +48,7 @@ class GPSdInput : public InputThread {
 		bool execute();								/**< Gather input	*/
 		GPSFix* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
 		std::map<int, AISShip>* getData();			/**< Returns all AIS contacts */
-		std::map<int, AISShip> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
+		std::map<int, AISShip> getData(AISShipType shiptype);/**< Returns AIS contacts of a particular ship type */
 		AISShip* getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
 		AISShip* getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
 		int pruneAIS(Location loc);					/**< Call the prune() function of each AIS contact. */
@@ -68,6 +68,56 @@ class GPSdInput : public InputThread {
 		std::map<int, AISShip>	_aisTargets;
 		redi::pstreambuf	gpsdstream;
 		std::thread 		*myThread;
+
+		/*Document root;
+
+		// helper functions for getting and setting JSON values
+		bool inline GetVar(const string name, int& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsInt()) {
+				var = myvar.GetInt();
+			} else return false;
+			return true;
+		}
+
+		bool inline GetVar(const string name, double& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsDouble()) {
+				var = myvar.GetDouble();
+			} else return false;
+			return true;
+		}
+
+		bool inline GetVar(const string name, string& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsString()) {
+				var = myvar.GetString();
+			} else return false;
+			return true;
+		}
+
+		bool inline GetVar(const string name, Value& var, Value &d) {
+			Value default_val;
+			string ptr = "/" + name;
+			var = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			return true;
+		}
+
+		bool inline GetVar(const string name, bool& var, Value &d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsBool()) {
+				var = myvar.GetBool();
+			} else return false;
+			return true;
+		}*/
 };
 		
 #endif

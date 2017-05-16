@@ -27,9 +27,10 @@
 #include "hal/drivers/adc128d818.hpp"
 #include "hal/adcInput.hpp" 
 #include "easylogging++.h"
+#include "configuration.hpp"
  
 ADCInput::ADCInput(void) {
-	period = IMU_READ_PERIOD;
+	period = Conf::get()->adcReadPeriod();
 }
  
 bool ADCInput::init() {
@@ -37,26 +38,26 @@ bool ADCInput::init() {
 	
 	LOG(INFO) << "Initializing ADC subsystem";
 	// set up any internal ADCs and check that we can access the relevant files
-	batmonPath = ADC_BATMON_PATH;
+	batmonPath = Conf::get()->batmonPath();
 	result &= ((access(batmonPath.c_str(), F_OK)) == 0); // check for the existence of the relevant file
 	LOG(DEBUG) << "Result of initializing battery monitor; " << result;
 	
 	// set up the upper external ADC bank
 	result &= upper.begin();
 	upper.setReferenceMode(reference_mode_t::EXTERNAL_REF);
-	upper.setReference(ADC128D818_EXTERNAL_REF);
+	upper.setReference(Conf::get()->adcExternRefVolt());
 	LOG(DEBUG) << "Result of initializing upper ADC bank; " << result;
 	
 	// set up the lower external ADC bank
 	result &= lower.begin();
 	lower.setReferenceMode(reference_mode_t::EXTERNAL_REF);
-	lower.setReference(ADC128D818_EXTERNAL_REF);
+	lower.setReference(Conf::get()->adcExternRefVolt());
 	LOG(DEBUG) << "Result of initializing lower ADC bank; " << result;
 	
 	// This populates the various maps
-	_raw[ADC_BATMON_NAME] = -1;
-	_offsets[ADC_BATMON_NAME] = 0.0;
-	_scales[ADC_BATMON_NAME] = 0.0043956;			// default is to scale this value to a battery voltage, i.e. 0-4095 => 0-18V
+	_raw[Conf::get()->batmonName()] = -1;
+	_offsets[Conf::get()->batmonName()] = 0.0;
+	_scales[Conf::get()->batmonName()] = 0.0043956;			// default is to scale this value to a battery voltage, i.e. 0-4095 => 0-18V
 													// Note that this needs to be calibrated
 	for (unsigned int i = 0; i < upperChannels.size(); i++) {
 		_raw[upperChannels[i]] = -1;
@@ -99,9 +100,9 @@ bool ADCInput::execute() {
 	ain.open(batmonPath);
 	if (ain.is_open()) {
 		ain.get(in, 5);		// value is from 0-4095, so at most four characters, but we have to grab at least 5 to get it all
-		_raw["battery_mon"] = atoi(in);	
+		_raw[Conf::get()->batmonName()] = atoi(in);	
 	} else {
-		_raw["battery_mon"] = -1;
+		_raw[Conf::get()->batmonName()] = -1;
 		result = false;
 	}
 	for (unsigned int i = 0; i < upperChannels.size(); i++) {

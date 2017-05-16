@@ -25,6 +25,7 @@ CPPFLAGS += -I include
 CPPFLAGS += -I submodules/hackerboat-private
 CPPFLAGS += -I submodules/date
 CPPFLAGS += -I submodules/pstreams
+CPPFLAGS += -I submodules/rapidjson/include
 CPPFLAGS += -isystem submodules/easyloggingpp/src
 CPPFLAGS += -I $(GTEST_INC)
 CPPFLAGS += -D _USE_MATH_DEFINES
@@ -34,8 +35,6 @@ CPPFLAGS += -D ELPP_THREAD_SAFE
 
 LDFLAGS  += -L /usr/local/lib
 
-LDLIBS += -ljansson
-LDLIBS += -lsqlite3
 LDLIBS += -lm
 LDLIBS += -lrt
 LDLIBS += -lGeographic
@@ -44,7 +43,7 @@ LDLIBS += -lcurl
 export OPTS
 
 VPATH=src/common:src/hal:src/master:src/drivers:src/tests:submodules/lsquaredc:submodules/easyloggingpp/src
-all: submodules master
+all: submodules master watchdog
 test: unit_tests
 	./setup/Hackerboat-Init.sh
 	./unit_tests
@@ -74,11 +73,11 @@ LIBHACKERBOAT_HAL_SRCS+= servo.cpp
 LIBHACKERBOAT_HAL_SRCS+= orientationInput.cpp
 LIBHACKERBOAT_C_HAL_SRCS+= lsquaredc.c
 
-LIBHACKERBOAT_SRCS= util.cpp
+LIBHACKERBOAT_SRCS= configuration.cpp
+LIBHACKERBOAT_SRCS+= util.cpp
 LIBHACKERBOAT_SRCS+= autoModes.cpp
 LIBHACKERBOAT_SRCS+= waypoint.cpp
 LIBHACKERBOAT_SRCS+= rcModes.cpp
-LIBHACKERBOAT_SRCS+= sqliteStorage.cpp
 LIBHACKERBOAT_SRCS+= location.cpp
 LIBHACKERBOAT_SRCS+= gps.cpp
 LIBHACKERBOAT_SRCS+= enumtable.cpp
@@ -86,9 +85,6 @@ LIBHACKERBOAT_SRCS+= ais.cpp
 LIBHACKERBOAT_SRCS+= pid.cpp
 LIBHACKERBOAT_SRCS+= twovector.cpp
 LIBHACKERBOAT_SRCS+= orientation.cpp
-LIBHACKERBOAT_SRCS+= jansson_extras.cpp
-LIBHACKERBOAT_SRCS+= json_utilities.cpp
-LIBHACKERBOAT_SRCS+= json_ostream.cpp
 LIBHACKERBOAT_SRCS+= boatState.cpp
 LIBHACKERBOAT_SRCS+= boatModes.cpp
 LIBHACKERBOAT_SRCS+= navModes.cpp
@@ -111,6 +107,13 @@ ALL_OBJS+=$(MASTER_OBJS)
 master: $(MASTER_OBJS) libhackerboathal.a libhackerboat.a 
 	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
 
+WD_SRCS=master/hackerboatWatchdog.cpp
+WD_OBJ=$(addprefix src/,$(WD_SRCS:.cpp=.o))
+ALL_OBJS+=$(WD_OBJ)
+
+watchdog: $(WD_OBJ) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS)
+
 RC_SRCS=master/hackerboatRC.cpp
 RC_OBJS=$(addprefix src/,$(RC_SRCS:.cpp=.o))
 rcctrl: $(RC_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
@@ -128,12 +131,10 @@ TEST_OBJS += rcmode_test.o
 TEST_OBJS += automode_test.o
 TEST_OBJS += boatstate_test.o
 TEST_OBJS += boatmode_test.o
-TEST_OBJS += sqliteStorage_test.o
-TEST_OBJS += rudder_test.o
 GTEST_OBJS=test_utilities.o gtest.o gtest_main.o
 ALL_OBJS+= $(TEST_OBJS) $(GTEST_OBJS)
-unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a libhackerboathal.a libhackerboat.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
+unit_tests: $(TEST_OBJS) $(GTEST_OBJS) libhackerboathal.a libhackerboat.a 
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ libhackerboathal.a libhackerboat.a $(LDLIBS) -o $@
 
 # gtest rules:
 # gtest isn't installed as a library by the debian package because it
@@ -144,7 +145,7 @@ gtest.o: $(GTEST_DIR) $(GTEST_INC)
 	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -I $(GTEST_DIR) -c -o $@ $(GTEST_DIR)/src/gtest-all.cc
 #gtest_main.o: $(GTEST_DIR)/src/gtest_main.cc
 gtest_main.o: gtest_main.cc
-	$(CXX) $(CXXFLAGS) -I $(GTEST_INC) -isystem submodules/easyloggingpp/src -c -o $@ $^
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -I $(GTEST_INC) -isystem submodules/easyloggingpp/src -c -o $@ $^
 
 submodules:
 	@$(MAKE) -C submodules

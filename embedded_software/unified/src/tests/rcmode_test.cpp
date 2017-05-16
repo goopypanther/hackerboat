@@ -8,8 +8,11 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
+
+using namespace rapidjson;
 
 class RCModeIdleTest : public ::testing::Test {
 	public:
@@ -35,7 +38,7 @@ class RCModeIdleTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -46,7 +49,7 @@ class RCModeIdleTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -85,11 +88,11 @@ class RCModeIdleTest : public ::testing::Test {
 
 TEST_F(RCModeIdleTest, Outputs) {
 	VLOG(1) << "==RC Mode Idle Test, Outputs===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("middlePosn");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
@@ -105,11 +108,11 @@ TEST_F(RCModeIdleTest, Outputs) {
 
 TEST_F(RCModeIdleTest, RudderSwitch) {
 	VLOG(1) << "==RC Mode Idle Test, Rudder Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("min");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Executing idle mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::RUDDER);
@@ -119,11 +122,11 @@ TEST_F(RCModeIdleTest, RudderSwitch) {
 
 TEST_F(RCModeIdleTest, CourseSwitch) {
 	VLOG(1) << "==RC Mode Idle Test, Course Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MAX;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Executing idle mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::COURSE);
@@ -133,14 +136,14 @@ TEST_F(RCModeIdleTest, CourseSwitch) {
 
 TEST_F(RCModeIdleTest, FailSafeSwitch) {
 	VLOG(1) << "===RC Mode Idle Test, FailSafe===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("middlePosn");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	*rcfailsafe = true;
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Failsafe state: " << me.rc->isFailSafe();
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	VLOG(2) << "Executing idle mode...";
@@ -158,8 +161,8 @@ class RCModeRudderTest : public ::testing::Test {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = RCModeBase::factory(me, RCModeEnum::RUDDER);
 			start = std::chrono::system_clock::now();
-			rcchannels->at(RC_MODE_SWITCH) = RC_MIN;
-			rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+			rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("min");
+			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 			me.health = &health;
 			health.setADCdevice(&adc);
 			me.rudder = &rudder;
@@ -178,7 +181,7 @@ class RCModeRudderTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -189,7 +192,7 @@ class RCModeRudderTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -231,73 +234,73 @@ TEST_F(RCModeRudderTest, Outputs) {
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
 	
-	rcchannels->at(RC_RUDDER_CH) = 1401;
-	rcchannels->at(RC_THROTTLE_CH) = RC_MAX;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 1401;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 50);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 	
-	rcchannels->at(RC_RUDDER_CH) = RC_MAX;
-	rcchannels->at(RC_THROTTLE_CH) = 1350;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = Conf::get()->RClimits().at("max");
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 1350;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 100);
 	EXPECT_EQ(me.throttle->getThrottle(), 2);
 	
-	rcchannels->at(RC_RUDDER_CH) = 991;
-	rcchannels->at(RC_THROTTLE_CH) = 991;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 991;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 991;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 0);
 	EXPECT_EQ(me.throttle->getThrottle(), 0);
 	
-	rcchannels->at(RC_RUDDER_CH) = 581;
-	rcchannels->at(RC_THROTTLE_CH) = RC_MAX;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 581;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), -50);
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 	
-	rcchannels->at(RC_RUDDER_CH) = RC_MIN;
-	rcchannels->at(RC_THROTTLE_CH) = 1350;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = Conf::get()->RClimits().at("min");
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 1350;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), -100);
 	EXPECT_EQ(me.throttle->getThrottle(), 2);
 	
-	rcchannels->at(RC_RUDDER_CH) = 991;
-	rcchannels->at(RC_THROTTLE_CH) = 991;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 991;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 991;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 0);
 	EXPECT_EQ(me.throttle->getThrottle(), 0);
 	
-	rcchannels->at(RC_RUDDER_CH) = 581;
-	rcchannels->at(RC_THROTTLE_CH) = RC_MIN;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 581;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("min");
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), -50);
 	EXPECT_EQ(me.throttle->getThrottle(), -5);
 	
-	rcchannels->at(RC_RUDDER_CH) = RC_MIN;
-	rcchannels->at(RC_THROTTLE_CH) = 650;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = Conf::get()->RClimits().at("min");
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 650;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), -100);
 	EXPECT_EQ(me.throttle->getThrottle(), -2);
 	
-	rcchannels->at(RC_RUDDER_CH) = 991;
-	rcchannels->at(RC_THROTTLE_CH) = 991;
-	VLOG(2) << "Writing rudder channel: " << rcchannels->at(RC_RUDDER_CH) << " & throttle channel: " << rcchannels->at(RC_THROTTLE_CH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) = 991;
+	rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = 991;
+	VLOG(2) << "Writing rudder channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("rudder")) << " & throttle channel: " << rcchannels->at(Conf::get()->RCchannelMap().at("throttle"));
 	mode = mode->execute();
 	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	EXPECT_EQ(me.rudder->read(), 0);
@@ -306,11 +309,11 @@ TEST_F(RCModeRudderTest, Outputs) {
 
 TEST_F(RCModeRudderTest, CourseSwitch) {
 	VLOG(1) << "==RC Mode Rudder Test, Course Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MAX;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Executing rudder mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::COURSE);
@@ -320,11 +323,11 @@ TEST_F(RCModeRudderTest, CourseSwitch) {
 
 TEST_F(RCModeRudderTest, IdleSwitch) {
 	VLOG(1) << "==RC Mode Rudder Test, Idle Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("middlePosn");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
@@ -342,14 +345,14 @@ TEST_F(RCModeRudderTest, IdleSwitch) {
 
 TEST_F(RCModeRudderTest, FailSafeSwitch) {
 	VLOG(1) << "===RC Mode Rudder Test, FailSafe===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MAX;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	*rcfailsafe = true;
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Failsafe state: " << me.rc->isFailSafe();
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	VLOG(2) << "Executing rudder mode...";
@@ -369,8 +372,9 @@ class RCModeCourseTest : public ::testing::Test {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = RCModeBase::factory(me, RCModeEnum::COURSE);
 			start = std::chrono::system_clock::now();
-			rcchannels->at(RC_MODE_SWITCH) = RC_MAX;
-			rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+			rcchannels->assign(18, Conf::get()->RClimits().at("min"));
+			rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
+			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 			me.health = &health;
 			health.setADCdevice(&adc);
 			me.rudder = &rudder;
@@ -389,7 +393,7 @@ class RCModeCourseTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -400,7 +404,7 @@ class RCModeCourseTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -439,11 +443,11 @@ class RCModeCourseTest : public ::testing::Test {
 
 TEST_F(RCModeCourseTest, RudderSwitch) {
 	VLOG(1) << "==RC Mode Course Test, Rudder Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("min");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Executing course mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::RUDDER);
@@ -453,11 +457,11 @@ TEST_F(RCModeCourseTest, RudderSwitch) {
 
 TEST_F(RCModeCourseTest, IdleSwitch) {
 	VLOG(1) << "==RC Mode Course Test, Idle Switch===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("middlePosn");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
@@ -475,14 +479,14 @@ TEST_F(RCModeCourseTest, IdleSwitch) {
 
 TEST_F(RCModeCourseTest, FailSafeSwitch) {
 	VLOG(1) << "===RC Mode Course Test, FailSafe===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MAX;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
 	*rcfailsafe = true;
 	me.rudder->write(50);
 	me.throttle->setThrottle(5);
 	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
+	VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Failsafe state: " << me.rc->isFailSafe();
 	VLOG(2) << "Writing rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 	VLOG(2) << "Executing course mode...";
@@ -498,23 +502,23 @@ TEST_F(RCModeCourseTest, FailSafeSwitch) {
 
 TEST_F(RCModeCourseTest, PIDtestProportional) {
 	VLOG(1) << "===RC Mode Course Test, PID (proportional) Test===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MAX;				// Course mode
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;				// RC mode
-	rcchannels->at(RC_COURSE_SELECTOR) = RC_MIDDLE_POSN;	// target course 180 degrees
-	rcchannels->at(RC_THROTTLE_CH) = RC_MAX;				// max forward throttle
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("max"));				// Course mode
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max"));				// RC mode
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("courseSelect")) = Conf::get()->RClimits().at("middlePosn"));	// target course 180 degrees
+	EXPECT_NO_THROW(rcchannels->at(Conf::get()->RCchannelMap().at("throttle")) = Conf::get()->RClimits().at("max"));				// max forward throttle
 	std::get<0>(me.K) = 10.0;
 	std::get<1>(me.K) = 0.0;
 	std::get<2>(me.K) = 0.0;
 	orientvalue->roll = 0.0;
 	orientvalue->pitch = 0.0;
 	orientvalue->heading = 181.0;
-	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
-	VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
-	VLOG(2) << "Auto switch: " << me.rc->getChannel(RC_AUTO_SWITCH);
-	VLOG(2) << "Target course: " << me.rc->getCourse() << " Current course: " << orientvalue->heading;
+	//VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
+	//VLOG(2) << "RC mode switch: " << BoatState::rcModeNames.get(me.rc->getMode());
+	//VLOG(2) << "Auto switch: " << me.rc->getChannel(Conf::get()->RCchannelMap().at("auto"));
+	//VLOG(2) << "Target course: " << me.rc->getCourse() << " Current course: " << orientvalue->heading;
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::COURSE);
 	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10.0, 0.1));
-	VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
-	VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
+	//VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
+	//VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 }

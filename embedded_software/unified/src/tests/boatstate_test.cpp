@@ -5,10 +5,13 @@
 #include "boatState.hpp"
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #define TOL 0.000001
+
+using namespace rapidjson;
 
 TEST(BoatStateTest, FaultString) {
 	VLOG(1) << "===Boat State Test, Fault String===";
@@ -137,8 +140,8 @@ TEST(BoatStateTest, JSON) {
 	testfix.fix = Location(5.0, 5.0);
 	me.relays = RelayMap::instance();
 	me.recordTime = std::chrono::system_clock::now();
-	me.currentWaypoint = 4;
-	me.waypointStrength = 20.0;
+	//me.currentWaypoint = 4;
+	//me.waypointStrength = 20.0;
 	me.lastContact = std::chrono::system_clock::now();
 	me.lastRC = std::chrono::system_clock::now();
 	me.launchPoint = Location(10.0, 10.0);
@@ -148,55 +151,15 @@ TEST(BoatStateTest, JSON) {
 	me.setNavMode("Fault");
 	me.setAutoMode("Waypoint");
 	me.setRCmode("Rudder");
-	json_t* packed;
+	Value packed;
 	ASSERT_NO_THROW(packed = me.pack());
-	ASSERT_TRUE(packed);
-	VLOG(2) << "Packed JSON: " << json_dumps(packed, 0);
+	ASSERT_TRUE(packed.IsObject());
+	VLOG(2) << "Packed JSON: " << packed;
 	EXPECT_TRUE(you.parse(packed));
 	VLOG(2) << "Parsed JSON: " << you;
 	EXPECT_EQ(floor<milliseconds>(me.recordTime), you.recordTime);
-	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
-	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
-	EXPECT_EQ(floor<milliseconds>(me.lastContact), you.lastContact);
-	EXPECT_EQ(floor<milliseconds>(me.lastRC), you.lastRC);
-	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
-	EXPECT_EQ(me.launchPoint.lon, you.launchPoint.lon);
-	EXPECT_EQ(me.lastFix.fix.lat, you.lastFix.fix.lat);
-	EXPECT_EQ(me.lastFix.fix.lon, you.lastFix.fix.lon);
-	EXPECT_TRUE(you.hasFault("test"));
-	EXPECT_EQ(me.getBoatMode(), you.getBoatMode());
-	EXPECT_EQ(me.getNavMode(), you.getNavMode());
-	EXPECT_EQ(me.getAutoMode(), you.getAutoMode());
-	EXPECT_EQ(me.getRCMode(), you.getRCMode());
-}
-
-TEST(BoatStateTest, Storage) {
-	VLOG(1) << "===Boat State Test, Storage===";
-	BoatState me, you;
-	GPSFix testfix;
-	testfix.fix = Location(5.0, 5.0);
-	me.relays = RelayMap::instance();
-	me.recordTime = std::chrono::system_clock::now();
-	me.currentWaypoint = 4;
-	me.waypointStrength = 20.0;
-	me.lastContact = std::chrono::system_clock::now();
-	me.lastRC = std::chrono::system_clock::now();
-	me.launchPoint = Location(10.0, 10.0);
-	me.lastFix = testfix;
-	me.insertFault("test");
-	me.setBoatMode("Disarmed");
-	me.setNavMode("Fault");
-	me.setAutoMode("Waypoint");
-	me.setRCmode("Rudder");
-	VLOG(2) << "Object to be stored: " << me;
-	EXPECT_GT(me.countRecords(), -1);
-	VLOG(2) << "Number of records: " << me.countRecords();
-	EXPECT_TRUE(me.appendRecord());
-	EXPECT_TRUE(you.getLastRecord());
-	VLOG(2) << "Recovered object: " << you;
-	EXPECT_EQ(floor<milliseconds>(me.recordTime), you.recordTime);
-	EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
-	EXPECT_EQ(me.waypointStrength, you.waypointStrength);
+	//EXPECT_EQ(me.currentWaypoint, you.currentWaypoint);
+	//EXPECT_EQ(me.waypointStrength, you.waypointStrength);
 	EXPECT_EQ(floor<milliseconds>(me.lastContact), you.lastContact);
 	EXPECT_EQ(floor<milliseconds>(me.lastRC), you.lastRC);
 	EXPECT_EQ(me.launchPoint.lat, you.launchPoint.lat);
@@ -213,18 +176,38 @@ TEST(BoatStateTest, Storage) {
 TEST(BoatStateTest, Command) {
 	VLOG(1) << "===Boat State Test, Command List===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, &err)));
+	Document start, selftest, disarmed, fault, navigation, armedtest;
+	Value default_val;
+	start.Parse("{\"mode\":\"Start\"}");
+	EXPECT_TRUE(start.IsObject());
+	EXPECT_TRUE(start.HasMember("mode"));
+	selftest.Parse("{\"mode\":\"SelfTest\"}");
+	EXPECT_TRUE(selftest.IsObject());
+	EXPECT_TRUE(selftest.HasMember("mode"));
+	disarmed.Parse("{\"mode\":\"Disarmed\"}");
+	EXPECT_TRUE(disarmed.IsObject());
+	EXPECT_TRUE(disarmed.HasMember("mode"));
+	fault.Parse("{\"mode\":\"Fault\"}");
+	EXPECT_TRUE(fault.IsObject());
+	EXPECT_TRUE(fault.HasMember("mode"));
+	navigation.Parse("{\"mode\":\"Navigation\"}");
+	EXPECT_TRUE(navigation.IsObject());
+	EXPECT_TRUE(navigation.HasMember("mode"));
+	armedtest.Parse("{\"mode\":\"ArmedTest\"}");
+	EXPECT_TRUE(armedtest.IsObject());
+	EXPECT_TRUE(armedtest.HasMember("mode"));
+
+	EXPECT_NO_THROW(me.pushCmd("SetMode", start));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", selftest));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", disarmed));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", fault));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", navigation));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", armedtest));
 	VLOG(2) << me;
 	EXPECT_EQ(me.commandCnt(), 6);
 	EXPECT_EQ(me.executeCmds(1), 1);
@@ -239,17 +222,17 @@ TEST(BoatStateTest, Command) {
 	VLOG(2) << me;
 	EXPECT_EQ(me.getBoatMode(), BoatModeEnum::ARMEDTEST);
 	EXPECT_EQ(me.commandCnt(), 0);
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Start\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", start));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"SelfTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", selftest));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Disarmed\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", disarmed));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Fault\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", fault));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"Navigation\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", navigation));
 	VLOG(2) << me;
-	EXPECT_NO_THROW(me.pushCmd("SetMode", json_loads("{\"mode\":\"ArmedTest\"}", 0, &err)));
+	EXPECT_NO_THROW(me.pushCmd("SetMode", armedtest));
 	VLOG(2) << me;
 	EXPECT_EQ(me.commandCnt(), 6);
 	EXPECT_NO_THROW(me.flushCmds());
@@ -260,8 +243,12 @@ TEST(BoatStateTest, Command) {
 TEST(BoatStateTest, SetNavMode) {
 	VLOG(1) << "===Boat State Test, Command Nav Mode===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetNavMode", json_loads("{\"mode\":\"Autonomous\"}", 0, &err)));
+	Document d;
+	Value default_val;
+	d.Parse("{\"mode\":\"Autonomous\"}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("mode"));
+	EXPECT_NO_THROW(me.pushCmd("SetNavMode", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
@@ -271,8 +258,11 @@ TEST(BoatStateTest, SetNavMode) {
 TEST(BoatStateTest, SetAutoMode) {
 	VLOG(1) << "===Boat State Test, Command Auto Mode===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetAutoMode", json_loads("{\"mode\":\"Return\"}", 0, &err)));
+	Document d;
+	d.Parse("{\"mode\":\"Return\"}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("mode"));
+	EXPECT_NO_THROW(me.pushCmd("SetAutoMode", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
@@ -282,14 +272,21 @@ TEST(BoatStateTest, SetAutoMode) {
 TEST(BoatStateTest, SetHome) {
 	VLOG(1) << "===Boat State Test, Command Set Home===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lat\":5.0,\"lon\":7.5}}", 0, &err)));
+	Document d;
+	Value default_val;
+	d.Parse("{\"location\":{\"lat\":5.0,\"lon\":7.5}}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("location"));
+	EXPECT_NO_THROW(me.pushCmd("SetHome", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
 	EXPECT_EQ(me.launchPoint.lat, 5.0);
 	EXPECT_EQ(me.launchPoint.lon, 7.5);
-	EXPECT_NO_THROW(me.pushCmd("SetHome", json_loads("{\"location\":{\"lon\":7.5}}", 0, &err)));
+	d.Parse("{\"location\":{\"lon\":7.5}}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("location"));
+	EXPECT_NO_THROW(me.pushCmd("SetHome", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 0);
 	VLOG(2) << me;
@@ -300,7 +297,8 @@ TEST(BoatStateTest, SetHome) {
 TEST(BoatStateTest, SetWaypoint) {
 	VLOG(1) << "===Boat State Test, Command Set Waypoint===";
 	BoatState me;
-	json_error_t err;
+	Document d;
+	Value default_val;
 	me.waypointList.loadKML("/home/debian/hackerboat/embedded_software/unified/test_data/waypoint/test_map_1.kml");
 	VLOG(2) << "Count: " << me.waypointList.count()
 			<< ", current: " << me.waypointList.current()
@@ -309,16 +307,25 @@ TEST(BoatStateTest, SetWaypoint) {
 	EXPECT_EQ(me.waypointList.count(), 7);
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::NONE);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":4}", 0, &err)));
+	d.Parse("{\"number\":4}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("number"));
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", d));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count() << ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 4);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":8}", 0, &err)));
+	d.Parse("{\"number\":8}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("number"));
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", d));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count()
 			<< ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 6);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", json_loads("{\"number\":-1}", 0, &err)));
+	d.Parse("{\"number\":-1}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("number"));
+	EXPECT_NO_THROW(me.pushCmd("SetWaypoint", d));
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Count: " << me.waypointList.count() << ", current: " << me.waypointList.current();
 	EXPECT_EQ(me.waypointList.current(), 0);
@@ -327,13 +334,20 @@ TEST(BoatStateTest, SetWaypoint) {
 TEST(BoatStateTest, SetWaypointAction) {
 	VLOG(1) << "===Boat State Test, Command Set Waypoint Action===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"Return\"}", 0, &err)));
+	Document d;
+	Value default_val;
+	d.Parse("{\"action\":\"Return\"}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("action"));
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", d));
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
-	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", json_loads("{\"action\":\"\"}", 0, &err)));
+	d.Parse("{\"action\":\"\"}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("action"));
+	EXPECT_NO_THROW(me.pushCmd("SetWaypointAction", d));
 	EXPECT_EQ(me.executeCmds(1), 0);
 	VLOG(2) << "Action: " << me.waypointList.actionNames.get(me.waypointList.getAction());
 	EXPECT_EQ(me.waypointList.getAction(), WaypointActionEnum::RETURN);
@@ -342,22 +356,35 @@ TEST(BoatStateTest, SetWaypointAction) {
 TEST(BoatStateTest, SetPID) {
 	VLOG(1) << "===Boat State Test, Command Set PID===";
 	BoatState me;
-	json_error_t err;
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":5.0}", 0, &err)));
+	Document d;
+	Value default_val;
+	d.Parse("{\"Kp\":5.0}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("Kp"));
+	EXPECT_NO_THROW(me.pushCmd("SetPID", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
-	EXPECT_EQ(std::get<0>(me.K), 5.0);
-	EXPECT_EQ(std::get<1>(me.K), 0.1);
-	EXPECT_EQ(std::get<2>(me.K), 0.0);
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Ki\":0.5,\"Kd\":0.1}", 0, &err)));
+	EXPECT_TRUE(toleranceEquals(std::get<0>(me.K), 5.0, 0.0000001));
+	EXPECT_TRUE(toleranceEquals(std::get<1>(me.K), 0.1, 0.0000001));
+	EXPECT_TRUE(toleranceEquals(std::get<2>(me.K), 0.0, 0.0000001));
+	d.Parse("{\"Ki\":0.5,\"Kd\":0.1}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("Ki"));
+	ASSERT_TRUE(d.HasMember("Kd"));
+	EXPECT_NO_THROW(me.pushCmd("SetPID", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;
 	EXPECT_EQ(std::get<0>(me.K), 5.0);
 	EXPECT_EQ(std::get<1>(me.K), 0.5);
 	EXPECT_EQ(std::get<2>(me.K), 0.1);
-	EXPECT_NO_THROW(me.pushCmd("SetPID", json_loads("{\"Kp\":50.0,\"Ki\":5.0,\"Kd\":1.0}", 0, &err)));
+	d.Parse("{\"Kp\":50.0,\"Ki\":5.0,\"Kd\":1.0}");
+	ASSERT_TRUE(d.IsObject());
+	ASSERT_TRUE(d.HasMember("Kp"));
+	ASSERT_TRUE(d.HasMember("Ki"));
+	ASSERT_TRUE(d.HasMember("Kd"));
+	EXPECT_NO_THROW(me.pushCmd("SetPID", d));
 	VLOG(2) << me;
 	EXPECT_EQ(me.executeCmds(1), 1);
 	VLOG(2) << me;

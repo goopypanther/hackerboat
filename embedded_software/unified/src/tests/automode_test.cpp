@@ -8,8 +8,8 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 class AutoModeIdleTest : public ::testing::Test {
 	public:
@@ -35,7 +35,7 @@ class AutoModeIdleTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -46,7 +46,7 @@ class AutoModeIdleTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -132,8 +132,8 @@ TEST_F(AutoModeIdleTest, AnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 class AutoModeWaypointTest : public ::testing::Test {
@@ -160,7 +160,7 @@ class AutoModeWaypointTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -171,7 +171,7 @@ class AutoModeWaypointTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -249,8 +249,8 @@ TEST_F(AutoModeWaypointTest, CommandAnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, CourseSelection) {
@@ -343,8 +343,8 @@ TEST_F(AutoModeWaypointTest, WaypointAnchor) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.59436, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.37912, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.59436, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.37912, 0.0001));
 }
 
 TEST_F(AutoModeWaypointTest, WaypointIdle) {
@@ -403,7 +403,7 @@ class AutoModeReturnTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -414,7 +414,7 @@ class AutoModeReturnTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -492,8 +492,8 @@ TEST_F(AutoModeReturnTest, CommandAnchorTransition) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	VLOG(2) << "Anchor point: " << ((AutoAnchorMode*)mode)->getAnchorPoint();
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lat, 47.6906518, 0.0001));
-	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint().lon, -122.3799706, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lat, 47.6906518, 0.0001));
+	EXPECT_TRUE(toleranceEquals(((AutoAnchorMode*)mode)->getAnchorPoint()->lon, -122.3799706, 0.0001));
 }
 
 TEST_F(AutoModeReturnTest, CourseSelection) {
@@ -557,7 +557,7 @@ class AutoModeAnchorTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -568,7 +568,7 @@ class AutoModeAnchorTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();

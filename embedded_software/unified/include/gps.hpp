@@ -12,16 +12,15 @@
 #ifndef GPS_H
 #define GPS_H
 
-extern "C" {
-	#include <jansson.h>
-}
+#include "rapidjson/rapidjson.h"
 #include <stdlib.h>
 #include <chrono>
 #include <string>
 #include "hackerboatRoot.hpp"
-#include "sqliteStorage.hpp"
 #include "location.hpp"
 #include "enumtable.hpp"
+
+using namespace rapidjson;
 
 enum class NMEAModeEnum : int {
 	NONE 	= 0,	/**< No data */
@@ -38,21 +37,19 @@ enum class NMEAModeEnum : int {
  * The actual text of each incoming sentence is stored for logging purposes as well. 
  *
  */
-class GPSFix : public HackerboatStateStorable {
+class GPSFix : public HackerboatState {
 	public:
 		static const EnumNameTable<NMEAModeEnum> NMEAModeNames;
 	
 		GPSFix ();
-		GPSFix (json_t *packet);				/**< Create a GPS fix from an incoming gpsd TPV */
-		bool parseGpsdPacket (json_t *packet);	/**< Parse an incoming TSV into the current object. */
-		bool parse (json_t *input);
-		json_t *pack () const;
+		GPSFix (Value& packet);					/**< Create a GPS fix from an incoming gpsd TPV */
+		GPSFix (const GPSFix& g) {this->copy(g);};
+		bool parseGpsdPacket (Value& packet);	/**< Parse an incoming TSV into the current object. */
+		bool parse (Value& input);
+		Value pack () const;
 		bool isValid () const;
-		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
-		void copy(GPSFix *newfix);
-		void copy(GPSFix &newfix);
+		void copy(const GPSFix* newfix);
+		void copy(const GPSFix& newfix);
 		
 		sysclock		gpsTime;	/**< GPS time of fix */
 		
@@ -74,8 +71,7 @@ class GPSFix : public HackerboatStateStorable {
 		bool 			fixValid = false;	/**< Checks whether this fix is valid or not */				
 		
 	private:
-		bool coreParse (json_t* input);	/**< This is the pieces of the parsing task shared between parse() and parseGpsdPacket() */
-		HackerboatStateStorage *gpsStorage = NULL;
+		bool coreParse (Value& input);	/**< This is the pieces of the parsing task shared between parse() and parseGpsdPacket() */
 };
 
 #endif

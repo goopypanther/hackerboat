@@ -24,6 +24,7 @@
 #include "hal/drivers/lsm303.hpp"
 #include "hal/drivers/l3gd20.hpp"
 #include "hal/inputThread.hpp"
+#include "configuration.hpp"
 
 class HalTestHarness;
 
@@ -55,11 +56,11 @@ class OrientationInput : public InputThread {
 			this->kill(); 
 			//if (myThread) delete myThread;
 		}
-		LSM303 compass { IMU_I2C_BUS };
+		LSM303 compass { Conf::get()->imuI2Cbus() };
 	
 	private:
 		bool getData ();
-		void mapAxes (map<char, double> data, double &x, double &y, double &z);
+		void mapAxes (tuple<double, double, double> data, double &x, double &y, double &z);
 		void getAccelOrientation ();
 		void getMagOrientation ();
 		//L3GD20	gyro { IMU_I2C_BUS };

@@ -7,8 +7,8 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 class NavModeIdleTest : public ::testing::Test {
 	public:
@@ -34,7 +34,7 @@ class NavModeIdleTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -45,7 +45,7 @@ class NavModeIdleTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -56,7 +56,7 @@ class NavModeIdleTest : public ::testing::Test {
 			*rcvalid = true;
 			*rcfailsafe = false;
 			*orientvalid = true;
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at(Conf::get()->batmonName()) = 3000;
 			health.readHealth();
 		}
 		
@@ -115,8 +115,8 @@ TEST_F(NavModeIdleTest, CommandAuto) {
 TEST_F(NavModeIdleTest, SwitchRC) {
 	VLOG(1) << "===Nav Mode Idle Test, Switch RC===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
@@ -148,7 +148,7 @@ class NavModeFaultTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -159,7 +159,7 @@ class NavModeFaultTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -170,7 +170,7 @@ class NavModeFaultTest : public ::testing::Test {
 			*rcvalid = true;
 			*rcfailsafe = false;
 			*orientvalid = true;
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at(Conf::get()->batmonName()) = 3000;
 			health.readHealth();
 		}
 		
@@ -198,8 +198,8 @@ class NavModeFaultTest : public ::testing::Test {
 
 TEST_F(NavModeFaultTest, Entry) {
 	VLOG(1) << "===Nav Mode Fault Test, Entry===";
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::IDLE);
 	VLOG(1) << "Executing nav mode...";
@@ -293,7 +293,7 @@ class NavModeRCTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -304,7 +304,7 @@ class NavModeRCTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -315,7 +315,7 @@ class NavModeRCTest : public ::testing::Test {
 			*rcvalid = true;
 			*rcfailsafe = false;
 			*orientvalid = true;
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at(Conf::get()->batmonName()) = 3000;
 			health.readHealth();
 		}
 		
@@ -344,15 +344,15 @@ class NavModeRCTest : public ::testing::Test {
 TEST_F(NavModeRCTest, AutoSwitchExit) {
 	VLOG(1) << "===Nav Mode RC Test, Switch Auto===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), NavModeEnum::RC);
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
@@ -372,10 +372,10 @@ TEST_F(NavModeRCTest, Fault) {
 
 TEST_F(NavModeRCTest, RCModeExecute) {
 	VLOG(1) << "===Nav Mode RC Test, Execute===";
-	rcchannels->at(RC_MODE_SWITCH) = RC_MIDDLE_POSN;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
-	VLOG(2) << "Setting RC mode switch to " << rcchannels->at(RC_MODE_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("mode")) = Conf::get()->RClimits().at("middlePosn");
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
+	VLOG(2) << "Setting RC mode switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("mode"));
 	NavRCMode *myrc = (NavRCMode*)mode;
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
@@ -422,8 +422,8 @@ TEST_F(NavModeRCTest, RCModeExecute) {
 TEST_F(NavModeRCTest, CommandIdle) {
 	VLOG(1) << "===Nav Mode RC Test, Command Idle===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	me.setNavMode(NavModeEnum::IDLE);
 	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
 	mode = mode->execute();
@@ -435,8 +435,8 @@ TEST_F(NavModeRCTest, CommandFault) {
 	VLOG(1) << "===Nav RC Fault Test, Command Fault===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	me.setNavMode(NavModeEnum::FAULT);
 	mode = mode->execute();
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
@@ -447,8 +447,8 @@ TEST_F(NavModeRCTest, CommandAuto) {
 	VLOG(1) << "===Nav RC Fault Test, Command Auto===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
 	VLOG(2) << "Setting nav mode to " << me.navModeNames.get(me.getNavMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	me.setNavMode(NavModeEnum::AUTONOMOUS);
 	mode = mode->execute();
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
@@ -460,7 +460,7 @@ class NavModeAutoTest : public ::testing::Test {
 		NavModeAutoTest () {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = NavModeBase::factory(me, NavModeEnum::AUTONOMOUS);
-			rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
+			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
 			start = std::chrono::system_clock::now();
 			me.health = &health;
 			health.setADCdevice(&adc);
@@ -480,7 +480,7 @@ class NavModeAutoTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -491,7 +491,7 @@ class NavModeAutoTest : public ::testing::Test {
 			fix->fix.lat = 48.0;
 			fix->fix.lon = -114.0;
 			me.lastFix = *fix;
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			me.disarmInput.setDir(true);
 			me.disarmInput.init();
 			me.disarmInput.set();
@@ -502,7 +502,7 @@ class NavModeAutoTest : public ::testing::Test {
 			*rcvalid = true;
 			*rcfailsafe = false;
 			*orientvalid = true;
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at(Conf::get()->batmonName()) = 3000;
 			health.readHealth();
 		}
 		
@@ -531,15 +531,15 @@ class NavModeAutoTest : public ::testing::Test {
 TEST_F(NavModeAutoTest, RCSwitchExit) {
 	VLOG(1) << "===Nav Mode Auto Test, Switch RC===";
 	VLOG(2) << "Starting nav mode set to " << me.navModeNames.get(mode->getMode());
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
 	EXPECT_EQ(mode->getMode(), NavModeEnum::AUTONOMOUS);
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MAX;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("max");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	VLOG(2) << "Nav mode set to " << me.navModeNames.get(mode->getMode());
@@ -588,8 +588,8 @@ TEST_F(NavModeAutoTest, CommandFault) {
 TEST_F(NavModeAutoTest, AutoModeExecute) {
 	VLOG(1) << "===Nav Mode Auto Test, Execute===";
 	NavAutoMode *myauto = (NavAutoMode*)mode;
-	rcchannels->at(RC_AUTO_SWITCH) = RC_MIN;
-	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(RC_AUTO_SWITCH);
+	rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
+	VLOG(2) << "Setting RC/Auto switch to " << rcchannels->at(Conf::get()->RCchannelMap().at("auto"));
 	VLOG(1) << "Executing nav mode...";
 	mode = mode->execute();
 	VLOG(2) << "New nav mode set to " << me.navModeNames.get(mode->getMode());

@@ -12,7 +12,6 @@
 #ifndef AUTOMODES_H
 #define AUTOMODES_H 
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>
@@ -20,6 +19,7 @@
 #include "enumdefs.hpp"
 #include "stateMachine.hpp"
 #include "boatState.hpp"
+#include "configuration.hpp"
 
 class AutoModeBase : public StateMachineBase<AutoModeEnum, BoatState> {
 	public:
@@ -47,9 +47,10 @@ class AutoWaypointMode : public AutoModeBase {
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::WAYPOINT);
 				helm.SetMode(AUTOMATIC);
-				helm.SetControllerDirection(RUDDER_DIRECTION);
-				helm.SetSampleTime(RUDDER_PERIOD);
-				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
+				helm.SetControllerDirection(Conf::get()->rudderDir());
+				helm.SetSampleTime(Conf::get()->rudderPeriod());
+				helm.SetOutputLimits(Conf::get()->rudderMin(), 
+									Conf::get()->rudderMax());
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
@@ -57,7 +58,7 @@ class AutoWaypointMode : public AutoModeBase {
 		double in = 0;
 		double out = 0;
 		double setpoint = 0;
-		int throttleSetting = AUTO_DEFAULT_THROTTLE;
+		int throttleSetting = Conf::get()->autoDefaultThrottle();
 };
 
 class AutoReturnMode : public AutoModeBase {
@@ -67,9 +68,10 @@ class AutoReturnMode : public AutoModeBase {
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::RETURN);
 				helm.SetMode(AUTOMATIC);
-				helm.SetControllerDirection(RUDDER_DIRECTION);
-				helm.SetSampleTime(RUDDER_PERIOD);
-				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
+				helm.SetControllerDirection(Conf::get()->rudderDir());
+				helm.SetSampleTime(Conf::get()->rudderPeriod());
+				helm.SetOutputLimits(Conf::get()->rudderMin(), 
+									Conf::get()->rudderMax());
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
 	private:
@@ -77,7 +79,7 @@ class AutoReturnMode : public AutoModeBase {
 		double in = 0;
 		double out = 0;
 		double setpoint = 0;
-		int throttleSetting = AUTO_DEFAULT_THROTTLE;
+		int throttleSetting = Conf::get()->autoDefaultThrottle();
 };
 
 class AutoAnchorMode : public AutoModeBase {
@@ -87,12 +89,13 @@ class AutoAnchorMode : public AutoModeBase {
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setAutoMode(AutoModeEnum::ANCHOR);
 				helm.SetMode(AUTOMATIC);
-				helm.SetControllerDirection(RUDDER_DIRECTION);
-				helm.SetSampleTime(RUDDER_PERIOD);
-				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
+				helm.SetControllerDirection(Conf::get()->rudderDir());
+				helm.SetSampleTime(Conf::get()->rudderPeriod());
+				helm.SetOutputLimits(Conf::get()->rudderMin(), 
+									Conf::get()->rudderMax());
 			}; 
 		AutoModeBase* execute ();							/**< Execute the current state */
-		Location getAnchorPoint() {return _state.anchorPoint;};
+		Location* getAnchorPoint() {return &(_state.anchorPoint);};
 	private:
 		//Location anchorPoint;
 		PID helm;

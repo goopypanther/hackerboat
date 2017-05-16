@@ -20,6 +20,7 @@
 #include "hal/adcInput.hpp"
 #include "hal/config.h"
 #include "hal/relay.hpp"
+#include "configuration.hpp"
 
 class HalTestHarness;
 
@@ -46,8 +47,8 @@ class Throttle {
 		int _throttle = 0;
 		ADCInput* _adc;
 		RelayMap *relays = RelayMap::instance();
-		const int throttleMax = THROTTLE_MAX;
-		const int throttleMin = THROTTLE_MIN;
+		const float throttleMax = Conf::get()->throttleMax();
+		const float throttleMin = Conf::get()->throttleMin();
 };
 
 #endif

@@ -18,9 +18,7 @@
 #include <chrono>
 #include <map>
 #include <iostream>
-extern "C" {
-	#include <jansson.h>
-}
+#include "rapidjson/rapidjson.h"
 #include "hal/config.h"
 #include "gps.hpp"
 #include "ais.hpp"
@@ -28,6 +26,7 @@ extern "C" {
 #include "hal/gpsdInput.hpp"
 #include "pstream.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 using namespace std;
 using namespace redi;
@@ -96,12 +95,10 @@ bool GPSdInput::begin() {
 }
 
 bool GPSdInput::execute() {
-	// grab the lock
-	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
+	Document root;
 	bool result = true;
-	json_error_t inerr;
-	string buf;
-	buf.reserve(GPS_BUF_SIZE);
+	string buf, s;
+	buf.reserve(Conf::get()->gpsBufSize());
 	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
@@ -111,43 +108,34 @@ bool GPSdInput::execute() {
 	} 
 	if (buf.length() > 10) {
 		//cerr << "Incoming buffer is: " << buf.c_str() << endl;
-		json_t *input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
-		if (input) {
+		root.Parse(buf.c_str());
+		if (!root.HasParseError() && root.IsObject()) {
 			//cerr << "Loaded GPS JSON string." << endl;
-			//buf.clear();
-			json_t *objclass = json_object_get(input, "class");
-			if (objclass) {
-				string s;
-				const char *p = json_string_value(objclass);
-				size_t l = json_string_length(objclass);
-				s.assign(p, l);
+			if (root.HasMember("class") && root["class"].IsString()) {
+				s = root["class"].GetString();
 				if (s == "TPV") {
 					LOG(DEBUG) << "Got GPS packet";
-					LOG(DEBUG) << "GPS packet contents: " << input;
-					result = _lastFix.parseGpsdPacket(input);
+					LOG(DEBUG) << "GPS packet contents: " << root;
+					result = _lastFix.parseGpsdPacket(root);
 				} else if (s == "AIS") {
 					AISShip newship;
 					LOG(DEBUG) << "Got AIS packet";
-					LOG(DEBUG) << "AIS packet contents: " << input;
-					if (newship.parseGpsdPacket(input)) {
+					LOG(DEBUG) << "AIS packet contents: " << root;
+					if (newship.parseGpsdPacket(root)) {
 						_aisTargets.emplace(newship.getMMSI(), newship);
 						result = true;
 					} 
-				} 
-				//json_decref(input);
-				//json_decref(objclass);
-			} 
-			json_decref(input);
-			result = false;
-		} result = false;
+				} else result = false;
+			} else result = false;
+		} else result = false;
 	} else result = false;
 	
-	LOG_IF(strlen(inerr.text), DEBUG) << "GPSd JSON loading error: " << inerr.text << " from " << inerr.source 
-									<< " at line " << inerr.line << ", column " << inerr.column << ", buffer: " << buf;
+	LOG_IF(root.HasParseError(), DEBUG) << "GPSd JSON loading error: " << root.GetParseError() << " offset: " 
+										 << root.GetErrorOffset() << "buffer" << buf;
 	//lock.unlock();
-	if (result) {
+	if (result && s == "TPV") {
 		_gpsAvgList.emplace_front(_lastFix);
-		if (_gpsAvgList.size() < GPS_AVG_LEN) {
+		if (_gpsAvgList.size() < Conf::get()->gpsAvgLen()) {
 			_gpsAvgList.pop_back();
 		}
 	}
@@ -158,10 +146,10 @@ map<int, AISShip>* GPSdInput::getData() {
 	return &_aisTargets;
 }
 
-map<int, AISShip> GPSdInput::getData(AISShipType type) {
+map<int, AISShip> GPSdInput::getData(AISShipType shiptype) {
 	map<int, AISShip> result;
 	for (auto const &r : _aisTargets) {
-		if (type == r.second.shiptype) {
+		if (shiptype == r.second.shiptype) {
 			result.emplace(r.first, r.second);
 		}
 	}
@@ -169,7 +157,7 @@ map<int, AISShip> GPSdInput::getData(AISShipType type) {
 }
 
 AISShip* GPSdInput::getData(int MMSI) {
-	for (auto const r : _aisTargets) {
+	for (auto const &r : _aisTargets) {
 		if (MMSI == r.first) {
 			return &(_aisTargets[MMSI]);
 		}
@@ -178,7 +166,7 @@ AISShip* GPSdInput::getData(int MMSI) {
 }
 
 AISShip* GPSdInput::getData(string name) {
-	for (auto const r : _aisTargets) {
+	for (auto const &r : _aisTargets) {
 		if (name == r.second.shipname) {
 			return &(_aisTargets[r.first]);
 		}

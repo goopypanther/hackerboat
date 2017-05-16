@@ -12,7 +12,7 @@
 #ifndef ORIENTATION_H
 #define ORIENTATION_H
  
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "hal/config.h"
 #include <cmath>
 #include <string>
@@ -20,6 +20,9 @@
 #include "location.hpp"
 #include <GeographicLib/MagneticModel.hpp>
 #include <GeographicLib/Geocentric.hpp>
+
+using namespace rapidjson;
+using namespace std;
 
 /**
  * @class Orientation
@@ -34,8 +37,8 @@ class Orientation : public HackerboatState {
 		Orientation() = default;
 		Orientation(double r, double p, double y, bool mag = true) :
 			pitch(p), roll(r), heading(y), magnetic(mag) {};
-		bool parse (json_t *input);				/**< Parse an orientation object out of json object */
-		json_t *pack () const;					/**< Create a json object of this orientation */
+		bool parse (Value& input);				/**< Parse an orientation object out of json object */
+		Value pack () const;					/**< Create a json object of this orientation */
 		bool isValid ();						/**< Check if this is a valid orientation object */
 		bool normalize (void);					/**< Normalize the roll/pitch/heading values to +/-180 degrees (or 0-360 degrees in the case of heading) */
 		double headingError (double target);	/**< Get the error angle between this Orientation and target heading, in degrees. */	

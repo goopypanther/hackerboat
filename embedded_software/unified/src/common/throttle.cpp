@@ -21,6 +21,7 @@
 #include "hal/relay.hpp"
 #include "hal/throttle.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 bool Throttle::setThrottle(int throttle) {
 	if ((throttle < throttleMin) || (throttle > throttleMax)) return false;
@@ -28,10 +29,10 @@ bool Throttle::setThrottle(int throttle) {
 	bool result = true;
 	try {
 		if (_throttle >= 0) {
-			result &= relays->get("DIR").clear();
+			result &= relays->get("DIR")->clear();
 			LOG(DEBUG) << "Setting throttle forward";
 		} else {
-			result &= relays->get("DIR").set();
+			result &= relays->get("DIR")->set();
 			LOG(DEBUG) << "Setting throttle reverse";
 		}
 	} catch (...) {
@@ -41,52 +42,52 @@ bool Throttle::setThrottle(int throttle) {
 	switch (abs(_throttle)) {
 		case 5:
 			LOG(DEBUG) << "Setting throttle to 5";
-			result &= relays->get("RED").set();
-			result &= relays->get("WHT").set();
-			result &= relays->get("YLW").set();
-			result &= relays->get("REDWHT").set();
-			result &= relays->get("YLWWHT").set();
+			result &= relays->get("RED")->set();
+			result &= relays->get("WHT")->set();
+			result &= relays->get("YLW")->set();
+			result &= relays->get("REDWHT")->set();
+			result &= relays->get("YLWWHT")->set();
 			break;
 		case 4:
 			LOG(DEBUG) << "Setting throttle to 4";
-			result &= relays->get("RED").clear();
-			result &= relays->get("WHT").clear();
-			result &= relays->get("YLW").set();
-			result &= relays->get("REDWHT").set();
-			result &= relays->get("YLWWHT").clear();
+			result &= relays->get("RED")->clear();
+			result &= relays->get("WHT")->clear();
+			result &= relays->get("YLW")->set();
+			result &= relays->get("REDWHT")->set();
+			result &= relays->get("YLWWHT")->clear();
 			break;
 		case 3:
 			LOG(DEBUG) << "Setting throttle to 3";
-			result &= relays->get("RED").clear();
-			result &= relays->get("WHT").set();
-			result &= relays->get("YLW").set();
-			result &= relays->get("REDWHT").clear();
-			result &= relays->get("YLWWHT").clear();
+			result &= relays->get("RED")->clear();
+			result &= relays->get("WHT")->set();
+			result &= relays->get("YLW")->set();
+			result &= relays->get("REDWHT")->clear();
+			result &= relays->get("YLWWHT")->clear();
 			break;
 		case 2:
 			LOG(DEBUG) << "Setting throttle to 2";
-			result &= relays->get("RED").clear();
-			result &= relays->get("WHT").set();
-			result &= relays->get("YLW").clear();
-			result &= relays->get("REDWHT").clear();
-			result &= relays->get("YLWWHT").set();
+			result &= relays->get("RED")->clear();
+			result &= relays->get("WHT")->set();
+			result &= relays->get("YLW")->clear();
+			result &= relays->get("REDWHT")->clear();
+			result &= relays->get("YLWWHT")->set();
 			break;
 		case 1:
 			LOG(DEBUG) << "Setting throttle to 1";
-			result &= relays->get("RED").clear();
-			result &= relays->get("WHT").set();
-			result &= relays->get("YLW").clear();
-			result &= relays->get("REDWHT").clear();
-			result &= relays->get("YLWWHT").clear();
+			result &= relays->get("RED")->clear();
+			result &= relays->get("WHT")->set();
+			result &= relays->get("YLW")->clear();
+			result &= relays->get("REDWHT")->clear();
+			result &= relays->get("YLWWHT")->clear();
 			break;
 		case 0:
 		default:
 			LOG(DEBUG) << "Setting throttle to off";
-			result &= relays->get("RED").clear();
-			result &= relays->get("WHT").clear();
-			result &= relays->get("YLW").clear();
-			result &= relays->get("REDWHT").clear();
-			result &= relays->get("YLWWHT").clear();
+			result &= relays->get("RED")->clear();
+			result &= relays->get("WHT")->clear();
+			result &= relays->get("YLW")->clear();
+			result &= relays->get("REDWHT")->clear();
+			result &= relays->get("YLWWHT")->clear();
 			break;
 	}
 	return result;

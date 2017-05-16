@@ -14,9 +14,6 @@
 #ifndef AIO_REST_H
 #define AIO_REST_H
 
-extern "C" {
-	#include <jansson.h>
-}
 #include <cstdlib>
 #include <inttypes.h>
 #include <cstdio>
@@ -29,6 +26,7 @@ extern "C" {
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"
+#include "configuration.hpp"
 
 #define REST_GROUP 		""
 #define REST_DATATYPE	"json"
@@ -71,13 +69,13 @@ typedef map<string, AIO_Subscriber*> SubFuncMap;
 class AIO_Rest : public InputThread  {
 	public:
 		AIO_Rest (BoatState *me,						/// The BoatState vector that data is taken from and read to
-				string host 	= REST_HOST,
-				string username	= REST_USERNAME,
-				string key 		= REST_KEY,
-				string group	= REST_GROUP,
-				string datatype	= REST_DATATYPE,
-				std::chrono::system_clock::duration subper = REST_SUBSCRIPTION_PERIOD,
-				std::chrono::system_clock::duration pubper = REST_PUBLISH_PERIOD);
+				string host 	= Conf::get()->restConf().at("host"),
+				string username	= Conf::get()->restConf().at("username"),
+				string key 		= Conf::get()->restConf().at("key"),
+				string group	= Conf::get()->restConf().at("group"),
+				string datatype	= Conf::get()->restConf().at("datatype"),
+				sysdur subper 	= Conf::get()->restSubPeriod(),
+				sysdur pubper 	= Conf::get()->restPubPeriod());
 		bool begin();								/// Start the
 		bool execute();								/// Get the next subscription
 		void setPubFuncMap (PubFuncMap *pubmap);	/// A map of the publish functions to call, by topic
@@ -96,8 +94,8 @@ class AIO_Rest : public InputThread  {
 		PubFuncMap *_pub;				/// A map of the functions to call to publish different outgoing topics
 		SubFuncMap *_sub;				/// A map of functions to call when different topics are received
 		PubFuncMap::iterator pubit;		/// Iterator pointed to next item to publish
-		std::chrono::system_clock::duration 	_subper;	/// Frequency of subscription polling
-		std::chrono::system_clock::duration 	_pubper;	/// Frequency of publishing
+		sysdur _subper;					/// Frequency of subscription polling
+		sysdur _pubper;					/// Frequency of publishing
 		std::chrono::system_clock::time_point	lastsub;	/// Time of the last subscription poll
 		std::chrono::system_clock::time_point	lastpub;	/// Time of the last publication
 

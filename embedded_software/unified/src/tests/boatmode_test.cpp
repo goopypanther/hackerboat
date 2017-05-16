@@ -7,8 +7,8 @@
 #include "enumdefs.hpp"
 #include "test_utilities.hpp"
 #include "hal/halTestHarness.hpp"
-#include <jansson.h>
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 #define TOL 0.000001
 
@@ -114,7 +114,7 @@ class BoatModeSelfTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -163,14 +163,14 @@ class BoatModeSelfTest : public ::testing::Test {
 TEST_F(BoatModeSelfTest, Pass) {
 	VLOG(1) << "===Boat Mode Test, Selftest, Pass===";
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() + 15ms) {
 			ADD_FAILURE();
 			break;
 		}
 		health.readHealth();
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_LT(std::chrono::system_clock::now(), start + Conf::get()->selfTestDelay() - 15ms);
 	VLOG(1) << "Finished run";
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
@@ -182,14 +182,14 @@ TEST_F(BoatModeSelfTest, LowBattery) {
 	VLOG(1) << "===Boat Mode Test, Selftest, Low Battery===";
 	adcraw->at("battery_mon") = 100;
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() + 15ms) {
 			ADD_FAILURE();
 			break;
 		}
 		health.readHealth();
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_LT(std::chrono::system_clock::now(), start + Conf::get()->selfTestDelay() - 15ms);
 	VLOG(1) << "Finished run";
 	VLOG(2) << me;
 	VLOG(2) << "Battery input set to: " << adc.getScaledValues().at("battery_mon") 
@@ -205,19 +205,19 @@ TEST_F(BoatModeSelfTest, LowBatteryRecovery) {
 	VLOG(2) << "Battery input set to: " << adc.getScaledValues().at("battery_mon") 
 			<< "/" << adcraw->at("battery_mon");
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY - 10s) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() - 10s) {
 			adcraw->at("battery_mon") = 3000;
 			VLOG(2) << "Battery input set to: " << adc.getScaledValues().at("battery_mon") 
 					<< "/" << adcraw->at("battery_mon");
 		}
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() + 15ms) {
 			ADD_FAILURE();
 			break;
 		}
 		health.readHealth();
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_LT(std::chrono::system_clock::now(), start + Conf::get()->selfTestDelay() - 15ms);
 	VLOG(1) << "Finished run";
 	VLOG(2) << me;
 	VLOG(2) << "Battery input set to: " << adc.getScaledValues().at("battery_mon") 
@@ -232,14 +232,14 @@ TEST_F(BoatModeSelfTest, ArmFailLow) {
 	me.disarmInput.clear();
 	VLOG(2) << me;
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() + 15ms) {
 			ADD_FAILURE();
 			break;
 		}
 		health.readHealth();
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_LT(std::chrono::system_clock::now(), start + Conf::get()->selfTestDelay() - 15ms);
 	VLOG(1) << "Finished run";
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
@@ -252,14 +252,14 @@ TEST_F(BoatModeSelfTest, ArmFailHigh) {
 	me.armInput.set();
 	VLOG(2) << me;
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
-		if (std::chrono::system_clock::now() > start + SELFTEST_DELAY + 15ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() + 15ms) {
 			ADD_FAILURE();
 			break;
 		}
 		health.readHealth();
 		mode = mode->execute();
 	}
-	EXPECT_LT(std::chrono::system_clock::now(), start + SELFTEST_DELAY - 15ms);
+	EXPECT_LT(std::chrono::system_clock::now(), start + Conf::get()->selfTestDelay() - 15ms);
 	VLOG(1) << "Finished run";
 	VLOG(2) << me;
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
@@ -291,7 +291,7 @@ class BoatModeDisarmedTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->init();
 				fault->setDir(true);
 				fault->clear();
@@ -351,11 +351,11 @@ TEST_F(BoatModeDisarmedTest, Horn) {
 	mode = mode->execute();
 	VLOG(2) << me;
 	while (mode->getMode() == BoatModeEnum::DISARMED) {
-		if (std::chrono::system_clock::now() > start + HORN_TIME + 100ms) {
+		if (std::chrono::system_clock::now() > start + Conf::get()->hornTime() + 100ms) {
 			ADD_FAILURE();
 			break;
 		}
-		EXPECT_EQ(me.relays->get("HORN").output()->get(), 1);
+		EXPECT_EQ(me.relays->get("HORN")->output()->get(), 1);
 		mode = mode->execute();
 		std::this_thread::sleep_for(50ms);
 	}
@@ -363,7 +363,7 @@ TEST_F(BoatModeDisarmedTest, Horn) {
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
 			<< " Last mode: " << me.boatModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::NAVIGATION);
-	EXPECT_EQ(me.relays->get("HORN").output()->get(), 0);
+	EXPECT_EQ(me.relays->get("HORN")->output()->get(), 0);
 }
 
 class BoatModeNavTest : public ::testing::Test {
@@ -388,7 +388,7 @@ class BoatModeNavTest : public ::testing::Test {
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
-				harness.accessRelay(&(r.second), &drive, &fault);
+				harness.accessRelay(r.second, &drive, &fault);
 				fault->setDir(true);
 				fault->init();
 				fault->clear();
@@ -406,7 +406,7 @@ class BoatModeNavTest : public ::testing::Test {
 				me.disarmInput.set();
 				me.armInput.clear();
 			#endif /*DISTRIB_IMPLEMENTED*/
-			me.rudder->attach(RUDDER_PORT, RUDDER_PIN);
+			me.rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin());
 			*adcvalid = true;
 			*rcvalid = true;
 			*rcfailsafe = false;
@@ -518,7 +518,7 @@ TEST_F(BoatModeNavTest, ModeCommandDisarm) {
 	mode = mode->execute();
 	VLOG(2) << "This mode: " << me.boatModeNames.get(mode->getMode())
 			<< " Last mode: " << me.boatModeNames.get(mode->getLastMode());
-	EXPECT_GT(std::chrono::system_clock::now(), start + DISARM_PULSE_LEN);
+	EXPECT_GT(std::chrono::system_clock::now(), start + Conf::get()->disarmPulseLen());
 	EXPECT_EQ(mode->getMode(), BoatModeEnum::DISARMED);
 	EXPECT_EQ(mode->getLastMode(), BoatModeEnum::NAVIGATION);
 }

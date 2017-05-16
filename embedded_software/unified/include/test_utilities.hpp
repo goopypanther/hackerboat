@@ -1,14 +1,22 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/pointer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include <cmath>
 
-testing::AssertionResult assertJSONEqual(const char *expected_expr, const char *actual_expr,
-					 json_t *expected, json_t *actual);
+#ifndef TEST_UTILITIES
+#define TEST_UTILITIES
+
+/*testing::AssertionResult assertJSONEqual(const char *expected_expr, 
+										const char *actual_expr,
+					 					Value& expected, Value& actual);
 
 #define EXPECT_JSON_EQ(a, b) EXPECT_PRED_FORMAT2(assertJSONEqual, a, b)
-#define ASSERT_JSON_EQ(a, b) ASSERT_PRED_FORMAT2(assertJSONEqual, a, b)
+#define ASSERT_JSON_EQ(a, b) ASSERT_PRED_FORMAT2(assertJSONEqual, a, b)*/
 
 
 bool inline toleranceEquals (double a, double b, double tolerance) {	/**< Compare two doubles with a tolerance */
@@ -20,3 +28,5 @@ bool inline toleranceEquals (double a, double b, double tolerance) {	/**< Compar
 		return false;
 	}
 }
+
+#endif /* TEST_UTILITIES */

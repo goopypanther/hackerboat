@@ -15,9 +15,6 @@
 #ifndef HACKERBOATROOT_H
 #define HACKERBOATROOT_H
  
-extern "C" {
-	#include <jansson.h>
-}
 #include <stdlib.h>
 #include <inttypes.h>
 #include <chrono>
@@ -28,25 +25,26 @@ extern "C" {
 #include <sstream>
 #include <locale>
 #include "hal/config.h"
-#include "json_utilities.hpp"
-#include "sqliteStorage.hpp"
 #include "date.h"
 #include "tz.h"
-
-// forward declarations
-class HackerboatStateStorage;
-class SQLiteParameterSlice;
-class SQLiteRowReference;
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
+#include "rapidjson/pointer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include <ostream>
 
 // namespaces used to make the time functions readable
 
 using namespace date;
 using namespace std::chrono;
+using namespace rapidjson;
+using namespace std;
 
 // type definitions for code sanity
 
 typedef time_point<system_clock> 	sysclock;
-typedef duration<system_clock>		sysdur;
+//typedef duration<system_clock>		sysdur;
 
 #define USE_RESULT __attribute__((warn_unused_result))
 
@@ -62,12 +60,12 @@ class HackerboatState {
 		/** Populate the object from the given json object.
 		 * If seq is true, a sequence number element is expected
 		 */
-		virtual bool parse (json_t *input) USE_RESULT = 0;
+		virtual bool parse (Value& input) USE_RESULT = 0;
 
 		/** Pack the contents of the object into a json object and return a pointer to that object.
 		 * If seq is true, a sequence number element will be included
 		 */
-		virtual json_t *pack () const USE_RESULT = 0;
+		virtual Value pack () const USE_RESULT = 0;
 
 		/** Tests whether the current object is in a valid state */
 		virtual bool isValid (void) const {
@@ -125,9 +123,96 @@ class HackerboatState {
 			}
 			return true;
 		};
-		
+
+		// helper functions for getting and setting JSON values
+		bool inline static GetVar(const string name, int& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsInt()) {
+				var = myvar.GetInt();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, double& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsDouble()) {
+				var = myvar.GetDouble();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, string& var, Value& d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsString()) {
+				var = myvar.GetString();
+			} else return false;
+			return true;
+		}
+
+		bool inline static GetVar(const string name, Value& var, Value &d) {
+			Value default_val;
+			string ptr = "/" + name;
+			var = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			return true;
+		}
+
+		bool inline static GetVar(const string name, bool& var, Value &d) {
+			Value myvar, default_val;
+			string ptr = "/" + name;
+			myvar = Pointer(ptr.c_str()).GetWithDefault(d, default_val, root.GetAllocator());
+			if (myvar.IsBool()) {
+				var = myvar.GetBool();
+			} else return false;
+			return true;
+		}
+
+		int inline static PutVar(const string name, const int& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const double& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const string& var, Value &d) {
+			Value s;
+			s.SetString(var.c_str(), var.size(), root.GetAllocator());
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, s, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const Value& var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, const bool var, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Set(d, var, root.GetAllocator());
+			return 0;
+		}
+
+		int inline static PutVar(const string name, Value &d) {
+			string ptr = "/" + name;
+			Pointer(ptr.c_str()).Create(d, root.GetAllocator());
+			return 0;
+		}
+
 	protected:
 		HackerboatState(void) {};
+		static Document root;
 };
 
 std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
@@ -141,59 +226,41 @@ std::ostream& operator<< (std::ostream& stream, const HackerboatState& state);
  *
  */
 
-class HackerboatStateStorable : public HackerboatState {
-	public:
-		typedef int64_t sequence;			/**< The type of sequence numbers / OIDs in persistent storage. Negative numbers indicate invalid / missing data */
+inline std::ostream& operator<< (std::ostream& stream, const Document& d) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	d.Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
 
-		/** Get the sequenceNum of this object.
-		 * An object's sequence number is -1 until populated from or inserted into a file.
-		 */
-		sequence getSequenceNum (void) const
-		{ return _sequenceNum; }
+inline std::ostream& operator<< (std::ostream& stream, const Value& v) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	v.Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
 
-		sequence countRecords (void);							/**< Return the number of records of the object's type in the open database file */
-		bool writeRecord (void);								/**< Update the current record in the target database file. Must already exist */
-		bool getRecord(sequence select) USE_RESULT;				/**< Populate the object from the open database file */
-		bool getLastRecord(void) USE_RESULT;					/**< Get the latest record */
-		bool appendRecord(void);								/**< Append the contents of the object to the end of the database table. Updates the receiver's sequence number field with its newly-assigned value */
-		
-	protected:
-		HackerboatStateStorable()			/**< Create a state object */
-			: _sequenceNum(-1)
-		{};
+inline std::ostream& operator<< (std::ostream& stream, const Value* v) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	v->Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
 
-		sequence 	_sequenceNum;				/**< sequence number in the database, or -1 */
+inline std::ostream& operator<< (std::ostream& stream, const Document* d) {
+	StringBuffer buf;
+	Writer<StringBuffer> writer(buf);
+	d->Accept(writer);
+	stream << buf.GetString();
+	return stream;
+}
 
-		/** Returns a sqlite storage object for this instance.
-		 *
-		 * Concrete classes must implement this to return a
-		 * HackerboatStateStorage object representing the database,
-		 * table name, and columns of the place this instance is
-		 * stored. Typically this returns a single shared storage
-		 * instance for all instances of a given class, but that's not
-		 * required.
-		 *
-		 * The columns defined by the returned storage object must
-		 * match whatever this class's fillRow() and readFromRow()
-		 * implementations expect.
-		 */
-		virtual HackerboatStateStorage& storage() = 0;
-
-		/** Write the receiver's state into a set of sqlite columns.
-		 *
-		 * The default implementation calls
-		 * HackerboatState::pack() and expects the database to
-		 * contain a single JSON column.
-		 */
-		virtual bool fillRow(SQLiteParameterSlice) const USE_RESULT = 0;
-
-		/** Populate the receiver from a database row.
-		 *
-		 * The default implementation expects a single column
-		 * containing JSON text which is deserialized and given to
-		 * HackerboatState::parse().
-		 */
-		virtual bool readFromRow(SQLiteRowReference, sequence) USE_RESULT = 0;
-};
+inline std::ostream& operator<< (std::ostream& stream, const HackerboatState& v) {
+	stream << v.pack();
+	return stream;
+}
 
 #endif

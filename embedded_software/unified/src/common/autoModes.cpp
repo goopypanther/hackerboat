@@ -21,10 +21,10 @@
 #include "hackerboatRoot.hpp"
 #include "hal/relay.hpp"
 #include "hal/gpio.hpp"
-#include "json_utilities.hpp"
 #include "pid.hpp"
 #include "rcModes.hpp"
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 AutoModeBase* AutoModeBase::factory(BoatState& state, AutoModeEnum mode) {
 	switch (mode) {
@@ -101,7 +101,7 @@ AutoModeBase* AutoWaypointMode::execute() {
 	_state.throttle->setThrottle(this->throttleSetting);
 	
 	// check if we've arrived at the next waypoint
-	if (_state.lastFix.fix.distance(target) < AUTO_WAYPOINT_TOL) {
+	if (_state.lastFix.fix.distance(target) < Conf::get()->autoWaypointTol()) {
 		LOG(INFO) << "Incrementing waypoint from waypoint " << to_string(_state.waypointList.current());
 		if (!_state.waypointList.increment()) {	// if this returns false, it means we got to the end of the waypoint list with and end action other that RETURN
 			switch (_state.waypointList.getAction()) {
@@ -166,7 +166,7 @@ AutoModeBase* AutoReturnMode::execute() {
 	_state.throttle->setThrottle(this->throttleSetting);
 	
 	// check if we've arrived at the origin
-	if (_state.lastFix.fix.distance(target) < AUTO_WAYPOINT_TOL) {
+	if (_state.lastFix.fix.distance(target) < Conf::get()->autoWaypointTol()) {
 		LOG(INFO) << "Arrived at origin point, anchoring";
 		return new AutoAnchorMode(_state, _state.getAutoMode());
 	}
@@ -199,13 +199,13 @@ AutoModeBase* AutoAnchorMode::execute() {
 	
 	// determine whether the target point is forward or aft of current position
 	
-	if (distance < ANCHOR_DEADBAND) {
+	if (distance < Conf::get()->anchorDeadband()) {
 		this->in = 0;
 		this->throttleSetting = 0;
 	} else {
-		this->throttleSetting = round(distance*ANCHOR_THROTTLE_GAIN);
-		if (this->throttleSetting > THROTTLE_MAX) {
-			this->throttleSetting = THROTTLE_MAX;
+		this->throttleSetting = round(distance*Conf::get()->anchorThrottleGain());
+		if (this->throttleSetting > Conf::get()->throttleMax()) {
+			this->throttleSetting = Conf::get()->throttleMax();
 		}
 		if (abs(headingError) < 90.0) {
 			this->in = headingError;

@@ -27,8 +27,8 @@ class TwoVector : public HackerboatState {
 		TwoVector () {};
 		TwoVector (double x, double y) :
 			_x(x), _y(y) {};
-		bool parse (json_t *input);
-		json_t *pack () const;
+		bool parse (Value& input);
+		Value pack () const;
 		bool isValid () {return ((isfinite(_x)) && (isfinite(_y)));};
 		
 		// functions for deriving cartesian coordinates from polar input

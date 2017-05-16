@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 #include <asm/termbits.h>
 #include "easylogging++.h"
+#include "configuration.hpp"
 
 using namespace std;
 
@@ -42,24 +43,36 @@ double RCInput::map(double x, double in_min, double in_max, double out_min, doub
 RCInput::RCInput (std::string devpath) : 
 	_path(devpath) {
 		LOG(INFO) << "Creating new RCInput object";
-		rawChannels.assign(RC_CHANNEL_COUNT, 0);
-		period = RC_READ_PERIOD;
+		rawChannels.assign(Conf::get()->RCchannelCount(), 0);
+		period = Conf::get()->rcReadPeriod();
 	}
 
 int RCInput::getThrottle () {
-	int throttle = round(map(static_cast<double>(rawChannels[RC_THROTTLE_CH]), RC_MIN, RC_MAX, THROTTLE_MIN, THROTTLE_MAX));
+	int throttle = round(map(static_cast<double>(rawChannels[Conf::get()->RCchannelMap().at("throttle")]), 
+												Conf::get()->RClimits().at("min"), 
+												Conf::get()->RClimits().at("max"), 
+												Conf::get()->throttleMin(), 
+												Conf::get()->throttleMax()));
 	VLOG(3) << "Throttle setting is " << throttle;
 	return throttle;
 }
 
 double RCInput::getRudder () {
-	double rudder = map(static_cast<double>(rawChannels[RC_RUDDER_CH]), RC_MIN, RC_MAX, RUDDER_MIN, RUDDER_MAX); 
+	double rudder = map(static_cast<double>(rawChannels[Conf::get()->RCchannelMap().at("rudder")]), 
+											Conf::get()->RClimits().at("min"), 
+											Conf::get()->RClimits().at("max"), 
+											Conf::get()->rudderMin(), 
+											Conf::get()->rudderMax()); 
 	VLOG(3) << "Rudder setting is " << rudder;
 	return rudder;
 }
 
 double RCInput::getCourse () {
-	double course = map(static_cast<double>(rawChannels[RC_COURSE_SELECTOR]), RC_MIN, RC_MAX, COURSE_MIN, COURSE_MAX); 
+	double course = map(static_cast<double>(rawChannels[Conf::get()->RCchannelMap().at("courseSelect")]), 
+											Conf::get()->RClimits().at("min"), 
+											Conf::get()->RClimits().at("max"), 
+											Conf::get()->courseMin(), 
+											Conf::get()->courseMax()); 
 	VLOG(3) << "Course setting is " << course;
 	return course;
 }
@@ -73,11 +86,15 @@ RCModeEnum RCInput::getMode() {
 		VLOG(3) << "RC switch mode is failsafe";
 		return RCModeEnum::FAILSAFE;
 	}
-	if (this->getChannel(RC_MODE_SWITCH) < (RC_MIDDLE_POSN-RC_MIDDLE_TOL)) {
+	if (this->getChannel(Conf::get()->RCchannelMap().at("mode")) < 
+		(Conf::get()->RClimits().at("middlePosn") - 
+		Conf::get()->RClimits().at("middleTol"))) {
 		VLOG(3) << "RC switch mode is rudder";
 		return RCModeEnum::RUDDER;
 	}
-	if (this->getChannel(RC_MODE_SWITCH) > (RC_MIDDLE_POSN+RC_MIDDLE_TOL)) {
+	if (this->getChannel(Conf::get()->RCchannelMap().at("mode")) > 
+		(Conf::get()->RClimits().at("middlePosn") + 
+		Conf::get()->RClimits().at("middleTol"))) {
 		VLOG(3) << "RC switch mode is course";
 		return RCModeEnum::COURSE;
 	}
@@ -128,7 +145,7 @@ bool RCInput::begin() {
 }
 
 bool RCInput::execute() {
-	//if (!lock && (!lock.try_lock_for(RC_LOCK_TIMEOUT))) {
+	//if (!lock && (!lock.try_lock_for(Conf::get()->RC_LOCK_TIMEOUT))) {
 	//	LOG(ERROR) << "Failed to lock data for RC Input";
 	//	return false;
 	//}
@@ -138,15 +155,15 @@ bool RCInput::execute() {
 		//lock.unlock();
 		return false;
 	}
-	char buf[SBUS_BUF_LEN];
-	ssize_t bytesRead = read(devFD, buf, SBUS_BUF_LEN);
+	char buf[buflen];
+	ssize_t bytesRead = read(devFD, buf, buflen);
 	if (bytesRead > 0) {
 		for (int i = 0; i < bytesRead; i++) inbuf.push_back(buf[i]); // we have to do this in order to copy /0 correctly
 		LOG(DEBUG) << "Read " << to_string(bytesRead) << " bytes into inbuf: [" << inbuf << "]";
-		memset(buf, 0, SBUS_BUF_LEN);
+		memset(buf, 0, buflen);
 	}
-	if (inbuf.size() >= SBUS_BUF_LEN) {
-		if ((inbuf[0] != SBUS_STARTBYTE) || (inbuf[(SBUS_BUF_LEN - 1)] != SBUS_ENDBYTE)) {
+	if (inbuf.size() >= buflen) {
+		if ((inbuf[0] != startByte) || (inbuf[(buflen - 1)] != endByte)) {
 			LOG(DEBUG) << "Received invalid frame: [" << inbuf << "]";
 			inbuf.clear();
 			_errorFrames++;

@@ -16,7 +16,7 @@
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include "hal/relay.hpp"
 #include "easylogging++.h"
 
@@ -25,6 +25,7 @@
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
+using namespace rapidjson;
 
 int main(int argc, char **argv) {
 	START_EASYLOGGINGPP(argc, argv);
@@ -40,13 +41,13 @@ int main(int argc, char **argv) {
 	cout << "Setting relays in sequence..." << endl;
 	for (auto &r : *(relays->getmap())) {
 		cout << "Setting " << r.first << endl;
-		r.second.set();
+		r.second->set();
 		//if (r.second.pack()) cout << "Successfully packed" << endl;
-		cout << string(json_dumps(r.second.pack(), JSON_ENSURE_ASCII)) << endl;
+		cout << r.second->pack() << endl;
 		std::this_thread::sleep_for(1500ms);
 		cout << "Clearing " << r.first << endl;
-		r.second.clear();
-		cout << string(json_dumps(r.second.pack(), JSON_ENSURE_ASCII)) << endl;
+		r.second->clear();
+		cout << r.second->pack() << endl;
 	}
 	return 0;
 }

@@ -12,7 +12,7 @@
 #ifndef STATEMACHINE_H
 #define STATEMACHINE_H 
  
-#include <jansson.h>
+#include "rapidjson/rapidjson.h"
 #include <stdlib.h>
 #include <string>
 #include <chrono>

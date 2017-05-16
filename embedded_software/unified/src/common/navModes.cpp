@@ -9,7 +9,6 @@
  *
  ******************************************************************************/
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>
@@ -22,6 +21,7 @@
 #include "navModes.hpp"
 #include "easylogging++.h"
 #include "util.hpp"
+#include "configuration.hpp"
 
 NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 	switch (mode) {
@@ -79,7 +79,7 @@ NavModeBase *NavIdleMode::execute () {
 	}
 	
 	// check for RC mode switch
-	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
+	if (_state.rc->getChannel(Conf::get()->RCchannelMap().at("auto")) > Conf::get()->RClimits().at("middlePosn")) {	// Note that this will trip in the case of failsafe mode
 		LOG(DEBUG) << "Leaving nav idle mode for RC mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}
@@ -136,7 +136,7 @@ NavModeBase *NavRCMode::execute () {
 	_state.setNavMode(NavModeEnum::RC);	// Overwrites any improper commands
 	
 	// check the auto/rc mode switch (nav mode commands will be ignored)
-	if (_state.rc->getChannel(RC_AUTO_SWITCH) < RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
+	if (_state.rc->getChannel(Conf::get()->RCchannelMap().at("auto")) < Conf::get()->RClimits().at("middlePosn")) {	// Note that this will trip in the case of failsafe mode
 		LOG(DEBUG) << "Leaving nav RC mode for auto mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::AUTONOMOUS);
 	}
@@ -174,7 +174,7 @@ NavModeBase *NavAutoMode::execute () {
 	_state.setNavMode(NavModeEnum::AUTONOMOUS);	// Overwrites any improper commands
 	
 	// check for RC mode switch
-	if (_state.rc->getChannel(RC_AUTO_SWITCH) > RC_MIDDLE_POSN) {	// Note that this will trip in the case of failsafe mode
+	if (_state.rc->getChannel(Conf::get()->RCchannelMap().at("auto")) > Conf::get()->RClimits().at("middlePosn")) {	// Note that this will trip in the case of failsafe mode
 		LOG(DEBUG) << "Leaving nav auto mode for RC mode by switch";
 		return NavModeBase::factory(_state, NavModeEnum::RC);
 	}

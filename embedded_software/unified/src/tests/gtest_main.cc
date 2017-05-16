@@ -31,6 +31,8 @@
 
 #include "gtest/gtest.h"
 #include "easylogging++.h"
+#include "configuration.hpp"
+#include "hal/relay.hpp"
 
 #define ELPP_STL_LOGGING 
 
@@ -42,6 +44,8 @@ GTEST_API_ int main(int argc, char **argv) {
     // Actually reconfigure all loggers instead
     el::Loggers::reconfigureAllLoggers(conf);
 	START_EASYLOGGINGPP(argc, argv);
+	Conf::get()->load();
+	RelayMap::instance()->init();
 	printf("Running main() from gtest_main.cc with logging enabled\n");
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

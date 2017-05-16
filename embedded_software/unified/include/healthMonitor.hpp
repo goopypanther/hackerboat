@@ -24,16 +24,13 @@
 
 using namespace std;
 
-class HealthMonitor : public HackerboatStateStorable {
+class HealthMonitor : public HackerboatState {
 	public:
 		HealthMonitor () = default;
 		HealthMonitor (ADCInput* adc) : _adc(adc) {};
-		bool parse (json_t *input);
-		json_t *pack () const;
+		bool parse (Value& input);
+		Value pack () const;
 		bool isValid () {return valid;};
-		HackerboatStateStorage& storage();
-		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
-		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
 		bool setADCdevice(ADCInput* adc) {	/**< Set the ADC input thread */
 			valid = false;
 			if (adc) {
@@ -57,7 +54,6 @@ class HealthMonitor : public HackerboatStateStorable {
 		int			wifiRssi;				/**< Wifi RSSI, dbm */
 		
 	private:
-		HackerboatStateStorage *healthStorage = NULL;
 		bool valid;
 		ADCInput* _adc;
 };

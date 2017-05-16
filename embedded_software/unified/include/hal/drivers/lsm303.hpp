@@ -21,6 +21,7 @@
 #include "hal/config.h"
 #include <map>
 #include <vector>
+#include <tuple>
 
 
 /*=========================================================================
@@ -143,38 +144,38 @@ class LSM303 {
 		bool setAccelRegister(LSM303AccelRegistersEnum reg, uint8_t val);	/**< Set an arbitrary register on the chip. */
 		uint8_t getAccelRegister(LSM303AccelRegistersEnum reg);			/**< Read an arbitrary register on the chip. */
 		
-		map<char, double> getMagData ();								/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
-		map<char, double> getAccelData ();								/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
+		tuple<double, double, double> getMagData ();								/**< Get the scaled magnetometer data. There will be three fields, named x, y, and z. */
+		tuple<double, double, double> getAccelData ();								/**< Get the scaled accelerometer data. Fields named as for magnetometer. */
 		double getTempData ();											/**< Get the scaled temperature data */
-		map<char, int> getRawMagData () {return _magData;};				/**< Get raw magnetometer data. Field names as for scaled data. */
-		map<char, int> getRawAccelData () {return _accelData;};			/**< Get raw accelerometer data. Field names as for scaled data. */
+		tuple<int, int, int> getRawMagData () {return _magData;};				/**< Get raw magnetometer data. Field names as for scaled data. */
+		tuple<int, int, int> getRawAccelData () {return _accelData;};			/**< Get raw accelerometer data. Field names as for scaled data. */
 		int getRawTempData () {return _tempData;};						/**< Get raw temperature data. */
-		map<char, int> getMagOffset () {return _magOffset;};			/**< Get the current offset for magnetometer data. Field names as for data. */
-		map<char, int> getAccelOffset () {return _accelOffset;};		/**< Get the current offset for accelerometer data. Field names as for data. */
+		tuple<int, int, int> getMagOffset () {return _magOffset;};			/**< Get the current offset for magnetometer data. Field names as for data. */
+		tuple<int, int, int> getAccelOffset () {return _accelOffset;};		/**< Get the current offset for accelerometer data. Field names as for data. */
 		int getTempOffset () {return _tempOffset;};						/**< Get the offset used for the temperature data */
-		map<char, double> getMagScale () {return _magScale;};			/**< Get the current scale factor for the magnetometer data. Field names as for data. */
-		map<char, double> getAccelScale () {return _accelScale;};		/**< Get the current scale factor for the accelerometer data. Field names as for data. */
+		tuple<double, double, double> getMagScale () {return _magScale;};			/**< Get the current scale factor for the magnetometer data. Field names as for data. */
+		tuple<double, double, double> getAccelScale () {return _accelScale;};		/**< Get the current scale factor for the accelerometer data. Field names as for data. */
 		double getTempScale () {return _tempScale;};					/**< Get the scaling factor used for the temperature */
-		bool setMagOffset (map<char, int> offset);						/**< Set magnetometer offsets. */
-		bool setAccelOffset (map<char, int> offset);					/**< Set accelerometer offsets. */
-		bool setMagScale (map<char, double> scale);						/**< Set magnetometer scale. */
-		bool setAccelScale (map<char, double> scale);					/**< Set accelerometer scale. */
+		bool setMagOffset (tuple<int, int, int> offset);						/**< Set magnetometer offsets. */
+		bool setAccelOffset (tuple<int, int, int> offset);					/**< Set accelerometer offsets. */
+		bool setMagScale (tuple<double, double, double> scale);						/**< Set magnetometer scale. */
+		bool setAccelScale (tuple<double, double, double> scale);					/**< Set accelerometer scale. */
 		void setTempOffset (int offset) {_tempOffset = offset;};		/**< Set temperature offset */
 		void setTempScale (double scale) {_tempScale = scale;};			/**< Set temperature scale */
 		
 	private:	
-		bool 				setReg (uint8_t addr, uint8_t reg, uint8_t val);
-		int16_t				getReg (uint8_t addr, uint8_t reg);
-		int					_bus;
-		int					_tempData = 0;
-		map<char, int> 		_accelData = {{'x',0},{'y',0},{'z',0}};   
-		map<char, int>		_magData = {{'x',0},{'y',0},{'z',0}};
-		int 				_tempOffset = 0;
-		double				_tempScale = 1;
-		map<char, double>  	_magScale = {{'x',1},{'y',1},{'z',1}};
-		map<char, int>   	_magOffset = {{'x',0},{'y',0},{'z',0}};
-		map<char, double>  	_accelScale = {{'x',1},{'y',1},{'z',1}};
-		map<char, int>   	_accelOffset = {{'x',0},{'y',0},{'z',0}};
+		bool                setReg (uint8_t addr, uint8_t reg, uint8_t val);
+		int16_t             getReg (uint8_t addr, uint8_t reg);
+		int					        _bus;
+		int					        _tempData     = 0;
+		tuple<int, int, int>      _accelData      = {0,0,0};   
+		tuple<int, int, int>		  _magData        = {0,0,0};
+		int 				        _tempOffset   = 0;
+		double				      _tempScale    = 1;
+		tuple<double, double, double> _magScale   = {1,1,1};
+		tuple<int, int, int>   	  _magOffset      = {0,0,0};
+		tuple<double, double, double> _accelScale = {1,1,1};
+		tuple<int, int, int>      _accelOffset    = {0,0,0};
 
 };
 

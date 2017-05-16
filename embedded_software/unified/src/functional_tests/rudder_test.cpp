@@ -43,10 +43,16 @@ int main(int argc, char **argv) {
     
 	double targetHeading = 0;
 	double in = 0, out = 0, setpoint = 0;
-	Pin enable(SYSTEM_SERVO_ENB_PORT, SYSTEM_SERVO_ENB_PIN, true, true);
+	Pin enable(Conf::get()->servoEnbPort(), Conf::get()->servoEnbPin(), true, true);
 	PID *helm = new PID(&in, &out, &setpoint, 0, 0, 0, 0);
+	helm->SetMode(AUTOMATIC);
+	helm->SetControllerDirection(Conf::get()->rudderDir());
+	helm->SetSampleTime(Conf::get()->rudderPeriod());
+	helm->SetOutputLimits(Conf::get()->rudderMin(), 
+						Conf::get()->rudderMax());
+	helm->SetTunings(10,0,0);
 	
-	if (!me->rudder->attach(RUDDER_PORT, RUDDER_PIN)) {
+	if (!me->rudder->attach(Conf::get()->rudderPort(), Conf::get()->rudderPin())) {
 		std::cout << "Rudder failed to attach 1" << std::endl;
 		return -1;
 	}
@@ -65,20 +71,28 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < 100; i++) {
 		double currentheading = me->orient->getOrientation()->makeTrue().heading;
 		if (isfinite(currentheading)) targetHeading += currentheading;
-		cout << targetHeading << endl;
+		cout << ".";
 		std::this_thread::sleep_for(100ms);
 	}
+	cout << endl;
 	targetHeading = targetHeading/100;
 	cout << "Target heading is " << to_string(targetHeading) << " degrees true " << endl;
-	
+	int count = 0;
 	for (;;) {
 		in = me->orient->getOrientation()->makeTrue().headingError(targetHeading);
-		LOG_EVERY_N(100, DEBUG) << "True Heading: " << me->orient->getOrientation()->makeTrue() 
+		count++;
+		LOG_EVERY_N(10, DEBUG) << "True Heading: " << me->orient->getOrientation()->makeTrue() 
 								<< ", Target Course: " << targetHeading;
 		helm->Compute();
 		me->rudder->write(out);
-		LOG_EVERY_N(100, DEBUG) << "Rudder command: " << to_string(out);
+		LOG_EVERY_N(10, DEBUG) << "Rudder command: " << to_string(out);
 		std::this_thread::sleep_for(100ms);
+		if (count > 9) {
+			count = 0;
+			cout << "True Heading: " << me->orient->getOrientation()->makeTrue().heading 
+								<< "\tTarget Course: " << targetHeading
+								<< "\tRudder command: " << to_string(out) << endl;
+		}
 	}
 	
 	return 0;

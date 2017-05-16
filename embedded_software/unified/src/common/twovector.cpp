@@ -18,21 +18,17 @@
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 
-bool TwoVector::parse(json_t *input) {
-	return (GET_VAR(_x) & GET_VAR(_y));
+bool TwoVector::parse(Value& d) {
+	return (GetVar("_x", _x, d) & GetVar("_y", _y, d));
 }
 
-json_t* TwoVector::pack () const {
-	json_t *output = json_object();
-	int packResult = 0;
-	packResult += json_object_set_new(output, "_x", json_real(_x));
-	packResult += json_object_set_new(output, "_y", json_real(_y));
+Value TwoVector::pack () const {
+	Value d;
+	int r = 0;
+	r += PutVar("_x", _x, d);
+	r += PutVar("_y", _y, d);
 	
-	if (packResult != 0) {
-		json_decref(output);
-		return NULL;
-	}
-	return output;
+	return d;
 }
 
 TwoVector TwoVector::getVectorRad(double ang, double mag) {

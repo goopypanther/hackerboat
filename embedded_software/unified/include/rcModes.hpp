@@ -12,7 +12,6 @@
 #ifndef RCMODES_H
 #define RCMODES_H 
  
-#include <jansson.h>
 #include <stdlib.h>
 #include <string>
 #include <chrono>
@@ -21,6 +20,7 @@
 #include "stateMachine.hpp"
 #include "boatState.hpp"
 #include "pid.hpp"
+#include "configuration.hpp"
 
 class RCModeBase : public StateMachineBase<RCModeEnum, BoatState> {
 	public:
@@ -57,9 +57,10 @@ class RCCourseMode : public RCModeBase {
 			helm(&in, &out, &setpoint, 0, 0, 0, 0) {
 				state.setRCmode(RCModeEnum::COURSE);
 				helm.SetMode(AUTOMATIC);
-				helm.SetControllerDirection(RUDDER_DIRECTION);
-				helm.SetSampleTime(RUDDER_PERIOD);
-				helm.SetOutputLimits(RUDDER_MIN, RUDDER_MAX);
+				helm.SetControllerDirection(Conf::get()->rudderDir());
+				helm.SetSampleTime(Conf::get()->rudderPeriod());
+				helm.SetOutputLimits(Conf::get()->rudderMin(), 
+									Conf::get()->rudderMax());
 			};
 		RCModeBase* execute ();													/**< Execute one step of this mode. */
 	private:
