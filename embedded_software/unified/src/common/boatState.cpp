@@ -30,6 +30,7 @@
 #include "hal/gpsdInput.hpp"
 #include "boatState.hpp"
 #include "easylogging++.h"
+#include "util.hpp"
 
 #define GET_VAR(var) ::parse(json_object_get(input, #var), &var)
 #define MAKE_FUNC(func) { #func, std::function<bool(json_t*, BoatState*)>( Command::func ) }
@@ -148,8 +149,8 @@ json_t* BoatState::pack () const {
 	json_t *output = json_object();
 	int packResult = 0;
 	packResult += json_object_set_new(output, "recordTime", json(HackerboatState::packTime(this->recordTime)));
-	packResult += json_object_set_new(output, "currentWaypoint", json_integer(currentWaypoint));
-	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
+//	packResult += json_object_set_new(output, "currentWaypoint", json_integer(currentWaypoint));
+//	packResult += json_object_set_new(output, "waypointStrength", json_real(waypointStrength));
 	packResult += json_object_set_new(output, "lastContact", json(HackerboatState::packTime(this->lastContact)));
 	packResult += json_object_set_new(output, "lastRC", json(HackerboatState::packTime(this->lastRC)));
 	packResult += json_object_set_new(output, "lastFix", this->lastFix.pack());
@@ -181,11 +182,6 @@ json_t* BoatState::pack () const {
 		packResult += json_object_set_new(output, "commands", json_null());
 	}
 	if (packResult != 0) {
-		if (output) {
-			//LOG(ERROR) << "BoatState pack failed: " << output;
-		} else {
-			//LOG(WARNING) << "BoatState pack failed, no output";
-		}
 		json_decref(output);
 		return NULL;
 	}
@@ -196,8 +192,8 @@ bool BoatState::parse (json_t* input ) {
 	std::string recordTimeIn, lastContactIn, lastRCin, boatMode, navMode, autoMode, rcMode;
 	bool result = true;
 
-	result &= GET_VAR(currentWaypoint);
-	result &= GET_VAR(waypointStrength);
+//	result &= GET_VAR(currentWaypoint);
+//	result &= GET_VAR(waypointStrength);
 	result &= GET_VAR(faultString);
 	result &= GET_VAR(boatMode);
 	result &= GET_VAR(navMode);
@@ -228,8 +224,8 @@ HackerboatStateStorage &BoatState::storage () {
 		stateStorage = new HackerboatStateStorage(HackerboatStateStorage::databaseConnection(STATE_DB_FILE),
 							"BOAT_STATE",
 							{ { "recordTime", "TEXT" },
-							  { "currentWaypoint", "INTEGER" },
-							  { "waypointStrength", "REAL" },
+	//						  { "currentWaypoint", "INTEGER" },
+	//						  { "waypointStrength", "REAL" },
 							  { "lastContact", "TEXT" },
 							  { "lastRC", "TEXT" },
 							  { "lastFix", "TEXT" },
@@ -246,26 +242,26 @@ HackerboatStateStorage &BoatState::storage () {
 }
 
 bool BoatState::fillRow(SQLiteParameterSlice row) const {
-	row.assertWidth(13);
+	row.assertWidth(11);
 	json_t* out;
 	LOG_EVERY_N(10, DEBUG) << "Storing BoatState object to the database" << *this;
 	LOG(DEBUG) << "Storing BoatState object to the database" << *this;
 	row.bind(0, HackerboatState::packTime(recordTime));
-	row.bind(1, currentWaypoint);
-	row.bind(2, waypointStrength);
-	row.bind(3, HackerboatState::packTime(lastContact));
-	row.bind(4, HackerboatState::packTime(lastRC));
+//	row.bind(1, currentWaypoint);
+//	row.bind(2, waypointStrength);
+	row.bind(1, HackerboatState::packTime(lastContact));
+	row.bind(2, HackerboatState::packTime(lastRC));
 	out = this->lastFix.pack();
-	row.bind_json_new(5, out);
+	row.bind_json_new(3, out);
 	out  = this->launchPoint.pack();
-	row.bind_json_new(6, out);
-	row.bind(7, faultString);
-	row.bind(8, boatModeNames.get(_boat));
-	row.bind(9, navModeNames.get(_nav));
-	row.bind(10, autoModeNames.get(_auto));
-	row.bind(11, rcModeNames.get(_rc));
+	row.bind_json_new(4, out);
+	row.bind(5, faultString);
+	row.bind(6, boatModeNames.get(_boat));
+	row.bind(7, navModeNames.get(_nav));
+	row.bind(8, autoModeNames.get(_auto));
+	row.bind(9, rcModeNames.get(_rc));
 	out = this->relays->pack();
-	row.bind_json_new(12, out);
+	row.bind_json_new(10, out);
 
 	return true;
 }
@@ -273,12 +269,12 @@ bool BoatState::fillRow(SQLiteParameterSlice row) const {
 bool BoatState::readFromRow(SQLiteRowReference row, sequence seq) {
 	bool result = true;
 	_sequenceNum = seq;
-	row.assertWidth(13);
+	row.assertWidth(11);
 
 	std::string str = row.string_field(0);
 	result &= HackerboatState::parseTime(str, this->recordTime);
-	this->currentWaypoint = row.int_field(1);
-	this->waypointStrength = row.double_field(2);
+//	this->currentWaypoint = row.int_field(1);
+//	this->waypointStrength = row.double_field(2);
 	str = row.string_field(3);
 	result &= HackerboatState::parseTime(str, this->lastContact);
 	str = row.string_field(4);
@@ -332,19 +328,47 @@ int BoatState::executeCmds (int num) {
 	}
 	return result;
 }
+		
+std::string BoatState::printCurrentWaypointNum() {
+	if (this->_nav == NavModeEnum::AUTONOMOUS) {
+		switch (this->_auto) {
+			case AutoModeEnum::WAYPOINT:
+				return std::to_string(this->waypointList.current());
+				break;
+			case AutoModeEnum::ANCHOR:
+				return "ANCHOR";
+				break;
+			case AutoModeEnum::RETURN:
+				return "RETURN";
+				break;
+			default:
+				return "NONE";
+		}
+	} else return "NONE";
+}
+
+Location BoatState::getCurrentTarget()  {
+	if (this->_nav == NavModeEnum::AUTONOMOUS) {
+		switch (this->_auto) {
+			case AutoModeEnum::WAYPOINT:
+				return this->waypointList.getWaypoint();
+				break;
+			case AutoModeEnum::ANCHOR:
+				return this->anchorPoint;
+				break;
+			case AutoModeEnum::RETURN:
+				return this->launchPoint;
+				break;
+			default:
+				return Location();
+		}
+	} else return Location();
+}								/**< Returns the current target location, or an invalid Location if there isn't one right now */
 
 std::string BoatState::getCSV() {
 	std::string csv;
 	csv =  HackerboatState::packTime(recordTime);
 	csv += ",";
-	csv	+= std::to_string(currentWaypoint);
-	csv += ",";
-	csv += std::to_string(waypointStrength);
-	csv += ",";
-//	csv	+= HackerboatState::packTime(lastContact);
-//	csv += ",";
-//	csv += HackerboatState::packTime(lastRC);
-//	csv += ",
 	csv += std::to_string(lastFix.fix.lat);
 	csv += ",";
 	csv += std::to_string(lastFix.fix.lon);
@@ -353,41 +377,44 @@ std::string BoatState::getCSV() {
 	csv += ",";
 	csv += std::to_string(lastFix.speed);
 	csv += ",";
-	csv += std::to_string(lastFix.fixValid);
+	csv += GPSFix::NMEAModeNames.get(lastFix.mode);
 	csv += ",";
-	csv += std::to_string(disarmInput.get());
+	csv	+= this->printCurrentWaypointNum();
 	csv += ",";
-	csv += std::to_string(armInput.get());
+	csv += std::to_string(this->getCurrentTarget().lat);
 	csv += ",";
-	csv += servoEnable.get();
+	csv += std::to_string(this->getCurrentTarget().lon);
 	csv += ",";
 	csv += std::to_string(throttle->getThrottle());
+	csv += ",";
+	if (this->getCurrentTarget().isValid()) {
+		csv += std::to_string(lastFix.fix.bearing(this->getCurrentTarget()));
+	} else csv += "N/A";
 	csv += ",";
 	csv += std::to_string(rudder->readMicroseconds());
 	csv += ",";
 	csv += std::to_string(orient->getOrientation()->heading);
 	csv += ",";
-	csv += std::to_string(rc->getThrottle());
+	csv += boatModeNames.get(getBoatMode());
 	csv += ",";
-	csv += std::to_string(rc->getCourse());
+	csv += navModeNames.get(getNavMode());
 	csv += ",";
-	csv += rc->isFailSafe();
+	csv += autoModeNames.get(getAutoMode());
 	csv += ",";
-	csv += rcModeNames.get(rc->getMode());
-	//csv += ",";
-	//csv += adc->getRawValues()["mot_i"];
-	//csv += ",";
-	//csv += adc->getRawValues()["battery_mon"];
+	csv += rcModeNames.get(getRCMode());
+	csv += ",";
+	csv += adc->getRawValues()["mot_i"];
+	csv += ",";
+	csv += adc->getRawValues()["battery_mon"];
 	csv += "\n";
 	return csv;
 }
 
 std::string BoatState::getCSVheaders() {
 	std::string headers;
-	headers = "RecordTime,CurrentWaypoint,WaypointStrength,/*LastContactTime,LastRCTime,*/";
-	headers += "Lat,Lon,Track,Speed,FixValid,StopButtonState,ArmButtonState,ServoEnableState,";
-	headers += "ThrottlePosition,RudderCommand,CurrentHeading,ThrottleInput,CourseInput,RCFailSafe,";
-	headers += "RCMode,RawMotorCurrent,RawBatteryVoltage";
+	headers = "Record Time, Lat, Lon, GPS Track (deg true), Speed (m/s),Fix Type, Waypoint #,Waypoint Lat,Waypoint Lon, Target Course";
+	headers += "Throttle Position,Rudder Command (ms),Current Heading (deg mag),Boat Mode, Nav Mode, Auto Mode,";
+	headers += "RC Mode, Raw Motor Current, Raw Battery Voltage";
 	return headers;
 }
 
@@ -528,7 +555,7 @@ bool Command::SetHome(json_t* args, BoatState *state) {
 	}
 	if ((!args) && state->lastFix.isValid()) {
 		state->launchPoint = state->lastFix.fix;
-		LOG(INFO) << "Setting launch point to current location, " << state->launchPoint;
+		LOG(INFO) << "Setting launch point to current location, " << state->gps->getAverageFix();
 		return true;
 	} else {
 		Location newhome;

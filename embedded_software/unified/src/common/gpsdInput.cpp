@@ -18,7 +18,9 @@
 #include <chrono>
 #include <map>
 #include <iostream>
-#include "jansson.h"
+extern "C" {
+	#include <jansson.h>
+}
 #include "hal/config.h"
 #include "gps.hpp"
 #include "ais.hpp"
@@ -98,19 +100,22 @@ bool GPSdInput::execute() {
 	//if (!lock && (!lock.try_lock_for(IMU_LOCK_TIMEOUT))) return false;
 	bool result = true;
 	json_error_t inerr;
-	string buf = "";
+	string buf;
+	buf.reserve(GPS_BUF_SIZE);
 	int i = 0;
 	while (gpsdstream.in_avail()) {
 		buf.push_back(gpsdstream.sbumpc());
 		i++;
-		if (buf.back() == '\r') break;
+		if (buf.back() == '\r')	break;
 		if (i > 5000) break;
 	} 
 	if (buf.length() > 10) {
-		json_t* input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
+		//cerr << "Incoming buffer is: " << buf.c_str() << endl;
+		json_t *input = json_loads(buf.c_str(), JSON_REJECT_DUPLICATES, &inerr);
 		if (input) {
-			buf.clear();
-			json_t* objclass = json_object_get(input, "class");
+			//cerr << "Loaded GPS JSON string." << endl;
+			//buf.clear();
+			json_t *objclass = json_object_get(input, "class");
 			if (objclass) {
 				string s;
 				const char *p = json_string_value(objclass);
@@ -129,9 +134,9 @@ bool GPSdInput::execute() {
 						result = true;
 					} 
 				} 
-				json_decref(input);
-				json_decref(objclass);
-			}
+				//json_decref(input);
+				//json_decref(objclass);
+			} 
 			json_decref(input);
 			result = false;
 		} result = false;
@@ -140,11 +145,17 @@ bool GPSdInput::execute() {
 	LOG_IF(strlen(inerr.text), DEBUG) << "GPSd JSON loading error: " << inerr.text << " from " << inerr.source 
 									<< " at line " << inerr.line << ", column " << inerr.column << ", buffer: " << buf;
 	//lock.unlock();
+	if (result) {
+		_gpsAvgList.emplace_front(_lastFix);
+		if (_gpsAvgList.size() < GPS_AVG_LEN) {
+			_gpsAvgList.pop_back();
+		}
+	}
 	return result;
 }
 
-map<int, AISShip> GPSdInput::getData() {
-	return _aisTargets;
+map<int, AISShip>* GPSdInput::getData() {
+	return &_aisTargets;
 }
 
 map<int, AISShip> GPSdInput::getData(AISShipType type) {
@@ -157,17 +168,22 @@ map<int, AISShip> GPSdInput::getData(AISShipType type) {
 	return result;
 }
 
-AISShip GPSdInput::getData(int MMSI) {
-	return _aisTargets[MMSI];
-}
-
-AISShip GPSdInput::getData(string name) {
-	for (auto const &r : _aisTargets) {
-		if (name == r.second.shipname) {
-			return r.second;
+AISShip* GPSdInput::getData(int MMSI) {
+	for (auto const r : _aisTargets) {
+		if (MMSI == r.first) {
+			return &(_aisTargets[MMSI]);
 		}
 	}
-	return AISShip();
+	return NULL;
+}
+
+AISShip* GPSdInput::getData(string name) {
+	for (auto const r : _aisTargets) {
+		if (name == r.second.shipname) {
+			return &(_aisTargets[r.first]);
+		}
+	}
+	return NULL;
 }
 
 int GPSdInput::pruneAIS(Location loc) {
@@ -180,4 +196,17 @@ int GPSdInput::pruneAIS(Location loc) {
 		}
 	}
 	return count;
+}
+
+GPSFix GPSdInput::getAverageFix() {
+	double lattot = 0, lontot = 0;
+	GPSFix result;
+	for (auto &thisfix: _gpsAvgList) {
+		lattot += thisfix.fix.lat;
+		lontot += thisfix.fix.lon;
+	}
+	result.fix.lat = lattot/_gpsAvgList.size();
+	result.fix.lon = lontot/_gpsAvgList.size();
+	return result;
+	
 }

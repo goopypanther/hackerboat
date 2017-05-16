@@ -12,7 +12,9 @@
 #ifndef GPS_H
 #define GPS_H
 
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include <stdlib.h>
 #include <chrono>
 #include <string>
@@ -49,6 +51,8 @@ class GPSFix : public HackerboatStateStorable {
 		HackerboatStateStorage& storage();
 		bool fillRow(SQLiteParameterSlice) const USE_RESULT;
 		bool readFromRow(SQLiteRowReference, sequence) USE_RESULT;
+		void copy(GPSFix *newfix);
+		void copy(GPSFix &newfix);
 		
 		sysclock		gpsTime;	/**< GPS time of fix */
 		

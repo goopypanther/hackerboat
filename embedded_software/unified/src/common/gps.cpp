@@ -113,12 +113,14 @@ bool GPSFix::parseGpsdPacket (json_t *input) {
 		this->mode = NMEAModeEnum::NONE;
 		result = false;
 	}
-	this->fix.lat = lat;
-	this->fix.lon = lon;
+	if (result) {
+		this->fix.lat = lat;
+		this->fix.lon = lon;
+	}
 	this->recordTime = std::chrono::system_clock::now();
 	json_decref(gpsMode);
 	
-	LOG_IF((!result && input), ERROR) << "Parsing GPSFix packet input failed: " << input;
+	LOG_IF((!result && input), ERROR) << "Parsing GPSFix packet input failed: ";// << input;
 	LOG_IF(!input, WARNING) << "Attempted to parse NULL JSON in GPSFix.parseGpsdPacket()";
 	
 	if (result) return this->isValid();
@@ -244,4 +246,44 @@ bool GPSFix::readFromRow(SQLiteRowReference row, sequence seq) {
 	
 	if (fixValid && result) return this->isValid();
 	return false;
+}
+
+void GPSFix::copy(GPSFix *newfix) {
+	this->gpsTime 	= newfix->gpsTime;
+	this->mode 		= newfix->mode;
+	//this->device 	= newfix->device;
+	this->fix.lat 	= newfix->fix.lat;
+	this->fix.lon 	= newfix->fix.lon;
+	this->track		= newfix->track;
+	this->speed		= newfix->speed;
+	this->alt		= newfix->alt;
+	this->climb		= newfix->climb;
+	this->epx		= newfix->epx;
+	this->epy		= newfix->epy;
+	this->epd		= newfix->epd;
+	this->eps		= newfix->eps;
+	this->ept		= newfix->ept;
+	this->epv		= newfix->epv;
+	this->epc		= newfix->epc;
+	this->fixValid	= newfix->fixValid;
+}
+
+void GPSFix::copy(GPSFix &newfix) {
+	this->gpsTime 	= newfix.gpsTime;
+	this->mode 		= newfix.mode;
+	//this->device 	= newfix.device;
+	this->fix.lat 	= newfix.fix.lat;
+	this->fix.lon 	= newfix.fix.lon;
+	this->track		= newfix.track;
+	this->speed		= newfix.speed;
+	this->alt		= newfix.alt;
+	this->climb		= newfix.climb;
+	this->epx		= newfix.epx;
+	this->epy		= newfix.epy;
+	this->epd		= newfix.epd;
+	this->eps		= newfix.eps;
+	this->ept		= newfix.ept;
+	this->epv		= newfix.epv;
+	this->epc		= newfix.epc;
+	this->fixValid	= newfix.fixValid;
 }

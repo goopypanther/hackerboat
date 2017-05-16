@@ -127,7 +127,7 @@ bool Servo::writeMicroseconds (unsigned long value) {
 	if (value < _min) return false;
 	if (value > _max) return false;
 	_val = value;
-	return true;
+	return writeMicroseconds();
 }
 
 bool Servo::setFrequency (unsigned long freq) {

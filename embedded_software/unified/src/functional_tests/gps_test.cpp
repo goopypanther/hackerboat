@@ -36,13 +36,14 @@ int main(int argc, char **argv) {
 	GPSdInput gps;
 	if (gps.begin()) {
 		while(1) {
-			GPSFix *fix = gps.getFix();
+			GPSFix fix;
+			fix.copy(gps.getFix());
 			cout << "Time: ";
-			cout << HackerboatState::packTime(fix->gpsTime);
-			cout << "\tMode: " << GPSFix::NMEAModeNames.get(fix->mode);
-			cout << "\tLat: " << fix->fix.lat;
-			cout << "\tLon: " << fix->fix.lon;
-			cout << "\tValid: " << fix->isValid() << endl;
+			cout << HackerboatState::packTime(fix.gpsTime);
+			cout << "\tMode: " << GPSFix::NMEAModeNames.get(fix.mode);
+			cout << "\tLat: " << fix.fix.lat;
+			cout << "\tLon: " << fix.fix.lon;
+			cout << "\tValid: " << fix.isValid() << endl;
 			std::this_thread::sleep_for(500ms);
 		}
 	} else {

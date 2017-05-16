@@ -22,6 +22,7 @@
 #include "boatState.hpp"
 #include "rcModes.hpp"
 #include "autoModes.hpp"
+#include "util.hpp"
 
 class NavModeBase : public StateMachineBase<NavModeEnum, BoatState> {
 	public:
@@ -56,12 +57,15 @@ class NavRCMode : public NavModeBase {
 	public:
 		NavRCMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE, RCModeEnum submode = RCModeEnum::IDLE) : 
 			NavModeBase(state, last, NavModeEnum::RC),
-			_rcMode(RCModeBase::factory(state, submode)) {
+			_rcMode(RCModeBase::factory(state, submode)), _oldRCmode(NULL) {
 				state.setNavMode(NavModeEnum::RC);
 			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		RCModeBase* getRCMode () {return _rcMode;};							/**< Get the current RC mode object */
-		~NavRCMode () {delete _rcMode; delete _oldRCmode;};					/**< Explicit destructor to make sure we take care of the submode */
+		~NavRCMode () {														/**< Explicit destructor to make sure we take care of the submode */
+			REMOVE(_rcMode);
+			REMOVE(_oldRCmode);
+		}
 	private:
 		RCModeBase* _rcMode;
 		RCModeBase* _oldRCmode;
@@ -71,12 +75,15 @@ class NavAutoMode : public NavModeBase {
 	public:
 		NavAutoMode (BoatState& state, NavModeEnum last = NavModeEnum::NONE, AutoModeEnum submode = AutoModeEnum::IDLE) : 
 			NavModeBase(state, last, NavModeEnum::AUTONOMOUS),
-			_autoMode(AutoModeBase::factory(state, submode)) {
+			_autoMode(AutoModeBase::factory(state, submode)), _oldAutoMode(NULL) {
 				state.setNavMode(NavModeEnum::AUTONOMOUS);
 			};
 		NavModeBase* execute ();											/**< Execute the given mode. */
 		AutoModeBase* getAutoMode () {return _autoMode;};					/**< Get the current autonomous mode object */
-		~NavAutoMode () {delete _autoMode; delete _oldAutoMode;};			/**< Explicit destructor to make sure we take care of the submode */
+		~NavAutoMode () {													/**< Explicit destructor to make sure we take care of the submode */
+			REMOVE(_autoMode);
+			REMOVE(_oldAutoMode);
+		}
 	private:
 		AutoModeBase* _autoMode;
 		AutoModeBase* _oldAutoMode;

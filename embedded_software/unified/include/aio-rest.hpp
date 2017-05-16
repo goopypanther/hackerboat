@@ -14,7 +14,9 @@
 #ifndef AIO_REST_H
 #define AIO_REST_H
 
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include <cstdlib>
 #include <inttypes.h>
 #include <cstdio>
@@ -42,8 +44,8 @@ class AIO_Subscriber {
 		virtual int poll() = 0;									// returns number of bytes received
 		int getStatus() {return httpStatus;};
 	protected:
-		char toHex(char code);
-		string urlEncode(const string &value);		// url encode a string
+//		char toHex(char code);
+//		string urlEncode(const string &value);		// url encode a string
 		string stripEscape(const string &value);	// strip backslash escapes out of a string
 		string 			_key;
 		BoatState		*_me;
@@ -87,9 +89,6 @@ class AIO_Rest : public InputThread  {
 		// transmission functions
 		int transmit(string feedkey, string payload);						/// Attempts to add the given payload to the given feed. Returns HTTP response code.
 		string fetch(string feedkey, string specifier, int *httpStatus);	/// Fetches the last data from the given feed with the given specifier, which must be URL encoded. Returns the response string.
-		string getResponse(	redi::pstreambuf *str,
-							size_t maxlen = REST_MAX_BUFFER,
-							std::chrono::system_clock::duration timeout = REST_TIMEOUT);
 
 	private:
 
@@ -178,6 +177,14 @@ class pub_FaultString : public AIO_Publisher {
 		int pub();
 	private:
 		bool _last;		/// If the last time this object was called there was a fault string, this will be true.
+};
+
+/// Publish the current waypoint number and location
+class pub_Waypoint : public AIO_Publisher {
+	public:
+		pub_Waypoint(BoatState *me, AIO_Rest *rest) :
+			AIO_Publisher(me, rest, "waypoint") {};
+	int pub();
 };
 
 // Subscriber classes

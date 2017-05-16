@@ -188,14 +188,14 @@ AutoModeBase* AutoAnchorMode::execute() {
 							std::get<2>(_state.K));
 		}
 	if (!callCount) {
-		anchorPoint = _state.lastFix.fix;
-		LOG(INFO) << "Anchoring at " << anchorPoint;
+		_state.anchorPoint = _state.lastFix.fix;
+		LOG(INFO) << "Anchoring at " << _state.anchorPoint;
 	}
 	callCount++;
 	
 	// get the bearing and distance to the anchor point
-	double headingError = _state.orient->getOrientation()->makeTrue().headingError(_state.lastFix.fix.bearing(anchorPoint));
-	double distance = _state.lastFix.fix.distance(anchorPoint);
+	double headingError = _state.orient->getOrientation()->makeTrue().headingError(_state.lastFix.fix.bearing(_state.anchorPoint));
+	double distance = _state.lastFix.fix.distance(_state.anchorPoint);
 	
 	// determine whether the target point is forward or aft of current position
 	

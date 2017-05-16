@@ -77,13 +77,16 @@ class BoatNavigationMode : public BoatModeBase {
 	public:
 		BoatNavigationMode (BoatState& state, BoatModeEnum last = BoatModeEnum::NONE, NavModeEnum submode = NavModeEnum::IDLE) : 
 			BoatModeBase(state, last, BoatModeEnum::NAVIGATION),
-			_navMode(NavModeBase::factory(state, submode)) {
+			_navMode(NavModeBase::factory(state, submode)), _oldNavMode(NULL) {
 				state.setBoatMode(BoatModeEnum::NAVIGATION);
 				state.setNavMode(submode);
 			};
-		NavModeBase* getNavMode () {return _navMode;};		/**< Get the current nav mode object */
+		NavModeBase* getNavMode () {return _navMode;}		/**< Get the current nav mode object */
 		BoatModeBase* execute();							/**< Execute the current state */
-		~BoatNavigationMode () {delete _navMode; delete _oldNavMode;};	/**< Explicit destructor to make sure we nuke the submode */
+		virtual ~BoatNavigationMode () {							/**< Explicit destructor to make sure we nuke the submode */
+			REMOVE(_navMode);
+			REMOVE(_oldNavMode);
+		};	
 	private:
 		NavModeBase* _navMode;
 		NavModeBase* _oldNavMode;

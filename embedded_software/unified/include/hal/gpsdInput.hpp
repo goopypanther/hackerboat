@@ -22,6 +22,7 @@
 #include <vector>
 #include <tuple>
 #include <map>
+#include <list>
 #include "hal/config.h"
 #include "gps.hpp"
 #include "ais.hpp"
@@ -46,12 +47,13 @@ class GPSdInput : public InputThread {
 		bool begin();								/**< Start the input thread */
 		bool execute();								/**< Gather input	*/
 		GPSFix* getFix() {return &_lastFix;};		/**< Returns last GPS fix (TSV report, more or less) */
-		std::map<int, AISShip> getData();				/**< Returns all AIS contacts */
+		std::map<int, AISShip>* getData();			/**< Returns all AIS contacts */
 		std::map<int, AISShip> getData(AISShipType type);/**< Returns AIS contacts of a particular ship type */
-		AISShip getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
-		AISShip getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
+		AISShip* getData(int MMSI);					/**< Returns AIS contact for given MMSI, if it exists. It returns a reference to a default (invalid) object if the given MMSI is not present. */
+		AISShip* getData(string name);				/**< Returns AIS contact for given ship name, if it exists. It returns a reference to a default (invalid) object if the given ship name is not present. */
 		int pruneAIS(Location loc);					/**< Call the prune() function of each AIS contact. */
 		bool isValid() {return isConnected();};
+		GPSFix getAverageFix();
 		~GPSdInput () {
 			this->kill(); 
 			//if (myThread) delete myThread;
@@ -61,6 +63,8 @@ class GPSdInput : public InputThread {
 		string 				_host = "127.0.0.1";
 		int 				_port = 3001;
 		GPSFix 				_lastFix;
+		GPSFix				_averageFix;
+		list<GPSFix>		_gpsAvgList;
 		std::map<int, AISShip>	_aisTargets;
 		redi::pstreambuf	gpsdstream;
 		std::thread 		*myThread;

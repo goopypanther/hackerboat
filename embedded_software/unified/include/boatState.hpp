@@ -35,6 +35,7 @@
 #include "hal/throttle.hpp"
 #include "hal/servo.hpp"
 #include "hal/orientationInput.hpp"
+#include "util.hpp"
 
 using namespace std;
 class BoatState;	// forward declaration so this compiles
@@ -114,13 +115,14 @@ class BoatState : public HackerboatStateStorable {
 		std::string getCSV();										/**< Export the current state as a line for a CSV file */
 		std::string getCSVheaders();								/**< Generate CSV headers */
 		ArmButtonStateEnum getArmState ();							/**< Get the current state of the arm & disarm inputs */
+		std::string printCurrentWaypointNum();						/**< Print the current waypoint number, RETURN, ANCHOR, or NONE */
+		Location getCurrentTarget();								/**< Returns the current target location, or an invalid Location if there isn't one right now */
 
-		int 					currentWaypoint; 	/**< The current waypoint */
-		double					waypointStrength;	/**< Relative strength of the waypoint */
 		sysclock				lastContact;		/**< Time of last shore contact */
 		sysclock				lastRC;				/**< Time of the last signal from the RC input */
 		GPSFix					lastFix;			/**< Location of the last GPS fix */
 		Location				launchPoint;		/**< Location of the launch point */
+		Location				anchorPoint;		/**< Location of the anchor point */
 		Waypoints				waypointList;		/**< Waypoints to follow */
 		Dodge*					diversion;			/**< Avoid obstacles! */
 		HealthMonitor*			health;				/**< Current state of the boat's health */

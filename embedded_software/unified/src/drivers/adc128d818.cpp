@@ -140,7 +140,7 @@ int16_t ADC128D818::read(uint8_t channel) {
 	int result = -1;
 	int handle = i2c_open(_bus);
 	std::vector<uint16_t> seq;
-	std::vector<uint8_t> buf { 4 };
+	uint8_t buf[4];
 	if (handle >= 0) {
 		seq.push_back(addr << 1);
 		seq.push_back(READ_REG_BASE + channel);
@@ -148,7 +148,7 @@ int16_t ADC128D818::read(uint8_t channel) {
 		seq.push_back(((addr << 1)|1));
 		seq.push_back(I2C_READ);
 		seq.push_back(I2C_READ);
-		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf.data()) >= 0) {
+		if (i2c_send_sequence(handle, seq.data(), seq.size(), buf) >= 0) {
 			result = (int)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
 		}
 	} else {

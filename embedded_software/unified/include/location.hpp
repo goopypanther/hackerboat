@@ -14,7 +14,9 @@
 #ifndef LOCATION_H
 #define LOCATION_H
  
-#include <jansson.h>
+extern "C" {
+	#include <jansson.h>
+}
 #include "hal/config.h"
 #include <math.h>
 #include <string>

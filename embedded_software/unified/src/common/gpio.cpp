@@ -127,6 +127,10 @@ bool Pin::setDir (bool dir) {
 bool Pin::writePin (bool val) {
 	ofstream value;
 	_state = val;
+	if (!_init) {
+		LOG(ERROR) << "Attempted to write to an uninitialized pin";
+		return false;
+	}
 	value.open(path + "/value");
 	if (value.is_open()) {
 		if (_state) {
@@ -147,6 +151,10 @@ int Pin::get() {
 	ifstream value;
 	std::string line;
 	int result = -1;
+	if (!_init) {
+		LOG(ERROR) << "Attempted to read from an uninitialized pin";
+		return -1;
+	}
 	value.open(path + "/value");
 	if (value.is_open()) {
 		if(getline(value, line)) {

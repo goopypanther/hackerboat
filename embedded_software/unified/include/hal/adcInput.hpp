@@ -44,7 +44,7 @@ class ADCInput : public InputThread {
 		std::map<std::string, double> 	getScales() {return _scales;};					/**< Get the scaling for all channels. */
 		~ADCInput () {
 			this->kill(); 
-			if (myThread) delete myThread;
+			//if (myThread) delete myThread;
 		}
 		
 		using InputThread::getLastInputTime;

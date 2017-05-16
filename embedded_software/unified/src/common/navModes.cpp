@@ -21,6 +21,7 @@
 #include "autoModes.hpp"
 #include "navModes.hpp"
 #include "easylogging++.h"
+#include "util.hpp"
 
 NavModeBase *NavModeBase::factory(BoatState& state, NavModeEnum mode) {
 	switch (mode) {
@@ -144,7 +145,7 @@ NavModeBase *NavRCMode::execute () {
 	// execute the current RC mode
 	_oldRCmode = _rcMode;
 	_rcMode = _rcMode->execute();
-	if (_rcMode != _oldRCmode) delete _oldRCmode;
+	if (_rcMode != _oldRCmode) REMOVE(_oldRCmode);
 	
 	return this;
 }
@@ -181,7 +182,7 @@ NavModeBase *NavAutoMode::execute () {
 	// execute the current RC mode
 	_oldAutoMode = _autoMode;
 	_autoMode = _autoMode->execute();
-	if (_autoMode != _oldAutoMode) delete _oldAutoMode;
+	if (_autoMode != _oldAutoMode) REMOVE(_oldAutoMode);
 	
 	return this;
 }
