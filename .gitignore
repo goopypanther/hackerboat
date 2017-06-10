@@ -43,7 +43,10 @@ BUILD
 # Eagle
 *.s#*
 *.b#*
-*.l#
+*.l#*
+*.s$*
+*.b$*
+*.l$*
 *.scr
 
 # Excel files
