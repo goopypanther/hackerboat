@@ -35,6 +35,7 @@ using namespace std;
 class Orientation : public HackerboatState {
 	public:
 		Orientation() = default;
+		Orientation(bool mag) : magnetic(mag) {};
 		Orientation(double r, double p, double y, bool mag = true) :
 			pitch(p), roll(r), heading(y), magnetic(mag) {};
 		bool parse (Value& input);				/**< Parse an orientation object out of json object */
@@ -52,7 +53,7 @@ class Orientation : public HackerboatState {
 		double heading 	= NAN;
 	
 	protected:
-		bool magnetic;
+		bool magnetic = true;
 
 	private:
 		double normAxis (double val, const double max, const double min) const;		/**< Normalize given axis */

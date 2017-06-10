@@ -80,7 +80,7 @@ AutoModeBase* AutoWaypointMode::execute() {
 	}
 	callCount++;
 	
-	// get course to next waypoint
+	// get next waypoint
 	Location target = _state.waypointList.getWaypoint();
 	
 	// get course to the next waypoint
