@@ -94,7 +94,7 @@ Conf::Conf () {
 	_throttleMin	 	= (-5);
 	_rudderMax			= (100);
 	_rudderMin			= (-100);
-	_rudderDir			= (0);
+	_rudderDir			= (1);
 	_rudderPeriod		= (100);
 	_courseMax			= (360.0);
 	_courseMin			= (0.0);
