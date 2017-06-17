@@ -319,17 +319,16 @@ std::string BoatState::getCSV() {
 	csv += ",";
 	csv += rcModeNames.get(getRCMode());
 	csv += ",";
-	csv += adc->getRawValues()["mot_i"];
+	csv += std::to_string(adc->getRawValues()["mot_i"]);
 	csv += ",";
-	csv += adc->getRawValues()["battery_mon"];
-	csv += "\n";
+	csv += std::to_string(adc->getRawValues()["battery_mon"]);
 	return csv;
 }
 
 std::string BoatState::getCSVheaders() {
 	std::string headers;
-	headers = "Record Time, Lat, Lon, GPS Track (deg true), Speed (m/s),Fix Type, Waypoint #,Waypoint Lat,Waypoint Lon, Target Course";
-	headers += "Throttle Position,Rudder Command (ms),Current Heading (deg mag),Boat Mode, Nav Mode, Auto Mode,";
+	headers = "Record Time, Lat, Lon, GPS Track (deg true), Speed (m/s),Fix Type, Waypoint #,Waypoint Lat,Waypoint Lon, Target Course, ";
+	headers += "Throttle Position,Rudder Command (ms),Current Heading (deg mag),Boat Mode, Nav Mode, Auto Mode, ";
 	headers += "RC Mode, Raw Motor Current, Raw Battery Voltage";
 	return headers;
 }
