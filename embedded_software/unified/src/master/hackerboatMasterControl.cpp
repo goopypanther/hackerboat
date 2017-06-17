@@ -48,6 +48,7 @@ INITIALIZE_EASYLOGGINGPP
 
 int main (int argc, char **argv) {
 	cerr << "Starting up..." << std::endl;
+	bool declinationLoaded = false;
 
     // Load configuration from file
     el::Configurations conf("/home/debian/hackerboat/embedded_software/unified/setup/log.conf");
@@ -135,6 +136,11 @@ int main (int argc, char **argv) {
 		// read inputs
 		state.lastFix.copy(state.gps->getFix());
 		state.health->readHealth();
+
+		// check if we have a valid fix and have not loaded the declination -- if so, load it. 
+		if (state.lastFix.isValid() && !declinationLoaded) {
+			declinationLoaded = state.orient->getOrientation()->updateDeclination(state.lastFix.fix);
+		}
 
 		// run the state
 		auto endtime = std::chrono::system_clock::now() + 100ms;
