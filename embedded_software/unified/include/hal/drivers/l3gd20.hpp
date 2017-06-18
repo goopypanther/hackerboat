@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include "hal/config.h"
 #include <unistd.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>

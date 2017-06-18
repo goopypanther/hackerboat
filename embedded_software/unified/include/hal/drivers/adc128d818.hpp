@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <vector>
-#include "hal/config.h"
 extern "C" {
 	#include "lsquaredc.h"
 }

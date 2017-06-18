@@ -14,7 +14,7 @@
 #include <math.h>
 #include <string>
 #include "gps.hpp"
-#include "hal/config.h"
+
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "easylogging++.h"

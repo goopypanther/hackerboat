@@ -22,7 +22,7 @@
 #include <list>
 #include "pstream.h"
 #include "hal/inputThread.hpp"
-#include "hal/config.h"
+
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"

@@ -22,7 +22,7 @@
 #include "gps.hpp"
 #include "hackerboatRoot.hpp"
 #include "hal/gpsdInput.hpp"
-#include "hal/config.h"
+
 #include "twovector.hpp"
 
 using namespace std;

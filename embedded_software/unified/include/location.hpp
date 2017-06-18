@@ -15,7 +15,7 @@
 #define LOCATION_H
  
 #include "rapidjson/rapidjson.h"
-#include "hal/config.h"
+
 #include <math.h>
 #include <string>
 #include "hackerboatRoot.hpp"

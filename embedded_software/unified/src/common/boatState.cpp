@@ -17,7 +17,7 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include "gps.hpp"
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"
 #include "waypoint.hpp"

@@ -13,7 +13,6 @@
 #ifndef SERVO_H
 #define SERVO_H
  
-#include "config.h"
 #include <math.h>
 #include <string>
 #include <inttypes.h>

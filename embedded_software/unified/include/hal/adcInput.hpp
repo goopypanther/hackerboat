@@ -22,7 +22,6 @@
 #include <map>
 #include <inttypes.h>
 #include "hal/inputThread.hpp"
-#include "hal/config.h"
 #include "hal/drivers/adc128d818.hpp"
 #include "configuration.hpp"
 

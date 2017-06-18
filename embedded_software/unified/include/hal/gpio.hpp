@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include <iostream>
 #include <fstream>
-#include "hal/config.h"
+
 
 class HalTestHarness;
 

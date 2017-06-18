@@ -460,6 +460,7 @@ class NavModeAutoTest : public ::testing::Test {
 		NavModeAutoTest () {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = NavModeBase::factory(me, NavModeEnum::AUTONOMOUS);
+			rcchannels->resize(Conf::get()->RCchannelMap().size(), Conf::get()->RClimits().at("min"));
 			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
 			start = std::chrono::system_clock::now();
 			me.health = &health;
@@ -523,8 +524,8 @@ class NavModeAutoTest : public ::testing::Test {
 		bool				*orientvalid;
 		GPSFix				*fix;
 		Orientation			*orientvalue;
-		std::map<std::string, int> 	*adcraw;
-		std::vector<uint16_t>		*rcchannels;
+		std::map<std::string, int> 	*adcraw = new std::map<std::string, int>;
+		std::vector<uint16_t>		*rcchannels = new std::vector<uint16_t>;
 		
 };
 

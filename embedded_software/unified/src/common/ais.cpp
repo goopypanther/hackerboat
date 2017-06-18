@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 #include "rapidjson/rapidjson.h"
-#include "hal/config.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include <string>
@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include "hackerboatRoot.hpp"
 #include "location.hpp"
-#include "hal/config.h"
+
 #include "hackerboatRoot.hpp"
 #include "enumtable.hpp"
 #include "ais.hpp"

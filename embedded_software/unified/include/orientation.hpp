@@ -13,7 +13,7 @@
 #define ORIENTATION_H
  
 #include "rapidjson/rapidjson.h"
-#include "hal/config.h"
+
 #include <cmath>
 #include <string>
 #include "hackerboatRoot.hpp"

@@ -20,7 +20,6 @@
 #include "enumtable.hpp"
 #include "location.hpp"
 #include "gps.hpp"
-#include "hal/config.h"
 #include "easylogging++.h"
 #include "enumdefs.hpp"
 #include "healthMonitor.hpp"

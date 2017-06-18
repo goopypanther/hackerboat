@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "location.hpp"
 #include "hackerboatRoot.hpp"
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 #include "waypoint.hpp"

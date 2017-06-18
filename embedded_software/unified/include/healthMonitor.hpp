@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <map>
 #include "hackerboatRoot.hpp"
-#include "hal/config.h"
+
 #include "hal/adcInput.hpp"
 
 using namespace std;

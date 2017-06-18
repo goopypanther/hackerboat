@@ -19,7 +19,7 @@
 #include <map>
 #include <iostream>
 #include "rapidjson/rapidjson.h"
-#include "hal/config.h"
+
 #include "gps.hpp"
 #include "ais.hpp"
 #include "hal/inputThread.hpp"

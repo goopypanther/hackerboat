@@ -18,7 +18,7 @@
 #include "location.hpp"
 #include "orientation.hpp"
 #include "gps.hpp"
-#include "hal/config.h"
+
 #include "hal/servo.hpp"
 #include "hal/throttle.hpp"
 #include "hal/gpsdInput.hpp"

@@ -13,7 +13,7 @@
 #include <string>
 #include <chrono>
 #include <tuple>
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "stateMachine.hpp"
 #include "boatState.hpp"

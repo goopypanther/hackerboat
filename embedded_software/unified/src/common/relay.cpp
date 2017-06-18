@@ -19,7 +19,7 @@
 #include <inttypes.h>
 #include <cmath>
 #include <tuple>
-#include "hal/config.h"
+
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
 #include "hal/relay.hpp"

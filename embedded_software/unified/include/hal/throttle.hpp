@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <vector>
 #include "hal/adcInput.hpp"
-#include "hal/config.h"
 #include "hal/relay.hpp"
 #include "configuration.hpp"
 

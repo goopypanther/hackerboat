@@ -23,7 +23,7 @@
 #include <string>
 #include "location.hpp"
 #include "hackerboatRoot.hpp"
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
 

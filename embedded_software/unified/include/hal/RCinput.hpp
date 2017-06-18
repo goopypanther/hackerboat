@@ -23,7 +23,6 @@
 #include <inttypes.h>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
-#include "hal/config.h"
 #include "hal/inputThread.hpp"
 #include "configuration.hpp"
 

@@ -23,7 +23,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "hal/inputThread.hpp"
-#include "hal/config.h"
+
 #include "hal/drivers/adc128d818.hpp"
 #include "hal/adcInput.hpp" 
 #include "easylogging++.h"

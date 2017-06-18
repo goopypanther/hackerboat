@@ -17,7 +17,7 @@
 #include <cmath>
 #include <iostream>
 #include "hal/adcInput.hpp"
-#include "hal/config.h"
+
 #include "hal/relay.hpp"
 #include "hal/throttle.hpp"
 #include "easylogging++.h"

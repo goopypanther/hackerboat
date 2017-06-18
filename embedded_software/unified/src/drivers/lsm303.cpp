@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include "hal/config.h"
+
 #include <map>
 #include <vector>
 #include <tuple>

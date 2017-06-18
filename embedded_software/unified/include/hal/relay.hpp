@@ -20,7 +20,6 @@
 #include <vector>
 #include <map>
 #include <inttypes.h>
-#include "hal/config.h"
 #include "hal/gpio.hpp"
 #include "hal/adcInput.hpp"
 #include "rapidjson/rapidjson.h"

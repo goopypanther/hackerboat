@@ -16,7 +16,7 @@
 #include <fstream>
 #include <string>
 #include <inttypes.h>
-#include "hal/config.h"
+
 #include "hal/servo.hpp"
 #include "easylogging++.h"
 #include "configuration.hpp"

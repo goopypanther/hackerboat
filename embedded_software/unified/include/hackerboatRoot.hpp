@@ -24,7 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <locale>
-#include "hal/config.h"
+
 #include "date.h"
 #include "tz.h"
 #include "rapidjson/rapidjson.h"

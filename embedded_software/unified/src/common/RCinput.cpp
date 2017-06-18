@@ -22,7 +22,7 @@
 #include <cmath>
 #include "enumdefs.hpp"
 #include "enumtable.hpp"
-#include "hal/config.h"
+
 #include "hal/inputThread.hpp"
 #include "hal/RCinput.hpp"
 #include <unistd.h>

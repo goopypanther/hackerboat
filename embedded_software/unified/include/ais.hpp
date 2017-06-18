@@ -15,7 +15,7 @@
 #define AIS_H
  
 #include "rapidjson/rapidjson.h"
-#include "hal/config.h"
+
 #include <math.h>
 #include <string>
 #include <chrono>

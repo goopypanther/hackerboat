@@ -19,7 +19,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cctype>
-#include "hal/config.h"
+
 #include "private-config.h"
 #include "hackerboatRoot.hpp"
 #include "boatState.hpp"

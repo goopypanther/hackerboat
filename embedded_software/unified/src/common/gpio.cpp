@@ -17,7 +17,7 @@
 #include <map>
 #include <inttypes.h>
 #include <iostream>
-#include "hal/config.h"
+
 #include "hal/gpio.hpp"
 #include <fcntl.h>  
 #include <unistd.h>

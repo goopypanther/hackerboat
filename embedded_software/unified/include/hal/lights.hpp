@@ -13,7 +13,7 @@
 #ifndef LIGHTS_H
 #define LIGHTS_H
 
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "pixel.hpp"
 

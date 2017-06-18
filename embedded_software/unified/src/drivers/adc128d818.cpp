@@ -20,7 +20,7 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
-#include "hal/config.h"
+
 #include "hal/drivers/adc128d818.hpp"
 #include "configuration.hpp"
 

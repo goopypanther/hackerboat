@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string>
 #include <chrono>
-#include "hal/config.h"
+
 #include "enumdefs.hpp"
 #include "hackerboatRoot.hpp"
 

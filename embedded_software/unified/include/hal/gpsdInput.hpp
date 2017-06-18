@@ -23,7 +23,7 @@
 #include <tuple>
 #include <map>
 #include <list>
-#include "hal/config.h"
+
 #include "gps.hpp"
 #include "ais.hpp"
 #include "hal/inputThread.hpp"
