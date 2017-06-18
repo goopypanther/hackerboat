@@ -1,6 +1,3 @@
-[submodule "embedded_software/unified/submodules/jansson"]
-	path = embedded_software/unified/submodules/jansson
-	url = https://github.com/logos-electromechanical/jansson.git
 [submodule "embedded_software/unified/submodules/date"]
 	path = embedded_software/unified/submodules/date
 	url = https://github.com/logos-electromechanical/date.git
