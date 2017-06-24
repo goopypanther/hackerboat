@@ -71,14 +71,14 @@ class NavModeIdleTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> 	*adcraw;
-		std::vector<uint16_t>		*rcchannels;
+		bool 				*adcvalid 			= nullptr;
+		bool				*rcvalid 			= nullptr;
+		bool				*rcfailsafe 		= nullptr;
+		bool				*orientvalid 		= nullptr;
+		GPSFix				*fix 				= nullptr;
+		Orientation			*orientvalue 		= nullptr;
+		std::map<std::string, int> 	*adcraw		= nullptr;
+		std::vector<uint16_t>		*rcchannels	= nullptr;
 		
 };
 
@@ -185,14 +185,14 @@ class NavModeFaultTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> 	*adcraw;
-		std::vector<uint16_t>		*rcchannels;
+		bool 				*adcvalid 			= nullptr;
+		bool				*rcvalid 			= nullptr;
+		bool				*rcfailsafe 		= nullptr;
+		bool				*orientvalid 		= nullptr;
+		GPSFix				*fix 				= nullptr;
+		Orientation			*orientvalue 		= nullptr;
+		std::map<std::string, int> 	*adcraw		= nullptr;
+		std::vector<uint16_t>		*rcchannels	= nullptr;
 		
 };
 
@@ -330,14 +330,14 @@ class NavModeRCTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> 	*adcraw;
-		std::vector<uint16_t>		*rcchannels;
+		bool 				*adcvalid 			= nullptr;
+		bool				*rcvalid 			= nullptr;
+		bool				*rcfailsafe 		= nullptr;
+		bool				*orientvalid 		= nullptr;
+		GPSFix				*fix 				= nullptr;
+		Orientation			*orientvalue 		= nullptr;
+		std::map<std::string, int> 	*adcraw		= nullptr;
+		std::vector<uint16_t>		*rcchannels	= nullptr;
 		
 };
 
@@ -460,8 +460,6 @@ class NavModeAutoTest : public ::testing::Test {
 		NavModeAutoTest () {
 			system("gpsd -n -S 3001 /dev/ttyS4 /dev/ttyACM0");
 			mode = NavModeBase::factory(me, NavModeEnum::AUTONOMOUS);
-			rcchannels->resize(Conf::get()->RCchannelMap().size(), Conf::get()->RClimits().at("min"));
-			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
 			start = std::chrono::system_clock::now();
 			me.health = &health;
 			health.setADCdevice(&adc);
@@ -478,6 +476,7 @@ class NavModeAutoTest : public ::testing::Test {
 			harness.accessRC(&rc, NULL, NULL, &rcfailsafe, &rcvalid, &rcchannels, NULL, NULL, NULL);
 			harness.accessGPSd(&gps, &fix, NULL);
 			harness.accessOrientation(&orient, &orientvalue, &orientvalid);
+			rcchannels->at(Conf::get()->RCchannelMap().at("auto")) = Conf::get()->RClimits().at("min");
 			for (auto r: *me.relays->getmap()) {
 				Pin *drive;
 				Pin *fault;
@@ -518,14 +517,14 @@ class NavModeAutoTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> 	*adcraw = new std::map<std::string, int>;
-		std::vector<uint16_t>		*rcchannels = new std::vector<uint16_t>;
+		bool 				*adcvalid 			= nullptr;
+		bool				*rcvalid 			= nullptr;
+		bool				*rcfailsafe 		= nullptr;
+		bool				*orientvalid 		= nullptr;
+		GPSFix				*fix 				= nullptr;
+		Orientation			*orientvalue 		= nullptr;
+		std::map<std::string, int> 	*adcraw 	= nullptr;
+		std::vector<uint16_t>		*rcchannels = nullptr;
 		
 };
 

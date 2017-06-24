@@ -243,7 +243,7 @@ TEST(PID, Differential) {
 TEST(PID, Timing) {
 	VLOG(1) << "===PID Timing Test===";
 	double input = 0, output = 0, setpoint = 0;
-	VLOG(2) << "Setting integral to 10.0, 10 ms sample time, direct acting, with limits of +/-50";
+	VLOG(2) << "Setting integral to 0.1, 10 ms sample time, direct acting, with limits of +/-50";
 	PID mypid(&input, &output, &setpoint, 0.0, 10.0, 0, DIRECT);
 	mypid.SetOutputLimits(-50.0, 50.0);
 	mypid.SetSampleTime(10);

@@ -269,7 +269,7 @@ TEST_F(AutoModeWaypointTest, CourseSelection) {
 	EXPECT_TRUE(orientvalue->isMagnetic());
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::WAYPOINT);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 5, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -5, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
@@ -512,7 +512,7 @@ TEST_F(AutoModeReturnTest, CourseSelection) {
 	VLOG(2) << me;
 	EXPECT_EQ(me.waypointList.current(), 0);
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::RETURN);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -4, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 4, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
@@ -663,7 +663,7 @@ TEST_F(AutoModeAnchorTest, Forward) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -10, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), 5);
 }
 
@@ -689,6 +689,6 @@ TEST_F(AutoModeAnchorTest, Reverse) {
 	VLOG(2) << "This auto mode: " << me.autoModeNames.get(mode->getMode())
 			<< ", Last auto mode: " << me.autoModeNames.get(mode->getLastMode());
 	EXPECT_EQ(mode->getMode(), AutoModeEnum::ANCHOR);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -5, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 5, 0.1));
 	EXPECT_EQ(me.throttle->getThrottle(), -5);
 }

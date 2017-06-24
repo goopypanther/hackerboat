@@ -135,7 +135,7 @@ class BoatModeSelfTest : public ::testing::Test {
 			*rcvalid = true;
 			*rcfailsafe = false;
 			*orientvalid = true;
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at("battery_mon") = 3300;
 			health.readHealth();
 		}
 		
@@ -150,13 +150,13 @@ class BoatModeSelfTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> *adcraw;
+		bool 				*adcvalid		= nullptr;
+		bool				*rcvalid		= nullptr;
+		bool				*rcfailsafe		= nullptr;
+		bool				*orientvalid	= nullptr;
+		GPSFix				*fix			= nullptr;
+		Orientation			*orientvalue	= nullptr;
+		std::map<std::string, int> *adcraw	= nullptr;
 		
 };
 
@@ -206,7 +206,7 @@ TEST_F(BoatModeSelfTest, LowBatteryRecovery) {
 			<< "/" << adcraw->at("battery_mon");
 	while (mode->getMode() == BoatModeEnum::SELFTEST) {
 		if (std::chrono::system_clock::now() > start + Conf::get()->selfTestDelay() - 10s) {
-			adcraw->at("battery_mon") = 3000;
+			adcraw->at("battery_mon") = 3300;
 			VLOG(2) << "Battery input set to: " << adc.getScaledValues().at("battery_mon") 
 					<< "/" << adcraw->at("battery_mon");
 		}
@@ -321,13 +321,13 @@ class BoatModeDisarmedTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> *adcraw;	
+		bool 				*adcvalid		= nullptr;
+		bool				*rcvalid		= nullptr;
+		bool				*rcfailsafe		= nullptr;
+		bool				*orientvalid	= nullptr;
+		GPSFix				*fix			= nullptr;
+		Orientation			*orientvalue	= nullptr;
+		std::map<std::string, int> *adcraw	= nullptr;	
 };
 
 TEST_F(BoatModeDisarmedTest, Horn) {
@@ -426,13 +426,13 @@ class BoatModeNavTest : public ::testing::Test {
 		GPSdInput 			gps;
 		OrientationInput 	orient;
 		HalTestHarness		harness;
-		bool 				*adcvalid;
-		bool				*rcvalid;
-		bool				*rcfailsafe;
-		bool				*orientvalid;
-		GPSFix				*fix;
-		Orientation			*orientvalue;
-		std::map<std::string, int> *adcraw;	
+		bool 				*adcvalid		= nullptr;
+		bool				*rcvalid		= nullptr;
+		bool				*rcfailsafe		= nullptr;
+		bool				*orientvalid	= nullptr;
+		GPSFix				*fix			= nullptr;
+		Orientation			*orientvalue	= nullptr;
+		std::map<std::string, int> *adcraw	= nullptr;	
 };
 
 TEST_F(BoatModeNavTest, Factory) {

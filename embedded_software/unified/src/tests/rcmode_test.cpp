@@ -518,7 +518,7 @@ TEST_F(RCModeCourseTest, PIDtestProportional) {
 	//VLOG(2) << "Target course: " << me.rc->getCourse() << " Current course: " << orientvalue->heading;
 	mode = mode->execute();
 	EXPECT_EQ(mode->getMode(), RCModeEnum::COURSE);
-	EXPECT_TRUE(toleranceEquals(me.rudder->read(), 10.0, 0.1));
+	EXPECT_TRUE(toleranceEquals(me.rudder->read(), -10.0, 0.1));
 	//VLOG(2) << "Current RC mode: " << BoatState::rcModeNames.get(mode->getMode());
 	//VLOG(2) << "Output of rudder: " << me.rudder->read() << " & throttle: " << me.throttle->getThrottle();
 }
